@@ -93,7 +93,7 @@ use_spacer left
 
 TEXT
 ${alignc}${tztime local %A, %Y-%m-%d %H:%M:%S} 
-
+${hr}
 ${nodename}${alignr}Uptime: ${uptime}
 ${sysname} ${kernel}${alignr}Load: ${loadavg 1}
 ${hr}
@@ -116,29 +116,3 @@ wlp2s0: ${addr wlp2s0}
 DOWN: ${downspeed wlp2s0}${alignr}UP: ${upspeed wlp2s0}
 ${downspeedgraph wlp2s0 40,130}${alignr}${upspeedgraph wlp2s0 40,130}
 TOTAL DOWN: ${totaldown wlp2s0}${alignr}UP: ${totalup wlp2s0}
-
-enp1so: ${addr enp1s0}
-
-#TEMP:
-#hdd: ${hddtemp}°C - cpu: ${i2c temp 1}
-
-#${scroll 16 $nodename - $sysname $kernel on $machine | }
-#$hr
-#${color grey}Uptime:$color $uptime
-#${color grey}Frequency (in MHz):$color $freq
-#${color grey}Frequency (in GHz):$color $freq_g
-#${color grey}RAM Usage:$color $mem/$memmax - $memperc% ${membar 4}
-#${color grey}Swap Usage:$color $swap/$swapmax - $swapperc% ${swapbar 4}
-#${color grey}CPU Usage:$color $cpu% ${cpubar 4}
-#${color grey}Processes:$color $processes  ${color grey}Running:$color $running_processes
-#$hr
-#${color grey}File systems:
-# / $color${fs_used /}/${fs_size /} ${fs_bar 6 /}
-#${color grey}Networking:
-#Up:$color ${upspeed eth0} ${color grey} - Down:$color ${downspeed eth0}
-#$hr
-#${color grey}Name              PID   CPU%   MEM%
-#${color lightgrey} ${top name 1} ${top pid 1} ${top cpu 1} ${top mem 1}
-#${color lightgrey} ${top name 2} ${top pid 2} ${top cpu 2} ${top mem 2}
-#${color lightgrey} ${top name 3} ${top pid 3} ${top cpu 3} ${top mem 3}
-#${color lightgrey} ${top name 4} ${top pid 4} ${top cpu 4} ${top mem 4}
