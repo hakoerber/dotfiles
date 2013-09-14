@@ -1,0 +1,31 @@
+[user]
+	name = Hannes Körber
+	email = hannes.koerber@gmail.com
+[alias]
+    untrack = "rm --cached"
+    unstage = "reset HEAD"
+    unmodify = "checkout --"
+    ignore-changes = "update-index --assume-unchangend"
+    unignore-changes = "update-index --no-assume-unchanged"    
+    visual = "!gitk"
+
+    co = "checkout"
+    ci = "commit"
+    st = "status"
+    br = "branch"
+    rb = "rebase"
+
+    last = "log -1 HEAD"
+[core]
+    editor = vim
+    pager = less
+    whitespace = ""
+    excludesfile = "~/.gitignore_global"
+[color]
+    ui = true 
+[gui]
+	recentrepo = /home/hannes/programming/git-repositories/autobackup
+[push]
+	default = simple
+[merge]
+	tool = vimdiff

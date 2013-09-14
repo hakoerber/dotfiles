@@ -1,0 +1,11 @@
+# File with instructions to greet the user. Read at the end of ~/.bashrc
+
+#COUNTER_DESTROYED=3
+
+
+clear
+#echo -ne "${NC}Hello, $USER. Today is $(date +"%A, %-d %B %Y, %T")\n\n"
+#echo -ne "${NC}" ; ncal -MC
+#echo -ne "${NC}System is $(uptime | grep -o "up.*:[[:digit:]][[:digit:]]" | tr -s " ") hours\n"
+#echo -ne "${NC}Your personal counter for destroyed linuxes is: $COUNTER_DESTROYED\n"
+#echo -ne "${NC}Keep it up and have fun.\n"

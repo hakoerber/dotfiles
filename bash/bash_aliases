@@ -1,0 +1,46 @@
+# File to define bash aliases. Read by ~/.bashrc.
+
+alias ll='ls -AlF'
+alias la='ls -A'
+
+alias ls='ls --group-directories-first --classify --color=auto'
+
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+alias rm='rm -v'
+alias cp='cp -v'
+alias mv='mv -v'
+alias ln='ln -v'
+
+#alias 'sudo rm -rf --no-preserve-root /'='echo "..."'
+#alias 'sudo find / -delete'='echo "..."'
+
+alias du='du -h'
+alias df='df -h'
+
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
+
+alias root='sudo -sE'
+
+alias back='cd $OLDPWD'
+
+alias more='less'
+
+alias sag='sudo apt-get'
+alias sagi='sudo apt-get install'
+alias sagu='sudo apt-get update'
+alias sagug='sudo apt-get upgrade'
+alias sagdug='sudo apt-get dist-upgrade'
+alias sources='cat /etc/apt/sources.list /etc/apt/sources.list.d/*'
+
+alias cs="cryptsetup"
+
+alias le_haxxor_1='clear && dmesg | pv -qL $[15 + (RANDOM % 10)]'
+alias le_haxxor_2='clear && hexdump -C /dev/urandom | grep "1e 4c"'
+
+alias YOLO="pacman -Syu --force"

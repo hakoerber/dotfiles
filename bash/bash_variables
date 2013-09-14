@@ -1,0 +1,7 @@
+#!/bin/bash
+export USERBIN=$HOME/bin
+
+export ENCFS_MOUNT="$HOME/.crypt/encfs/mount"
+export ENCFS_DEV="$HOME/.crypt/encfs/dev"
+
+export MOZ_DISABLE_PANGO=1
