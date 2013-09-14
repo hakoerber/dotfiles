@@ -7,7 +7,7 @@ config_dir="$HOME/dotfiles/"
 backup_dir="$HOME/dotfiles.bak/"
 
 # the following folders inside $config_dir will be inspected and symlinked:
-symlink_folders="bash git i3 vim zsh"
+symlink_folders="bash git i3 vim zsh conky"
 
 path_combine()
 {

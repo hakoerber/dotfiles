@@ -205,6 +205,8 @@ for_window [class="^Wicd-client.py$"] floating enable
 # Notifications through xfce4-notifyd, e.g. notifications from wicd
 for_window [class="^Xfce4-notifyd$"] floating enable
 
+for_window [class="^Conky$" ] floating enable
+
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 bar {
@@ -241,6 +243,9 @@ exec --no-startup-id xset r rate $mouse_repeat_delay $mouse_repeat_speed
 
 # Start wicd in tray
 exec --no-startup-id wicd-gtk --tray
+
+# Start conky
+exec --no-startup-id conky 
 
 # Enabling a mode to shutdown, reboot, lock screen and so on
 set $mode_system System (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown
