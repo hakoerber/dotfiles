@@ -5,6 +5,8 @@
 LOGFILE="$HOME/.i3/logs/i3exit.log"
 LOGFILE_MAXSIZE=100000
 
+FALLBACK_COLOR=000000
+
 [[ $(stat -c%s "$LOGFILE") -gt $LOGFILE_MAXSIZE ]] && >$LOGFILE
 
 log()
@@ -14,7 +16,18 @@ log()
 
 lock()
 {
-    i3lock --image="$HOME/.i3/data/lockscreen.png"
+    resolution=$(xrandr | grep \* | cut -d " " -f 4)
+    log "[I] Resolution found: \"$resolution\""
+    lockscreen="$HOME/.i3/data/lockscreen_$resolution.png"
+    log "[I] Looking for lockscreen at \"$lockscreen\""
+    if [[ -f "$lockscreen" ]] ; then
+        log "[I] Lockscreen found, will be used as background image."
+        background_options="--image $lockscreen"
+    else
+        log "[W] Lockscreen not  found, using color #$FALLBACK_COLOR as background."
+        background_options="--color $FALLBACK_COLOR"
+    fi
+    i3lock $background_options
 }
 
 log "[I] Received signal \"$1\"."
