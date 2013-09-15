@@ -26,6 +26,21 @@ set $mouse_repeat_speed 25
 # Path to the exit script
 set $path_i3exit ~/.i3/scripts/i3exit.bash
 
+# Keys for the exit mode
+set $key_lock l
+set $key_logout e
+set $key_suspend s
+set $key_hibernate h
+set $key_reboot r
+set $key_shutdown Shift+S
+
+set $signal_lock lock
+set $signal_logout logout
+set $signal_suspend suspend
+set $signal_hibernate hibernate
+set $signal_reboot reboot
+set $signal_shutdown shutdown
+
 # Path and options for the wallpaper changer script
 set $path_wallchanger ~/.i3/scripts/wallchanger.bash
 set $wallpaper_directory "$HOME/Bilder/wallpaper/misc"
@@ -181,12 +196,12 @@ popup_during_fullscreen smart
 force_focus_wrapping no
 
 # Do no force xinerama
-force_xinerama no   
+force_xinerama no
 
 # Hit the current workspace button again to return to the previous workspace
 workspace_auto_back_and_forth yes
 
-# Draw a window as urgent when switching to its workspace, even if focused, for 
+# Draw a window as urgent when switching to its workspace, even if focused, for
 # 500 ms
 force_display_urgency_hint 500 ms
 
@@ -220,7 +235,7 @@ bar {
         background #000000
         statusline #ffffff
         separator #666666
-        
+
         focused_workspace  #4c7899 #285577 #ffffff
         active_workspace   #333333 #5f676a #ffffff
         inactive_workspace #333333 #222222 #888888
@@ -245,17 +260,17 @@ exec --no-startup-id xset r rate $mouse_repeat_delay $mouse_repeat_speed
 exec --no-startup-id wicd-gtk --tray
 
 # Start conky
-exec --no-startup-id conky 
+exec --no-startup-id conky
 
 # Enabling a mode to shutdown, reboot, lock screen and so on
 set $mode_system System (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown
 mode "$mode_system" {
-    bindsym l exec --no-startup-id $path_i3exit lock, mode "default"
-    bindsym e exec --no-startup-id $path_i3exit logout, mode "default"
-    bindsym s exec --no-startup-id $path_i3exit suspend, mode "default"
-    bindsym h exec --no-startup-id $path_i3exit hibernate, mode "default"
-    bindsym r exec --no-startup-id $path_i3exit reboot, mode "default"
-    bindsym Shift+s exec --no-startup-id i3exit shutdown, mode "default"  
+    bindsym $key_lock exec --no-startup-id $path_i3exit $signal_lock, mode "default"
+    bindsym $key_logout exec --no-startup-id $path_i3exit $signal_logout, mode "default"
+    bindsym $key_suspend exec --no-startup-id $path_i3exit $signal_suspend, mode "default"
+    bindsym $key_hibernate exec --no-startup-id $path_i3exit $signal_hibernate, mode "default"
+    bindsym $key_reboot exec --no-startup-id $path_i3exit $signal_reboot, mode "default"
+    bindsym $key_shutdown exec --no-startup-id $path_i3exit $signal_shutdown, mode "default"
 
     # back to normal: Enter or Escape
     bindsym Return mode "default"
