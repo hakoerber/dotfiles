@@ -16,7 +16,7 @@ log()
 
 lock()
 {
-    resolution=$(xrandr | grep \* | cut -d " " -f 4)
+    resolution=$(xrandr | grep '*' | awk '{ print $1 }')
     log "[I] Resolution found: \"$resolution\""
     lockscreen="$HOME/.i3/data/lockscreen_$resolution.png"
     log "[I] Looking for lockscreen at \"$lockscreen\""
