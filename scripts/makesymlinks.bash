@@ -6,12 +6,13 @@ config_dir="$HOME/dotfiles/"
 mapping_file="$config_dir/MAPPING"
 
 # backup directory, files that would otherwise be overwritten go there
-backup_dir="$HOME/dotfiles.bak/"
+backup_dir="$HOME/.dotfiles.bak/"
 
 # the following folders inside $config_dir will be inspected and the
 # contents symlinked:
-symlink_folders="bash git i3 vim zsh conky terminator"
+symlink_folders='bash git i3 vim zsh conky terminator'
 
+MAPPING_SEPARATOR='::'
 
 path_combine()
 {
@@ -24,7 +25,7 @@ DEFAULT_ROOT="$HOME"
 # folder::root
 get_mapping()
 {
-    entry="$(grep -E "^$1::.+$" "$mapping_file" | head -n1 | grep -Eo "::.+$" | cut -c 3-)"
+    entry="$(grep -E "^$1$MAPPING_SEPARATOR.+$" "$mapping_file" | head -n1 | grep -Eo "$MAPPING_SEPARATOR.+$" | cut -c 3-)"
     echo "$entry"
 }
 
