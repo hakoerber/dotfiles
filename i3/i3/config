@@ -212,9 +212,9 @@ for_window [class="^Wicd-client.py$"] floating enable
 # Notifications through xfce4-notifyd, e.g. notifications from wicd
 for_window [class="^Xfce4-notifyd$"] floating enable
 
-for_window [class="^Conky$" ] floating enable
+for_window [class="^Conky$"] floating enable
 
-
+for_window [class="^Terminator$"] border none
 
 
 # Start the wallpaper changer.

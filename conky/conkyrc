@@ -105,7 +105,7 @@ own_window_title Conky
 own_window_transparent yes
 
 # will be ignored if own_window_type is override
-own_window_hints none
+#own_window_hints none
 
 # window will not be controlled by the window manager, hints are ignored
 own_window_type override
