@@ -1,0 +1,28 @@
+#!/bin/bash
+
+if [ -d /etc/X11/xinit/xinitrc.d ]; then
+  for f in /etc/X11/xinit/xinitrc.d/*; do
+    [ -x "$f" ] && . "$f"
+  done
+  unset f
+fi
+
+[ -f /etc/xprofile ] && source /etc/xprofile
+[ -f ~/.xprofile ] && source ~/.xprofile
+
+# execute the host-specific .xinitrc-addition
+hostfile="$HOME/.xinitrc.d/$(hostname).xinitrc"
+[[ -f "$hostfile" ]] && bash "$hostfile" &
+
+case $1 in
+e17)
+	exec enlightenment_start
+	;;
+i3)
+	exec i3
+	;;
+xfce4) ;;
+*)
+    exec i3
+    ;;
+esac
