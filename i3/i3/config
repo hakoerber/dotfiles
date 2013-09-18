@@ -21,7 +21,7 @@ set $keyboard_options nodeadkeys
 
 # Mouse options
 set $mouse_repeat_delay 150
-set $mouse_repeat_speed 25
+set $mouse_repeat_speed 30
 
 # Path to the exit script
 set $path_i3exit ~/.i3/scripts/i3exit.bash
@@ -266,11 +266,14 @@ exec --no-startup-id setxkbmap $keyboard_layout $keyboard_options
 # Set key repeat delay
 exec --no-startup-id xset r rate $mouse_repeat_delay $mouse_repeat_speed
 
+# Enable vertical edge scroll for the touchpad
+exec --no-startup-id synclient VertEdgeScroll=1
+
 # Start wicd in tray
 exec --no-startup-id wicd-gtk --tray
 
 # Start conky
-exec --no-startup-id conky
+#exec --no-startup-id conky
 
 # Enabling a mode to shutdown, reboot, lock screen and so on
 set $mode_system System (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown
