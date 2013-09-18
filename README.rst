@@ -7,7 +7,7 @@ Installation
 ------------
 
 1. ``git clone git://github.com:whatevsz/dotfiles ~/dotfiles``
-2. ``bash ~/dotfiles/scripts/makesymlinks.bash``
+2. ``bash ~/dotfiles/scripts/setup.bash``
 
 ``makesymlinks,bash`` will back up all configuration files that would otherwise
 be overridden and then symlink the content of all folders specified in $symlink_folders
@@ -15,14 +15,14 @@ into $HOME or the desired destination given in MAPPING, if present.
 
 If you want to use a different directory instead of ``~/dotfiles``, just alter the first
 line and replace  ``~/dotfiles`` with the desired destination, and change the line
-``config_dir="$HOME/dotfiles/"`` in ``scripts/makesymlinks.bash`` accordingly. You can
+``config_dir="$HOME/dotfiles/"`` in ``scripts/setup.bash`` accordingly. You can
 also choose a different folder for the backup of old files (default being ``~/.dotfiles,bak``
-by altering ``backup_dir`` in ``scripts/makesymlinks.bash`` to your needs.
+by altering ``backup_dir`` in ``scripts/setup.bash`` to your needs.
 
 Structure
 ---------
 
-- ``scripts/`` - Scripts for setting up the configuration.
+- ``scripts/`` - Scripts, e.g.  for setting up the configuration.
 - ``MAPPING`` - File that contains mapping directives.
 - All other folders - These are the folders that contain the configuration files.
 
