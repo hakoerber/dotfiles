@@ -10,19 +10,27 @@ fi
 [ -f /etc/xprofile ] && source /etc/xprofile
 [ -f ~/.xprofile ] && source ~/.xprofile
 
+
+# keyboard options
+keyboard_layout=de
+keyboard_options= nodeadkeys
+keyboard_repeat_delay=150
+keyboard_repeat_speed=30
+
 # execute the host-specific .xinitrc-addition
 hostfile="$HOME/.xinitrc.d/$(hostname).xinitrc"
 [[ -f "$hostfile" ]] && bash "$hostfile" &
 
+# set keyboard layout
+setxkbmap $keyboard_layout $keyboard_options
+
+# set key repeat delay
+xset r rate $keyboard_repeat_delay $keyboard_repeat_speed
+
+
 case $1 in
-e17)
-	exec enlightenment_start
-	;;
-i3)
-	exec i3
-	;;
-xfce4) ;;
 *)
-    exec i3
+    SESSION_CONF=$( bash "$HOME/.i3/genconfig.bash")
+    exec i3 -c "$SESSION_CONF"
     ;;
 esac
