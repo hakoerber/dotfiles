@@ -27,6 +27,7 @@ setxkbmap $keyboard_layout $keyboard_options
 # set key repeat delay
 xset r rate $keyboard_repeat_delay $keyboard_repeat_speed
 
+#[[ -f ~/.Xresources ]] && xrdb ~/.Xresources
 
 case $1 in
 *)
