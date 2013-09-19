@@ -15,14 +15,6 @@ set $mod Mod4
 # The default terminal
 set $terminal terminator
 
-# Keyboard options
-set $keyboard_layout de
-set $keyboard_options nodeadkeys
-
-# Mouse options
-set $mouse_repeat_delay 150
-set $mouse_repeat_speed 25
-
 # Path to the exit script
 set $path_i3exit ~/.i3/scripts/i3exit.bash
 
@@ -222,45 +214,17 @@ for_window [class="^Xfce4-notifyd$"] floating enable
 
 for_window [class="^Conky$" ] floating enable
 
-# Start i3bar to display a workspace bar (plus the system information i3status
-# finds out, if available)
-bar {
-    mode dock
-    position bottom
-    tray_output primary
-    font pango:DejaVu Sans Mono 8
-    workspace_buttons yes
-
-    colors {
-        background #000000
-        statusline #ffffff
-        separator #666666
-
-        focused_workspace  #4c7899 #285577 #ffffff
-        active_workspace   #333333 #5f676a #ffffff
-        inactive_workspace #333333 #222222 #888888
-        urgent_workspace   #2f343a #900000 #ffffff
-    }
-
-    status_command i3status --config $path_i3status_config
-}
 
 
 
 # Start the wallpaper changer.
 exec --no-startup-id $path_wallchanger $wallpaper_directory $wallpaper_interval > $wallpaper_logfile
 
-# Set keyboard layout
-exec --no-startup-id setxkbmap $keyboard_layout $keyboard_options
-
-# Set key repeat delay
-exec --no-startup-id xset r rate $mouse_repeat_delay $mouse_repeat_speed
-
 # Start wicd in tray
 exec --no-startup-id wicd-gtk --tray
 
 # Start conky
-exec --no-startup-id conky
+#exec --no-startup-id conky
 
 # Enabling a mode to shutdown, reboot, lock screen and so on
 set $mode_system System (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown
@@ -278,10 +242,3 @@ mode "$mode_system" {
 }
 bindsym $mod+Pause mode "$mode_system"
 bindsym $mod+Shift+Pause exec --no-startup-id $path_i3exit lock
-
-
-bindsym XF86Sleep exec --no-startup-id $path_i3exit suspend
-
-bindsym XF86AudioMute exec --no-startup-id amixer set Master toggle
-bindsym XF86AudioRaiseVolume exec --no-startup-id amixer set Master %5+
-bindsym XF86AudioLowerVolume exec --no-startup-id amixer set Master %5-

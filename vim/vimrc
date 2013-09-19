@@ -1,81 +1,158 @@
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"   Filename: .vimrc                                                         "
-" Maintainer: Michael J. Smalley <michaeljsmalley@gmail.com>                 "
-"        URL: http://github.com/michaeljsmalley/dotfiles                     "
-"                                                                            "
-"                                                                            "
-" Sections:                                                                  "
-"   01. General ................. General Vim behavior                       "
-"   02. Events .................. General autocmd events                     "
-"   03. Theme/Colors ............ Colors, fonts, etc.                        "
-"   04. Vim UI .................. User interface behavior                    "
-"   05. Text Formatting/Layout .. Text, tab, indentation related             "
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" 01 important
+" 02 moving around, searching and patterns
+" 03 tags
+" 04 displaying text
+" 05 syntax, highlighting and spelling
+" 06 multiple windows
+" 07 multiple tab pages
+" 08 terminal
+" 09 using the mouse
+" 10 printing
+" 11 messages and info
+" 12 selecting text
+" 13 editing text
+" 14 tabs and indenting
+" 15 folding
+" 16 diff mode
+" 17 mapping
+" 18 reading and writing files
+" 19 the swap file
+" 20 command line editing
+" 21 executing external commands
+" 22 running make and jumping to errors
+" 23 language specific
+" 24 multi-byte characters
+" 25 various
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" 01. General                                                                "
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-set nocompatible         " get rid of Vi compatibility mode. SET FIRST!
+set nocompatible
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" 02. Events                                                                 "
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-filetype plugin indent on " filetype detection[ON] plugin[ON] indent[ON]
+" setup of vundle
+filetype off
+set rtp+=~/.vim/bundle/vundle/
+call vundle#rc()
+Bundle 'gmarik/vundle'
 
-" In Makefiles DO NOT use spaces instead of tabs
-autocmd FileType make setlocal noexpandtab
-" In Ruby files, use 2 spaces instead of 4 for tabs
-autocmd FileType ruby setlocal sw=2 ts=2 sts=2
+filetype plugin indent on
 
-" Enable omnicompletion (to use, hold Ctrl+X then Ctrl+O while in Insert mode.
-set ofu=syntaxcomplete#Complete
+" solarized color theme
+Bundle 'altercation/vim-colors-solarized'
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" 03. Theme/Colors                                                           "
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-set t_Co=256              " enable 256-color mode.
-syntax enable             " enable syntax highlighting (previously syntax on).
-"colorscheme molokai       " set colorscheme
+" setup for the solarized color theme
+set background=dark
+let g:solarized_termcolors=16
+let g:solarized_termtrans=1
+let g:solarized_contrase="normal"
+let g:solarized_visibility="normal"
+syntax enable
+colorscheme solarized
 
-" Prettify JSON files
-autocmd BufRead,BufNewFile *.json set filetype=json
-autocmd Syntax json sou ~/.vim/syntax/json.vim
+set mouse=a                         " enable mouse support
+set mousehide                       " hide the mouse when typing
 
-" Prettify Vagrantfile
-autocmd BufRead,BufNewFile Vagrantfile set filetype=ruby
+set history=1000                    " history length for commands, defaults to
+                                    " 20
 
-" Highlight characters that go over 80 columns
-highlight OverLength ctermbg=red ctermfg=white guibg=#592929
-match OverLength /\%81v.\+/
+set nobackup                        " do not create a backup
+set nowritebackup
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" 04. Vim UI                                                                 "
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-set number                " show line numbers
-set cul                   " highlight current line
-set laststatus=2          " last window always has a statusline
-set nohlsearch            " Don't continue to highlight searched phrases.
-set incsearch             " But do highlight as you type your search.
-set ignorecase            " Make searches case-insensitive.
-set ruler                 " Always show info along bottom.
-set showmatch
-set statusline=%<%f\%h%m%r%=%-20.(line=%l\ \ col=%c%V\ \ totlin=%L%)\ \ \%h%m%r%=%-40(bytval=0x%B,%n%Y%)\%P
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" 05. Text Formatting/Layout                                                 "
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-set autoindent            " auto-indent
-set tabstop=4             " tab spacing
-set softtabstop=4         " unify
-set shiftwidth=4          " indent/outdent by 4 columns
-set shiftround            " always indent/outdent to the nearest tabstop
-set expandtab             " use spaces instead of tabs
-set smarttab              " use tabs at the start of a line, spaces elsewhere
-set nowrap                " don't wrap text
+set showmode                        " show the current mode
+set cursorline                      " highlight the current line
+set number                          " enable linenumbers
+set numberwidth=2                   " only use as many columns for the line
+                                    " numbers as necessary
+set relativenumber                  " show file numbers relative to the current
+                                    " line instead of absolute ones, but still
+                                    " the absolute linenumber on the current
+                                    " line due to 'number' being set
+set showmatch                       " show matching brackets/parentheses
+set incsearch                       " show matches while typing in a search
+set hlsearch                        " highlight matches in a search
 
-match ErrorMsg '\s\+$'    " mark trailing whitespace
+set ignorecase                      " ignore case when only searching for
+                                    " lowercase
+set smartcase                       " letters, case sensitive otherwis
 
-" Removes trailing spaces
+set foldenable                      " auto-fold code
+
+set wrap                            " wrap text
+set linebreak
+
+set backspace=indent,eol,start      " allowing backspacing over autoindent,
+                                    " line breaks and start of insert
+
+set encoding=utf-8                  " set the encoding
+
+
+set showmode                        " show current mode in the status line
+
+set swapfile                        " use a swapfile
+set updatecount=200                 " default, number of characters that have
+                                    " to be typed before the swapfile is
+                                    " written to disk
+set updatetime=10000                " time in milliseconds after the swapfile
+                                    " is written to disk
+
+set title                           " let vim set the title of the window
+set titlestring=""                  " use default titlestring
+
+
+
+set autoread                        " automatically reload a file when it was
+                                    " changed outside of vim
+
+set gdefault                        " apply replace patterns to the whole line
+                                    " by default
+
+set tabstop=4                       " one tab equals 4 spaces
+set softtabstop=4                   " makes the spaces feel like real tabs
+set shiftwidth=4                    " one indent level equals 4 spaces
+set expandtab                       " expand tabs to spaces
+set autoindent                      " copy indent from current line when
+                                    " starting a new one
+set smartindent                     " smart indenting for C-like languages
+set smarttab                        " use shiftwidth when tabbing in front of
+                                    " a line instead of tabsstop/softtabstop
+
+set undofile                        " use an undo file
+set undodir=~/.vim/backups          " store undo files in a fixed directory
+                                    " instead of the current directory
+set undolevels=1000                 " undo a maximum of 1000 changes
+set undoreload=10000                " save the whole buffer for undo when
+                                    " reloading it
+
+
+set foldmethod=indent               " fold according to indet
+set foldnestmax=2                   " fold a maximum of 2 levels
+set nofoldenable                    " unfold everything by default
+
+set scrolloff=4                     " show context at the screen edges
+
+
+set showcmd                         " show (partial) command in the command line
+set hidden                          " buffers can exist without a window
+
+set ttyfast                         " enhance smoothness
+set ruler                           " show position in status line
+
+set wildmenu                        " show a menu when autocompleting
+set wildmode=list:longest           " automatically complete up to the level
+                                    " of ambiguity
+
+set autochdir                       " automatically change to the directory that
+                                    " contains the file that is edited
+
+let mapleader = ","
+
+nnoremap / /\v
+vnoremap / /\v
+nnoremap <leader><space> :noh<cr>
+nnoremap <tab> %
+vnoremap <tab> %
+
+nnoremap j gj
+nnoremap k gk
+
 function! TrimWhiteSpace()
      %s/\s\+$//e
      endfunction
