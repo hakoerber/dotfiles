@@ -133,7 +133,7 @@ bindsym $mod+Shift+parenright move container to workspace 9
 bindsym $mod+Shift+equal move container to workspace 10
 
 # reload the configuration file
-bindsym $mod+Shift+C reload
+bindsym $mod+Shift+C exec --no-startup-id bash ~/.i3/scripts/genconfig.bash ; reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+R restart
 # exit i3 (logs you out of your X session)
@@ -212,9 +212,11 @@ for_window [class="^Wicd-client.py$"] floating enable
 # Notifications through xfce4-notifyd, e.g. notifications from wicd
 for_window [class="^Xfce4-notifyd$"] floating enable
 
-for_window [class="^Conky$" ] floating enable
+for_window [class="^Conky$"] floating enable
 
+for_window [class="^Terminator$"] border none
 
+for_window [class="^Firefox$"] border none
 
 
 # Start the wallpaper changer.
