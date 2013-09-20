@@ -13,7 +13,7 @@ fi
 
 # keyboard options
 keyboard_layout=de
-keyboard_options= nodeadkeys
+keyboard_variant=nodeadkeys
 keyboard_repeat_delay=150
 keyboard_repeat_speed=30
 
@@ -22,15 +22,24 @@ hostfile="$HOME/.xinitrc.d/$(hostname).xinitrc"
 [[ -f "$hostfile" ]] && bash "$hostfile" &
 
 # set keyboard layout
-setxkbmap $keyboard_layout $keyboard_options
+setxkbmap -layout "$keyboard_layout" -variant "$keyboard_variant"
 
 # set key repeat delay
-xset r rate $keyboard_repeat_delay $keyboard_repeat_speed
+xset r rate "$keyboard_repeat_delay" "$keyboard_repeat_speed"
 
 #[[ -f ~/.Xresources ]] && xrdb ~/.Xresources
 
-case $1 in
-*)
+case "$1" in
+kde)
+    exec startkde
+    ;;
+xfce4)
+    exec startxfce4
+    ;;
+e17)
+    exec enlightenment_start
+    ;;
+i3|*)
     SESSION_CONF=$(bash "$HOME/.i3/scripts/genconfig.bash")
     exec i3 -c "$SESSION_CONF"
     ;;
