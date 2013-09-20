@@ -7,9 +7,11 @@ SESSION_CONF="$HOME/.i3/session.config"
 # directory that contains host specific configuration
 CONF_DIR="$HOME/.i3/config.d"
 # file that should be used when no host specific configuration present
-DEFAULT_CONF="$CONF_DIR/default.config"
+DEFAULT_CONF="$CONF_DIR/default"
 
-host_specific_conf="$CONF_DIR/$(hostname).config"
+host="$(hostname)"
+
+host_specific_conf="$CONF_DIR/$host.config"
 
 # if it's a symlink to $MAIN_CONF, cat will fail
 [[ -f "$SESSION_CONF" ]] && rm "$SESSION_CONF"
@@ -25,7 +27,7 @@ else
     else
         conf_to_use="$DEFAULT_CONF"
     fi
-    cat "$MAIN_CONF" "$conf_to_use" > "$SESSION_CONF"
+    cat "$MAIN_CONF" <(echo -e "\n###\n### host-specific configuration for host \"$host\"\n###\n") "$conf_to_use" > "$SESSION_CONF"
 fi
 
 echo "$SESSION_CONF"
