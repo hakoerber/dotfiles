@@ -39,9 +39,6 @@ set $wallpaper_directory "$HOME/Bilder/wallpaper/misc"
 set $wallpaper_logfile "$HOME/.i3/logs/wallpaper.log"
 set $wallpaper_interval 900
 
-# Path to the config file for i3status
-set $path_i3status_config ~/.i3/i3status.conf
-
 # font for window titles. ISO 10646 = Unicode
 #font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
 font pango:DejaVu Sans Mono 10
@@ -175,8 +172,8 @@ workspace_layout default
 new_window normal
 new_float normal
 
-# Do not show vertical borders between windows
-hide_edge_borders vertical
+# Do not show borders at the screen edges
+hide_edge_borders both
 
 # Focus follows mouse
 focus_follows_mouse yes
@@ -214,7 +211,7 @@ for_window [class="^Xfce4-notifyd$"] floating enable
 
 for_window [class="^Conky$"] floating enable
 
-for_window [class="^Terminator$"] border none
+for_window [class="^Terminator$"] border 1pixel
 
 for_window [class="^Firefox$"] border none
 
