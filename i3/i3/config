@@ -217,10 +217,16 @@ for_window [class="^Firefox$"] border none
 
 
 # Start the wallpaper changer.
-exec --no-startup-id $path_wallchanger $wallpaper_directory $wallpaper_interval > $wallpaper_logfile
+exec --no-startup-id $path_wallchanger $wallpaper_directory $wallpaper_interval > $wallpaper_logfile &
 
-# Start wicd in tray
-exec --no-startup-id wicd-gtk --tray
+# Start wicd in tray.
+exec --no-startup-id wicd-gtk --tray &
+
+# Start color temperature changer.
+exec --no-startup-id gtk-redshift -l 49.5:11 -t 6500:4500 &
+
+# Start pulseaudio control applet.
+exec --no-startup-id pa-applet &
 
 # Start conky
 #exec --no-startup-id conky
