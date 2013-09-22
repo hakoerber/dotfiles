@@ -1,0 +1,157 @@
+# de / wm
+### internet
+# torrents
+deluge
+# instant messaging
+pidgin
+skype
+# irc
+xchat
+# email
+thunderbird
+# network manager
+wicd-gtk
+# browser
+firefox
+flashplugin
+# ftp
+filezilla
+# online storage
+dropbox
+# ssh
+putty
+
+### multimedia
+# image viewers
+geeqie
+feh
+# image manipulation
+gimp
+imagemagick
+pinta
+# audio players
+mpg123
+clementine
+spotify
+# audio tagger
+easytag
+# video players
+vlc
+
+### utilities
+# package management
+pacaur
+# compression
+p7zip
+# file managers
+thunar
+thunar-archive-plugin
+thunar-dropbox
+thunar-media-tags-plugin
+# taskbars / docks
+docky
+conky
+dzen2
+
+### documents
+# pdf reader
+epdfview
+# office suites
+libreoffice
+
+### security
+# network
+ntop
+wireshark-cli
+wireshark-gtk
+# backup programs
+rsnapshot
+# encryption
+gnupg
+truecrypt
+encfs
+
+### console
+# shells
+zsh
+# terminal emulators
+terminator
+rxvt-unicode
+# eyecandy
+archey
+
+# text editors
+mousepad
+gvim
+gvim
+
+# development
+git
+bzr
+eclipse-cdt
+eclipse-egit
+eclipse-pydev
+
+# programming languages
+python2-xdg
+python-docs
+python-pip
+python-pylint
+
+### desktop environments
+# i3
+i3-wm
+i3lock
+i3status
+dmenu
+# xfce
+xfce4
+xfce4-goodies
+
+### system
+# audio stack
+alsa-utils
+pulseaudio-alsa
+pa-applet-git
+redshift
+
+# kernel / drivers
+broadcom-wl-ck-atom
+xf86-input-synaptics
+xf86-video-fbdev
+xf86-video-intel
+xf86-video-modesetting
+xf86-video-vesa
+
+# console
+htop
+powertop
+xorg-xev
+xorg-xfontsel
+xorg-xkill
+xorg-xprop
+stress
+
+### system
+# login manager
+slim
+archlinux-themes-slim
+# disks / filesystems
+sshfs
+gptfdisk
+# kernel
+linux-ck-atom-headers
+linux-headers
+# booting
+grub
+# misc
+ntp
+
+### appearance
+# X
+lxappearance
+oxygen-gtk2
+oxygen-gtk3
+xcursor-vanilla-dmz
+# fonts
+ttf-microsoft-consolas

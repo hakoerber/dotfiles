@@ -23,6 +23,7 @@ Structure
 ---------
 
 - ``scripts/`` - Scripts, e.g.  for setting up the configuration.
+- ``setup/`` - Setup information, e.g. a list of packages.
 - ``MAPPING`` - File that contains mapping directives.
 - All other folders - These are the folders that contain the configuration files.
 
