@@ -1,0 +1,16 @@
+out_to_console yes
+out_to_ncurses no
+out_to_stderr no
+out_to_x no
+
+short_units yes
+
+update_interval 1.0
+update_interval_on_battery 1.0
+
+xftfont Consolas
+
+TEXT
+${if_up wlp2os0}W: ${addr wlp2s0} (${wireless_link_qual_perc wlp2s0}%)${else}W down$endif | \
+BAT: ${battery_short} (${battery_time}) | \
+${tztime} |
