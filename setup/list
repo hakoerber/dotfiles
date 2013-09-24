@@ -52,6 +52,8 @@ thunar-media-tags-plugin
 docky
 conky
 dzen2
+# color pickers
+gcolor2
 
 ### documents
 # pdf reader
