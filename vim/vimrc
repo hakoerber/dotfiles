@@ -93,7 +93,9 @@ set nobackup                        " do not create a backup
 set nowritebackup
 
 
-set showmode                        " show the current mode
+set noshowmode                      " do not show the current mode, as this
+                                    " will be handled by vim-airline in the
+                                    " statusline
 set cursorline                      " highlight the current line
 set number                          " enable linenumbers
 set numberwidth=2                   " only use as many columns for the line
@@ -105,6 +107,7 @@ set relativenumber                  " show file numbers relative to the current
 set showmatch                       " show matching brackets/parentheses
 set incsearch                       " show matches while typing in a search
 set hlsearch                        " highlight matches in a search
+set wrapscan                        " wrap searches at the end of the file
 
 set ignorecase                      " ignore case when only searching for
                                     " lowercase
@@ -150,6 +153,7 @@ set autoindent                      " copy indent from current line when
 set smartindent                     " smart indenting for C-like languages
 set smarttab                        " use shiftwidth when tabbing in front of
                                     " a line instead of tabsstop/softtabstop
+set shiftround                      " round indent to multiples of shiftwidth
 
 set undofile                        " use an undo file
 set undodir=~/.vim/undo             " store undo files in a fixed directory
@@ -179,13 +183,32 @@ set wildmode=list:longest           " automatically complete up to the level
 set autochdir                       " automatically change to the directory that
                                     " contains the file that is edited
 
+set matchpairs="(:),{:},[:]"        " matching pairs for the '%'-command
+
+set notildeop                       " do not make '~' behave like an operator
+
+set virtualedit="block"             " allow moving the cursor where there is no
+                                    " actual character in virtual block mode
+
+set wildignore=*.swp,*.bak,*.pyc    " files to ignore when expanding wildcards
+
+set noerrorbells                    " do not beep on errors
+
+set list                            " show specific spectial characters
+set listchars=trail:~               " trailing whitespace as '~'
+
 let mapleader = ","
 
-"nnoremap / /\v
-"vnoremap / /\v
-nnoremap <leader><space> :noh<cr>
+" enable 'very-magic' in regex
+nnoremap / /\v
+vnoremap / /\v
+
+nnoremap <leader><space> :nohlsearch<CR>
 nnoremap <tab> %
 vnoremap <tab> %
+
+" make Y behave like other capitals, otherwise Y would work like yy
+nnoremap Y y$
 
 nnoremap j gj
 nnoremap k gk
@@ -193,6 +216,9 @@ nnoremap k gk
 function! TrimWhiteSpace()
      %s/\s\+$//e
      endfunction
+
+" automatically reload .vimrc when it's saved
+autocmd BufWritePost .vimrc source ~/.vimrc
 
 autocmd FileWritePre    * :call TrimWhiteSpace()
 autocmd FileAppendPre   * :call TrimWhiteSpace()
