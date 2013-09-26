@@ -215,6 +215,8 @@ for_window [class="^Terminator$"] border 1pixel
 
 for_window [class="^Firefox$"] border none
 
+for_window [class="^Xfce4-notifyd$"] border none
+
 
 # Start the wallpaper changer.
 exec --no-startup-id $path_wallchanger $wallpaper_directory $wallpaper_interval > $wallpaper_logfile &
