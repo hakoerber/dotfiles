@@ -15,39 +15,50 @@
 ### VARIABLES ##################################################################
 ################################################################################
 
-     # Use the win-key as modifier
-     set $mod Mod4
+    # Use the win-key as modifier
+    set $mod Mod4
 
-     # The default terminal
-     set $terminal terminator
+    # The default terminal
+    set $terminal terminator
 
-     # Path to the exit script
-     set $path_i3exit ~/.i3/scripts/i3exit.bash
+    # Path to the exit script
+    set $path_i3exit ~/.i3/scripts/i3exit.bash
 
-     # Keys for the exit mode
-     set $key_lock l
-     set $key_logout e
-     set $key_suspend s
-     set $key_hibernate h
-     set $key_reboot r
-     set $key_shutdown Shift+S
+    # Keys for the exit mode
+    set $key_lock l
+    set $key_logout e
+    set $key_suspend s
+    set $key_hibernate h
+    set $key_reboot r
+    set $key_shutdown Shift+S
 
-     set $signal_lock lock
-     set $signal_logout logout
-     set $signal_suspend suspend
-     set $signal_hibernate hibernate
-     set $signal_reboot reboot
-     set $signal_shutdown shutdown
+    set $signal_lock lock
+    set $signal_logout logout
+    set $signal_suspend suspend
+    set $signal_hibernate hibernate
+    set $signal_reboot reboot
+    set $signal_shutdown shutdown
 
-     # Path and options for the wallpaper changer script
-     set $path_wallchanger ~/.i3/scripts/wallchanger.bash
-     set $wallpaper_directory "$HOME/Bilder/wallpaper/misc"
-     set $wallpaper_logfile "$HOME/.i3/logs/wallpaper.log"
-     set $wallpaper_interval 900
+    # Path and options for the wallpaper changer script
+    set $path_wallchanger ~/.i3/scripts/wallchanger.bash
+    set $wallpaper_directory "$HOME/Bilder/wallpaper/misc"
+    set $wallpaper_logfile "$HOME/.i3/logs/wallpaper.log"
+    set $wallpaper_interval 900
+
+    set $workspace1 1:firefox
+    set $workspace2 2
+    set $workspace3 3
+    set $workspace4 4
+    set $workspace5 5
+    set $workspace6 6
+    set $workspace7 7
+    set $workspace8 8
+    set $workspace9 9
+    set $workspace10 10:skype
 
 ################################################################################
 ### KEYBINDINGS ################################################################
-################################################################################
+##################9#############################################################
 
     ### MOVING AND WINDOW BEHAVIOUR ############################################
 
@@ -88,27 +99,27 @@
     bindsym $mod+a focus parent
     bindcode $mod+d focus child
 
-    bindsym $mod+1 workspace 1
-    bindsym $mod+2 workspace 2
-    bindsym $mod+3 workspace 3
-    bindsym $mod+4 workspace 4
-    bindsym $mod+5 workspace 5
-    bindsym $mod+6 workspace 6
-    bindsym $mod+7 workspace 7
-    bindsym $mod+8 workspace 8
-    bindsym $mod+9 workspace 9
-    bindsym $mod+0 workspace 10
+    bindsym $mod+1 workspace $workspace1
+    bindsym $mod+2 workspace $workspace2
+    bindsym $mod+3 workspace $workspace3
+    bindsym $mod+4 workspace $workspace4
+    bindsym $mod+5 workspace $workspace5
+    bindsym $mod+6 workspace $workspace6
+    bindsym $mod+7 workspace $workspace7
+    bindsym $mod+8 workspace $workspace8
+    bindsym $mod+9 workspace $workspace9
+    bindsym $mod+0 workspace $workspace10
 
-    bindsym $mod+Shift+exclam move container to workspace 1
-    bindsym $mod+Shift+quotedbl move container to workspace 2
-    bindsym $mod+Shift+section move container to workspace 3
-    bindsym $mod+Shift+dollar move container to workspace 4
-    bindsym $mod+Shift+percent move container to workspace 5
-    bindsym $mod+Shift+ampersand move container to workspace 6
-    bindsym $mod+Shift+slash move container to workspace 7
-    bindsym $mod+Shift+parenleft move container to workspace 8
-    bindsym $mod+Shift+parenright move container to workspace 9
-    bindsym $mod+Shift+equal move container to workspace 10
+    bindsym $mod+Shift+exclam move container to workspace $workspace1
+    bindsym $mod+Shift+quotedbl move container to $workspace2
+    bindsym $mod+Shift+section move container to $workspace3
+    bindsym $mod+Shift+dollar move container to $workspace4
+    bindsym $mod+Shift+percent move container to $workspace5
+    bindsym $mod+Shift+ampersand move container to $workspace6
+    bindsym $mod+Shift+slash move container to $workspace7
+    bindsym $mod+Shift+parenleft move container to $workspace8
+    bindsym $mod+Shift+parenright move container to $workspace9
+    bindsym $mod+Shift+equal move container to $workspace10
 
     bindsym $mod+u workspace prev_on_output
     bindsym $mod+i workspace next_on_output
@@ -177,6 +188,17 @@
 ################################################################################
 ### GENERAL SETUP ##############################################################
 ################################################################################
+
+    #workspace $workspace1 output VBOX0
+    #workspace $workspace2 output VBOX0
+    #workspace $workspace3 output VBOX0
+    #workspace $workspace4 output VBOX0
+    #workspace $workspace5 output VBOX0
+    #workspace $workspace6 output VBOX0
+    #workspace $workspace7 output VBOX0
+    #workspace $workspace8 output VBOX0
+    #workspace $workspace9 output VBOX0
+    #workspace $workspace10 output VBOX1
 
     # Default orientation for new workspaces will be derived from aspect ratio
     default_orientation auto
