@@ -56,6 +56,9 @@ Bundle 'godlygeek/tabular'
 " status line plugin
 Bundle 'bling/vim-airline'
 
+" date/time support for CTRL-x and CTRL-a
+Bundle 'tpope/vim-speeddating'
+
 filetype plugin indent on
 
 " setup for the solarized color theme
@@ -187,7 +190,7 @@ set matchpairs="(:),{:},[:]"        " matching pairs for the '%'-command
 
 set notildeop                       " do not make '~' behave like an operator
 
-set virtualedit="block"             " allow moving the cursor where there is no
+set virtualedit+="block"            " allow moving the cursor where there is no
                                     " actual character in virtual block mode
 
 set wildignore=*.swp,*.bak,*.pyc    " files to ignore when expanding wildcards
