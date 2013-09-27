@@ -16,12 +16,6 @@ update_interval_on_battery 1.0
 #pad_percents 2
 #use_spacer left
 
-#TEXT
-#
-#\
-#\
-#\
-#\
 TEXT
 [
 { "full_text" : " \
@@ -100,6 +94,26 @@ ${endif}
 \
 \
 \
+${if_existing /sys/class/net/eth0}
+{ "full_text" : " \
+eth0: \
+${if_up eth0}\
+${addr eth0}\
+${else}\
+E: down\
+${endif}\
+ " , "color" : "\
+${if_up eth0}\
+${if_match "${addr eth0}" != "No Address"}\#00FF00\
+${else}\#FFFF00\
+${endif}\
+${else}\#FF0000\
+${endif}\
+" },
+${endif}
+\
+\
+\
 { "full_text" : " \
 LOAD: ${loadavg 2}\
  " , "color" : "\
@@ -109,6 +123,16 @@ ${else}\#FF0000)\
 ${endif}\
 ${endif}\
 " },
+\
+\
+\
+{ "full_text" : " VOL: \
+${if_match ${mixer} == 0}\
+mute\
+${else}\
+${mixer}%\
+${endif}\
+ " , "color" : "\#FFFFFF" },
 \
 \
 \
