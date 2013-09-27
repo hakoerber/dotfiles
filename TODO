@@ -3,3 +3,5 @@ Change zsh prompt.
 Vim normal mode status bar broken on virtualarch.
 
 Keepass/lastpass.
+
+Kill running conky on i3 restart.
