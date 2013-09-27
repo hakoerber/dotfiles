@@ -110,16 +110,16 @@
     bindsym $mod+9 workspace $workspace9
     bindsym $mod+0 workspace $workspace10
 
-    bindsym $mod+Shift+exclam move container to workspace $workspace1
-    bindsym $mod+Shift+quotedbl move container to $workspace2
-    bindsym $mod+Shift+section move container to $workspace3
-    bindsym $mod+Shift+dollar move container to $workspace4
-    bindsym $mod+Shift+percent move container to $workspace5
-    bindsym $mod+Shift+ampersand move container to $workspace6
-    bindsym $mod+Shift+slash move container to $workspace7
-    bindsym $mod+Shift+parenleft move container to $workspace8
-    bindsym $mod+Shift+parenright move container to $workspace9
-    bindsym $mod+Shift+equal move container to $workspace10
+    bindsym $mod+Shift+exclam     move container to workspace $workspace1
+    bindsym $mod+Shift+quotedbl   move container to workspace $workspace2
+    bindsym $mod+Shift+section    move container to workspace $workspace3
+    bindsym $mod+Shift+dollar     move container to workspace $workspace4
+    bindsym $mod+Shift+percent    move container to workspace $workspace5
+    bindsym $mod+Shift+ampersand  move container to workspace $workspace6
+    bindsym $mod+Shift+slash      move container to workspace $workspace7
+    bindsym $mod+Shift+parenleft  move container to workspace $workspace8
+    bindsym $mod+Shift+parenright move container to workspace $workspace9
+    bindsym $mod+Shift+equal      move container to workspace $workspace10
 
     bindsym $mod+u workspace prev_on_output
     bindsym $mod+i workspace next_on_output
