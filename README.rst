@@ -9,7 +9,7 @@ Installation
 1. ``git clone git://github.com:whatevsz/dotfiles ~/dotfiles``
 2. ``bash ~/dotfiles/scripts/setup.bash``
 
-``makesymlinks.bash`` will back up all configuration files that would otherwise
+``setup.bash`` will back up all configuration files that would otherwise
 be overridden and then symlink the content of all folders specified in $symlink_folders
 into $HOME or the desired destination given in MAPPING, if present.
 
@@ -17,7 +17,7 @@ If you want to use a different directory instead of ``~/dotfiles``, just alter t
 line and replace  ``~/dotfiles`` with the desired destination and change the line
 ``config_dir="$HOME/dotfiles/"`` in ``scripts/setup.bash`` accordingly. You can
 also choose a different folder for the backup of old files (default being ``~/.dotfiles.bak``)
-by altering ``backup_dir`` in ``scripts/setup.bash`` to your needs.
+by altering ``backup_dir`` in ``setup.bash`` to your needs.
 
 Structure
 ---------
@@ -25,6 +25,8 @@ Structure
 - ``scripts/`` - Scripts, e.g.  for setting up the configuration.
 - ``setup/`` - Setup information, e.g. a list of packages.
 - ``MAPPING`` - File that contains mapping directives.
+- ``TODO`` - Some stuff I am to lazy to do right now ;).
+- ``README.rst`` - The stuff you are reading right now.
 - All other folders - These are the folders that contain the configuration files.
 
 Mapping
@@ -46,3 +48,12 @@ This will symlink the contents of the folder ``dotfiles/terminator`` into ``~/.c
 
 When you provide multiple lines for the same folder, the first one that matches
 will be used.
+
+Required software
+-----------------
+
+-  ``git`` to clone the repository (you can alternatively download a tarball at
+   http://github.com/whatevsz/dotfiles/archive/master.zip)
+
+- ``zsh`` uses the configuration framework "oh-my-zsh" available at
+  http://github.com/robbyrussell/oh-my-zsh
