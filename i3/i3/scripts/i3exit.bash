@@ -16,13 +16,13 @@ log()
 
 lock()
 {
-    resolution=$(xrandr | grep '*' | awk '{ print $1 }')
+    resolution=$(xrandr | grep '*' | awk '{ print $1 }' | head -n1)
     log "[I] Resolution found: \"$resolution\""
     lockscreen="$HOME/.i3/data/lockscreen_$resolution.png"
     log "[I] Looking for lockscreen at \"$lockscreen\""
     if [[ -f "$lockscreen" ]] ; then
         log "[I] Lockscreen found, will be used as background image."
-        background_options="--image $lockscreen"
+        background_options="--image $lockscreen -t"
     else
         log "[W] Lockscreen not  found, using color #$FALLBACK_COLOR as background."
         background_options="--color $FALLBACK_COLOR"
