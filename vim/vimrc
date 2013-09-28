@@ -198,7 +198,7 @@ set wildignore=*.swp,*.bak,*.pyc    " files to ignore when expanding wildcards
 set noerrorbells                    " do not beep on errors
 
 set list                            " show specific spectial characters
-set listchars=trail:~               " trailing whitespace as '~'
+set listchars=                      " no trailing whitespace as '~'
 
 let mapleader = ","
 
