@@ -45,15 +45,15 @@
     set $wallpaper_logfile "$HOME/.i3/logs/wallpaper.log"
     set $wallpaper_interval 900
 
-    set $workspace1  1:firefox
-    set $workspace2  2
+    set $workspace1  1:www
+    set $workspace2  2:mail
     set $workspace3  3
     set $workspace4  4
     set $workspace5  5
     set $workspace6  6
     set $workspace7  7
-    set $workspace8  8
-    set $workspace9  9
+    set $workspace8  8:irc
+    set $workspace9  9:im
     set $workspace10 10:skype
 
     set $key_workspace1  1
