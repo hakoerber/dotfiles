@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # From http://i3wm.org/docs/user-contributed/conky-i3bar.html
 
+path_conkyrc="$1"
+
 # end the header so that i3bar knows we want to use JSON:
 echo '{ "version": 1 ,"stop_signal": 10, "cont_signal": 12, "click_events" : true }'
 
@@ -11,7 +13,7 @@ echo '['
 echo '[],'
 
 # Now send blocks with information forever:
-conky -c $HOME/.i3/conky/virtualarch.conky &
+conky -c "$path_conkyrc"
 
 while read input ; do
     bash ~/.i3/i3bar_clickparser.bash "$input"
