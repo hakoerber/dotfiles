@@ -2,11 +2,14 @@
 ### internet
 # torrents
 deluge
-# instant messaging
+# instant messaging/VOIP
 pidgin
 skype
+teamspeak3
+mumble
 # irc
-xchat
+quassel-core
+quassel-client
 # email
 thunderbird
 # network manager
@@ -29,21 +32,41 @@ feh
 gimp
 imagemagick
 pinta
+inkscape
+# 3D modelling
+blender
+# CD ripper
+cdparanoia
 # audio players
 mpg123
 clementine
 spotify
+# audio editors
+audacity
 # audio tagger
 easytag
 # video players
 vlc
+smplayer
+# video editors
+avidemux
+# ebook applications
+calibre
 
 ### utilities
 # package management
 pacaur
+# disk usage analyzer
+baobab
+# disk burner
+k3b
+dvd+rw-tools
+# ISO handler
+acetoneiso2
 # compression
 p7zip
 # file managers
+kdebase-dolphin
 thunar
 thunar-archive-plugin
 thunar-dropbox
@@ -72,6 +95,9 @@ rsnapshot
 gnupg
 truecrypt
 encfs
+# calculators
+bc
+kcalc
 
 ### console
 # shells
@@ -84,7 +110,6 @@ archey
 
 # text editors
 mousepad
-gvim
 gvim
 
 # development
