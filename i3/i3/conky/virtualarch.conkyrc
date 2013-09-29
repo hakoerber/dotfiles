@@ -74,17 +74,83 @@ ${endif}\
 \
 \
 \
+${if_mounted /home}\
+{ "full_text" : " \
+/home: ${fs_used /home}/${fs_size /home} (${fs_used_perc /home}%)\
+ " , "color" : "\
+${if_match ${fs_used_perc /home} <= 70}\#00FF00\
+${else}${if_match ${fs_used_perc /home} <= 90}\#FFFF00\
+${else}\#FF0000\
+${endif}\
+${endif}\
+" },
+${endif}\
+\
+\
+\
+${if_existing /sys/class/net/wlp2s0}\
+{ "full_text" : " \
+wlp2s0: \
+${if_up wlp2s0}\
+${if_match "${addr wlp2s0}" != "No Address"}\
+${addr wlp2s0} @ ${wireless_essid wlp2s0} (${wireless_link_qual_perc wlp2s0}%)\
+${else}\
+No Address\
+${endif}\
+${else}\
+down\
+${endif}\
+ " , "color" : "\
+${if_up wlp2s0}\
+${if_match "${addr wlp2s0}" != "No Address"}\
+${if_match ${wireless_link_qual_perc wlp2s0} <= 25}\
+\#FF0000\
+${else}${if_match ${wireless_link_qual_perc wlp2s0} <= 50}\
+\#FFFF00\
+${else}\
+\#00FF00\
+${endif}\
+${endif}\
+${else}\#FFFF00\
+${endif}\
+${else}\#FF0000\
+${endif}\
+" },
+${endif}
+\
+\
+\
 ${if_existing /sys/class/net/enp0s3}
 { "full_text" : " \
 enp0s3: \
 ${if_up enp0s3}\
 ${addr enp0s3}\
 ${else}\
-E: down\
+down\
 ${endif}\
  " , "color" : "\
 ${if_up enp0s3}\
 ${if_match "${addr enp0s3}" != "No Address"}\#00FF00\
+${else}\#FFFF00\
+${endif}\
+${else}\#FF0000\
+${endif}\
+" },
+${endif}
+\
+\
+\
+${if_existing /sys/class/net/enp1s0}
+{ "full_text" : " \
+enp1s0: \
+${if_up enp1s0}\
+${addr enp1s0}\
+${else}\
+down\
+${endif}\
+ " , "color" : "\
+${if_up enp1s0}\
+${if_match "${addr enp1s0}" != "No Address"}\#00FF00\
 ${else}\#FFFF00\
 ${endif}\
 ${else}\#FF0000\
@@ -100,7 +166,7 @@ eth0: \
 ${if_up eth0}\
 ${addr eth0}\
 ${else}\
-E: down\
+down\
 ${endif}\
  " , "color" : "\
 ${if_up eth0}\

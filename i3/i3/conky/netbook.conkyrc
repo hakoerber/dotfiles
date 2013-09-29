@@ -1,0 +1,131 @@
+# vim:set filetype=conkyrc:
+# TODO: coloring of LOAD should depend on number of cpus, as it scales accordingly
+out_to_console yes
+out_to_ncurses no
+out_to_stderr no
+out_to_x no
+
+short_units yes
+
+double_buffer yes
+
+update_interval 1.0
+update_interval_on_battery 1.0
+
+# pad_percents is useless without use_spacer, but the latter leads to some ugly gaps
+#pad_percents 2
+#use_spacer left
+
+TEXT
+[
+${if_existing /sys/class/net/wlp2s0}\
+{ "full_text" : " \
+W: \
+${if_up wlp2s0}\
+${if_match "${addr wlp2s0}" != "No Address"}\
+${addr wlp2s0} @ ${wireless_essid wlp2s0} (${wireless_link_qual_perc wlp2s0}%)\
+${else}\
+No Address\
+${endif}\
+${else}\
+down\
+${endif}\
+ " , "color" : "\
+${if_up wlp2s0}\
+${if_match "${addr wlp2s0}" != "No Address"}\
+${if_match ${wireless_link_qual_perc wlp2s0} <= 25}\
+\#FF0000\
+${else}${if_match ${wireless_link_qual_perc wlp2s0} <= 50}\
+\#FFFF00\
+${else}\
+\#00FF00\
+${endif}\
+${endif}\
+${else}\#FFFF00\
+${endif}\
+${else}\#FF0000\
+${endif}\
+" },
+${endif}
+\
+\
+\
+${if_existing /sys/class/net/enp0s3}
+{ "full_text" : " \
+E: \
+${if_up enp0s3}\
+${addr enp0s3}\
+${else}\
+down\
+${endif}\
+ " , "color" : "\
+${if_up enp0s3}\
+${if_match "${addr enp0s3}" != "No Address"}\#00FF00\
+${else}\#FFFF00\
+${endif}\
+${else}\#FF0000\
+${endif}\
+" },
+${endif}
+\
+\
+\
+${if_existing /sys/class/net/enp1s0}
+{ "full_text" : " \
+E: \
+${if_up enp1s0}\
+${addr enp1s0}\
+${else}\
+down\
+${endif}\
+ " , "color" : "\
+${if_up enp1s0}\
+${if_match "${addr enp1s0}" != "No Address"}\#00FF00\
+${else}\#FFFF00\
+${endif}\
+${else}\#FF0000\
+${endif}\
+" },
+${endif}
+\
+\
+\
+${if_existing /sys/class/net/eth0}
+{ "full_text" : " \
+E: \
+${if_up eth0}\
+${addr eth0}\
+${else}\
+down\
+${endif}\
+ " , "color" : "\
+${if_up eth0}\
+${if_match "${addr eth0}" != "No Address"}\#00FF00\
+${else}\#FFFF00\
+${endif}\
+${else}\#FF0000\
+${endif}\
+" },
+${endif}
+\
+\
+\
+{ "full_text" : " VOL: \
+${if_match ${mixer} == 0}\
+mute\
+${else}\
+${mixer}%\
+${endif}\
+ " , "color" : "\#FFFFFF" },
+\
+\
+\
+${if_existing /sys/class/power_supply/BAT0}\
+{ "full_text" : " BAT: ${battery_short BAT0} " , "color" : "\#FFFFFF" },
+${endif}\
+\
+\
+\
+{ "full_text" : " ${time %a %F %T} " , "short_text" : " ${time %a %T} " , "color" : "\#FFFFFF" , "name" : "time" }
+],
+
