@@ -27,7 +27,7 @@ setxkbmap -layout "$keyboard_layout" -variant "$keyboard_variant"
 # set key repeat delay
 xset r rate "$keyboard_repeat_delay" "$keyboard_repeat_speed"
 
-#[[ -f ~/.Xresources ]] && xrdb ~/.Xresources
+[[ -f ~/.Xresources ]] && xrdb ~/.Xresources
 
 case "$1" in
 kde)
