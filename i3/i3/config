@@ -285,6 +285,7 @@
     for_window [class="^Conky$"] floating enable
     for_window [class="^Terminator$"] border 1pixel
     for_window [class="^Firefox$"] border 1pixel
+    for_window [class="^Truecrypt$"] floating enable
 
 ################################################################################
 ### APPLICATION AUTOSTART ######################################################
