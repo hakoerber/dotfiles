@@ -23,7 +23,7 @@ ${if_existing /sys/class/net/wlp2s0}\
 W: \
 ${if_up wlp2s0}\
 ${if_match "${addr wlp2s0}" != "No Address"}\
-${addr wlp2s0} @ ${wireless_essid wlp2s0} (${wireless_link_qual_perc wlp2s0}%)\
+${wireless_essid wlp2s0} (${wireless_link_qual_perc wlp2s0}%)\
 ${else}\
 No Address\
 ${endif}\
@@ -106,7 +106,20 @@ ${endif}\
 ${else}\#FF0000\
 ${endif}\
 " },
-${endif}
+${endif}\
+\
+\
+\
+${if_existing /sys/class/power_supply/BAT0}\
+{ "full_text" : " BAT: ${battery_short BAT0} "\
+, "color" : "\
+${if_match ${battery_percent BAT0} < 10}\#FF0000\
+${else}${if_match ${battery_percent BAT0} < 30}\#FFFF00\
+${else}\#00FF00\
+${endif}\
+${endif}\
+" },
+${endif}\
 \
 \
 \
@@ -117,12 +130,6 @@ ${else}\
 ${mixer}%\
 ${endif}\
  " , "color" : "\#FFFFFF" },
-\
-\
-\
-${if_existing /sys/class/power_supply/BAT0}\
-{ "full_text" : " BAT: ${battery_short BAT0} " , "color" : "\#FFFFFF" },
-${endif}\
 \
 \
 \
