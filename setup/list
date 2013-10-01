@@ -41,6 +41,9 @@ cdparanoia
 mpg123
 clementine
 spotify
+mpd
+mpc
+ncmpcpp
 # audio editors
 audacity
 # audio tagger
