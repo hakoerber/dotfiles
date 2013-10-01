@@ -52,6 +52,7 @@ will be used.
 Required third party software
 -----------------------------
 
+<<<<<<< HEAD
 - ``zsh`` uses the configuration framework "oh-my-zsh", available at
   http://github.com/robbyrussell/oh-my-zsh
 
