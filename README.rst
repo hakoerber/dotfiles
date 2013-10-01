@@ -49,11 +49,8 @@ This will symlink the contents of the folder ``dotfiles/terminator`` into ``~/.c
 When you provide multiple lines for the same folder, the first one that matches
 will be used.
 
-Required software
------------------
-
--  ``git`` to clone the repository (you can alternatively download a tarball at
-   http://github.com/whatevsz/dotfiles/archive/master.zip)
+Required third party software
+-----------------------------
 
 - ``zsh`` uses the configuration framework "oh-my-zsh" available at
   http://github.com/robbyrussell/oh-my-zsh
