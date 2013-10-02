@@ -176,6 +176,8 @@ linux-headers
 grub
 # misc
 ntp
+cowsay
+fortune-mod
 
 ### appearance
 # X
