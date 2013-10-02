@@ -170,7 +170,7 @@ set foldmethod=indent               " fold according to indet
 set foldnestmax=2                   " fold a maximum of 2 levels
 set nofoldenable                    " unfold everything by default
 
-set scrolloff=4                     " show context at the screen edges
+set scrolloff=5                     " show context at the screen edges
 
 
 set showcmd                         " show (partial) command in the command line
