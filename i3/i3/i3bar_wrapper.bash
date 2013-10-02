@@ -13,7 +13,7 @@ echo '['
 echo '[],'
 
 # Now send blocks with information forever:
-conky -c "$path_conkyrc"
+conky -c "$path_conkyrc" &
 
 while read input ; do
     bash ~/.i3/i3bar_clickparser.bash "$input"
