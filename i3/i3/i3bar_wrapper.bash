@@ -4,7 +4,7 @@
 path_conkyrc="$1"
 
 # end the header so that i3bar knows we want to use JSON:
-echo '{ "version": 1 ,"stop_signal": 10, "cont_signal": 12, "click_events" : true }'
+echo '{ "version" : 1 , "click_events" : true }'
 
 # Begin the endless array.
 echo '['
