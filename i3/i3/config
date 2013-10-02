@@ -96,6 +96,11 @@
 
     set $kill Shift+Q
 
+    set $redshift_latitude 49.5
+    set $redshift_longitude 11
+    set $redshift_colortemp_day
+    set $redshift_colortemp_night
+
 ################################################################################
 ### KEYBINDINGS ################################################################
 ##################9#############################################################
@@ -291,8 +296,11 @@
 ### APPLICATION AUTOSTART ######################################################
 ################################################################################
 
+    set $redshift_lat_long 49.5:11
+    set $redshift_colortemp 5500:3700
+
     exec --no-startup-id $path_wallchanger $wallpaper_directory $wallpaper_interval > $wallpaper_logfile &
     exec --no-startup-id wicd-gtk --tray &
-    exec --no-startup-id gtk-redshift -l 49.5:11 -t 6500:4500 &
+    exec --no-startup-id gtk-redshift -l $redshift_lat_long -t $redshift_colortemp &
     #exec --no-startup-id conky
 
