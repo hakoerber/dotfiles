@@ -197,8 +197,8 @@ set wildignore=*.swp,*.bak,*.pyc    " files to ignore when expanding wildcards
 
 set noerrorbells                    " do not beep on errors
 
-set list                            " show specific spectial characters
-set listchars=                      " no trailing whitespace as '~'
+"set list                            " show specific spectial characters
+"set listchars=                      " no trailing whitespace as '~'
 
 let mapleader = ","
 
@@ -227,3 +227,8 @@ autocmd FileWritePre    * :call TrimWhiteSpace()
 autocmd FileAppendPre   * :call TrimWhiteSpace()
 autocmd FilterWritePre  * :call TrimWhiteSpace()
 autocmd BufWritePre     * :call TrimWhiteSpace()
+
+" Start NERDTree when starting vim
+"autocmd vimenter * NERDTree
+" close NERDTree when it's the only window left
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
