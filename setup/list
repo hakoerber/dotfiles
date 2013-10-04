@@ -22,6 +22,7 @@ filezilla
 # online storage
 dropbox
 # ssh
+openssh
 putty
 
 ### multimedia
@@ -178,6 +179,7 @@ grub
 ntp
 cowsay
 fortune-mod
+lsb-release
 
 ### appearance
 # X
