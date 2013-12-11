@@ -64,19 +64,25 @@ Bundle 'tpope/vim-fugitive'
 
 filetype plugin indent on
 
-" setup for vim-airline
-" enable tabline at the top showing all buffers
-let g:airline#extensions#tabline#enabled = 1
+set t_Co=256
 
 " setup for the solarized color theme
 set background=dark
 let g:solarized_termcolors=16
 let g:solarized_termtrans=1
-let g:solarized_contrase="normal"
+let g:solarized_contrast="normal"
 let g:solarized_visibility="normal"
 syntax enable
 colorscheme solarized
 
+" setup for vim-airline
+let g:airline_left_sep = '▶'
+let g:airline_right_sep = '◀'
+" enable tabline at the top showing all buffers
+let g:airline#extensions#tabline#enabled = 1
+"let g:airline_theme=
+
+set colorcolumn=79
 set clipboard=unnamed               " enable copying into the clipboard
 
 
