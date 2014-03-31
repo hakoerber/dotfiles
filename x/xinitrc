@@ -29,18 +29,5 @@ xset r rate "$keyboard_repeat_delay" "$keyboard_repeat_speed"
 
 [[ -f ~/.Xresources ]] && xrdb ~/.Xresources
 
-case "$1" in
-kde)
-    exec startkde
-    ;;
-xfce4)
-    exec startxfce4
-    ;;
-e17)
-    exec enlightenment_start
-    ;;
-i3|*)
-    SESSION_CONF=$(bash "$HOME/.i3/scripts/genconfig.bash")
-    exec i3 -c "$SESSION_CONF"
-    ;;
-esac
+SESSION_CONF=$(bash "$HOME/.i3/scripts/genconfig.bash")
+exec i3 -c "$SESSION_CONF" >> ~/.i3/logs/i3.log
