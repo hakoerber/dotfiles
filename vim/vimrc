@@ -59,6 +59,9 @@ Bundle 'bling/vim-airline'
 " date/time support for CTRL-x and CTRL-a
 Bundle 'tpope/vim-speeddating'
 
+" git integration
+Bundle 'tpope/vim-fugitive'
+
 set t_Co=16
 
 " setup for the solarized color theme
@@ -75,6 +78,8 @@ filetype plugin indent on
 " setup for vim-airline
 let g:airline_left_sep = '▶'
 let g:airline_right_sep = '◀'
+" enable tabline at the top showing all buffers
+let g:airline#extensions#tabline#enabled = 1
 "let g:airline_theme=
 
 set colorcolumn=79
@@ -138,6 +143,7 @@ set encoding=utf-8                  " set the encoding
 set showmode                        " show current mode in the status line
 
 set swapfile                        " use a swapfile
+set directory=~/.vim-swap,/var/tmp,/tmp
 set updatecount=200                 " default, number of characters that have
                                     " to be typed before the swapfile is
                                     " written to disk
@@ -146,8 +152,6 @@ set updatetime=10000                " time in milliseconds after the swapfile
 
 set title                           " let vim set the title of the window
 set titlestring=""                  " use default titlestring
-
-
 
 set autoread                        " automatically reload a file when it was
                                     " changed outside of vim
@@ -161,7 +165,6 @@ set shiftwidth=4                    " one indent level equals 4 spaces
 set expandtab                       " expand tabs to spaces
 set autoindent                      " copy indent from current line when
                                     " starting a new one
-set smartindent                     " smart indenting for C-like languages
 set smarttab                        " use shiftwidth when tabbing in front of
                                     " a line instead of tabsstop/softtabstop
 set shiftround                      " round indent to multiples of shiftwidth
@@ -205,6 +208,8 @@ set wildignore=*.swp,*.bak,*.pyc    " files to ignore when expanding wildcards
 
 set noerrorbells                    " do not beep on errors
 
+set colorcolumn=80                  " highlight the 80st column
+
 "set list                            " show specific spectial characters
 "set listchars=                      " no trailing whitespace as '~'
 
@@ -238,7 +243,15 @@ autocmd BufWritePre     * :call TrimWhiteSpace()
 
 " Start NERDTree when starting vim
 "autocmd vimenter * NERDTree
+"autocmd VimEnter * wincmd p
 " close NERDTree when it's the only window left
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
 
 call togglebg#map("<F5>")
+
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+nnoremap <F3> :NERDTreeToggle<CR>
