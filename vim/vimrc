@@ -254,3 +254,6 @@ nnoremap <C-l> <C-w>l
 
 nnoremap <F3> :NERDTreeToggle<CR>
 
+" Autosave views when closing and restoring when opening again.
+autocmd BufWinLeave *.* mkview
+autocmd BufWinEnter *.* silent loadview
