@@ -19,7 +19,7 @@
     set $mod Mod4
 
     # The default terminal
-    set $terminal terminator
+    set $terminal urxvt
 
     # Path to the exit script
     set $path_i3exit ~/.i3/scripts/i3exit.bash
@@ -291,6 +291,7 @@
     for_window [class="^Terminator$"] border 1pixel
     for_window [class="^Firefox$"] border 1pixel
     for_window [class="^Truecrypt$"] floating enable
+    for_window [class="^URxvt$"] border 1pixel
 
 ################################################################################
 ### APPLICATION AUTOSTART ######################################################

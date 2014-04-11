@@ -10,6 +10,8 @@ fi
 [ -f /etc/xprofile ] && source /etc/xprofile
 [ -f ~/.xprofile ] && source ~/.xprofile
 
+export LANG=en_US.UTF-8
+
 
 # keyboard options
 keyboard_layout=de
@@ -27,7 +29,7 @@ setxkbmap -layout "$keyboard_layout" -variant "$keyboard_variant"
 # set key repeat delay
 xset r rate "$keyboard_repeat_delay" "$keyboard_repeat_speed"
 
-[[ -f ~/.Xresources ]] && xrdb ~/.Xresources
+[[ -f ~/.Xresources ]] && xrdb -merge ~/.Xresources
 
 SESSION_CONF=$(bash "$HOME/.i3/scripts/genconfig.bash")
 exec i3 -c "$SESSION_CONF" >> ~/.i3/logs/i3.log
