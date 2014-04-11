@@ -62,9 +62,7 @@ Bundle 'tpope/vim-speeddating'
 " git integration
 Bundle 'tpope/vim-fugitive'
 
-filetype plugin indent on
-
-set t_Co=256
+set t_Co=16
 
 " setup for the solarized color theme
 set background=dark
@@ -74,6 +72,8 @@ let g:solarized_contrast="normal"
 let g:solarized_visibility="normal"
 syntax enable
 colorscheme solarized
+
+filetype plugin indent on
 
 " setup for vim-airline
 let g:airline_left_sep = '▶'
@@ -242,10 +242,12 @@ autocmd FilterWritePre  * :call TrimWhiteSpace()
 autocmd BufWritePre     * :call TrimWhiteSpace()
 
 " Start NERDTree when starting vim
-autocmd vimenter * NERDTree
+"autocmd vimenter * NERDTree
 "autocmd VimEnter * wincmd p
 " close NERDTree when it's the only window left
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
+
+call togglebg#map("<F5>")
 
 nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j

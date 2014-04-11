@@ -19,7 +19,7 @@
     set $mod Mod4
 
     # The default terminal
-    set $terminal terminator
+    set $terminal urxvt
 
     # Path to the exit script
     set $path_i3exit ~/.i3/scripts/i3exit.bash
@@ -43,6 +43,7 @@
     set $path_wallchanger ~/.i3/scripts/wallchanger.bash
     set $wallpaper_directory "$HOME/Bilder/wallpaper/misc"
     set $wallpaper_logfile "$HOME/.i3/logs/wallpaper.log"
+    set $wallpaper_fallback "$HOME/.i3/data/wallpaper/"
     set $wallpaper_interval 900
 
     set $workspace1  1:www
@@ -291,6 +292,7 @@
     for_window [class="^Terminator$"] border 1pixel
     for_window [class="^Firefox$"] border 1pixel
     for_window [class="^Truecrypt$"] floating enable
+    for_window [class="^URxvt$"] border 1pixel
 
 ################################################################################
 ### APPLICATION AUTOSTART ######################################################
@@ -299,7 +301,7 @@
     set $redshift_lat_long 49.5:11
     set $redshift_colortemp 5500:3700
 
-    exec --no-startup-id $path_wallchanger $wallpaper_directory $wallpaper_interval > $wallpaper_logfile &
+    exec --no-startup-id $path_wallchanger $wallpaper_directory $wallpaper_interval $wallpaper_fallback > $wallpaper_logfile &
     exec --no-startup-id wicd-gtk --tray &
     exec --no-startup-id gtk-redshift -l $redshift_lat_long -t $redshift_colortemp &
     #exec --no-startup-id conky
