@@ -62,7 +62,16 @@ Bundle 'tpope/vim-speeddating'
 " git integration
 Bundle 'tpope/vim-fugitive'
 
-set t_Co=16
+" buffer expolorer
+Bundle 'fholgado/minibufexpl.vim'
+
+" shows a code outline
+Bundle 'majutsushi/tagbar'
+
+" automatically enables completion when typing
+Bundle 'vim-scripts/autocomplpop'
+
+set t_Co=256
 
 " setup for the solarized color theme
 set background=dark
@@ -255,6 +264,8 @@ nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
 
 nnoremap <F3> :NERDTreeToggle<CR>
+
+map <F4> :MBEToggle<CR>
 
 " Autosave views when closing and restoring when opening again.
 autocmd BufWinLeave *.* mkview
