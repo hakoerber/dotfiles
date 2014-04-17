@@ -31,3 +31,8 @@ else
 fi
 
 echo "$SESSION_CONF"
+
+# if we got any parameters, tell i3 to reload the config
+# so the script can be used both on startup without reload (as i3 is not even
+# running yet) and later when reloading
+[[ -n "$1" ]] && i3-msg reload

@@ -12,24 +12,52 @@ fi
 
 export LANG=en_US.UTF-8
 
-
 # keyboard options
 keyboard_layout=de
 keyboard_variant=nodeadkeys
 keyboard_repeat_delay=150
 keyboard_repeat_speed=30
 
+# path and options for the wallpaper changer script
+path_wallchanger="$HOME/.i3/scripts/wallchanger.bash"
+wallpaper_directory="$HOME/pictures/wallpaper/misc"
+wallpaper_logfile="$HOME/.i3/logs/wallpaper.log"
+wallpaper_fallback="$HOME/.i3/data/wallpaper/"
+wallpaper_interval="900"
+
+# redshift settings
+redshift_lat_long="49.5:11"
+redshift_colortemp="5500:3700"
+
+# start the pulseaudio volume control tray applet
+pasystray &
+
+# start dropbox
+dropboxd &
+
+# start the wallpaper changer
+$path_wallchanger "$wallpaper_directory" "$wallpaper_interval" "$wallpaper_fallback" > "$wallpaper_logfile" &
+
+# start redshift
+redshift-gtk -l "$redshift_lat_long" -t "$redshift_colortemp" &
+
+# set keyboard layout
+setxkbmap -layout "$keyboard_layout" -variant "$keyboard_variant" &
+
+# set key repeat delay
+xset r rate "$keyboard_repeat_delay" "$keyboard_repeat_speed" &
+
 # execute the host-specific .xinitrc-addition
 hostfile="$HOME/.xinitrc.d/$(hostname).xinitrc"
 [[ -f "$hostfile" ]] && bash "$hostfile" &
 
-# set keyboard layout
-setxkbmap -layout "$keyboard_layout" -variant "$keyboard_variant"
+[[ -f ~/.Xresources ]] && xrdb -merge ~/.Xresources &
 
-# set key repeat delay
-xset r rate "$keyboard_repeat_delay" "$keyboard_repeat_speed"
+LOG="$HOME/.i3/logs/i3.log"
+LOGOLD="$HOME/.i3/logs/i3.log.old"
 
-[[ -f ~/.Xresources ]] && xrdb -merge ~/.Xresources
+# simple logrotate so we can still get info about the last session
+[[ -f "$LOG" ]] && mv -f "$LOG" "$LOGOLD"
 
 SESSION_CONF=$(bash "$HOME/.i3/scripts/genconfig.bash")
 exec i3 -c "$SESSION_CONF" >> ~/.i3/logs/i3.log
