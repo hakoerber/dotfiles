@@ -28,6 +28,9 @@ lock()
         background_options="--color $FALLBACK_COLOR"
     fi
     i3lock $background_options
+    retval=$?
+    [[ -z "$1" ]] && sleep 1 && xset dpms force off
+    return $retval
 }
 
 log "[I] Received signal \"$1\"."
@@ -43,7 +46,7 @@ case "$1" in
         ;;
     suspend)
         log "[I] Suspending."
-        lock && systemctl suspend
+        lock "1" && systemctl suspend
         ;;
     hibernate)
         log "[I] Hibernating."

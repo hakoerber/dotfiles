@@ -39,23 +39,16 @@
     set $signal_reboot    reboot
     set $signal_shutdown  shutdown
 
-    # Path and options for the wallpaper changer script
-    set $path_wallchanger ~/.i3/scripts/wallchanger.bash
-    set $wallpaper_directory "$HOME/Bilder/wallpaper/misc"
-    set $wallpaper_logfile "$HOME/.i3/logs/wallpaper.log"
-    set $wallpaper_fallback "$HOME/.i3/data/wallpaper/"
-    set $wallpaper_interval 900
-
-    set $workspace1  1:www
-    set $workspace2  2:mail
+    set $workspace1  1
+    set $workspace2  2
     set $workspace3  3
     set $workspace4  4
     set $workspace5  5
     set $workspace6  6
     set $workspace7  7
-    set $workspace8  8:irc
-    set $workspace9  9:im
-    set $workspace10 10:skype
+    set $workspace8  8
+    set $workspace9  9
+    set $workspace10 10
 
     set $key_workspace1  1
     set $key_workspace2  2
@@ -73,7 +66,7 @@
     set $up    k
     set $right l
 
-    set $splith g
+    set $splith c
     set $splitv v
 
     set $fullscreen f
@@ -99,8 +92,8 @@
 
     set $redshift_latitude 49.5
     set $redshift_longitude 11
-    set $redshift_colortemp_day
-    set $redshift_colortemp_night
+    set $redshift_colortemp_day 6500
+    set $redshift_colortemp_night 4500
 
 ################################################################################
 ### KEYBINDINGS ################################################################
@@ -173,7 +166,8 @@
     bindsym $mod+Shift+$next_on_output move container to workspace next_on_output
 
     # regenerate and reload the configuration file
-    bindsym $mod+$reload exec --no-startup-id bash ~/.i3/scripts/genconfig.bash ; reload
+    # if genconfig gets any paramters, it will invoke i3-msg reload
+    bindsym $mod+$reload exec --no-startup-id bash ~/.i3/scripts/genconfig.bash 1
 
     bindsym $mod+$restart restart
     bindsym $mod+$exit    exit
@@ -293,16 +287,7 @@
     for_window [class="^Firefox$"] border 1pixel
     for_window [class="^Truecrypt$"] floating enable
     for_window [class="^URxvt$"] border 1pixel
-
-################################################################################
-### APPLICATION AUTOSTART ######################################################
-################################################################################
-
-    set $redshift_lat_long 49.5:11
-    set $redshift_colortemp 5500:3700
-
-    exec --no-startup-id $path_wallchanger $wallpaper_directory $wallpaper_interval $wallpaper_fallback > $wallpaper_logfile &
-    exec --no-startup-id wicd-gtk --tray &
-    exec --no-startup-id gtk-redshift -l $redshift_lat_long -t $redshift_colortemp &
-    #exec --no-startup-id conky
-
+    for_window [class="^Cairo-dock$"] floating enable ; border none
+    for_window [class="^Pavucontrol$"] floating enable
+    for_window [title="^Skype.*for Linux$" ] floating enable
+    for_window [class="^Chromium$" ] border none
