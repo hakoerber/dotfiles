@@ -4,23 +4,21 @@
 deluge
 # instant messaging/VOIP
 pidgin
-skype
-teamspeak3
-mumble
 # irc
 quassel-core
 quassel-client
 # email
 thunderbird
 # network manager
-wicd-gtk
+netctl
+wpa_supplicant
+wpa_actiond
+iw
 # browser
 firefox
 flashplugin
 # ftp
 filezilla
-# online storage
-dropbox
 # ssh
 openssh
 putty
@@ -31,56 +29,26 @@ geeqie
 feh
 # image manipulation
 gimp
-imagemagick
-pinta
-inkscape
-# 3D modelling
-blender
-# CD ripper
-cdparanoia
 # audio players
 mpg123
 clementine
-spotify
 mpd
 mpc
 ncmpcpp
-# audio editors
-audacity
-# audio tagger
-easytag
 # video players
 vlc
-smplayer
-# video editors
-avidemux
-# ebook applications
-calibre
 
 ### utilities
-# package management
-pacaur
-# disk usage analyzer
-baobab
-# disk burner
-k3b
-dvd+rw-tools
-# ISO handler
-acetoneiso2
 # compression
 p7zip
 # file managers
-kdebase-dolphin
 thunar
 thunar-archive-plugin
-thunar-dropbox
 thunar-media-tags-plugin
 # taskbars / docks
 docky
 conky
 dzen2
-# color pickers
-gcolor2
 
 ### documents
 # pdf reader
@@ -95,33 +63,27 @@ wireshark-cli
 wireshark-gtk
 # backup programs
 rsnapshot
+rsync
 # encryption
 gnupg
 truecrypt
 encfs
 # calculators
-bc
-kcalc
 
 ### console
 # shells
 zsh
 # terminal emulators
-terminator
 rxvt-unicode
-# eyecandy
-archey
 
 # text editors
 mousepad
-gvim
+vim
 
 # development
 git
 bzr
-eclipse-cdt
-eclipse-egit
-eclipse-pydev
+eclipse
 
 # programming languages
 python2-xdg
@@ -135,46 +97,28 @@ i3-wm
 i3lock
 i3status
 dmenu
-# xfce
-xfce4
-xfce4-goodies
 
 ### system
 # audio stack
 alsa-utils
-pulseaudio-alsa
-pa-applet-git
 redshift
 
-# kernel / drivers
-broadcom-wl-ck-atom
-xf86-input-synaptics
-xf86-video-fbdev
-xf86-video-intel
-xf86-video-modesetting
-xf86-video-vesa
-
 # console
+curl
+wget
 htop
 powertop
 xorg-xev
 xorg-xfontsel
 xorg-xkill
 xorg-xprop
-stress
 
 ### system
-# login manager
-slim
-archlinux-themes-slim
 # disks / filesystems
 sshfs
 gptfdisk
 # kernel
-linux-ck-atom-headers
 linux-headers
-# booting
-grub
 # misc
 ntp
 cowsay
@@ -187,5 +131,13 @@ lxappearance
 oxygen-gtk2
 oxygen-gtk3
 xcursor-vanilla-dmz
-# fonts
-ttf-microsoft-consolas
+
+### fonts
+ttf-dejavu
+
+# X
+xorg-server
+xorg-server-utils
+xorg-apps
+xorg-server-xephyr
+xorg-xinit
