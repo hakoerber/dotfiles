@@ -3,7 +3,7 @@
 line="$1"
 
 log(){
-    echo $* >> ~/.i3/output_i3bar.log.2
+    echo $* >> ~/.i3/logs/output_i3bar.log
 }
 
 # I'm sorry.
