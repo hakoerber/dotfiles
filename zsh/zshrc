@@ -59,5 +59,4 @@ man() {
 
 [[ $TERM == "urxvt" ]] && export TERM="rxvt-unicode"
 
-
-
+alias su="su -"
