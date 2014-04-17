@@ -57,6 +57,7 @@ man() {
         man "$@"
 }
 
+[[ $TERM == "urxvt" ]] && export TERM="rxvt-unicode"
 
 
 
