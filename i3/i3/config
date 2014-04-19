@@ -252,7 +252,7 @@
     # Do show borders at the screen edges
     hide_edge_borders none
 
-    focus_follows_mouse yes
+    focus_follows_mouse no
 
     # Only map a popup in fullscreen mode if it belongs to the fullscreen window
     # <smart|ignore|leave_fullscreen>
@@ -271,10 +271,20 @@
     force_display_urgency_hint 500 ms
 
     # font for window titles. ISO 10646 = Unicode
-    font pango:DejaVu Sans Mono 10
+    font pango:DejaVu Sans Mono 11
 
     # Use Mouse+$mod to drag floating windows to their wanted position
     floating_modifier $mod
+
+################################################################################
+### COLOR SETTINGS #############################################################
+################################################################################
+
+# class                 border  backgr. text    indicator
+client.focused          #E16B40 #E16B40 #000000 #FF0000
+client.focused_inactive #333333 #5f676a #ffffff #484e50
+client.unfocused        #333333 #202020 #cccccc #292d2e
+client.urgent           #2f343a #900000 #ffffff #900000
 
 ################################################################################
 ### APPLICATION SPECIFIC SETTINGS ##############################################
@@ -291,3 +301,5 @@
     for_window [class="^Pavucontrol$"] floating enable
     for_window [title="^Skype.*for Linux$" ] floating enable
     for_window [class="^Chromium$" ] border none
+    for_window [class="^yad-status$" ] floating enable ; border none
+    for_window [class="^Docky$" ] floating enable ; border none
