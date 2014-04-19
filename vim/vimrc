@@ -152,7 +152,7 @@ set encoding=utf-8                  " set the encoding
 set showmode                        " show current mode in the status line
 
 set swapfile                        " use a swapfile
-set directory=~/.vim-swap,/var/tmp,/tmp
+set directory=/var/tmp,/tmp
 set updatecount=200                 " default, number of characters that have
                                     " to be typed before the swapfile is
                                     " written to disk
