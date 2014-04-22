@@ -1,1 +1,2 @@
-kill -SIGUSR1 $(cat $HOME/.i3/logs/conky.pid)
+echo "update" >> ~/test.log
+kill -SIGUSR1 $(cat $LOGDIR/i3/conky.pid)

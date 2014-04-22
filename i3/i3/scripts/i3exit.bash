@@ -2,16 +2,19 @@
 
 ### From http://www.archlinux.org/index.php/i3
 
-LOGFILE="$HOME/.i3/logs/i3exit.log"
+LOGFILE="$LOGDIR/i3/i3exit.log"
 LOGFILE_MAXSIZE=100000
 
 FALLBACK_COLOR=000000
+
+mkdir -p "$(dirname $LOGFILE)"
+touch "$LOGFILE"
 
 [[ $(stat -c%s "$LOGFILE") -gt $LOGFILE_MAXSIZE ]] && >$LOGFILE
 
 log()
 {
-    echo "$(date "+%Y-%m-%d %H:%M:%S") $1" >> "$LOGFILE"
+    echo "[$(date +%FT%T)] $1" >> "$LOGFILE"
 }
 
 lock()

@@ -8,7 +8,23 @@ getvol() {
 }
 
 setvol() {
-    pactl set-sink-volume $SINK $(( $1 * 65536 / 100 ))
+    if [[ $1 =~ [+-][0-9]+ ]] ; then
+        oldvol="$(getvol)"
+        echo "oldvol $oldvol"
+        delta="$(echo "$1" | cut -c 2-)"
+        echo "delta $delta"
+        if [[ "$(echo "$1" | cut -c 1)" == "+" ]] ; then
+            echo "+"
+            newvol=$(( $oldvol + $delta ))
+        else
+            echo "-"
+            newvol=$(( $oldvol - $delta ))
+        fi
+        echo "newvol $newvol"
+    else
+        newvol="$1"
+    fi
+    pactl set-sink-volume $SINK $(( $newvol * 65536 / 100 ))
 }
 
 ismuted() {
@@ -57,15 +73,19 @@ case "$1" in
         else
             setvol "$2"
         fi
+        hook="$3"
         ;;
     "mute")
         mute
+        hook="$2"
         ;;
     "unmute")
         unmute
+        hook="$2"
         ;;
     "mute-toggle")
         mute-toggle
+        hook="$2"
         ;;
     "is-muted")
         echo $(ismuted)
@@ -74,6 +94,11 @@ case "$1" in
         echo $(status)
         ;;
     *)
-        echo "wrong usage"
+        usage
         ;;
 esac
+
+if [[ -n "$hook" ]] ; then
+    echo "volume changed, executing hook: $hook"
+    $hook
+fi

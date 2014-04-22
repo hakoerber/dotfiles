@@ -45,6 +45,7 @@ p7zip
 thunar
 thunar-archive-plugin
 thunar-media-tags-plugin
+ranger
 # taskbars / docks
 docky
 conky
