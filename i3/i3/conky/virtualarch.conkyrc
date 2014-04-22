@@ -16,8 +16,26 @@ update_interval_on_battery 1.0
 #use_spacer left
 
 TEXT
-[
-{ "full_text" : " " }, \
+[\
+{ "full_text" : "\
+${if_running mpd}\
+${if_mpd_playing}\
+${if_match "${mpd_status}" == "Paused"}\
+\
+${else}\
+\
+${endif}\
+   ${mpd_artist} - ${mpd_title} ${mpd_elapsed}/${mpd_length}\
+${else}\
+   stopped\
+${endif}\
+${else}\
+   down\
+${endif}\
+ " , "name" : "mpd" },\
+\
+\
+\
 ${if_existing /sys/class/net/wlp2s0}\
 { "full_text" : "      \
 ${if_up wlp2s0}\
@@ -45,11 +63,11 @@ ${endif}\
 ${else}\#FF0000\
 ${endif}\
 " , "name" : "wireless" },\
-${endif}
+${endif}\
 \
 \
 \
-${if_existing /sys/class/net/enp0s3}
+${if_existing /sys/class/net/enp0s3}\
 { "full_text" : " \
 enp0s3: \
 ${if_up enp0s3}\
@@ -65,11 +83,11 @@ ${endif}\
 ${else}\#FF0000\
 ${endif}\
 " },\
-${endif}
+${endif}\
 \
 \
 \
-${if_existing /sys/class/net/enp1s0}
+${if_existing /sys/class/net/enp1s0}\
 { "full_text" : " \
 enp1s0: \
 ${if_up enp1s0}\
@@ -85,11 +103,11 @@ ${endif}\
 ${else}\#FF0000\
 ${endif}\
 " },\
-${endif}
+${endif}\
 \
 \
 \
-${if_existing /sys/class/net/eth0}
+${if_existing /sys/class/net/eth0}\
 { "full_text" : " \
 eth0: \
 ${if_up eth0}\
@@ -105,17 +123,17 @@ ${endif}\
 ${else}\#FF0000\
 ${endif}\
 " },\
-${endif}
+${endif}\
 \
 \
 \
 { "full_text" : "     \
-${pre_exec bash $HOME/.i3/scripts/pa-volume.bash status} " , "color" : "\#FFFFFF" , "name" : "volume" },\
+${texeci 3600 bash $HOME/.i3/scripts/pa-volume.bash status} " , "color" : "\#FFFFFF" , "name" : "volume" },\
 \
 \
 \
 ${if_existing /sys/class/power_supply/BAT1}\
-${execi 10 bash $HOME/.i3/scripts/status.d/battery.bash conky}\
+${texeci 10 bash $HOME/.i3/scripts/status.d/battery.bash conky}\
 ${endif}\
 \
 \
@@ -124,7 +142,7 @@ ${endif}\
 \
 \
 \
-{ "full_text" : "     ${execi 60 bash ~/.i3/scripts/status.d/conky_pacman.bash} " , "color" : "\#FFFFFF" , "name" : "pacman" },\
+{ "full_text" : "     ${texeci 60 bash ~/.i3/scripts/status.d/conky_pacman.bash} " , "color" : "\#FFFFFF" , "name" : "pacman" },\
 \
 \
 \

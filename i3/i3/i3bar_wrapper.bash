@@ -10,12 +10,12 @@ X_MAX=1920
 # paths to scripts used.
 PA_VOLUME_SCRIPT="$HOME/.i3/scripts/pa-volume.bash"
 I3BAR_UPDATE="$HOME/.i3/scripts/update-status.bash"
-LOGFILE="$HOME/.i3/logs/output_i3bar.log"
+LOGFILE="$LOGDIR/i3/i3log_wrapper.log"
 SCRIPTS_SYSINFO="$HOME/.i3/scripts/status.d/sysinfo.bash"
 SCRIPTS_WIRELESS="$HOME/.i3/scripts/status.d/wireless.bash"
 SCRIPTS_BATTERY="$HOME/.i3/scripts/status.d/battery.bash"
 SCRIPTS_PACMAN="$HOME/.i3/scripts/status.d/pacman.bash"
-PIDFILE="$HOME/.i3/logs/conky.pid"
+PIDFILE="$LOGDIR/i3/conky.pid"
 
 COLOR_FG="#FFFFFF"
 COLOR_BG="#222222"
@@ -25,11 +25,14 @@ YAD_PREFIX="GTK2_RC_FILES=$GTK_THEME"
 
 FONT="DejaVu Sans Mono 11"
 
+mkdir -p "$(dirname $LOGFILE)"
 echo > "$LOGFILE"
 
 log() {
-    echo $* >> "$LOGFILE"
+    echo "[$(date +%FT%T)] $*" >> "$LOGFILE"
 }
+
+log "START"
 
 update() {
     bash $I3BAR_UPDATE
@@ -73,12 +76,16 @@ while read line ; do
     # to i3bar and crash it due to wrong formatting.
 
     log "line: $line"
+    [[ "$line" == "[" ]] && continue
 
     name="$(getval "$line" "name")"
     log "name: $name"
 
     case "$name" in
 
+    "mpd")
+        mpc toggle 1>/dev/null 2>%1
+        ;;
     "pacman")
         width=500
         height=700
@@ -198,4 +205,3 @@ while read line ; do
     esac
 
 done
-

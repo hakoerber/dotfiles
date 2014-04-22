@@ -28,7 +28,10 @@ rxtotal=$(echo "$vnstat_output" | grep "^totalrx;" | cut -d ";" -f 2)
 vnstat_created="$(date --date=@$(echo "$vnstat_output" | grep "^created;" | cut -d ";" -f 2) "$TIMEFORMAT")"
 vnstat_last_update="$(date --date=@$(echo "$vnstat_output" | grep "^updated;" | cut -d ";" -f 2) "$TIMEFORMAT")"
 
-echo "Interface $INTERFACE:"
+txhour=$(( $txhour / 1024 ))
+rxhour=$(( $rxhour / 1024 ))
+
+echo -e "Interface $INTERFACE:\n"
 (
 echo "IP:|$ip"
 echo "ESSID:|$essid"
@@ -39,17 +42,14 @@ echo "Quality:|$qual"
 echo "Signal level:|$lvl dBm"
 echo "Bitrate:|$rate Mb/s"
 ) | columnize
-echo ""
-echo "Usage:"
+echo -e "\nUsage:\n"
 (
-echo "Hourly up:|${txhour} KiB"
-echo "Hourly down:|${rxhour} KiB"
-echo "Daily up:|${txtoday} MiB"
-echo "Daily down:|${rxtoday} MiB"
-echo "Total up:|${txtotal} MiB"
-echo "Total down:|${rxtotal} MiB"
+echo "Hourly up:|${txhour}|MiB"
+echo "Hourly down:|${rxhour}|MiB"
+echo "Daily up:|${txtoday}|MiB"
+echo "Daily down:|${rxtoday}|MiB"
+echo "Total up:|${txtotal}|MiB"
+echo "Total down:|${rxtotal}|MiB"
 echo ""
-echo "Database created at:|$vnstat_created"
-echo "Last update at:|$vnstat_last_update"
 ) | columnize
-
+echo -e "\nLast update at: $vnstat_last_update"
