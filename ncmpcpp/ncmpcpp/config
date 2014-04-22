@@ -20,7 +20,7 @@ ncmpcpp_directory = "~/.ncmpcpp"
 ## (eg. ncmpc) also use that location.
 ##
 #
-lyrics_directory = "~/.lyrics"
+lyrics_directory = "~/music/lyrics"
 #
 ##### connection settings #####
 #
@@ -30,7 +30,7 @@ mpd_host = "localhost"
 #
 mpd_port = "6600"
 #
-mpd_music_dir = "~/Musik"
+mpd_music_dir = "~/music/library"
 #
 #mpd_connection_timeout = "5"
 #
@@ -254,7 +254,7 @@ mpd_music_dir = "~/Musik"
 ##   not available.
 ##
 #
-#song_columns_list_format = "(7f)[green]{l} (25)[cyan]{A} (40)[]{t|f} (30)[red]{b}"
+#song_columns_list_format = "(7f)[green]{l} (25)[cyan]{a} (40)[]{t|f} (30)[red]{b}"
 #
 ##### various settings #####
 #
@@ -301,7 +301,7 @@ mpd_music_dir = "~/Musik"
 #
 #user_interface = "classic" (classic/alternative)
 #
-media_library_left_column = "A" (possible values: a,y,g,c,p, legend above)
+#media_library_left_column = "a" (possible values: a,y,g,c,p, legend above)
 #
 #default_find_mode = "wrapped" (wrapped/normal)
 #
@@ -409,7 +409,7 @@ media_library_left_column = "A" (possible values: a,y,g,c,p, legend above)
 #
 #block_search_constraints_change_if_items_found = "yes"
 #
-mouse_support = "yes"
+#mouse_support = "yes"
 #
 #mouse_list_scroll_whole_page = "yes"
 #
@@ -437,7 +437,7 @@ mouse_support = "yes"
 ##       in database and local one for searching in current playlist)
 ##
 #
-search_engine_default_search_mode = "2"
+#search_engine_default_search_mode = "1"
 #
 ##
 ## Note: Below variables can allow you to physically
@@ -445,18 +445,17 @@ search_engine_default_search_mode = "2"
 ## ncmpcpp's browser screen.
 ##
 #
-allow_physical_files_deletion = "no"
+#allow_physical_files_deletion = "no"
 #
-allow_physical_directories_deletion = "no"
+#allow_physical_directories_deletion = "no"
 #
-external_editor = "vim"
+#external_editor = ""
 #
-# set to yes, if your editor is console app
-use_console_editor = "yes"
+#use_console_editor = "no" (set to yes, if your editor is console app)
 #
 ##### colors definitions #####
 #
-colors_enabled = "yes"
+#colors_enabled = "yes"
 #
 #empty_tag_color = "cyan"
 #
