@@ -4,8 +4,10 @@
 # creating nice output if you click on the status bar
 # what i done depends on the first paramter
 
-PATH_WARN_1="$HOME/.i3/logs/batwarn1"
-PATH_WARN_2="$HOME/.i3/logs/batwarn2"
+[[ ! -d "$LOGDIR/batwarn" ]] && mkdir -p "$LOGDIR/batwarn"
+
+PATH_WARN_1="$LOGDIR/batwarn/batwarn1"
+PATH_WARN_2="$LOGDIR/batwarn/batwarn2"
 
 THRESHOLD1=25
 THRESHOLD2=5
@@ -51,12 +53,12 @@ conky() {
         if threshold2 ; then
             if [[ ! -f "$PATH_WARN_2" ]] ; then
                 echo > "$PATH_WARN_2"
-                notify-send --icon dialog-warning "Battery below 5%"
+                notify-send --icon dialog-warning "Battery below ${THRESHOLD2}%"
             fi
         elif threshold1 ; then
             if [[ ! -f "$PATH_WARN_1" ]] ; then
                 echo > "$PATH_WARN_1"
-                notify-send --icon dialog-warning "Battery below 25%"
+                notify-send --icon dialog-warning "Battery below ${THRESHOLD1}%"
             fi
         fi
     fi
