@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
+# Possible options:
+# --dry-run -n : only show what would be done without doing anything
 
 # config directory
 config_dir="$HOME/dotfiles/"
 
 mapping_file="$config_dir/MAPPING"
+
+skel_dir="$config_dir/skel/"
 
 # backup directory, files that would otherwise be overwritten go there
 backup_dir="$HOME/.dotfiles.bak/"
@@ -13,6 +17,22 @@ backup_dir="$HOME/.dotfiles.bak/"
 symlink_folders='git i3 vim zsh conky x mpd ncmpcpp'
 
 MAPPING_SEPARATOR='::'
+
+dryrun=""
+
+while [[ $# -gt 0 ]] ; do
+    case "$1" in
+        -n|--dry-run)
+            echo "dry run"
+            dryrun="yes"
+            ;;
+        *)
+            echo "invalid parameters"
+            exit 1
+            ;;
+    esac
+    shift
+done
 
 path_combine()
 {
@@ -49,14 +69,22 @@ for folder in $symlink_folders ; do
             continue
         elif [[ -e "$destination" ]]; then
             backup_destination="$(path_combine "$backup_dir" "$(basename "$destination")")"
-            [[ -d "$backup_dir" ]] || mkdir -p "$backup_dir"
+            if ! [[ -d "$backup_dir" ]] ; then
+                echo "mkdir -p \"$backup_dir\""
+                [[ $dryrun ]] || mkdir -p "$backup_dir"
+            fi
             echo "mv \"$destination\" -> \"$backup_destination\""
-            mv "$destination" "$backup_destination"
+            [[ $dryrun ]] || mv "$destination" "$backup_destination"
         fi
 
         [[ -e "$destination" ]] && [[ "$(readlink "$destination")" == "$file" ]] && continue
         echo "ln -sf \"$file\" -> \"$destination\""
-        ln -sf "$file" "$destination"
+        [[ $dryrun ]] || ln -sf "$file" "$destination"
     done
 done
 
+# copy everything from the skel directory into $HOME, but do not overwrite anything
+# the /. at the end of source is some cp magic that copies the content of a directory
+# instead of the directory inself
+echo "cp -a --no-clobber \"$skel_dir/.\" \"$HOME\""
+[[ $dryrun ]] || cp -a --no-clobber "$skel_dir/." "$HOME"
