@@ -17,15 +17,22 @@ update_interval_on_battery 1.0
 
 TEXT
 [\
-{ "full_text" : "\
-${if_running mpd}\
 ${if_mpd_playing}\
+{ "full_text" : "\
 ${if_match "${mpd_status}" == "Paused"}\
 \
 ${else}\
 \
 ${endif}\
-   ${mpd_artist} - ${mpd_title} ${mpd_elapsed}/${mpd_length}\
+ - " , "name" : "mpd_toggle" ,"separator" : false , "separator_block_width" : 0 },\
+${endif}\
+\
+\
+\
+{ "full_text" : "\
+${if_running mpd}\
+${if_mpd_playing}\
+${mpd_artist} - ${mpd_title} ${mpd_elapsed}/${mpd_length}\
 ${else}\
    stopped\
 ${endif}\
@@ -128,7 +135,7 @@ ${endif}\
 \
 \
 { "full_text" : "     \
-${texeci 3600 bash $HOME/.i3/scripts/pa-volume.bash status} " , "color" : "\#FFFFFF" , "name" : "volume" },\
+${texeci 5 bash $HOME/.i3/scripts/pa-volume.bash status} " , "color" : "\#FFFFFF" , "name" : "volume" },\
 \
 \
 \

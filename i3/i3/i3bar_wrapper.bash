@@ -25,7 +25,6 @@ YAD_PREFIX="GTK2_RC_FILES=$GTK_THEME"
 
 FONT="DejaVu Sans Mono 11"
 
-mkdir -p "$(dirname $LOGFILE)"
 echo > "$LOGFILE"
 
 log() {
@@ -83,7 +82,7 @@ while read line ; do
 
     case "$name" in
 
-    "mpd")
+    "mpd_toggle")
         mpc toggle 1>/dev/null 2>%1
         ;;
     "pacman")
@@ -200,7 +199,6 @@ while read line ; do
         elif [[ $button == 0 ]] ; then
             bash $PA_VOLUME_SCRIPT set-vol $newvol
         fi
-        update
         ;;
     esac
 
