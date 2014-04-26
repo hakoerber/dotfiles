@@ -11,8 +11,6 @@ DEFAULT_CONF="$CONF_DIR/default"
 
 LOGFILE="$LOGDIR/i3/genconfig.log"
 
-mkdir -p "$(dirname $LOGFILE)"
-
 log() {
     echo "[$(date +%FT%T)] $*" >> "$LOGFILE"
 }

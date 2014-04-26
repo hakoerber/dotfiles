@@ -7,9 +7,7 @@ LOGFILE_MAXSIZE=100000
 
 FALLBACK_COLOR=000000
 
-mkdir -p "$(dirname $LOGFILE)"
 touch "$LOGFILE"
-
 [[ $(stat -c%s "$LOGFILE") -gt $LOGFILE_MAXSIZE ]] && >$LOGFILE
 
 log()
