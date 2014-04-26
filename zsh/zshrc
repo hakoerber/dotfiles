@@ -59,4 +59,105 @@ man() {
 
 [[ $TERM == "urxvt" ]] && export TERM="rxvt-unicode"
 
+### ALIASES
+#
 alias su="su -"
+
+alias ll='ls -AlF'
+alias la='ls -A'
+
+alias ls='ls --group-directories-first --classify --color=auto'
+
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+alias rm='rm -v'
+alias cp='cp -v'
+alias mv='mv -v'
+alias ln='ln -v'
+
+alias du='du -h'
+alias df='df -h'
+
+alias root='sudo -sE'
+
+alias b='cd $OLDPWD'
+
+alias cs="cryptsetup"
+
+alias le_haxxor_1='clear && dmesg | pv -qL $[15 + (RANDOM % 10)]'
+alias le_haxxor_2='clear && hexdump -C /dev/urandom | grep "1e 4c"'
+
+alias YOLO="pacman -Syu --force"
+
+alias such="git"
+alias very="git"
+alias much="git"
+alias wow="git status"
+
+### FUNCTIONS
+
+function mount() {
+    if [[ $# == 0 ]] ; then
+        /usr/bin/env mount | column -t
+    else
+        /usr/bin/env mount $*
+    fi
+}
+
+ff() {
+	find . -type f -iname "*"$*"*" ;
+}
+
+ffcs() {
+	find . -type f -name "*"$*"*" ;
+}
+
+extract()  # Handy Extract Program.
+{
+	if [ -f $1 ] ; then
+		case $1 in
+			*.tar.bz2	)	tar xvjf $1 	;;
+			*.tar.gz	)	tar xvzf $1 	;;
+			*.bz2		)	bunzip2 $1  	;;
+			*.rar		)	unrar x $1  	;;
+			*.gz		)	gunzip $1   	;;
+			*.tar		)	tar xvf $1  	;;
+			*.tbz2		)	tar xvjf $1 	;;
+			*.tgz		)	tar xvzf $1		;;
+			*.zip		)	unzip $1		;;
+			*.Z			)	uncompress $1	;;
+			*.7z		)	7z x $1 		;;
+			*)   echo "$1 cannot be extracted via extract()" ;;
+		esac
+	else
+		echo "$1 is not a valid file"
+	fi
+}
+
+ruler() {
+	for s in '....^....|' '1234567890'; do
+		w=${#s}
+		str=$(for (( i=1; $i<=$(( ($COLUMNS + $w) / $w )) ; i=$i+1 )); do echo -n $s; done )
+		str=$(echo $str | cut -c -$COLUMNS)
+		echo $str
+	done
+}
+
+ckwww() {
+	ping -c 3 www.google.com
+}
+
+topcmds() {
+	history | awk '{print $2}' | awk 'BEGIN {FS="|"}{print $1}' | sort | uniq -c | sort -nr | head
+}
+
+fnottype() {
+	find . -maxdepth 1 ! -type $1
+}
+
+# simple calculator
+c () {
+    echo "$*" | bc -l
+}
