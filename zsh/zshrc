@@ -57,6 +57,20 @@ man() {
         man "$@"
 }
 
+### SHELL OPTIONS
+setopt AUTO_CD
+setopt APPEND_HISTORY
+setopt HIST_IGNORE_DUPS
+setopt NOHIST_IGNORE_ALL_DUPS
+setopt HIST_IGNORE_SPACE
+setopt CORRECT
+setopt RM_STAR_SILENT
+setopt BG_NICE
+setopt CHECK_JOBS
+setopt HUP
+setopt LONG_LIST_JOBS
+
+
 [[ $TERM == "urxvt" ]] && export TERM="rxvt-unicode"
 
 ### ALIASES
