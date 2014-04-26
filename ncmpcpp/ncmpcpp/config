@@ -36,7 +36,8 @@ mpd_music_dir = "~/music/library"
 #
 #mpd_crossfade_time = "5"
 #
-#mpd_communication_mode = "notifications" (polling/notifications)
+#(polling/notifications)
+mpd_communication_mode = "notifications"
 #
 ##### music visualizer #####
 ##
@@ -170,13 +171,13 @@ mpd_music_dir = "~/music/library"
 ## Note: colors can be nested.
 ##
 #
-#song_list_format = "{%a - }{%t}|{$8%f$9}$R{$3(%l)$9}"
+song_list_format = "{%a - }{%t}|{$8%f$9}$R{$3(%l)$9}"
 #
-#song_status_format = "{{%a{ \"%b\"{ (%y)}} - }{%t}}|{%f}"
+song_status_format = "{{%a{ \"%b\"{ (%y)}} - }{%t}}|{%f}"
 #
-#song_library_format = "{%n - }{%t}|{%f}"
+song_library_format = "{%n - }{%t}|{%f}"
 #
-#tag_editor_album_format = "{(%y) }%b"
+tag_editor_album_format = "{(%y) }%b"
 #
 ##
 ## Note: Below variables are for alternative version of user's interface.
@@ -254,7 +255,7 @@ mpd_music_dir = "~/music/library"
 ##   not available.
 ##
 #
-#song_columns_list_format = "(7f)[green]{l} (25)[cyan]{a} (40)[]{t|f} (30)[red]{b}"
+song_columns_list_format = "(7f)[green]{l} (25)[cyan]{a} (40)[]{t|f} (30)[red]{b}"
 #
 ##### various settings #####
 #
@@ -273,19 +274,19 @@ mpd_music_dir = "~/music/library"
 #
 #playlist_separate_albums = "no"
 #
-#playlist_display_mode = "classic" (classic/columns)
+playlist_display_mode = "columns" (classic/columns)
 #
-#browser_display_mode = "classic" (classic/columns)
+browser_display_mode = "columns" (classic/columns)
 #
-#search_engine_display_mode = "classic" (classic/columns)
+search_engine_display_mode = "columns" (classic/columns)
 #
-#playlist_editor_display_mode = "classic" (classic/columns)
+playlist_editor_display_mode = "columns" (classic/columns)
 #
 #discard_colors_if_item_is_selected = "yes"
 #
-#incremental_seeking = "yes"
+incremental_seeking = "yes"
 #
-#seek_time = "1"
+seek_time = "1"
 #
 #autocenter_mode = "no"
 #
@@ -295,13 +296,13 @@ mpd_music_dir = "~/music/library"
 ## Note: You can specify third character which will
 ## be used to build 'empty' part of progressbar.
 ##
-#progressbar_look = "=>"
+progressbar_look = "=="
 #
-#default_place_to_search_in = "database" (database/playlist)
+default_place_to_search_in = "database" (database/playlist)
 #
-#user_interface = "classic" (classic/alternative)
+user_interface = "alternative" (classic/alternative)
 #
-#media_library_left_column = "a" (possible values: a,y,g,c,p, legend above)
+media_library_left_column = "A" (possible values: a,y,g,c,p, legend above)
 #
 #default_find_mode = "wrapped" (wrapped/normal)
 #
@@ -311,9 +312,9 @@ mpd_music_dir = "~/music/library"
 #
 #default_tag_editor_pattern = "%n - %t"
 #
-#header_visibility = "yes"
+header_visibility = "yes"
 #
-#statusbar_visibility = "yes"
+statusbar_visibility = "yes"
 #
 #titles_visibility = "yes"
 #
@@ -392,11 +393,11 @@ mpd_music_dir = "~/music/library"
 #
 #clock_display_seconds = "no"
 #
-#display_volume_level = "yes"
+display_volume_level = "yes"
 #
-#display_bitrate = "no"
+display_bitrate = "no"
 #
-#display_remaining_time = "no"
+display_remaining_time = "no"
 #
 #regular_expressions = "basic" (basic/extended)
 #
@@ -405,15 +406,15 @@ mpd_music_dir = "~/music/library"
 ## "The" word while sorting items in browser, tags in
 ## media library, etc.
 ##
-#ignore_leading_the = "no"
+ignore_leading_the = "yes"
 #
 #block_search_constraints_change_if_items_found = "yes"
 #
-#mouse_support = "yes"
+mouse_support = "yes"
 #
-#mouse_list_scroll_whole_page = "yes"
+mouse_list_scroll_whole_page = "yes"
 #
-#empty_tag_marker = "<empty>"
+empty_tag_marker = "[empty]"
 #
 #tag_editor_extended_numeration = "no"
 #
@@ -437,7 +438,7 @@ mpd_music_dir = "~/music/library"
 ##       in database and local one for searching in current playlist)
 ##
 #
-#search_engine_default_search_mode = "1"
+search_engine_default_search_mode = "1"
 #
 ##
 ## Note: Below variables can allow you to physically
@@ -445,17 +446,17 @@ mpd_music_dir = "~/music/library"
 ## ncmpcpp's browser screen.
 ##
 #
-#allow_physical_files_deletion = "no"
+allow_physical_files_deletion = "no"
 #
-#allow_physical_directories_deletion = "no"
+allow_physical_directories_deletion = "no"
 #
-#external_editor = ""
+external_editor = "vim"
 #
-#use_console_editor = "no" (set to yes, if your editor is console app)
+use_console_editor = "yes" (set to yes, if your editor is console app)
 #
 ##### colors definitions #####
 #
-#colors_enabled = "yes"
+colors_enabled = "yes"
 #
 #empty_tag_color = "cyan"
 #
