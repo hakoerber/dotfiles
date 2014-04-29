@@ -277,9 +277,6 @@
     # 500 ms
     force_display_urgency_hint 500 ms
 
-    # font for window titles. ISO 10646 = Unicode
-    font pango:DejaVu Sans Mono 11
-
     # Use Mouse+$mod to drag floating windows to their wanted position
     floating_modifier $mod
 
