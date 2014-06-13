@@ -8,12 +8,15 @@
     ignore-changes = "update-index --assume-unchangend"
     unignore-changes = "update-index --no-assume-unchanged"    
     visual = "!gitk"
+    staged = "diff --staged"
 
     co = "checkout"
     ci = "commit"
     st = "status"
     br = "branch"
     rb = "rebase"
+    df = "diff"
+
 
     last = "log -1 HEAD"
 [core]
