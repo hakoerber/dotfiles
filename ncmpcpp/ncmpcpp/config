@@ -59,9 +59,9 @@ mpd_communication_mode = "notifications"
 ## If you set format to 44100:16:2, make it 'yes'.
 ##
 #
-#visualizer_in_stereo = "no"
+visualizer_in_stereo = "no"
 #
-#visualizer_fifo_path = ""
+visualizer_fifo_path = "/tmp/mpd.fifo"
 #
 ##
 ## Note: Below parameter is needed for ncmpcpp
@@ -71,7 +71,7 @@ mpd_communication_mode = "notifications"
 ## are some problems with it.
 ##
 #
-#visualizer_output_name = ""
+visualizer_output_name = "mpd_fifo"
 #
 ##
 ## Note: Below parameter defines how often ncmpcpp
@@ -81,16 +81,16 @@ mpd_communication_mode = "notifications"
 ## Keep in mind that sane values start with >=10.
 ##
 #
-#visualizer_sync_interval = "30"
+visualizer_sync_interval = "30"
 #
 ##
 ## Note: To enable spectrum frequency visualization
 ## you need to compile ncmpcpp with fftw3 support.
 ##
 #
-#visualizer_type = "wave" (spectrum/wave)
+visualizer_type = "spectrum" (spectrum/wave)
 #
-#visualizer_look = "◆│"
+visualizer_look = "◆│"
 #
 ##### system encoding #####
 ##
@@ -173,11 +173,11 @@ mpd_communication_mode = "notifications"
 #
 song_list_format = "{%a - }{%t}|{$8%f$9}$R{$3(%l)$9}"
 #
-song_status_format = "{{%a{ \"%b\"{ (%y)}} - }{%t}}|{%f}"
+#song_status_format = "{{%a{ \"%b\"{ (%y)}} - }{%t}}|{%f}"
 #
-song_library_format = "{%n - }{%t}|{%f}"
+#song_library_format = "{%n - }{%t}|{%f}"
 #
-tag_editor_album_format = "{(%y) }%b"
+#tag_editor_album_format = "{(%y) }%b"
 #
 ##
 ## Note: Below variables are for alternative version of user's interface.
@@ -255,7 +255,7 @@ tag_editor_album_format = "{(%y) }%b"
 ##   not available.
 ##
 #
-song_columns_list_format = "(7f)[green]{l} (25)[cyan]{a} (40)[]{t|f} (30)[red]{b}"
+#song_columns_list_format = "(7f)[green]{l} (25)[cyan]{a} (40)[]{t|f} (30)[red]{b}"
 #
 ##### various settings #####
 #
@@ -274,19 +274,19 @@ song_columns_list_format = "(7f)[green]{l} (25)[cyan]{a} (40)[]{t|f} (30)[red]{b
 #
 #playlist_separate_albums = "no"
 #
-playlist_display_mode = "columns" (classic/columns)
+#playlist_display_mode = "classic" (classic/columns)
 #
-browser_display_mode = "columns" (classic/columns)
+#browser_display_mode = "classic" (classic/columns)
 #
-search_engine_display_mode = "columns" (classic/columns)
+#search_engine_display_mode = "classic" (classic/columns)
 #
-playlist_editor_display_mode = "columns" (classic/columns)
+#playlist_editor_display_mode = "classic" (classic/columns)
 #
 #discard_colors_if_item_is_selected = "yes"
 #
-incremental_seeking = "yes"
+#incremental_seeking = "yes"
 #
-seek_time = "1"
+#seek_time = "1"
 #
 #autocenter_mode = "no"
 #
@@ -298,11 +298,11 @@ seek_time = "1"
 ##
 progressbar_look = "=="
 #
-default_place_to_search_in = "database" (database/playlist)
+#default_place_to_search_in = "database" (database/playlist)
 #
-user_interface = "alternative" (classic/alternative)
+#user_interface = "classic" (classic/alternative)
 #
-media_library_left_column = "A" (possible values: a,y,g,c,p, legend above)
+#media_library_left_column = "a" (possible values: a,y,g,c,p, legend above)
 #
 #default_find_mode = "wrapped" (wrapped/normal)
 #
@@ -312,9 +312,9 @@ media_library_left_column = "A" (possible values: a,y,g,c,p, legend above)
 #
 #default_tag_editor_pattern = "%n - %t"
 #
-header_visibility = "yes"
+#header_visibility = "yes"
 #
-statusbar_visibility = "yes"
+#statusbar_visibility = "yes"
 #
 #titles_visibility = "yes"
 #
@@ -393,11 +393,11 @@ statusbar_visibility = "yes"
 #
 #clock_display_seconds = "no"
 #
-display_volume_level = "yes"
+#display_volume_level = "yes"
 #
-display_bitrate = "no"
+#display_bitrate = "no"
 #
-display_remaining_time = "no"
+#display_remaining_time = "no"
 #
 #regular_expressions = "basic" (basic/extended)
 #
@@ -406,15 +406,15 @@ display_remaining_time = "no"
 ## "The" word while sorting items in browser, tags in
 ## media library, etc.
 ##
-ignore_leading_the = "yes"
+#ignore_leading_the = "no"
 #
 #block_search_constraints_change_if_items_found = "yes"
 #
-mouse_support = "yes"
+#mouse_support = "yes"
 #
-mouse_list_scroll_whole_page = "yes"
+#mouse_list_scroll_whole_page = "yes"
 #
-empty_tag_marker = "[empty]"
+#empty_tag_marker = "<empty>"
 #
 #tag_editor_extended_numeration = "no"
 #
@@ -438,7 +438,7 @@ empty_tag_marker = "[empty]"
 ##       in database and local one for searching in current playlist)
 ##
 #
-search_engine_default_search_mode = "1"
+#search_engine_default_search_mode = "1"
 #
 ##
 ## Note: Below variables can allow you to physically
@@ -446,17 +446,17 @@ search_engine_default_search_mode = "1"
 ## ncmpcpp's browser screen.
 ##
 #
-allow_physical_files_deletion = "no"
+#allow_physical_files_deletion = "no"
 #
-allow_physical_directories_deletion = "no"
+#allow_physical_directories_deletion = "no"
 #
-external_editor = "vim"
+#external_editor = ""
 #
-use_console_editor = "yes" (set to yes, if your editor is console app)
+#use_console_editor = "no" (set to yes, if your editor is console app)
 #
 ##### colors definitions #####
 #
-colors_enabled = "yes"
+#colors_enabled = "yes"
 #
 #empty_tag_color = "cyan"
 #

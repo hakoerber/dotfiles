@@ -253,8 +253,8 @@
     workspace_layout default
 
     # Draw normal borders around all windows with 1-pixel borders
-    new_window normal 1
-    new_float normal 3
+    new_window 1pixel
+    new_float normal 1
 
     # Do show borders at the screen edges
     hide_edge_borders none
@@ -301,9 +301,9 @@ client.urgent           #2f343a #900000 #ffffff #900000
     for_window [class="^Xfce4-notifyd$"] floating enable , border none
     for_window [class="^Conky$"] floating enable
     for_window [class="^Terminator$"] border 1pixel
-    for_window [class="^Firefox$"] border 1pixel
+    for_window [class="^Firefox$"] border none
     for_window [class="^Truecrypt$"] floating enable
-    for_window [class="^URxvt$"] border 1pixel
+    for_window [class="^URxvt$"] border none
     for_window [class="^Cairo-dock$"] floating enable , border none
     for_window [class="^Pavucontrol$"] floating enable
     for_window [title="^Skype.*for Linux$" ] floating enable , border none
@@ -312,7 +312,13 @@ client.urgent           #2f343a #900000 #ffffff #900000
     for_window [class="^Docky$" ] floating enable , border none
     for_window [class="^Skype$" ] border 1pixel
     for_window [class="^Steam$" ] border 1pixel
+    for_window [class="^Eclipse$" ] border none
     #for_window [class="^Steam$" title="^Friends$" ] border 1pixel , floating enable , floating_maximum_size 200 x 700
     #for_window [class="^Steam$" title="Chat$" ] border 1pixel , floating enable
+    for_window [class="^sublime-text$" ] border none
+    for_window [class="^Evince$" ] border none
+    for_window [class="^Designer$" ] border none
+    for_window [class="^main\.py$" ] floating enable
+
 
 
