@@ -25,6 +25,24 @@ fi
 
 export LANG=en_US.UTF-8
 
+start_wm() {
+    log "generating i3 config"
+    I3_LOG="$LOGDIR/i3/i3.log"
+    I3_LOGOLD="${I3_LOG}.old"
+
+    # simple logrotate so we can still get info about the last session
+    if [[ -f "$I3_LOG" ]] ; then
+        log "moving old i3 log at $I3_LOG to $I3_LOGOLD"
+        mv -f "$I3_LOG" "$I3_LOGOLD"
+    fi
+
+    [[ ! -d "$(dirname $I3_LOG)" ]] && mkdir -p "$(dirname $I3_LOG)"
+    SESSION_CONF=$(bash "$HOME/.i3/scripts/genconfig.bash")
+    log "generated, starting i3"
+    exec i3 -c "$SESSION_CONF" >> "$LOGDIR/i3/i3.log"
+}
+
+
 # keyboard options
 keyboard_layout=de
 keyboard_variant=nodeadkeys
@@ -45,18 +63,26 @@ redshift_colortemp="5500:4000"
 # start mpd
 if [[ -z "$(pgrep --euid hannes --exact "^mpd$")" ]] ; then
     log "mpd is not running, starting mpd"
-    mpd "$HOME/.mpd/mpd.conf"
+    mpd "$HOME/.mpd/mpd.conf" &
 else
     log "mpd already running, will not start another instance"
 fi
 
+## start the urxvt daemon
+#if pidof urxvtd &>/dev/null ; then
+#    log "urxvtd already running"
+#else
+#    log "starting urxvtd"
+#    urxvtd -q --fork
+#fi
+
 # start the pulseaudio volume control tray applet
 log "starting pasystray"
-pasystray &
+pasystray & &> $LOGFILE
 
 # start dropbox
 log "starting dropboxd"
-dropboxd &
+dropboxd & &> $LOGFILE
 
 # start the wallpaper changer
 log "starting $path_wallchanger"
@@ -64,48 +90,33 @@ $path_wallchanger "$wallpaper_directory" "$wallpaper_interval" "$wallpaper_fallb
 
 # start redshift
 log "starting redshift-gtk"
-redshift-gtk -l "$redshift_lat_long" -t "$redshift_colortemp" &
+redshift-gtk -l "$redshift_lat_long" -t "$redshift_colortemp" & &> $LOGFILE
+# not it
 
 # set keyboard layout
 log "setting keyboard layout"
-setxkbmap -layout "$keyboard_layout" -variant "$keyboard_variant" &
+setxkbmap -layout "$keyboard_layout" -variant "$keyboard_variant" & &> $LOGFILE
 
 # set key repeat delay
 log "setting key repeat delay"
-xset r rate "$keyboard_repeat_delay" "$keyboard_repeat_speed" &
+xset r rate "$keyboard_repeat_delay" "$keyboard_repeat_speed" & &> $LOGFILE
 
 # execute the host-specific .xinitrc-addition
 hostfile="$HOME/.xinitrc.d/$(hostname).xinitrc"
 log "looking for host specific xinitrc addition at $hostfile"
 if [[ -f "$hostfile" ]] ; then
     log "found it. executing"
-    bash "$hostfile" &
+    bash "$hostfile" & &> $LOGFILE
 else
     log "found none"
 fi
 
 if [[ -f ~/.Xresources ]] ; then
     log "found ~/.Xresources, merging it into xrdb"
-    xrdb -merge ~/.Xresources &
+    xrdb -merge ~/.Xresources & &> $LOGFILE
 else
     log "~/.Xresources not found"
 fi
 
-I3_LOG="$LOGDIR/i3/i3.log"
-I3_LOGOLD="${I3_LOG}.old"
 
-# simple logrotate so we can still get info about the last session
-if [[ -f "$I3_LOG" ]] ; then
-    log "moving old i3 log at $I3_LOG to $I3_LOGOLD"
-    mv -f "$I3_LOG" "$I3_LOGOLD"
-fi
-
-[[ ! -d "$(dirname $I3_LOG)" ]] && mkdir -p "$(dirname $I3_LOG)"
-
-log "generating i3 config"
-
-
-SESSION_CONF=$(bash "$HOME/.i3/scripts/genconfig.bash")
-log "generated, starting i3"
-exec i3 -c "$SESSION_CONF" >> "$LOGDIR/i3/i3.log"
-
+start_wm

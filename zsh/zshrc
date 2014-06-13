@@ -1,50 +1,21 @@
-# Path to your oh-my-zsh configuration.
-ZSH=$HOME/.oh-my-zsh
+source ~/.ohmyzshrc
 
-# Set name of the theme to load.
-# Look in ~/.oh-my-zsh/themes/
-# Optionally, if you set this to "random", it'll load a random theme each
-# time that oh-my-zsh is loaded.
-ZSH_THEME="bira" #robbyrussell"
+#autoload -U promptinit
+#promptinit
+#
+#autoload -U colors
+#colors
+#
+#autoload -U compinit
+#compinit
+#
+#HISTSIZE=10000
+#SAVEHIST=10000
+HISTFILE="$HOME/.zsh_history"
 
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-
-# Set to this to use case-sensitive completion
-CASE_SENSITIVE="true"
-
-# Comment this out to disable bi-weekly auto-update checks
-DISABLE_AUTO_UPDATE="true"
-
-# Uncomment to change how often before auto-updates occur? (in days)
-# export UPDATE_ZSH_DAYS=13
-
-# Uncomment following line if you want to disable colors in ls
-# DISABLE_LS_COLORS="true"
-
-# Uncomment following line if you want to disable autosetting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment following line if you want to disable command autocorrection
-DISABLE_CORRECTION="true"
-
-# Uncomment following line if you want red dots to be displayed while waiting for completion
-# COMPLETION_WAITING_DOTS="true"
-
-# Uncomment following line if you want to disable marking untracked files under
-# VCS as dirty. This makes repository status check for large repositories much,
-# much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-# Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
-# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(git)
-
-source $ZSH/oh-my-zsh.sh
-
-# Customize to your needs...
+#PROMPT="%{$fg[white]%}╭─%{$fg[red]%}%n%{$fg[white]%}@%{$fg[green]%}%M %{$fg[cyan]%}%~
+#%{$fg[white]%}╰─%B$%b "
+#RPROMPT="%{$fg[red]%}%? %{$fg[white]%}%*%{$reset_color%}"
 
 man() {
         env LESS_TERMCAP_mb=$'\E[01;31m' \
@@ -57,7 +28,32 @@ man() {
         man "$@"
 }
 
+### VARIABLES
+export EDITOR="vim"
+export VISUAL="vim"
+
+### BOOKMARKS
+bm() {
+    case "$1" in
+        dev)
+            cd "$HOME/development/projects"
+            ;;
+        dot)
+            cd "$HOME/dotfiles"
+            ;;
+        *)
+            echo "unknown target"
+            ;;
+    esac
+}
+
+
 ### SHELL OPTIONS
+setopt EXTENDED_HISTORY
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_VERIFY
+setopt INC_APPEND_HISTORY
+setopt SHARE_HISTORY
 setopt AUTO_CD
 setopt APPEND_HISTORY
 setopt HIST_IGNORE_DUPS
@@ -74,13 +70,16 @@ setopt LONG_LIST_JOBS
 [[ $TERM == "urxvt" ]] && export TERM="rxvt-unicode"
 
 ### ALIASES
-#
+
 alias su="su -"
+
+LS_HIDE="*.py[co]"
+
+#  --dereference-command-line
+alias ls="ls --group-directories-first --classify --color=auto --hide=\"$LS_HIDE\""
 
 alias ll='ls -AlF'
 alias la='ls -A'
-
-alias ls='ls --group-directories-first --classify --color=auto'
 
 alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
@@ -109,6 +108,10 @@ alias such="git"
 alias very="git"
 alias much="git"
 alias wow="git status"
+
+alias v="vim"
+alias g="grep"
+
 
 ### FUNCTIONS
 
@@ -159,6 +162,12 @@ ruler() {
 	done
 }
 
+addext() {
+    [[ -z "$1" ]] || [[ -z "$2" ]] && { echo "Usage: $0 <file> <extension>" ; return }
+    mv "$1" "$1$2"
+
+}
+
 ckwww() {
 	ping -c 3 www.google.com
 }
@@ -174,4 +183,8 @@ fnottype() {
 # simple calculator
 c () {
     echo "$*" | bc -l
+}
+
+function http() {
+    curl http://httpcode.info/$1
 }

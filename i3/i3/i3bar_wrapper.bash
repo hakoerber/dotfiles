@@ -83,7 +83,7 @@ while read line ; do
     case "$name" in
 
     "mpd_toggle")
-        mpc toggle 1>/dev/null 2>%1
+        mpc toggle 1>/dev/null 2>&1
         ;;
     "pacman")
         width=500

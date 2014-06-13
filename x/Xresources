@@ -2,14 +2,14 @@
 Xcursor.theme: Vanilla-DMZ
 
 URxvt.scrollBar: false
-URxvt.font: xft:DejaVu Sans Mono:size=11
+URxvt.font: xft:DejaVu Sans Mono:size=10.5
 
-URxvt.letterSpace: -2
+URxvt.letterSpace: -1
 
 ! clickable URLs
-!URxvt.perl-ext-common: default,matcher
-!URxvt.urlLauncher: firefox
-!URxvt.matcher.button: 1
+URxvt.perl-ext-common: default,matcher
+URxvt.url-launcher: /usr/bin/chromium
+URxvt.matcher.button: 1
 
 URxvt.intensityStyles: false
 
@@ -17,7 +17,7 @@ URxvt.intensityStyles: false
 
 URxvt.saveLines: 10000
 
-URxvt.fading: 20
+URxvt.fading: 40
 
 URxvt.termName: urxvt
 
@@ -94,4 +94,28 @@ URxvt*color13:                 S_violet
 URxvt*color14:                 S_base1
 URxvt*color15:                 S_base3
 
+
+
+
+
+
+urxvt*foreground: white
+urxvt*background: black
+
+*color0:  #2E3436
+*color1:  #a40000
+*color2:  #4E9A06
+*color3:  #C4A000
+*color4:  #3465A4
+*color5:  #75507B
+*color6:  #ce5c00
+*color7:  #babdb9
+*color8:  #555753
+*color9:  #EF2929
+*color10: #8AE234
+*color11: #FCE94F
+*color12: #729FCF
+*color13: #AD7FA8
+*color14: #fcaf3e
+*color15: #EEEEEC
 

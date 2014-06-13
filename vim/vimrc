@@ -35,6 +35,9 @@ Bundle 'gmarik/vundle'
 " solarized color theme
 Bundle 'altercation/vim-colors-solarized'
 
+" monokai color theme
+Bundle 'sickill/vim-monokai'
+
 " display the undo history in a graph
 Bundle 'mbbill/undotree'
 
@@ -45,10 +48,10 @@ Bundle 'scrooloose/nerdtree'
 Bundle 'tpope/vim-surround'
 
 " better commenting
-Bundle 'scrooloose/nerdcommenter'
+Bundle 'tpope/vim-commentary'
 
 " nice auto completion
-Bundle 'Shougo/neocomplcache.vim'
+Bundle 'Valloric/YouCompleteMe'
 
 " nice text alignment
 Bundle 'godlygeek/tabular'
@@ -63,15 +66,56 @@ Bundle 'tpope/vim-speeddating'
 Bundle 'tpope/vim-fugitive'
 
 " buffer expolorer
-Bundle 'fholgado/minibufexpl.vim'
+"Bundle 'fholgado/minibufexpl.vim'
 
 " shows a code outline
 Bundle 'majutsushi/tagbar'
 
-" automatically enables completion when typing
-Bundle 'vim-scripts/autocomplpop'
+" python specific stuff
+Bundle 'klen/python-mode'
+
+" incremental visual mode
+Bundle 'terryma/vim-expand-region'
+
+" splitting single line code
+Bundle 'AndrewRadev/splitjoin.vim'
+
+" motion to two characters
+Bundle 'justinmk/vim-sneak'
+
+" alignment operator
+Bundle 'tommcdo/vim-lion'
+
+Bundle 'wincent/Command-T'
+
+Bundle 'sjl/gundo.vim'
+
+Bundle 'kien/ctrlp.vim'
+
+Bundle 'PeterRincker/vim-argumentative'
+
+Bundle 'wellle/targets.vim'
+
+Bundle 'Lokaltog/vim-easymotion'
+
+Bundle 'terryma/vim-multiple-cursors'
+
+Bundle 'flazz/vim-colorschemes'
 
 set t_Co=256
+
+" setup for pymode
+let g:pymode_trim_whitespaces = 1
+let g:pymode_lint_on_write = 0
+let g:pymode_lint_unmodified = 0
+let g:pymode_lint_on_fly = 0
+let g:pymoe_rope = 0
+let g:pymode_rope_completion = 0
+"let g:pymode_rope_completion_on_dot = 1
+let g:pymode_rope_goto_definition_cmd = "new"
+let g:pymode_syntax_all = 1
+let g:pymode_options = 1
+
 
 " setup for the solarized color theme
 set background=dark
@@ -80,16 +124,26 @@ let g:solarized_termtrans=1
 let g:solarized_contrast="normal"
 let g:solarized_visibility="normal"
 syntax enable
-colorscheme solarized
+colorscheme monokai
 
 filetype plugin indent on
 
 " setup for vim-airline
-let g:airline_left_sep = '▶'
-let g:airline_right_sep = '◀'
+let g:airline_theme='powerlineish'
+let g:airline_left_sep=''
+let g:airline_right_sep=''
+"let g:airline_section_z=''
+
 " enable tabline at the top showing all buffers
-let g:airline#extensions#tabline#enabled = 1
-"let g:airline_theme=
+"let g:airline#extensions#tabline#enabled = 1
+
+let g:ycm_complete_in_comments = 0
+let g:ycm_complete_in_strings = 1
+let g:ycm_collect_identifiers_from_comments_and_strings = 0 
+let g:ycm_seed_identifiers_with_syntax = 1
+let g:ycm_add_preview_to_completeopt = 1
+let g:ycm_autoclose_preview_window_after_completion = 1 
+let g:ycm_autoclose_preview_window_after_insertion = 1
 
 set colorcolumn=79
 set clipboard=unnamed               " enable copying into the clipboard
@@ -222,15 +276,35 @@ set colorcolumn=80                  " highlight the 80st column
 "set list                            " show specific spectial characters
 "set listchars=                      " no trailing whitespace as '~'
 
-let mapleader = ","
+let mapleader = "\<Space>"
+nnoremap <Leader>w :w<CR>
+
+vmap <Leader>y "+y
+vmap <Leader>d "+d
+nmap <Leader>p "+p
+nmap <Leader>P "+P
+vmap <Leader>p "+p
+vmap <Leader>P "+P
+
+nmap <Leader><Leader> za
+
+map , :
+
+vmap v <Plug>(expand_region_expand)
+vmap <C-v> <Plug>(expand_region_shrink)
+
+vnoremap <silent> y y`]
+vnoremap <silent> p p`]
+nnoremap <silent> p p`]
+
 
 " enable 'very-magic' in regex
-nnoremap / /\v
-vnoremap / /\v
+"nnoremap / /\v
+"vnoremap / /\v
 
-nnoremap <leader><space> :nohlsearch<CR>
-nnoremap <tab> %
-vnoremap <tab> %
+nnoremap <leader>, :nohlsearch<CR>
+
+noremap gV `[v`]
 
 " make Y behave like other capitals, otherwise Y would work like yy
 nnoremap Y y$
@@ -238,25 +312,26 @@ nnoremap Y y$
 nnoremap j gj
 nnoremap k gk
 
-function! TrimWhiteSpace()
-     %s/\s\+$//e
-     endfunction
+"function! TrimWhiteSpace()
+"     %s/\s\+$//e
+"endfunction
 
 " automatically reload .vimrc when it's saved
 autocmd BufWritePost .vimrc source ~/.vimrc
 
-autocmd FileWritePre    * :call TrimWhiteSpace()
-autocmd FileAppendPre   * :call TrimWhiteSpace()
-autocmd FilterWritePre  * :call TrimWhiteSpace()
-autocmd BufWritePre     * :call TrimWhiteSpace()
+"autocmd FileWritePre    * :call TrimWhiteSpace()
+"autocmd FileAppendPre   * :call TrimWhiteSpace()
+"autocmd FilterWritePre  * :call TrimWhiteSpace()
+"autocmd BufWritePre     * :call TrimWhiteSpace()
 
 " Start NERDTree when starting vim
 "autocmd vimenter * NERDTree
 "autocmd VimEnter * wincmd p
+let NERDTreeQuitOnOpen = 1
 " close NERDTree when it's the only window left
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
+"autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
 
-call togglebg#map("<F5>")
+"call togglebg#map("<F5>")
 
 nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
@@ -264,9 +339,34 @@ nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
 
 nnoremap <F3> :NERDTreeToggle<CR>
+nnoremap <F4> :TagbarToggle<CR>
 
-map <F4> :MBEToggle<CR>
 
 " Autosave views when closing and restoring when opening again.
 autocmd BufWinLeave *.* mkview
 autocmd BufWinEnter *.* silent loadview
+
+":inoremap <expr> <CR> pumvisible() ? '<C-e><CR>' : '<CR>'
+
+":au WinEnter * :setlocal number relativenumber
+":au WinLeave * :setlocal nonumber norelativenumber
+
+nnoremap <up>    <nop>
+nnoremap <down>  <nop>
+nnoremap <left>  <nop>
+nnoremap <right> <nop>
+inoremap <up>    <nop>
+inoremap <down>  <nop>
+inoremap <left>  <nop>
+inoremap <right> <nop>
+
+inoremap jj <ESC>
+
+nnoremap <leader>v <C-w>v<C-w>l
+
+" no more ex mode
+nnoremap Q <nop>
+
+nnoremap <leader>r :%s///<Left><Left>
+
+set virtualedit="onemore,all"
