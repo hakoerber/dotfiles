@@ -1,21 +1,19 @@
-source ~/.ohmyzshrc
+autoload -U promptinit
+promptinit
 
-#autoload -U promptinit
-#promptinit
-#
-#autoload -U colors
-#colors
-#
-#autoload -U compinit
-#compinit
-#
-#HISTSIZE=10000
-#SAVEHIST=10000
+autoload -U colors
+colors
+
+autoload -U compinit
+compinit
+
+HISTSIZE=10000
+SAVEHIST=10000
 HISTFILE="$HOME/.zsh_history"
 
-#PROMPT="%{$fg[white]%}╭─%{$fg[red]%}%n%{$fg[white]%}@%{$fg[green]%}%M %{$fg[cyan]%}%~
-#%{$fg[white]%}╰─%B$%b "
-#RPROMPT="%{$fg[red]%}%? %{$fg[white]%}%*%{$reset_color%}"
+PROMPT="%{$fg[white]%}╭─%{$fg[green]%}%M %{$fg[red]%}▶ %{$fg[yellow]%}%~
+%{$fg[white]%}╰─%B$%b "
+RPROMPT="%{$fg[red]%}%? %{$fg[white]%}%*%{$reset_color%}"
 
 man() {
         env LESS_TERMCAP_mb=$'\E[01;31m' \
@@ -66,6 +64,8 @@ setopt CHECK_JOBS
 setopt HUP
 setopt LONG_LIST_JOBS
 
+bindkey -e
+
 
 [[ $TERM == "urxvt" ]] && export TERM="rxvt-unicode"
 
@@ -112,8 +112,15 @@ alias wow="git status"
 alias v="vim"
 alias g="grep"
 
+# rebase the current branch onto WTF ARE YOU DOING YOU ARE DRUNNK TO GO BED
+##alias rebase="git rebase -i $(git branch --contains HEAD | grep -v '\*.*' | head -1)"
+
 
 ### FUNCTIONS
+
+function cd() {
+    builtin cd $* && ls
+}
 
 function mount() {
     if [[ $# == 0 ]] ; then

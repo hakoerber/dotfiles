@@ -370,3 +370,5 @@ nnoremap Q <nop>
 nnoremap <leader>r :%s///<Left><Left>
 
 set virtualedit="onemore,all"
+
+autocmd BufWritePre *.rst silent :%s/\s\+$//e
