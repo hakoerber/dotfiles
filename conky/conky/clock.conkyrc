@@ -30,7 +30,7 @@ alignment middle_right
 
 # gap between window and screen borders
 gap_x 100
-gap_y 0
+gap_y 60
 
 # do not fork to the background after startup
 background no
