@@ -181,7 +181,7 @@
 
     ### START APPLICATIONS #####################################################
 
-    bindsym $mod+d exec i3-dmenu-desktop --dmenu="dmenu -b -i -l 10 -p '>'"
+    bindsym $mod+d exec j4-dmenu-desktop --dmenu="dmenu -b -i -l 10 -p '>'"
     bindsym $mod+Return exec $terminal
     bindsym $mod+F1 exec firefox
 
@@ -303,7 +303,7 @@ client.urgent           #2f343a #900000 #ffffff #900000
     for_window [class="^Terminator$"] border 1pixel
     for_window [class="^Firefox$"] border none
     for_window [class="^Truecrypt$"] floating enable
-    for_window [class="^URxvt$"] border none
+    for_window [class="^URxvt$"] border 1pixel
     for_window [class="^Cairo-dock$"] floating enable , border none
     for_window [class="^Pavucontrol$"] floating enable
     for_window [title="^Skype.*for Linux$" ] floating enable , border none
@@ -311,7 +311,7 @@ client.urgent           #2f343a #900000 #ffffff #900000
     for_window [class="^yad-status$" ] floating enable , border none
     for_window [class="^Docky$" ] floating enable , border none
     for_window [class="^Skype$" ] border 1pixel
-    for_window [class="^Steam$" ] border 1pixel
+    for_window [class="^Steam$" ] border none
     for_window [class="^Eclipse$" ] border none
     #for_window [class="^Steam$" title="^Friends$" ] border 1pixel , floating enable , floating_maximum_size 200 x 700
     #for_window [class="^Steam$" title="Chat$" ] border 1pixel , floating enable
@@ -319,6 +319,7 @@ client.urgent           #2f343a #900000 #ffffff #900000
     for_window [class="^Evince$" ] border none
     for_window [class="^Designer$" ] border none
     for_window [class="^main\.py$" ] floating enable
+    for_window [class="^Xfce4-panel$"] floating enable
 
 
 

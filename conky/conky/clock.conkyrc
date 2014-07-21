@@ -28,6 +28,10 @@
 
 alignment middle_right
 
+# gap between window and screen borders
+gap_x 100
+gap_y 0
+
 # do not fork to the background after startup
 background no
 
@@ -47,7 +51,7 @@ cpu_avg_samples 2
 draw_borders no
 
 # white text with black outline
-default_outline_color black
+default_outline_color black #\#e16b40
 default_color white
 
 # number of samples to average for I/O monitoring
@@ -70,10 +74,6 @@ extra_newline no
 
 # print byte values in human readable form
 format_human_readable yes
-
-# gap between window and screen borders
-gap_x 10
-gap_y 10
 
 # do not break lines
 max_text_width 0
@@ -253,4 +253,4 @@ xftfont DejaVu Sans Mono:size=10
 TEXT
 ${font Ubuntu:size=70:bold}${alignr}${time %R}${font}
 
-${font Ubuntu:size=14}${alignr}${time %A, %d %B %Y}${font}
+${font Ubuntu:size=24}${alignr}${time %A, %d %B %Y}${font}

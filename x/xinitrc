@@ -76,13 +76,16 @@ fi
 #    urxvtd -q --fork
 #fi
 
+log "starting conky clock on desktop"
+conky -c "$HOME/.conky/clock.conkyrc
+
 # start the pulseaudio volume control tray applet
 log "starting pasystray"
 pasystray & &> $LOGFILE
 
 # start dropbox
 log "starting dropboxd"
-dropboxd & &> $LOGFILE
+nice -n 10 ionice -c 3 dropboxd & &> $LOGFILE
 
 # start the wallpaper changer
 log "starting $path_wallchanger"
@@ -117,6 +120,5 @@ if [[ -f ~/.Xresources ]] ; then
 else
     log "~/.Xresources not found"
 fi
-
 
 start_wm

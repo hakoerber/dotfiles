@@ -19,6 +19,9 @@
 
 
     last = "log -1 HEAD"
+
+    logl = log --graph --decorate --pretty=oneline --abbrev-commit --all
+
 [core]
     editor = vim
     pager = less
@@ -32,3 +35,5 @@
 	default = simple
 [merge]
 	tool = vimdiff
+[gc]
+	auto = 0

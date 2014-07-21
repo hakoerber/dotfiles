@@ -153,11 +153,15 @@ ${endif}\
 \
 \
 \
-{ "full_text" : "     $uptime_short " , "color" : "\#FFFFFF" , "name" : "sysinfo" },\
+{ "full_text" : "     ${texeci 60 /usr/local/bin/backlight.sh get-current-perc}% " , "color" : "\#FFFFFF" , "name" : "backlight" },\
 \
 \
 \
-{ "full_text" : " ${time %a %F %T} " , "color" : "\#FFFFFF" , "name" : "time" },\
+{ "full_text" : "     $uptime_short " , "color" : "\#FFFFFF" , "name" : "sysinfo" },\
+\
+\
+\
+{ "full_text" : "     ${time %a %F %T} " , "color" : "\#FFFFFF" , "name" : "time" },\
 \
 \
 \
