@@ -24,7 +24,7 @@ ${if_match "${mpd_status}" == "Paused"}\
 ${else}\
 \
 ${endif}\
- - " , "name" : "mpd_toggle" ,"separator" : false , "separator_block_width" : 0 },\
+  ~ " , "name" : "mpd_toggle" ,"separator" : false , "separator_block_width" : 0 },\
 ${endif}\
 \
 \
