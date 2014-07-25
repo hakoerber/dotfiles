@@ -26,7 +26,11 @@
 ###############################################################################
 
 
-alignment top_right
+alignment top_left
+
+# gap between window and screen borders
+gap_x 40
+gap_y 40
 
 # do not fork to the background after startup
 background no
@@ -70,10 +74,6 @@ extra_newline no
 
 # print byte values in human readable form
 format_human_readable yes
-
-# gap between window and screen borders
-gap_x 10
-gap_y 10
 
 # do not break lines
 max_text_width 0
@@ -143,10 +143,6 @@ use_spacer left
 
 # enables anti-aliased font for example
 use_xft yes
-
-# the xft font to use
-xftfont DejaVu Sans Mono:size=10
-
 
 ###############################################################################
 
@@ -249,28 +245,36 @@ xftfont DejaVu Sans Mono:size=10
 #  seti_progbar      (height)        Seti@home current progress bar
 #  seti_credit                       Seti@hoome total user credit
 
+color1 \#e16b40
+
+#${hr}
+#MEM  : ${mem}/${memmax} (${memperc}%) ${membar}
+#SWAP : ${swap}/${swapmax} (${swapperc}%) ${swapbar}
+#${hr}
+#NETWORK:
+#wlp2s0: ${addr wlp2s0}
+#DOWN: ${downspeed wlp2s0}${alignr}UP: ${upspeed wlp2s0}
+#${downspeedgraph wlp2s0 40,130}${alignr}${upspeedgraph wlp2s0 40,130}
+#TOTAL DOWN: ${totaldown wlp2s0}${alignr}UP: ${totalup wlp2s0}
 
 TEXT
-${alignc}${tztime local %A, %Y-%m-%d %H:%M:%S}
-${hr}
-${nodename}${alignr}Uptime: ${uptime}
-${sysname} ${kernel}${alignr}Load: ${loadavg 1}
-${hr}
-BAT: ${battery_short} (${battery_time}) ${battery_bar}
-${hr}
-CPU usage: ${cpu cpu0}% ${cpubar}
-${cpugraph cpu0 40,200} ${alignr}${cpugauge cpu0 40,80}
-${hr}
-/    : ${fs_used /}/${fs_size /} (${fs_used_perc /}%) ${fs_bar /}
-/home: ${fs_used /home}/${fs_size /home} (${fs_used_perc /home}%) ${fs_bar /home}
-/var : ${fs_used /var}/${fs_size /var} (${fs_used_perc /var}%) ${fs_bar /var}
-/boot: ${fs_used /boot}/${fs_size /boot} (${fs_used_perc /boot}%) ${fs_bar /boot}
-${hr}
-MEM  : ${mem}/${memmax} (${memperc}%) ${membar}
-SWAP : ${swap}/${swapmax} (${swapperc}%) ${swapbar}
-${hr}
-NETWORK:
-wlp2s0: ${addr wlp2s0}
-DOWN: ${downspeed wlp2s0}${alignr}UP: ${upspeed wlp2s0}
-${downspeedgraph wlp2s0 40,130}${alignr}${upspeedgraph wlp2s0 40,130}
-TOTAL DOWN: ${totaldown wlp2s0}${alignr}UP: ${totalup wlp2s0}
+${font Ubuntu Mono:size=16}
+${color1}${nodename}${color}${alignr}Uptime: ${uptime}
+${sysname}${alignr}${color1}${kernel}${color}
+
+
+CPU  : ${cpu cpu0}%  ${cpubar 10}
+
+${color1}${hr 2}${color}
+
+/    : ${fs_used_perc /}%  ${fs_bar 10 /}
+
+/home: ${fs_used_perc /home}%  ${fs_bar 10 /home}
+
+/boot: ${fs_used_perc /boot}%  ${fs_bar 10 /boot}
+
+${color1}${hr 2}${color}
+
+MEM  : ${memperc}%  ${membar 10}
+
+SWAP ; ${swapperc}%  ${swapbar 10}

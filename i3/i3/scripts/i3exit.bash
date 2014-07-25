@@ -51,7 +51,8 @@ case "$1" in
         ;;
     hibernate)
         log "[I] Hibernating."
-        lock && systemctl hibernate
+        #lock && 
+        systemctl hibernate
         ;;
     reboot)
         log "[I] Rebooting."

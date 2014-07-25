@@ -305,7 +305,7 @@ client.urgent           #2f343a #900000 #ffffff #900000
     for_window [class="^Truecrypt$"] floating enable
     for_window [class="^URxvt$"] border 1pixel
     for_window [class="^Cairo-dock$"] floating enable , border none
-    for_window [class="^Pavucontrol$"] floating enable
+    for_window [class="^Pavucontrol$"] floating enable , border normal
     for_window [title="^Skype.*for Linux$" ] floating enable , border none
     for_window [class="^Chromium$" ] border none
     for_window [class="^yad-status$" ] floating enable , border none

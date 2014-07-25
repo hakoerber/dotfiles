@@ -144,10 +144,6 @@ use_spacer left
 # enables anti-aliased font for example
 use_xft yes
 
-# the xft font to use
-xftfont DejaVu Sans Mono:size=10
-
-
 ###############################################################################
 
 
@@ -251,6 +247,8 @@ xftfont DejaVu Sans Mono:size=10
 
 
 TEXT
-${font Ubuntu:size=70:bold}${alignr}${time %R}${font}
+${font Ubuntu:size=112:light}${alignr}${time %R}${font}
+${font Ubuntu:size=30:light}_______________________${font}
 
-${font Ubuntu:size=24}${alignr}${time %A, %d %B %Y}${font}
+${font Ubuntu:size=30:light}${alignr}${time %A, %d %B %Y}${font}
+

@@ -77,7 +77,7 @@ fi
 #fi
 
 log "starting conky clock on desktop"
-conky -c "$HOME/.conky/clock.conkyrc
+(sleep 5 && conky -c "$HOME/.conky/clock.conkyrc" &> $LOGFILE) &
 
 # start the pulseaudio volume control tray applet
 log "starting pasystray"
