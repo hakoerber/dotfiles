@@ -17,7 +17,7 @@ URxvt.intensityStyles: false
 
 URxvt.saveLines: 10000
 
-URxvt.fading: 40
+URxvt.fading: 30
 
 URxvt.termName: urxvt
 

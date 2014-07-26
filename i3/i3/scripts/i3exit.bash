@@ -28,7 +28,7 @@ lock()
         log "[W] Lockscreen not  found, using color #$FALLBACK_COLOR as background."
         background_options="--color $FALLBACK_COLOR"
     fi
-    i3lock $background_options
+    i3lock $background_options #-p win --image "$HOME/pictures/windows-lockscreen.jpg"
     retval=$?
     [[ -z "$1" ]] && sleep 1 && xset dpms force off
     return $retval
@@ -51,7 +51,7 @@ case "$1" in
         ;;
     hibernate)
         log "[I] Hibernating."
-        #lock && 
+        #lock &&
         systemctl hibernate
         ;;
     reboot)

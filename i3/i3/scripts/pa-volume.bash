@@ -19,6 +19,11 @@ setvol() {
         else
             echo "-"
             newvol=$(( $oldvol - $delta ))
+            echo $newvol
+        fi
+        if [[ $newvol -gt 100 ]]; then
+            echo "capping at 100 percent"
+            newvol=100
         fi
         echo "newvol $newvol"
     else
