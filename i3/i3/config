@@ -181,7 +181,7 @@
 
     ### START APPLICATIONS #####################################################
 
-    bindsym $mod+d exec j4-dmenu-desktop --dmenu="dmenu -b -i -l 10 -p '>'"
+    bindsym $mod+d exec j4-dmenu-desktop --dmenu="dmenu -b -i -l 10 -p '>' -nb '#222222' -nf '#ffffff' -sb '#e16b40' -sf '#000000'"
     bindsym $mod+Return exec $terminal
     bindsym $mod+F1 exec firefox
 

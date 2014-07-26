@@ -17,21 +17,14 @@ update_interval_on_battery 1.0
 
 TEXT
 [\
-${if_mpd_playing}\
-{ "full_text" : "\
-${if_match "${mpd_status}" == "Paused"}\
-\
-${else}\
-\
-${endif}\
-  ~ " , "name" : "mpd_toggle" ,"separator" : false , "separator_block_width" : 0 },\
-${endif}\
-\
-\
-\
 { "full_text" : "\
 ${if_running mpd}\
 ${if_mpd_playing}\
+${if_match "${mpd_status}" == "Paused"}\
+   \
+${else}\
+   \
+${endif}\
 ${mpd_artist} - ${mpd_title} ${mpd_elapsed}/${mpd_length}\
 ${else}\
    stopped\
@@ -39,7 +32,7 @@ ${endif}\
 ${else}\
    down\
 ${endif}\
- " , "name" : "mpd" },\
+ " , "name" : "mpd_toggle" },\
 \
 \
 \
