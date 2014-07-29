@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# index of the sink. execute pactl list sinks to get a list
-SINK=1
+# name of the sink. execute pactl list sinks to get a list
+SINKNAME="alsa_output.pci-0000_00_1b.0.analog-stereo"
+
+# this is the worst
+SINK=$(( $(pactl list sinks | grep "Name: " | grep -n "${SINKNAME}" | grep -o "^[[:digit:]]*") -1))
 
 getvol() {
     echo $(pactl list sinks | grep "^[[:space:]]*Volume" | head -n $(( $SINK + 1 )) | tail -n 1 | grep -o "[[:digit:]]*%" | head -n 1 | cut -d "%" -f 1)

@@ -112,11 +112,27 @@ alias wow="git status"
 alias v="vim"
 alias g="grep"
 
+
 # rebase the current branch onto WTF ARE YOU DOING YOU ARE DRUNNK TO GO BED
 ##alias rebase="git rebase -i $(git branch --contains HEAD | grep -v '\*.*' | head -1)"
 
 
 ### FUNCTIONS
+
+slideshow() {
+    delay=$1
+    [[ -z "$delay" ]] && { echo "wrong usage" ; return 1 ; }
+    shift
+    [[ -z "$@" ]] && { echo "wrong usage" ; return 1 ; }
+    feh --auto-zoom \
+        --randomize \
+        --recursive \
+        --scale-down \
+        --image-bg black \
+        --draw-filename \
+        --slideshow-delay=$delay \
+        "$@"
+}
 
 function cd() {
     builtin cd $* && ls

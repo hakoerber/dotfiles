@@ -146,7 +146,7 @@ let g:ycm_autoclose_preview_window_after_completion = 1
 let g:ycm_autoclose_preview_window_after_insertion = 1
 
 set colorcolumn=79
-set clipboard=unnamed               " enable copying into the clipboard
+"set clipboard=unnamed               " enable copying into the clipboard
 
 
 set esckeys                         " enable cursor keys in insert mode
