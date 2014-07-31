@@ -23,6 +23,9 @@ URxvt.termName: urxvt
 
 URxvt.cursorBlink: true
 
+URxvt.transparent:   true
+URxvt.shading:       10
+
 ! Solarized color scheme for the X Window System
 !
 ! http://ethanschoonover.com/solarized

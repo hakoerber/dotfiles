@@ -50,7 +50,8 @@ keyboard_repeat_delay=150
 keyboard_repeat_speed=30
 
 # path and options for the wallpaper changer script
-path_wallchanger="$HOME/.i3/scripts/wallchanger.bash"
+path_wallchanger="$HOME/.i3/scripts/wallchanger.sh"
+wallchanger_pidfile="$RUNDIR/wallchanger.pid"
 wallpaper_directory="$HOME/pictures/wallpaper/misc"
 wallpaper_logfile="$LOGDIR/wallpaper.log"
 wallpaper_fallback="$HOME/.i3/data/wallpaper/"
@@ -61,7 +62,7 @@ redshift_lat_long="49.5:11"
 redshift_colortemp="5500:4000"
 
 # start mpd
-if [[ -z "$(pgrep --euid hannes --exact "^mpd$")" ]] ; then
+if ! pgrep --euid hannes --exact '^mpd$' ; then
     log "mpd is not running, starting mpd"
     mpd "$HOME/.mpd/mpd.conf" &
 else
@@ -77,46 +78,50 @@ fi
 #fi
 
 log "starting conky clock on desktop"
-(sleep 5 && conky -c "$HOME/.conky/clock.conkyrc" &> $LOGFILE) &
+(sleep 5 && conky -c "$HOME/.conky/clock.conkyrc" &>> $LOGFILE) &
 
 # start the pulseaudio volume control tray applet
 log "starting pasystray"
-pasystray & &> $LOGFILE
+pasystray & &>> $LOGFILE
 
 # start dropbox
 log "starting dropboxd"
-nice -n 10 ionice -c 3 dropboxd & &> $LOGFILE
+nice -n 10 ionice -c 3 dropboxd & &>> $LOGFILE
 
 # start the wallpaper changer
 log "starting $path_wallchanger"
-$path_wallchanger "$wallpaper_directory" "$wallpaper_interval" "$wallpaper_fallback" > "$wallpaper_logfile" &
+$path_wallchanger "$wallpaper_directory" "$wallpaper_interval" "$wallpaper_fallback" &
+echo $! > "$wallchanger_pidfile"
 
 # start redshift
 log "starting redshift-gtk"
-redshift-gtk -l "$redshift_lat_long" -t "$redshift_colortemp" & &> $LOGFILE
-# not it
+redshift-gtk -l "$redshift_lat_long" -t "$redshift_colortemp" & &>> $LOGFILE
 
 # set keyboard layout
 log "setting keyboard layout"
-setxkbmap -layout "$keyboard_layout" -variant "$keyboard_variant" & &> $LOGFILE
+setxkbmap -layout "$keyboard_layout" -variant "$keyboard_variant" & &>> $LOGFILE
 
 # set key repeat delay
 log "setting key repeat delay"
-xset r rate "$keyboard_repeat_delay" "$keyboard_repeat_speed" & &> $LOGFILE
+xset r rate "$keyboard_repeat_delay" "$keyboard_repeat_speed" & &>> $LOGFILE
+
+# disable auto screen disable
+xset -dpms
+xset s off
 
 # execute the host-specific .xinitrc-addition
 hostfile="$HOME/.xinitrc.d/$(hostname).xinitrc"
 log "looking for host specific xinitrc addition at $hostfile"
 if [[ -f "$hostfile" ]] ; then
     log "found it. executing"
-    bash "$hostfile" & &> $LOGFILE
+    bash "$hostfile" & &>> $LOGFILE
 else
     log "found none"
 fi
 
 if [[ -f ~/.Xresources ]] ; then
     log "found ~/.Xresources, merging it into xrdb"
-    xrdb -merge ~/.Xresources & &> $LOGFILE
+    xrdb -merge ~/.Xresources & &>> $LOGFILE
 else
     log "~/.Xresources not found"
 fi

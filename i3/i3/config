@@ -310,7 +310,7 @@ client.urgent           #2f343a #900000 #ffffff #900000
     for_window [class="^Chromium$" ] border none
     for_window [class="^yad-status$" ] floating enable , border none
     for_window [class="^Docky$" ] floating enable , border none
-    for_window [class="^Skype$" ] border 1pixel
+    for_window [class="^Skype$" ] border none
     for_window [class="^Steam$" ] border none
     for_window [class="^Eclipse$" ] border none
     #for_window [class="^Steam$" title="^Friends$" ] border 1pixel , floating enable , floating_maximum_size 200 x 700
@@ -320,6 +320,7 @@ client.urgent           #2f343a #900000 #ffffff #900000
     for_window [class="^Designer$" ] border none
     for_window [class="^main\.py$" ] floating enable
     for_window [class="^Xfce4-panel$"] floating enable
+    for_window [class="^Thunderbird"] border none
 
-
-
+    assign [class="^Thunderbird"] $workspace9
+    assign [class="^Skype$"] $workspace10

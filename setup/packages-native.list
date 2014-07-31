@@ -1,5 +1,6 @@
 acpi
 alsa-utils
+atool
 atop
 baobab
 blender
@@ -41,6 +42,7 @@ gvfs
 gvim
 hardinfo
 hedgewars
+highlight
 htop
 i3lock
 i3status
@@ -114,6 +116,7 @@ rxvt-unicode
 samba
 scrot
 skype
+smplayer
 sshfs
 steam
 subversion
@@ -126,14 +129,14 @@ thunderbird
 tk
 tmux
 tree
-ttf-ubuntu-font-family
 ttf-dejavu
+ttf-ubuntu-font-family
 tumbler
+unclutter
 units
 unrar
 virtualbox
 virtualbox-guest-iso
-virtualbox-host-dkms
 virtualbox-host-modules
 vlc
 vnstat
