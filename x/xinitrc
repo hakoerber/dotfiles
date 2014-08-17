@@ -59,7 +59,7 @@ wallpaper_interval="900"
 
 # redshift settings
 redshift_lat_long="49.5:11"
-redshift_colortemp="5500:4000"
+redshift_colortemp="5500:3700"
 
 # start mpd
 if ! pgrep --euid hannes --exact '^mpd$' ; then

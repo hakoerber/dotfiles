@@ -174,16 +174,18 @@
 
     # regenerate and reload the configuration file
     # if genconfig gets any paramters, it will invoke i3-msg reload
-    bindsym $mod+$reload exec --no-startup-id bash ~/.i3/scripts/genconfig.bash 1
+    bindsym $mod+$reload exec --no-startup-id ~/.i3/scripts/genconfig.bash 1
 
     bindsym $mod+$restart restart
     bindsym $mod+$exit    exit
 
     ### START APPLICATIONS #####################################################
 
-    bindsym $mod+d exec j4-dmenu-desktop --dmenu="dmenu -b -i -l 10 -p '>' -nb '#222222' -nf '#ffffff' -sb '#e16b40' -sf '#000000'"
+    bindsym $mod+d exec j4-dmenu-desktop --dmenu="dmenu -fn 'DejaVu Sans Mono:size=11' -b -i -l 10 -p '>' -nb '#222222' -nf '#ffffff' -sb '#e16b40' -sf '#000000'"
     bindsym $mod+Return exec $terminal
     bindsym $mod+F1 exec firefox
+
+    bindsym Pause exec --no-startup-id ~/.i3/scripts/shutdown-menu.bash
 
 ################################################################################
 ### MODES ######################################################################
@@ -213,23 +215,6 @@
             bindsym Escape mode "default"
     }
     bindsym $mod+r mode "resize"
-
-    # Enabling a mode to shutdown, reboot, lock screen and so on
-    set $mode_system System (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown
-    mode "$mode_system" {
-        bindsym $key_lock exec --no-startup-id $path_i3exit $signal_lock, mode "default"
-        bindsym $key_logout exec --no-startup-id $path_i3exit $signal_logout, mode "default"
-        bindsym $key_suspend exec --no-startup-id $path_i3exit $signal_suspend, mode "default"
-        bindsym $key_hibernate exec --no-startup-id $path_i3exit $signal_hibernate, mode "default"
-        bindsym $key_reboot exec --no-startup-id $path_i3exit $signal_reboot, mode "default"
-        bindsym $key_shutdown exec --no-startup-id $path_i3exit $signal_shutdown, mode "default"
-
-        # back to normal: Enter or Escape
-        bindsym Return mode "default"
-        bindsym Escape mode "default"
-    }
-    bindsym $mod+Pause mode "$mode_system"
-    bindsym Pause exec --no-startup-id $path_i3exit lock
 
 ################################################################################
 ### GENERAL SETUP ##############################################################
@@ -321,6 +306,7 @@ client.urgent           #2f343a #900000 #ffffff #900000
     for_window [class="^main\.py$" ] floating enable
     for_window [class="^Xfce4-panel$"] floating enable
     for_window [class="^Thunderbird"] border none
+    for_window [instance="^shutdown-menu$"] border normal
 
     assign [class="^Thunderbird"] $workspace9
     assign [class="^Skype$"] $workspace10

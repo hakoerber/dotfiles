@@ -12,8 +12,10 @@ SAVEHIST=10000
 HISTFILE="$HOME/.zsh_history"
 
 PROMPT="%{$fg[white]%}╭─%{$fg[green]%}%M %{$fg[red]%}▶ %{$fg[yellow]%}%~
-%{$fg[white]%}╰─%B$%b "
+%{$fg[white]%}╰─%B%#%b "
 RPROMPT="%{$fg[red]%}%? %{$fg[white]%}%*%{$reset_color%}"
+
+PATH="$PATH:$HOME/bin"
 
 man() {
         env LESS_TERMCAP_mb=$'\E[01;31m' \
@@ -110,7 +112,7 @@ alias much="git"
 alias wow="git status"
 
 alias v="vim"
-alias g="grep"
+alias g="git"
 
 
 # rebase the current branch onto WTF ARE YOU DOING YOU ARE DRUNNK TO GO BED
@@ -134,11 +136,11 @@ slideshow() {
         "$@"
 }
 
-function cd() {
+cd() {
     builtin cd $* && ls
 }
 
-function mount() {
+mount() {
     if [[ $# == 0 ]] ; then
         /usr/bin/env mount | column -t
     else
@@ -147,42 +149,45 @@ function mount() {
 }
 
 ff() {
-	find . -type f -iname "*"$*"*" ;
+    find . -type f -iname "*"$*"*" ;
 }
 
 ffcs() {
-	find . -type f -name "*"$*"*" ;
+    find . -type f -name "*"$*"*" ;
 }
 
-extract()  # Handy Extract Program.
+extr()
 {
-	if [ -f $1 ] ; then
-		case $1 in
-			*.tar.bz2	)	tar xvjf $1 	;;
-			*.tar.gz	)	tar xvzf $1 	;;
-			*.bz2		)	bunzip2 $1  	;;
-			*.rar		)	unrar x $1  	;;
-			*.gz		)	gunzip $1   	;;
-			*.tar		)	tar xvf $1  	;;
-			*.tbz2		)	tar xvjf $1 	;;
-			*.tgz		)	tar xvzf $1		;;
-			*.zip		)	unzip $1		;;
-			*.Z			)	uncompress $1	;;
-			*.7z		)	7z x $1 		;;
-			*)   echo "$1 cannot be extracted via extract()" ;;
-		esac
-	else
-		echo "$1 is not a valid file"
-	fi
+    if [[ -f "$1" ]] ; then
+        case "$1" in
+            *.tar.bz2 ) tar xvjf "$1"     ;;
+            *.tar.gz  ) tar xvzf "$1"     ;;
+            *.tar.xz  ) tar xvJf "$1"     ;;
+            *.bz2     ) bunzip2 "$1"      ;;
+            *.rar     ) unrar x "$1"      ;;
+            *.gz      ) gunzip "$1"       ;;
+            *.tar     ) tar xvf "$1"      ;;
+            *.tbz2    ) tar xvjf "$1"     ;;
+            *.tgz     ) tar xvzf "$1"     ;;
+            *.zip     ) unzip "$1"        ;;
+            *.Z       ) uncompress "$1"   ;;
+            *.7z      ) 7z x "$1"         ;;
+            *)
+                echo "$1 cannot be extracted via $0" 
+                ;;
+        esac
+    else
+        echo "$1 is not a valid file"
+    fi
 }
 
 ruler() {
-	for s in '....^....|' '1234567890'; do
-		w=${#s}
-		str=$(for (( i=1; $i<=$(( ($COLUMNS + $w) / $w )) ; i=$i+1 )); do echo -n $s; done )
-		str=$(echo $str | cut -c -$COLUMNS)
-		echo $str
-	done
+    for s in '....^....|' '1234567890'; do
+        w=${#s}
+        str=$(for (( i=1; $i<=$(( ($COLUMNS + $w) / $w )) ; i=$i+1 )); do echo -n $s; done )
+        str=$(echo $str | cut -c -$COLUMNS)
+        echo $str
+    done
 }
 
 addext() {
@@ -192,15 +197,15 @@ addext() {
 }
 
 ckwww() {
-	ping -c 3 www.google.com
+    ping -c 3 www.google.com
 }
 
 topcmds() {
-	history | awk '{print $2}' | awk 'BEGIN {FS="|"}{print $1}' | sort | uniq -c | sort -nr | head
+    history | awk '{print $2}' | awk 'BEGIN {FS="|"}{print $1}' | sort | uniq -c | sort -nr | head
 }
 
 fnottype() {
-	find . -maxdepth 1 ! -type $1
+    find . -maxdepth 1 ! -type $1
 }
 
 # simple calculator
@@ -208,6 +213,19 @@ c () {
     echo "$*" | bc -l
 }
 
-function http() {
+http() {
     curl http://httpcode.info/$1
+}
+
+bak() {
+    [[ -e "$1" ]] && cp -ai "$1" "$1.$(date +%FT%T).bak"
+}
+
+fstab() {
+    # yeah
+    expand /etc/fstab | grep -v '^#' | grep -P '^.+$' | tr -s ' ' | tr ' ' '|' | cat <(grep -P '<.+>' /etc/fstab | cut -f 2- -d ' ' | sed 's/>[^<]*</>|</g') - | column -ts '|'
+}
+
+rmext() {
+    [[ -e "$1" ]] && mv -i "$1" "${1%.*}"
 }
