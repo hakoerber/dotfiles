@@ -69,6 +69,10 @@ case "$signal" in
         log "[I] Shutting down."
         systemctl poweroff
         ;;
+    screen-off)
+        log "[I] Turning screen off."
+        xset dpms force off
+        ;;
     *)
         echo "Usage: $0 {lock|logout|suspend|hibernate|reboot|shutdown}"
         log "[E] Signal \"$signal\" unknown. Aborting."
