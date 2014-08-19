@@ -6,7 +6,8 @@ options=(
 "suspend"
 "hibernate"
 "reboot"
-"shutdown")
+"shutdown"
+"screen-off")
 
 i=1
 output=$(

@@ -142,9 +142,9 @@ cd() {
 
 mount() {
     if [[ $# == 0 ]] ; then
-        /usr/bin/env mount | column -t
+        command mount | column -t
     else
-        /usr/bin/env mount $*
+        command mount "$@"
     fi
 }
 
@@ -208,17 +208,12 @@ fnottype() {
     find . -maxdepth 1 ! -type $1
 }
 
-# simple calculator
-c () {
-    echo "$*" | bc -l
-}
-
 http() {
     curl http://httpcode.info/$1
 }
 
 bak() {
-    [[ -e "$1" ]] && cp -ai "$1" "$1.$(date +%FT%T).bak"
+    [[ -e "$1" ]] && cp -av "$1" "$1.bak"
 }
 
 fstab() {
@@ -228,4 +223,8 @@ fstab() {
 
 rmext() {
     [[ -e "$1" ]] && mv -i "$1" "${1%.*}"
+}
+
+serve() {
+    python3 -m http.server 8800
 }

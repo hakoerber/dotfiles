@@ -50,7 +50,7 @@ keyboard_repeat_delay=150
 keyboard_repeat_speed=30
 
 # path and options for the wallpaper changer script
-path_wallchanger="$HOME/.i3/scripts/wallchanger.sh"
+path_wallchanger="$HOME/development/projects/wallchanger/wallchanger"
 wallchanger_pidfile="$RUNDIR/wallchanger.pid"
 wallpaper_directory="$HOME/pictures/wallpaper/misc"
 wallpaper_logfile="$LOGDIR/wallpaper.log"
