@@ -78,14 +78,12 @@ mpc
 mpd
 mplayer
 mtools
-mupdf
 ncmpcpp
 net-tools
 p7zip
 pavucontrol
 pdnsd
 pidgin
-pinta
 powertop
 puddletag
 pulseaudio
@@ -163,4 +161,6 @@ xorg-xmodmap
 xorg-xrdb
 xorg-xrefresh
 youtube-dl
+zathura
+zathura-pdf-mupdf
 zsh

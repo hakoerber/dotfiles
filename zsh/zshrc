@@ -17,6 +17,9 @@ RPROMPT="%{$fg[red]%}%? %{$fg[white]%}%*%{$reset_color%}"
 
 PATH="$PATH:$HOME/bin"
 
+envoy --agent ssh-agent
+source <(envoy --print sh)
+
 man() {
         env LESS_TERMCAP_mb=$'\E[01;31m' \
         LESS_TERMCAP_md=$'\E[01;38;5;74m' \
@@ -101,7 +104,7 @@ alias b='cd $OLDPWD'
 
 alias cs="cryptsetup"
 
-alias le_haxxor_1='clear && dmesg | pv -qL $[15 + (RANDOM % 10)]'
+alias le_haxxor_1='clear && dmesg | pv -qL $[10 + (RANDOM % 10)]'
 alias le_haxxor_2='clear && hexdump -C /dev/urandom | grep "1e 4c"'
 
 alias YOLO="pacman -Syu --force"
