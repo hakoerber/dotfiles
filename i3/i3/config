@@ -19,7 +19,7 @@
     set $mod Mod4
 
     # The default terminal
-    set $terminal urxvt
+    set $terminal urxvtc #-e bash -c "tmux -q has-session && exec tmux attach-session -d || exec tmux new-session -n$USER -s$USER@$HOSTNAME"
 
     # Path to the exit script
     set $path_i3exit ~/.i3/scripts/i3exit.bash
@@ -251,7 +251,7 @@
     popup_during_fullscreen leave_fullscreen
 
     # Do not always wrap but change to a container on the same level instead
-    force_focus_wrapping no
+    force_focus_wrapping yes
 
     force_xinerama no
 

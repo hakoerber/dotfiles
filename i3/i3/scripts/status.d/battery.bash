@@ -53,12 +53,12 @@ conky() {
         if threshold2 ; then
             if [[ ! -f "$PATH_WARN_2" ]] ; then
                 echo > "$PATH_WARN_2"
-                notify-send --icon dialog-warning "Battery below ${THRESHOLD2}%"
+                notify-send --icon dialog-warning "Battery below ${THRESHOLD2}%" --expire-time 0
             fi
         elif threshold1 ; then
             if [[ ! -f "$PATH_WARN_1" ]] ; then
                 echo > "$PATH_WARN_1"
-                notify-send --icon dialog-warning "Battery below ${THRESHOLD1}%"
+                notify-send --icon dialog-warning "Battery below ${THRESHOLD1}%" --expire-time 30000
             fi
         fi
     fi

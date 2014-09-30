@@ -248,7 +248,7 @@ use_xft yes
 
 TEXT
 ${font Ubuntu:size=112:light}${alignr}${time %R}${font}
-${font Ubuntu:size=30:light}_______________________${font}
+${alignr}${font Ubuntu:size=30:light}__________________________________________________________${font}
 
 ${font Ubuntu:size=30:light}${alignr}${time %A, %d %B %Y}${font}
 
