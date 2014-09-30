@@ -14,7 +14,7 @@ backup_dir="$HOME/.dotfiles.bak/"
 
 # the following folders inside $config_dir will be inspected and the
 # contents symlinked:
-symlink_folders='git i3 vim zsh conky x mpd ncmpcpp'
+symlink_folders='git i3 vim zsh conky x mpd ncmpcpp tmux'
 
 MAPPING_SEPARATOR='::'
 

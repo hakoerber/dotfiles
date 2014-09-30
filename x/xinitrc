@@ -55,7 +55,7 @@ wallchanger_pidfile="$RUNDIR/wallchanger.pid"
 wallpaper_directory="$HOME/pictures/wallpaper/misc"
 wallpaper_logfile="$LOGDIR/wallpaper.log"
 wallpaper_fallback="$HOME/.i3/data/wallpaper/"
-wallpaper_interval="900"
+wallpaper_interval="10800"
 
 # redshift settings
 redshift_lat_long="49.5:11"
@@ -69,16 +69,19 @@ else
     log "mpd already running, will not start another instance"
 fi
 
-## start the urxvt daemon
-#if pidof urxvtd &>/dev/null ; then
-#    log "urxvtd already running"
-#else
-#    log "starting urxvtd"
-#    urxvtd -q --fork
-#fi
+ start the urxvt daemon
+if pgrep urxvtd >/dev/null 2>&1; then
+    log "urxvtd already running"
+else
+    log "starting urxvtd"
+    urxvtd -q -q -o
+fi
+
+log "starting zim in tray"
+zim --plugin trayicon
 
 log "starting conky clock on desktop"
-(sleep 5 && conky -c "$HOME/.conky/clock.conkyrc" &>> $LOGFILE) &
+(sleep 3 && conky -c "$HOME/.conky/clock.conkyrc" &>> $LOGFILE) &
 
 # start the pulseaudio volume control tray applet
 log "starting pasystray"

@@ -22,7 +22,7 @@ echo "MEM:"
 echo "${memused}MB / ${memtotal}MB ($(( $memused * 100 / $memtotal ))%) used"
 echo ""
 echo "PROCS:"
-(echo "x x cpu% mem% x x x x x x command" ; ps aux | sort -nrk 3 | tr -s " " | cut -d " " -f -11 | uniq -uf 10 | head -10) | cut -d " " -f 3,4,11 |  column -t
+(echo "x x CPU% MEM% x x x x x x COMMAND" ; ps aux | grep -v '^USER' | sort -nrk 3 | tr -s " " | cut -d " " -f -11 | uniq -uf 10 | head -10) | cut -d " " -f 3,4,11 | column -t
 echo ""
 echo "STORAGE:"
 df -hT --type=btrfs --type=ext4 --total

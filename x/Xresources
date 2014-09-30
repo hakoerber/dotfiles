@@ -7,7 +7,7 @@ URxvt.font: xft:DejaVu Sans Mono:size=10.5
 URxvt.letterSpace: -1
 
 ! clickable URLs
-URxvt.perl-ext-common: default,matcher
+URxvt.perl-ext-common: default,matcher,selection-to-clipboard
 URxvt.url-launcher: /usr/bin/chromium
 URxvt.matcher.button: 1
 
@@ -24,7 +24,7 @@ URxvt.termName: urxvt
 URxvt.cursorBlink: true
 
 URxvt.transparent:   true
-URxvt.shading:       15
+URxvt.shading:       10
 
 ! Solarized color scheme for the X Window System
 !

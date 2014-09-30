@@ -28,79 +28,86 @@ set nocompatible
 
 " setup of vundle
 filetype off
-set rtp+=~/.vim/bundle/vundle/
-call vundle#rc()
-Bundle 'gmarik/vundle'
+
+set rtp+=~/.vim/bundle/Vundle.vim/
+
+call vundle#begin()
+
+Plugin 'gmarik/vundle'
 
 " solarized color theme
-Bundle 'altercation/vim-colors-solarized'
+Plugin 'altercation/vim-colors-solarized'
 
 " monokai color theme
-Bundle 'sickill/vim-monokai'
+Plugin 'sickill/vim-monokai'
 
 " display the undo history in a graph
-Bundle 'mbbill/undotree'
+Plugin 'mbbill/undotree'
 
 " tree explorer plugin
-Bundle 'scrooloose/nerdtree'
+Plugin 'scrooloose/nerdtree'
 
 " quoting/parenthesizing made simple
-Bundle 'tpope/vim-surround'
+Plugin 'tpope/vim-surround'
 
 " better commenting
-Bundle 'tpope/vim-commentary'
+Plugin 'tpope/vim-commentary'
 
 " nice auto completion
-Bundle 'Valloric/YouCompleteMe'
+Plugin 'Valloric/YouCompleteMe'
 
 " nice text alignment
-Bundle 'godlygeek/tabular'
+Plugin 'godlygeek/tabular'
 
 " status line plugin
-Bundle 'bling/vim-airline'
+Plugin 'bling/vim-airline'
 
 " date/time support for CTRL-x and CTRL-a
-Bundle 'tpope/vim-speeddating'
+Plugin 'tpope/vim-speeddating'
 
 " git integration
-Bundle 'tpope/vim-fugitive'
+Plugin 'tpope/vim-fugitive'
 
 " buffer expolorer
-"Bundle 'fholgado/minibufexpl.vim'
+"Plugin 'fholgado/minibufexpl.vim'
 
 " shows a code outline
-Bundle 'majutsushi/tagbar'
+Plugin 'majutsushi/tagbar'
 
 " python specific stuff
-Bundle 'klen/python-mode'
+Plugin 'klen/python-mode'
 
 " incremental visual mode
-Bundle 'terryma/vim-expand-region'
+Plugin 'terryma/vim-expand-region'
 
 " splitting single line code
-Bundle 'AndrewRadev/splitjoin.vim'
+Plugin 'AndrewRadev/splitjoin.vim'
 
 " motion to two characters
-Bundle 'justinmk/vim-sneak'
+Plugin 'justinmk/vim-sneak'
 
 " alignment operator
-Bundle 'tommcdo/vim-lion'
+Plugin 'tommcdo/vim-lion'
 
-Bundle 'wincent/Command-T'
+Plugin 'wincent/Command-T'
 
-Bundle 'sjl/gundo.vim'
+Plugin 'sjl/gundo.vim'
 
-Bundle 'kien/ctrlp.vim'
+Plugin 'kien/ctrlp.vim'
 
-Bundle 'PeterRincker/vim-argumentative'
+Plugin 'PeterRincker/vim-argumentative'
 
-Bundle 'wellle/targets.vim'
+Plugin 'wellle/targets.vim'
 
-Bundle 'Lokaltog/vim-easymotion'
+Plugin 'Lokaltog/vim-easymotion'
 
-Bundle 'terryma/vim-multiple-cursors'
+Plugin 'terryma/vim-multiple-cursors'
 
-Bundle 'flazz/vim-colorschemes'
+Plugin 'flazz/vim-colorschemes'
+
+call vundle#end()
+
+filetype plugin indent on
 
 set t_Co=256
 
@@ -125,8 +132,6 @@ let g:solarized_contrast="normal"
 let g:solarized_visibility="normal"
 syntax enable
 colorscheme monokai
-
-filetype plugin indent on
 
 " setup for vim-airline
 let g:airline_theme='powerlineish'
@@ -170,6 +175,7 @@ set history=1000                    " history length for commands, defaults to
 
 set nobackup                        " do not create a backup
 set nowritebackup
+set backupcopy=no
 
 
 set noshowmode                      " do not show the current mode, as this
@@ -341,8 +347,8 @@ nnoremap <C-l> <C-w>l
 nnoremap <F3> :NERDTreeToggle<CR>
 nnoremap <F4> :TagbarToggle<CR>
 
-
 " Autosave views when closing and restoring when opening again.
+set viewdir=~/.vim/view
 autocmd BufWinLeave *.* mkview
 autocmd BufWinEnter *.* silent loadview
 

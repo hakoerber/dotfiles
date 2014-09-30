@@ -6,19 +6,37 @@ colors
 
 autoload -U compinit
 compinit
+zstyle ':completion:*' menu select
+setopt completealiases
+
+#[[ -n "${key[PageUp]}"   ]]  && bindkey  "${key[PageUp]}"    history-beginning-search-backward
+#[[ -n "${key[PageDown]}" ]]  && bindkey  "${key[PageDown]}"  history-beginning-search-forward
+
+
+#DIRSTACKFILE="$HOME/.cache/zsh/dirs"
+#if [[ -f $DIRSTACKFILE ]] && [[ $#dirstack -eq 0 ]]; then
+#    dirstack=( ${(f)"$(< $DIRSTACKFILE)"} )
+#    [[ -d $dirstack[1] ]] && cd $dirstack[1]
+#fi
+#chpwd() {
+#    print -l $PWD ${(u)dirstack} >$DIRSTACKFILE
+#}
+#
+#DIRSTACKSIZE=20
+#
+#setopt autopushd pushdsilent pushdtohome
+#
+### Remove duplicate entries
+#setopt pushdignoredups
+#
+### This reverts the +/- operators.
+#setopt pushdminus
+
+#source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 HISTSIZE=10000
 SAVEHIST=10000
 HISTFILE="$HOME/.zsh_history"
-
-PROMPT="%{$fg[white]%}╭─%{$fg[green]%}%M %{$fg[red]%}▶ %{$fg[yellow]%}%~
-%{$fg[white]%}╰─%B%#%b "
-RPROMPT="%{$fg[red]%}%? %{$fg[white]%}%*%{$reset_color%}"
-
-PATH="$PATH:$HOME/bin"
-
-envoy --agent ssh-agent
-source <(envoy --print sh)
 
 man() {
         env LESS_TERMCAP_mb=$'\E[01;31m' \
@@ -34,6 +52,9 @@ man() {
 ### VARIABLES
 export EDITOR="vim"
 export VISUAL="vim"
+export PATH="$PATH:$HOME/bin"
+export BROWSER="firefox"
+
 
 ### BOOKMARKS
 bm() {
@@ -72,18 +93,19 @@ setopt LONG_LIST_JOBS
 bindkey -e
 
 
-[[ $TERM == "urxvt" ]] && export TERM="rxvt-unicode"
+[[ $TERM == "urxvt" ]] && export TERM="rxvt-unicode" 
+[[ $TERM == "screen" ]] && export TERM="screen-256color"
 
 ### ALIASES
 
 alias su="su -"
 
-LS_HIDE="*.py[co]"
+#LS_HIDE="*.py[co]"
 
 #  --dereference-command-line
-alias ls="ls --group-directories-first --classify --color=auto --hide=\"$LS_HIDE\""
+alias ls="ls --group-directories-first --classify --color=auto" #--hide=\"$LS_HIDE\""
 
-alias ll='ls -AlF'
+alias ll='ls -AlFh'
 alias la='ls -A'
 
 alias grep='grep --color=auto'
@@ -140,7 +162,7 @@ slideshow() {
 }
 
 cd() {
-    builtin cd $* && ls
+    builtin cd "$@" && ls
 }
 
 mount() {
@@ -230,4 +252,73 @@ rmext() {
 
 serve() {
     python3 -m http.server 8800
+}
+
+manpdf() {
+    [[ -z "$1" ]] && { echo >&2 "$(man)" ; exit 1 ; }
+    man -t "$1" | ps2pdf - - | zathura -
+}
+
+myip4() {
+    curl "http://ipv4.icanhazip.com"
+}
+
+myip6() {
+    curl "http://ipv6.icanhazip.com" 1>/dev/null 2>&1 || echo "no ip6"
+}
+
+alias myip="myip4"
+
+alias clip="xclip -selection clipboard"
+alias clipo="xclip -out -selection clipboard"
+
+alias tmux="tmux -2"
+
+alias tm="tmux"
+alias tml="tmux list-sessions"
+alias tma="tmux attach-session"
+alias tmc="tmux switch-client -t"
+
+#echo $(date +%T) >> $HOME/tmux-debug.log
+#[[ $- != *i* ]] && return
+#[[ -z "$TMUX" ]] && exec tmux -2
+
+alias note="zim --plugin quicknote --notebook ~/wiki/zim/notes --page ":quicknotes" --append true"
+
+alias spm="sudo pacman"s
+
+alias chmod="chmod -c"
+alias chown="chown -c"
+
+alias rgrep="grep -r"
+
+autoload -Uz vcs_info
+zstyle ':vcs_info:*' enable git hg
+zstyle ':vcs_info:*' check-for-changes true
+zstyle ':vcs_info:git*' formats "%{${fg[cyan]}%}[%{${fg[green]}%}%s%{${fg[cyan]}%}][%{${fg[blue]}%}%r/%S%%{${fg[cyan]}%}][%{${fg[blue]}%}%b%{${fg[yellow]}%}%m%u%c%{${fg[cyan]}%}]%{$reset_color%}"
+
+setprompt() {
+    setopt prompt_subst
+
+    if [[ -n "$SSH_CLIENT" ]]; then
+        SSHINFO="[ssh] "
+    else
+        SSHINFO=""
+    fi
+
+#    if git status ; then
+#        GITINFO=" <git repo>"
+#    else
+#        GITINFO=""
+#    fi
+
+    PROMPT="%{$fg[white]%}┌─ %{$fg[green]%}%n@%M%{$fg[white]%}  ─  %{$fg[cyan]%}%*%{$fg[white]%}  ─  %{%B$fg[yellow]%}%~${vcs_info_msg_0_}%{%b%}
+%{$fg[white]%}└─ %B${PINFO}%#%b "
+    RPROMPT=""
+}
+
+setprompt
+
+gensshport() {
+    echo $(( $(od -v -An -N4 -tu4 < /dev/urandom) % (2**16-2**10) + 2**10 ))
 }
