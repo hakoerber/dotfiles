@@ -1,1 +1,2 @@
-session.config
+session.*.config
+testing/

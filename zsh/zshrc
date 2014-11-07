@@ -1,3 +1,26 @@
+[[ -z "$PS1" ]] && return
+
+### SHELL OPTIONS
+setopt EXTENDED_HISTORY
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_VERIFY
+setopt INC_APPEND_HISTORY
+setopt SHARE_HISTORY
+setopt AUTO_CD
+setopt APPEND_HISTORY
+setopt HIST_IGNORE_DUPS
+setopt NOHIST_IGNORE_ALL_DUPS
+setopt HIST_IGNORE_SPACE
+setopt CORRECT
+setopt RM_STAR_SILENT
+setopt BG_NICE
+setopt CHECK_JOBS
+setopt HUP
+setopt LONG_LIST_JOBS
+
+# emacs-like keybindings
+bindkey -e
+
 autoload -U promptinit
 promptinit
 
@@ -8,6 +31,13 @@ autoload -U compinit
 compinit
 zstyle ':completion:*' menu select
 setopt completealiases
+
+autoload -U edit-command-line
+zle -N edit-command-line
+bindkey '^xe' edit-command-line
+bindkey '^x^e' edit-command-line
+
+
 
 #[[ -n "${key[PageUp]}"   ]]  && bindkey  "${key[PageUp]}"    history-beginning-search-backward
 #[[ -n "${key[PageDown]}" ]]  && bindkey  "${key[PageDown]}"  history-beginning-search-forward
@@ -49,13 +79,6 @@ man() {
         man "$@"
 }
 
-### VARIABLES
-export EDITOR="vim"
-export VISUAL="vim"
-export PATH="$PATH:$HOME/bin"
-export BROWSER="firefox"
-
-
 ### BOOKMARKS
 bm() {
     case "$1" in
@@ -70,27 +93,6 @@ bm() {
             ;;
     esac
 }
-
-
-### SHELL OPTIONS
-setopt EXTENDED_HISTORY
-setopt HIST_EXPIRE_DUPS_FIRST
-setopt HIST_VERIFY
-setopt INC_APPEND_HISTORY
-setopt SHARE_HISTORY
-setopt AUTO_CD
-setopt APPEND_HISTORY
-setopt HIST_IGNORE_DUPS
-setopt NOHIST_IGNORE_ALL_DUPS
-setopt HIST_IGNORE_SPACE
-setopt CORRECT
-setopt RM_STAR_SILENT
-setopt BG_NICE
-setopt CHECK_JOBS
-setopt HUP
-setopt LONG_LIST_JOBS
-
-bindkey -e
 
 
 [[ $TERM == "urxvt" ]] && export TERM="rxvt-unicode" 
@@ -127,7 +129,7 @@ alias b='cd $OLDPWD'
 alias cs="cryptsetup"
 
 alias le_haxxor_1='clear && dmesg | pv -qL $[10 + (RANDOM % 10)]'
-alias le_haxxor_2='clear && hexdump -C /dev/urandom | grep "1e 4c"'
+alias le_haxxor_2='clear && hexdump -C /dev/urandom | pv -qlL 2'
 
 alias YOLO="pacman -Syu --force"
 
@@ -215,6 +217,10 @@ ruler() {
     done
 }
 
+if ! (ssh-add -l | grep -q 'id_rsa') ; then
+    ssh-add
+fi
+
 addext() {
     [[ -z "$1" ]] || [[ -z "$2" ]] && { echo "Usage: $0 <file> <extension>" ; return }
     mv "$1" "$1$2"
@@ -264,7 +270,7 @@ myip4() {
 }
 
 myip6() {
-    curl "http://ipv6.icanhazip.com" 1>/dev/null 2>&1 || echo "no ip6"
+    curl "http://ipv6.icanhazip.com" || echo "no ip6"
 }
 
 alias myip="myip4"
