@@ -1,9 +1,11 @@
 #!/bin/bash
 
+host="$(hostname --short)"
+
 # main configuration file that is always used
 MAIN_CONF="$HOME/.i3/config"
 # temporary configuration file used for this session
-SESSION_CONF="$HOME/.i3/session.config"
+SESSION_CONF="$HOME/.i3/session.${host}.config"
 # directory that contains host specific configuration
 CONF_DIR="$HOME/.i3/config.d"
 # file that should be used when no host specific configuration present
@@ -11,13 +13,11 @@ DEFAULT_CONF="$CONF_DIR/default"
 
 LOGFILE="$LOGDIR/i3/genconfig.log"
 
+host_specific_conf="$CONF_DIR/$host.config"
+
 log() {
     echo "[$(date +%FT%T)] $*" >> "$LOGFILE"
 }
-
-host="$(hostname)"
-
-host_specific_conf="$CONF_DIR/$host.config"
 
 # if it's a symlink to $MAIN_CONF, cat will fail
 [[ -f "$SESSION_CONF" ]] && rm "$SESSION_CONF"
@@ -25,7 +25,7 @@ host_specific_conf="$CONF_DIR/$host.config"
 if [[ ! -f "$host_specific_conf" ]] && [[ ! -f "$DEFAULT_CONF" ]]; then
     # if there is no host-specific configuration and no default one, just use
     # the main config
-    log "neither config for host $host nor default config at $DEFAULT_CONF found, using main only"
+    log "neither config for host $host at $host_specific_conf nor default config at $DEFAULT_CONF found, using main only"
     ln -sf "$MAIN_CONF" "$SESSION_CONF"
 else
     # either use the host specific config if present, or the default if not

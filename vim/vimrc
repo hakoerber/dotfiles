@@ -35,9 +35,6 @@ call vundle#begin()
 
 Plugin 'gmarik/vundle'
 
-" solarized color theme
-Plugin 'altercation/vim-colors-solarized'
-
 " monokai color theme
 Plugin 'sickill/vim-monokai'
 
@@ -68,42 +65,27 @@ Plugin 'tpope/vim-speeddating'
 " git integration
 Plugin 'tpope/vim-fugitive'
 
-" buffer expolorer
-"Plugin 'fholgado/minibufexpl.vim'
-
-" shows a code outline
-Plugin 'majutsushi/tagbar'
-
 " python specific stuff
 Plugin 'klen/python-mode'
 
 " incremental visual mode
-Plugin 'terryma/vim-expand-region'
-
-" splitting single line code
-Plugin 'AndrewRadev/splitjoin.vim'
-
-" motion to two characters
-Plugin 'justinmk/vim-sneak'
-
-" alignment operator
-Plugin 'tommcdo/vim-lion'
-
-Plugin 'wincent/Command-T'
-
-Plugin 'sjl/gundo.vim'
-
+"Plugin 'terryma/vim-expand-region'
+"
+"Plugin 'wincent/Command-T'
+"
+"Plugin 'sjl/gundo.vim'
+"
 Plugin 'kien/ctrlp.vim'
-
-Plugin 'PeterRincker/vim-argumentative'
-
-Plugin 'wellle/targets.vim'
-
-Plugin 'Lokaltog/vim-easymotion'
-
-Plugin 'terryma/vim-multiple-cursors'
-
-Plugin 'flazz/vim-colorschemes'
+"
+"Plugin 'PeterRincker/vim-argumentative'
+"
+"Plugin 'wellle/targets.vim'
+"
+"Plugin 'Lokaltog/vim-easymotion'
+"
+"Plugin 'terryma/vim-multiple-cursors'
+"
+"Plugin 'flazz/vim-colorschemes'
 
 call vundle#end()
 
@@ -195,8 +177,8 @@ set hlsearch                        " highlight matches in a search
 set wrapscan                        " wrap searches at the end of the file
 
 set ignorecase                      " ignore case when only searching for
-                                    " lowercase
-set smartcase                       " letters, case sensitive otherwis
+set smartcase                       " lowercase letters, case sensitive
+                                    " otherwise
 
 set foldenable                      " auto-fold code
 
@@ -357,18 +339,36 @@ autocmd BufWinEnter *.* silent loadview
 ":au WinEnter * :setlocal number relativenumber
 ":au WinLeave * :setlocal nonumber norelativenumber
 
-nnoremap <up>    <nop>
-nnoremap <down>  <nop>
-nnoremap <left>  <nop>
-nnoremap <right> <nop>
-inoremap <up>    <nop>
-inoremap <down>  <nop>
-inoremap <left>  <nop>
-inoremap <right> <nop>
+""nnoremap <up>    <nop>
+""nnoremap <down>  <nop>
+""nnoremap <left>  <nop>
+""nnoremap <right> <nop>
+""inoremap <up>    <nop>
+""inoremap <down>  <nop>
+""inoremap <left>  <nop>
+""inoremap <right> <nop>
+
+nmap <C-n> :bnext<CR>
+nmap <C-p> :bprev<CR>
+
+" default emacs movements for command line
+cnoremap <C-a>  <Home>
+cnoremap <C-b>  <Left>
+cnoremap <C-f>  <Right>
+cnoremap <C-d>  <Delete>
+cnoremap <M-b>  <S-Left>
+cnoremap <M-f>  <S-Right>
+cnoremap <M-d>  <S-right><Delete>
+cnoremap <Esc>b <S-Left>
+cnoremap <Esc>f <S-Right>
+cnoremap <Esc>d <S-right><Delete>
+cnoremap <C-g>  <C-c>
 
 inoremap jj <ESC>
 
 nnoremap <leader>v <C-w>v<C-w>l
+
+nmap ; :CtrlPBuffer<CR>
 
 " no more ex mode
 nnoremap Q <nop>

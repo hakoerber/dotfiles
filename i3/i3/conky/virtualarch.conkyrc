@@ -11,119 +11,29 @@ double_buffer yes
 update_interval 1.0
 update_interval_on_battery 1.0
 
+mpd_host 10.11.11.190
+mpd_port 6600
+
+
 # pad_percents is useless without use_spacer, but the latter leads to some ugly gaps
 #pad_percents 2
 #use_spacer left
 
+#${mpd_artist} - ${mpd_title} ${mpd_elapsed}/${mpd_length}\
 TEXT
 [\
 { "full_text" : "\
-${if_running mpd}\
 ${if_mpd_playing}\
 ${if_match "${mpd_status}" == "Paused"}\
    \
 ${else}\
    \
 ${endif}\
-${mpd_artist} - ${mpd_title} ${mpd_elapsed}/${mpd_length}\
+${mpd_title} ${mpd_elapsed}/${mpd_length}\
 ${else}\
    stopped\
 ${endif}\
-${else}\
-   down\
-${endif}\
  " , "name" : "mpd_toggle" },\
-\
-\
-\
-${if_existing /sys/class/net/wlp2s0}\
-{ "full_text" : "      \
-${if_up wlp2s0}\
-${if_match "${addr wlp2s0}" != "No Address"}\
-${wireless_essid wlp2s0} (${wireless_link_qual_perc wlp2s0}%)\
-${else}\
-No Address\
-${endif}\
-${else}\
-down\
-${endif}\
- " , "color" : "\
-${if_up wlp2s0}\
-${if_match "${addr wlp2s0}" != "No Address"}\
-${if_match ${wireless_link_qual_perc wlp2s0} <= 25}\
-\#FF0000\
-${else}${if_match ${wireless_link_qual_perc wlp2s0} <= 50}\
-\#FFFF00\
-${else}\
-\#FFFFFF\
-${endif}\
-${endif}\
-${else}\#FFFF00\
-${endif}\
-${else}\#FF0000\
-${endif}\
-" , "name" : "wireless" },\
-${endif}\
-\
-\
-\
-${if_existing /sys/class/net/enp0s3}\
-{ "full_text" : " \
-enp0s3: \
-${if_up enp0s3}\
-${addr enp0s3}\
-${else}\
-down\
-${endif}\
- " , "color" : "\
-${if_up enp0s3}\
-${if_match "${addr enp0s3}" != "No Address"}\#00FF00\
-${else}\#FFFF00\
-${endif}\
-${else}\#FF0000\
-${endif}\
-" },\
-${endif}\
-\
-\
-\
-${if_existing /sys/class/net/enp1s0}\
-{ "full_text" : " \
-enp1s0: \
-${if_up enp1s0}\
-${addr enp1s0}\
-${else}\
-down\
-${endif}\
- " , "color" : "\
-${if_up enp1s0}\
-${if_match "${addr enp1s0}" != "No Address"}\#00FF00\
-${else}\#FFFF00\
-${endif}\
-${else}\#FF0000\
-${endif}\
-" },\
-${endif}\
-\
-\
-\
-${if_existing /sys/class/net/eth0}\
-{ "full_text" : " \
-eth0: \
-${if_up eth0}\
-${addr eth0}\
-${else}\
-down\
-${endif}\
- " , "color" : "\
-${if_up eth0}\
-${if_match "${addr eth0}" != "No Address"}\#00FF00\
-${else}\#FFFF00\
-${endif}\
-${else}\#FF0000\
-${endif}\
-" },\
-${endif}\
 \
 \
 \
@@ -142,7 +52,7 @@ ${endif}\
 \
 \
 \
-{ "full_text" : "     ${texeci 60 bash ~/.i3/scripts/status.d/conky_pacman.bash} " , "color" : "\#FFFFFF" , "name" : "pacman" },\
+{ "full_text" : "     ${texeci 60 bash ~/.i3/scripts/status.d/conky_pacman.bash} " , "color" : "\#FFFFFF" , "name" : "pacman" },\
 \
 \
 \

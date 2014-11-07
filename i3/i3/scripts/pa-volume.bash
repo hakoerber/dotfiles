@@ -28,6 +28,10 @@ setvol() {
             echo "capping at 100 percent"
             newvol=100
         fi
+        if [[ $newvol -lt 0 ]]; then
+            echo "capping at 0 percent"
+            newvol=0
+        fi
         echo "newvol $newvol"
     else
         newvol="$1"

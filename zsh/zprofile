@@ -1,4 +1,10 @@
 # exec startx breaks some logind fuckery, without exec it works
-tmux start-server &
-(eval $(ssh-agent) ; ssh-add) >/dev/null 2>&1 &
+#tmux start-server &
+eval $(ssh-agent -s)
+
+export EDITOR="vim"
+export VISUAL="vim"
+export PATH="$HOME/bin:$PATH"
+export BROWSER="firefox"
+
 [[ -z $DISPLAY && $XDG_VTNR -eq 1 ]] && startx
