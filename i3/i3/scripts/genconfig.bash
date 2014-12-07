@@ -13,7 +13,7 @@ SESSION_CONF="$RUNDIR/i3/${host}.config"
 # directory that contains host specific configuration
 CONF_DIR="$HOME/.i3/config.d"
 # file that should be used when no host specific configuration present
-DEFAULT_CONF="$CONF_DIR/default"
+DEFAULT_CONF="$CONF_DIR/default.config"
 
 LOGFILE="$LOGDIR/i3/genconfig.log"
 
