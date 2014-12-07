@@ -1,7 +1,6 @@
 # http://github.com/github/gitignore
 
 ### Linux
-.*
 !.gitignore
 *~
 
