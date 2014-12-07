@@ -4,10 +4,13 @@
 # creating nice output if you click on the status bar
 # what i done depends on the first paramter
 
-[[ ! -d "$LOGDIR/batwarn" ]] && mkdir -p "$LOGDIR/batwarn"
+rundir="$RUNDIR/batwarn"
+logfile="$LOGDIR/batwarn.log"
 
-PATH_WARN_1="$LOGDIR/batwarn/batwarn1"
-PATH_WARN_2="$LOGDIR/batwarn/batwarn2"
+[[ ! -d "$rundir" ]] && mkdir -p "$rundir"
+
+PATH_WARN_1="$rundir/batwarn1"
+PATH_WARN_2="$rundir/batwarn2"
 
 THRESHOLD1=25
 THRESHOLD2=5
@@ -21,6 +24,11 @@ else
 fi
 time="$(echo "$acpi_output" | cut -d "," -f 3 | cut -d " " -f 2)"
 shortstatus="$(echo $status | cut -c 1)"
+
+log() {
+    echo [$(date +%FT%T)] "$*" >> $logfile
+}
+
 
 pretty() {
     (
@@ -52,11 +60,13 @@ conky() {
     if discharging ; then
         if threshold2 ; then
             if [[ ! -f "$PATH_WARN_2" ]] ; then
+                log "battery fell below $THRESHOLD2 percent. issuing warning."
                 echo > "$PATH_WARN_2"
                 notify-send --icon dialog-warning "Battery below ${THRESHOLD2}%" --expire-time 0
             fi
         elif threshold1 ; then
             if [[ ! -f "$PATH_WARN_1" ]] ; then
+                log "battery fell below $THRESHOLD1 percent. issuing warning."
                 echo > "$PATH_WARN_1"
                 notify-send --icon dialog-warning "Battery below ${THRESHOLD1}%" --expire-time 30000
             fi
@@ -64,7 +74,10 @@ conky() {
     fi
 
     if charging ; then
-        [[ -f "$PATH_WARN_1" ]] && rm "$PATH_WARN_1"
+        if [[ -f "$PATH_WARN_1" ]] ; then
+            log "charging now. resetting warnings."
+            rm "$PATH_WARN_1"
+        fi
         [[ -f "$PATH_WARN_2" ]] && rm "$PATH_WARN_2"
         #if [[ $percent -gt 25 ]] ; then
         #    [[ -f "$PATH_WARN_1" ]] && rm "$PATH_WARN_1"
