@@ -4,8 +4,12 @@ host="$(hostname --short)"
 
 # main configuration file that is always used
 MAIN_CONF="$HOME/.i3/config"
+# user-specific /var
+VARDIR="$HOME/.var"
+# user-specific /var/run
+RUNDIR="$VARDIR/run"
 # temporary configuration file used for this session
-SESSION_CONF="$HOME/.i3/session.${host}.config"
+SESSION_CONF="$RUNDIR/i3/${host}.config"
 # directory that contains host specific configuration
 CONF_DIR="$HOME/.i3/config.d"
 # file that should be used when no host specific configuration present
