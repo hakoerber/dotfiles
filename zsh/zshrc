@@ -140,13 +140,24 @@ alias wow="git status"
 
 alias v="vim"
 alias g="git"
+alias t="tmux"
+alias c="cd"
+alias l="ls"
 
+alias calc='python3 -ic "from math import *; import cmath"'
+
+# show non-printable characters by default
+alias cat="cat -v"
 
 # rebase the current branch onto WTF ARE YOU DOING YOU ARE DRUNNK TO GO BED
 ##alias rebase="git rebase -i $(git branch --contains HEAD | grep -v '\*.*' | head -1)"
 
 
 ### FUNCTIONS
+
+_remote() {
+    [[ -n "$SSH_CONNECTION" ]]
+}
 
 slideshow() {
     delay=$1
@@ -217,8 +228,10 @@ ruler() {
     done
 }
 
-if ! (ssh-add -l | grep -q 'id_rsa') ; then
-    ssh-add
+if ! _remote ; then
+    if ! (ssh-add -l | grep -q 'id_rsa') ; then
+        ssh-add
+    fi
 fi
 
 addext() {
@@ -261,7 +274,7 @@ serve() {
 }
 
 manpdf() {
-    [[ -z "$1" ]] && { echo >&2 "$(man)" ; exit 1 ; }
+    [[ -z "$1" ]] && { printf '%s' >&2 "$(man)" ; return ; }
     man -t "$1" | ps2pdf - - | zathura -
 }
 
@@ -306,21 +319,16 @@ zstyle ':vcs_info:git*' formats "%{${fg[cyan]}%}[%{${fg[green]}%}%s%{${fg[cyan]}
 setprompt() {
     setopt prompt_subst
 
-    if [[ -n "$SSH_CLIENT" ]]; then
-        SSHINFO="[ssh] "
-    else
-        SSHINFO=""
+    topstr="%{$fg[green]%}%n@%m%{$fg[white]%}  ─  %{%B$fg[yellow]%}%~${vcs_info_msg_0_}%{%b%} %{$fg[white]%}"
+    botstr="%B${PINFO}%#%b "
+
+    if _remote ; then
+        topstr="%{$fg[red]%}[remote]%{$fg[white]%} ${topstr}"
     fi
 
-#    if git status ; then
-#        GITINFO=" <git repo>"
-#    else
-#        GITINFO=""
-#    fi
-
-    PROMPT="%{$fg[white]%}┌─ %{$fg[green]%}%n@%M%{$fg[white]%}  ─  %{$fg[cyan]%}%*%{$fg[white]%}  ─  %{%B$fg[yellow]%}%~${vcs_info_msg_0_}%{%b%}
-%{$fg[white]%}└─ %B${PINFO}%#%b "
-    RPROMPT=""
+    PROMPT="%{$fg[white]%}┌─ ${topstr}
+└─ ${botstr}"
+    RPROMPT="%{$fg[cyan]%}%*%{$fg[white]%} ─ [%?]"
 }
 
 setprompt
@@ -328,3 +336,51 @@ setprompt
 gensshport() {
     echo $(( $(od -v -An -N4 -tu4 < /dev/urandom) % (2**16-2**10) + 2**10 ))
 }
+
+#ssh() {
+#    if [[ -n "$TMUX" ]] ; then
+#        echo "$0 $@" > "$HOME/.var/run/tmux.$(tmux display-message -p '#S').cmd"
+#        tmux detach-client >/dev/null 2>&1
+#    else
+#        command ssh "$@"
+#    fi
+#}
+
+tmux_after() {
+    cmdfile="$HOME/.var/run/tmux.$1.cmd"
+    if [[ -e "$cmdfile" ]] ; then
+        command $(<"$cmdfile")
+        rm "$cmdfile"
+        if tmux has-session -t "$1" ; then
+            tmux_wrap attach-session -t "$1"
+        fi
+    fi
+    exit
+}
+
+tmux_wrap() {
+    tmux "$1" "$2" "$3"
+    tmux_after "$3"
+}
+
+# desired behavior is like this:
+# if a shell is started, it automatically attaches to the lowest "s-x" session that has
+# no attached clients
+
+return 
+
+[[ -n "$TMUX" ]] && return
+
+for (( id=1 ;; id++ )) ; do
+    sessionname="s-${id}"
+    if tmux has-session -t "${sessionname}" ; then
+        if [[ -z "$(tmux list-clients -t "${sessionname}")" ]] ; then
+            tmux_wrap attach-session -t "${sessionname}"
+        else
+            continue
+        fi
+    else
+        tmux_wrap new-session -s "${sessionname}"
+    fi
+done
+

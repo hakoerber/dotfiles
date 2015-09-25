@@ -19,7 +19,7 @@
     set $mod Mod4
 
     # The default terminal
-    set $terminal ~/bin/start-urxvtc.sh 
+    set $terminal urxvt
     #-e bash -c "tmux -q has-session && exec tmux attach-session -d || exec tmux new-session -n$USER -s$USER@$HOSTNAME"
 
     # Path to the exit script
@@ -200,16 +200,16 @@
             # Pressing right will grow the window’s width.
             # Pressing up will shrink the window’s height.
             # Pressing down will grow the window’s height.
-            bindsym $left  resize shrink width 10 px or 10 ppt
-            bindsym $down  resize grow height 10 px or 10 ppt
-            bindsym $up    resize shrink height 10 px or 10 ppt
-            bindsym $right resize grow width 10 px or 10 ppt
+            bindsym $left  resize shrink width 5 px or 5 ppt
+            bindsym $down  resize grow height 5 px or 5 ppt
+            bindsym $up    resize shrink height 5 px or 5 ppt
+            bindsym $right resize grow width 5 px or 5 ppt
 
             # same bindings, but for the arrow keys
-            bindsym 113 resize shrink width 10 px or 10 ppt
-            bindsym 116 resize grow height 10 px or 10 ppt
-            bindsym 111 resize shrink height 10 px or 10 ppt
-            bindsym 114 resize grow width 10 px or 10 ppt
+            bindsym 113 resize shrink width 5 px or 5 ppt
+            bindsym 116 resize grow height 5 px or 5 ppt
+            bindsym 111 resize shrink height 5 px or 5 ppt
+            bindsym 114 resize grow width 5 px or 5 ppt
 
             # back to normal: Enter or Escape
             bindsym Return mode "default"
@@ -245,14 +245,14 @@
     # Do show borders at the screen edges
     hide_edge_borders none
 
-    focus_follows_mouse no
+    focus_follows_mouse yes
 
     # Only map a popup in fullscreen mode if it belongs to the fullscreen window
     # <smart|ignore|leave_fullscreen>
     popup_during_fullscreen leave_fullscreen
 
     # Do not always wrap but change to a container on the same level instead
-    force_focus_wrapping yes
+    force_focus_wrapping no
 
     force_xinerama no
 
@@ -309,6 +309,7 @@ client.urgent           #2f343a #900000 #ffffff #900000
     for_window [class="^Thunderbird$"] border none
     for_window [instance="^shutdown-menu$"] border normal
     for_window [class="^VirtualBox$" ] border normal
+    for_window [class="^Virt-manager$" ] border normal
 
     #assign [class="^Thunderbird"] $workspace9
     assign [class="^Firefox$" ] $workspace1
@@ -320,6 +321,58 @@ client.urgent           #2f343a #900000 #ffffff #900000
     assign [class="^Zim$" ] $workspace8
     assign [class="^Thunderbird$" ] $workspace9
     assign [class="^Skype$"] $workspace10
+    assign [class="^Mumble"] $workspace10
+    assign [class="^Deluge$"] $workspace5
 
 
+# bind some keys
+bindsym XF86Sleep exec --no-startup-id $path_i3exit suspend
+bindsym XF86AudioMute exec --no-startup-id amixer set Master toggle
+bindsym XF86AudioRaiseVolume exec --no-startup-id bash $HOME/.i3/scripts/pa-volume.bash set-vol +5 ; exec --no-startup-id "bash $HOME/.i3/scripts/update-status.bash"
+bindsym XF86AudioLowerVolume exec --no-startup-id bash $HOME/.i3/scripts/pa-volume.bash set-vol -5 ; exec --no-startup-id "bash $HOME/.i3/scripts/update-status.bash"
+# keys seemingly switched
+bindsym XF86MonBrightnessUp   exec --no-startup-id xbacklight -dec 5 ; exec --no-startup-id "bash $HOME/.i3/scripts/update-status.bash"
+bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -inc 5 ; exec --no-startup-id "bash $HOME/.i3/scripts/update-status.bash"
+
+bindsym XF86AudioPlay exec --no-startup-id mpc toggle
+
+bindsym XF86AudioPrev exec --no-startup-id mpc prev
+bindsym XF86AudioNext exec --no-startup-id mpc next
+
+# font for window titles. ISO 10646 = Unicode
+font pango:DejaVu Sans Mono 11
+
+bindsym $mod+o exec --no-startup-id "bash -c '~/dev/projects/xautorandr/xautorandr ; kill -SIGUSR2 $(cat $HOME/.var/run/wallchanger.pid)'"
+bindsym $mod+p exec --no-startup-id "bash -c 'kill -SIGUSR1 $(cat $HOME/.var/run/wallchanger.pid)'"
+
+# start i3bar to display a workspace bar (plus the system information i3status
+# finds out, if available)
+bar {
+    # always show at the top of the screen
+    mode dock
+    position top
+
+    tray_output primary
+
+    # show workspace buttons
+    workspace_buttons yes
+
+    id bar-0
+
+    font pango:DejaVu Sans, Icons 11
+
+    colors {
+        background #000000
+        statusline #ffffff
+        separator #e16b40
+
+        focused_workspace  #e16b40 #000000 #ffffff
+        active_workspace   #000000 #5f676a #ffffff
+        inactive_workspace #000000 #000000 #dddddd
+        urgent_workspace #D00000 #D00000 #000000
+    }
+
+    i3bar_command i3bar
+    status_command bash ~/.i3/scripts/i3bar_wrapper.bash ~/.i3/conky/statusbar.conkyrc
+}
 
