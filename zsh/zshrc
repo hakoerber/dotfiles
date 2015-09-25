@@ -149,6 +149,9 @@ alias calc='python3 -ic "from math import *; import cmath"'
 # show non-printable characters by default
 alias cat="cat -v"
 
+alias vimrc="vim -c ':e \$MYVIMRC'"
+alias zshrc="vim -c ':e ~/.zshrc'"
+
 # rebase the current branch onto WTF ARE YOU DOING YOU ARE DRUNNK TO GO BED
 ##alias rebase="git rebase -i $(git branch --contains HEAD | grep -v '\*.*' | head -1)"
 

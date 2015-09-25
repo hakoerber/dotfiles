@@ -1,282 +1,122 @@
 " vim: set filetype=vim
 
-" 01 important
-" 02 moving around, searching and patterns
-" 03 tags
-" 04 displaying text
-" 05 syntax, highlighting and spelling
-" 06 multiple windows
-" 07 multiple tab pages
-" 08 terminal
-" 09 using the mouse
-" 10 printing
-" 11 messages and info
-" 12 selecting text
-" 13 editing text
-" 14 tabs and indenting
-" 15 folding
-" 16 diff mode
-" 17 mapping
-" 18 reading and writing files
-" 19 the swap file
-" 20 command line editing
-" 21 executing external commands
-" 22 running make and jumping to errors
-" 23 language specific
-" 24 multi-byte characters
-" 25 various
-
 set nocompatible
-
-" setup of vundle
 filetype off
-
 set rtp+=~/.vim/bundle/Vundle.vim/
-
 call vundle#begin()
 
 Plugin 'gmarik/vundle'
 
-" monokai color theme
 Plugin 'sickill/vim-monokai'
-
-" display the undo history in a graph
-Plugin 'mbbill/undotree'
-
-" tree explorer plugin
-Plugin 'scrooloose/nerdtree'
-
-" quoting/parenthesizing made simple
+"Plugin 'mbbill/undotree'
+"Plugin 'scrooloose/nerdtree'
 Plugin 'tpope/vim-surround'
-
-" better commenting
 Plugin 'tpope/vim-commentary'
-
-" nice auto completion
 Plugin 'Valloric/YouCompleteMe'
-
-" nice text alignment
 Plugin 'godlygeek/tabular'
-
-" status line plugin
 Plugin 'bling/vim-airline'
-
-" date/time support for CTRL-x and CTRL-a
 Plugin 'tpope/vim-speeddating'
-
-" git integration
-Plugin 'tpope/vim-fugitive'
-
-" python specific stuff
+" Plugin 'tpope/vim-fugitive'
 Plugin 'klen/python-mode'
-
 Plugin 'nblock/vim-dokuwiki'
-
 Plugin 'saltstack/salt-vim'
-
 Plugin 'lepture/vim-jinja'
-
-" incremental visual mode
 "Plugin 'terryma/vim-expand-region'
-"
 "Plugin 'wincent/Command-T'
-"
 "Plugin 'sjl/gundo.vim'
-"
 Plugin 'kien/ctrlp.vim'
-"
 "Plugin 'PeterRincker/vim-argumentative'
-"
 "Plugin 'wellle/targets.vim'
-"
 "Plugin 'Lokaltog/vim-easymotion'
-"
 "Plugin 'terryma/vim-multiple-cursors'
-"
 "Plugin 'flazz/vim-colorschemes'
-
 Plugin 'reedes/vim-pencil'
 
 call vundle#end()
-
 filetype plugin indent on
 
 set t_Co=256
 
-" setup for pymode
-let g:pymode_trim_whitespaces = 1
-let g:pymode_lint_on_write = 0
-let g:pymode_lint_unmodified = 0
-let g:pymode_lint_on_fly = 0
-let g:pymode_rope = 0
-let g:pymode_rope_completion = 0
-"let g:pymode_rope_completion_on_dot = 1
-let g:pymode_rope_goto_definition_cmd = "new"
-let g:pymode_syntax_all = 1
-let g:pymode_options = 1
-
-
-" setup for the solarized color theme
-set background=dark
-let g:solarized_termcolors=16
-let g:solarized_termtrans=1
-let g:solarized_contrast="normal"
-let g:solarized_visibility="normal"
-syntax enable
-colorscheme monokai
-
-" setup for vim-airline
-let g:airline_theme='powerlineish'
-let g:airline_left_sep=''
-let g:airline_right_sep=''
-let g:airline_section_x = '%{PencilMode()}'
-let g:pencil#mode_indicators = {'hard': 'H', 'auto': 'A', 'soft': 'S', 'off': '',}
-"let g:airline_section_z=''
-
-" enable tabline at the top showing all buffers
-"let g:airline#extensions#tabline#enabled = 1
-
-let g:ycm_complete_in_comments = 0
-let g:ycm_complete_in_strings = 1
-let g:ycm_collect_identifiers_from_comments_and_strings = 0
-let g:ycm_seed_identifiers_with_syntax = 1
-let g:ycm_add_preview_to_completeopt = 1
-let g:ycm_autoclose_preview_window_after_completion = 1
-let g:ycm_autoclose_preview_window_after_insertion = 1
-
-set colorcolumn=79
-"set clipboard=unnamed               " enable copying into the clipboard
-
-
-set esckeys                         " enable cursor keys in insert mode
-set ttimeoutlen=50
-
-set modeline                        " respect modelines in files
-set modelines=5
-
-set laststatus=2                    " always show a status line
-
-"set nostartofline                   " do not reset the cursor into the first
-"                                    " column when moving
-
-set shortmess=rti                   " shorten some messages
-
-set mouse=a                         " enable mouse support
-set mousehide                       " hide the mouse when typing
-
-set history=1000                    " history length for commands, defaults to
-                                    " 20
-
-set nobackup                        " do not create a backup
-set nowritebackup
+set autochdir
+set autoindent
+set autoread
+set backspace=indent,eol,start
 set backupcopy=no
-
-
-set noshowmode                      " do not show the current mode, as this
-                                    " will be handled by vim-airline in the
-                                    " statusline
-set cursorline                      " highlight the current line
-set number                          " enable linenumbers
-set numberwidth=2                   " only use as many columns for the line
-                                    " numbers as necessary
-set relativenumber                  " show file numbers relative to the current
-                                    " line instead of absolute ones, but still
-                                    " the absolute linenumber on the current
-                                    " line due to 'number' being set
-set showmatch                       " show matching brackets/parentheses
-set incsearch                       " show matches while typing in a search
-set hlsearch                        " highlight matches in a search
-set wrapscan                        " wrap searches at the end of the file
-
-set ignorecase                      " ignore case when only searching for
-set smartcase                       " lowercase letters, case sensitive
-                                    " otherwise
-
-set foldenable                      " auto-fold code
-
-set wrap                            " wrap text
-set linebreak
-
-set backspace=indent,eol,start      " allowing backspacing over autoindent,
-                                    " line breaks and start of insert
-
-set encoding=utf-8                  " set the encoding
-
-
-set showmode                        " show current mode in the status line
-
-set swapfile                        " use a swapfile
+set colorcolumn=79
+set colorcolumn=80
+set confirm
+set cursorline
 set directory=/var/tmp,/tmp
-set updatecount=200                 " default, number of characters that have
-                                    " to be typed before the swapfile is
-                                    " written to disk
-set updatetime=10000                " time in milliseconds after the swapfile
-                                    " is written to disk
-
-set title                           " let vim set the title of the window
-set titlestring=""                  " use default titlestring
-
-set autoread                        " automatically reload a file when it was
-                                    " changed outside of vim
-
-set gdefault                        " apply replace patterns to the whole line
-                                    " by default
-
-set tabstop=4                       " one tab equals 4 spaces
-set softtabstop=4                   " makes the spaces feel like real tabs
-set shiftwidth=4                    " one indent level equals 4 spaces
-set expandtab                       " expand tabs to spaces
-set autoindent                      " copy indent from current line when
-                                    " starting a new one
-set smarttab                        " use shiftwidth when tabbing in front of
-                                    " a line instead of tabsstop/softtabstop
-set shiftround                      " round indent to multiples of shiftwidth
-
-set undofile                        " use an undo file
-set undodir=~/.vim/undo             " store undo files in a fixed directory
-                                    " instead of the current directory
-set undolevels=1000                 " undo a maximum of 1000 changes
-set undoreload=10000                " save the whole buffer for undo when
-                                    " reloading it
-
-
-set foldmethod=indent               " fold according to indet
-set foldnestmax=2                   " fold a maximum of 2 levels
-set nofoldenable                    " unfold everything by default
-
-set scrolloff=5                     " show context at the screen edges
-
-
-set showcmd                         " show (partial) command in the command line
-set hidden                          " buffers can exist without a window
-
-set ttyfast                         " enhance smoothness
-set ruler                           " show position in status line
-
-set wildmenu                        " show a menu when autocompleting
-set wildmode=list:longest           " automatically complete up to the level
-                                    " of ambiguity
-
-set autochdir                       " automatically change to the directory that
-                                    " contains the file that is edited
-
-set matchpairs="(:),{:},[:]"        " matching pairs for the '%'-command
-
-set notildeop                       " do not make '~' behave like an operator
-
-set virtualedit+="block"            " allow moving the cursor where there is no
-                                    " actual character in virtual block mode
-
-set wildignore=*.swp,*.bak,*.pyc    " files to ignore when expanding wildcards
-
-set noerrorbells                    " do not beep on errors
-
-set colorcolumn=80                  " highlight the 80st column
-
-"set list                            " show specific spectial characters
-"set listchars=                      " no trailing whitespace as '~'
+set encoding=utf-8
+set esckeys
+set expandtab
+set foldenable
+set foldmethod=indent
+set foldnestmax=2
+set gdefault
+set hidden
+set history=1000
+set hlsearch
+set ignorecase
+set incsearch
+set laststatus=2
+set linebreak
+set matchpairs="(:),{:},[:],<:>"
+set modeline
+set modelines=5
+set mouse=a
+set mousehide
+set nobackup
+set noerrorbells
+set nofoldenable
+set noshowmode
+set notildeop
+set notimeout
+set nowritebackup
+set number
+set numberwidth=2
+set pastetoggle=<F11>
+set relativenumber
+set ruler
+set scrolloff=7
+set shiftround
+set shiftwidth=4
+set shortmess=rti
+set showcmd
+set showmatch
+set matchtime=5
+set showmode
+set smartcase
+set lazyredraw
+set smarttab
+set softtabstop=4
+set swapfile
+set tabstop=4
+set title
+set titlestring=""
+set ttimeout
+set ttimeoutlen=50
+set ttyfast
+set undodir=~/.vim/undo
+set undofile
+set undolevels=1000
+set undoreload=10000
+set updatecount=200
+set updatetime=10000
+set viewdir=~/.vim/view
+set virtualedit+="block"
+set virtualedit="onemore,all"
+set whichwrap+=h,l
+set wildignore=*.swp,*.bak,*.pyc,*~,*.o
+set wildmenu
+set wildmode=list:longest
+set wrap
+set wrapscan
+set magic
 
 let mapleader = "\<Space>"
+map <leader>w: w!<cr>
+
 nnoremap <Leader>w :w<CR>
 
 vmap <Leader>y "+y
@@ -307,10 +147,10 @@ nnoremap <leader>, :nohlsearch<CR>
 noremap gV `[v`]
 
 " make Y behave like other capitals, otherwise Y would work like yy
-nnoremap Y y$
+map Y y$
 
-nnoremap j gj
-nnoremap k gk
+map j gj
+map k gk
 
 "function! TrimWhiteSpace()
 "     %s/\s\+$//e
@@ -342,7 +182,6 @@ nnoremap <F3> :NERDTreeToggle<CR>
 nnoremap <F4> :TagbarToggle<CR>
 
 " Autosave views when closing and restoring when opening again.
-set viewdir=~/.vim/view
 autocmd BufWinLeave *.* mkview
 autocmd BufWinEnter *.* silent loadview
 
@@ -387,6 +226,45 @@ nnoremap Q <nop>
 
 nnoremap <leader>r :%s///<Left><Left>
 
-set virtualedit="onemore,all"
 
 autocmd BufWritePre *.rst silent :%s/\s\+$//e
+" setup for pymode
+let g:pymode_trim_whitespaces = 1
+let g:pymode_lint_on_write = 0
+let g:pymode_lint_unmodified = 0
+let g:pymode_lint_on_fly = 0
+let g:pymode_rope = 0
+let g:pymode_rope_completion = 0
+"let g:pymode_rope_completion_on_dot = 1
+let g:pymode_rope_goto_definition_cmd = "new"
+let g:pymode_syntax_all = 1
+let g:pymode_options = 1
+
+
+" setup for the solarized color theme
+set background=dark
+let g:solarized_termcolors=16
+let g:solarized_termtrans=1
+let g:solarized_contrast="normal"
+let g:solarized_visibility="normal"
+syntax enable
+colorscheme monokai
+
+" setup for vim-airline
+let g:airline_theme='powerlineish'
+let g:airline_left_sep=''
+let g:airline_right_sep=''
+let g:airline_section_x = '%{PencilMode()}'
+let g:pencil#mode_indicators = {'hard': 'H', 'auto': 'A', 'soft': 'S', 'off': '',}
+"let g:airline_section_z=''
+
+" enable tabline at the top showing all buffers
+"let g:airline#extensions#tabline#enabled = 1
+
+let g:ycm_complete_in_comments = 0
+let g:ycm_complete_in_strings = 1
+let g:ycm_collect_identifiers_from_comments_and_strings = 0
+let g:ycm_seed_identifiers_with_syntax = 1
+let g:ycm_add_preview_to_completeopt = 1
+let g:ycm_autoclose_preview_window_after_completion = 1
+let g:ycm_autoclose_preview_window_after_insertion = 1
