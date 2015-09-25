@@ -5,6 +5,8 @@ filetype off
 set rtp+=~/.vim/bundle/Vundle.vim/
 call vundle#begin()
 
+" === plugin setup ===
+
 Plugin 'VundleVim/Vundle.vim'
 
 Plugin 'bling/vim-airline'
@@ -38,89 +40,115 @@ Plugin 'tpope/vim-surround'
 call vundle#end()
 filetype plugin indent on
 
+
+" === General options ===
+
 set t_Co=256
 
-set autochdir
+" == tabs / spaces / indent ==
+set tabstop=4
+set smarttab
+set softtabstop=4
+set shiftround
+set shiftwidth=4
 set autoindent
-set autoread
-set backspace=indent,eol,start
-set backupcopy=no
-set colorcolumn=80
-set confirm
-set cursorline
-set directory=/var/tmp,/tmp
-set encoding=utf-8
-set esckeys
 set expandtab
+set smartindent
+
+" == ui ==
+set cursorline
+set showcmd
+set number
+set wildmode=list:longest
+set lazyredraw
+set wildmenu
+set showmatch
+set colorcolumn=80
+set laststatus=2
+set matchtime=5
+set mouse=a
+set mousehide
+set noerrorbells
+set showmode
+set numberwidth=2
+set relativenumber
+set shortmess=rti
+set ruler
+set scrolloff=7
+set title
+set titlestring=""
+set ttyfast
+
+" == searching ==
+set hlsearch
+set incsearch
+set gdefault
+set ignorecase
+set magic
+set smartcase
+
+" == folding ==
 set foldenable
 set foldmethod=indent
 set foldnestmax=2
-set gdefault
-set hidden
-set history=1000
-set hlsearch
-set ignorecase
-set incsearch
-set laststatus=2
-set lazyredraw
-set linebreak
-set magic
-set matchpairs="(:),{:},[:],<:>"
-set matchtime=5
-set modeline
-set modelines=5
-set mouse=a
-set mousehide
+set foldlevelstart=2
+
+" == backups ==
 set nobackup
-set noerrorbells
-set nofoldenable
-set noshowmode
-set notildeop
-set notimeout
+set backupcopy=no
 set nowritebackup
-set number
-set numberwidth=2
-set pastetoggle=<F11>
-set relativenumber
-set ruler
-set scrolloff=7
-set shiftround
-set shiftwidth=4
-set shortmess=rti
-set showcmd
-set showmatch
-set showmode
-set smartcase
-set smartindent
-set smarttab
-set softtabstop=4
+
+" == swap ==
 set swapfile
-set tabstop=4
-set title
-set titlestring=""
-set ttimeout
-set ttimeoutlen=50
-set ttyfast
-set undodir=~/.vim/undo
-set undofile
-set undolevels=1000
-set undoreload=10000
 set updatecount=200
 set updatetime=10000
+
+" == undo ==
+set undolevels=1000
+set undoreload=10000
+set undodir=~/.vim/undo
+set undofile
+
+" == environment / directories ==
+set autochdir
+set directory=/var/tmp,/tmp
 set viewdir=~/.vim/view
-set virtualedit+="block"
-set virtualedit="onemore,all"
-set whichwrap+=h,l
+
+" == misc ==
+set autoread
+set confirm
+set encoding=utf-8
+set history=1000
+set modeline
+set modelines=5
+set notildeop
 set wildignore=*.swp,*.bak,*.pyc,*~,*.o
-set wildmenu
-set wildmode=list:longest
+set hidden
+
+" == editing ==
+set backspace=indent,eol,start
+set esckeys
+set matchpairs="(:),{:},[:],<:>"
+set notimeout
+set ttimeout
+set timeoutlen=1000
+set ttimeoutlen=0
+set virtualedit=block
+
+" == line breaking ==
+set linebreak
 set wrap
 set wrapscan
+
+
+" === keybinds ===
+set pastetoggle=<F11>
+
 let mapleader = "\<Space>"
 map <leader>w: w!<cr>
 
-nnoremap <Leader>w :w<CR>
-nmap <Leader><Leader> za
+nnoremap <leader>w :w<CR>
+nmap <leader><leader> za
 map , :
 
 vnoremap <silent> y y`]
@@ -140,10 +168,6 @@ nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
 
-" Autosave views when closing and restoring when opening again.
-autocmd BufWinLeave *.* mkview
-autocmd BufWinEnter *.* silent loadview
-
 nmap <C-n> :bnext<CR>
 nmap <C-p> :bprev<CR>
 
@@ -156,7 +180,15 @@ nmap ; :CtrlPBuffer<CR>
 " no more ex mode
 nnoremap Q <nop>
 
-" setup for the solarized color theme
+" === autocommands ===
+
+" autosave views when closing and restoring when opening again.
+autocmd BufWinLeave *.* mkview
+autocmd BufWinEnter *.* silent loadview
+
+" === plugin setup ===
+
+" == colorscheme ==
 set background=dark
 let g:solarized_termcolors=16
 let g:solarized_termtrans=1
@@ -165,6 +197,7 @@ let g:solarized_visibility="normal"
 syntax enable
 colorscheme monokai
 
+" == tagbar ==
 nnoremap <F10> :TagbarToggle<CR>
 let g:tagbar_map_jump = "i"
 let g:tagbar_left = 0
@@ -178,6 +211,7 @@ let g:tagbar_indent = 2
 let g:tagbar_show_linenumbers = 0
 let g:tagbar_foldlevel = 99 " unfold all
 
+" == airline ==
 let g:airline_right_sep = ''
 let g:airline_left_sep = ''
 let g:airline#extensions#disable_rtp_load = 1
@@ -189,6 +223,7 @@ let g:airline#extensions#whitespace#enabled = 1
 let g:airline#extensions#whitespace#symbol = ''
 let g:airline#extensions#whitespace#checks = ['trailing']
 
+" === functions ===
 function! DeleteTrailingWS()
      exe "normal mz"
      %s/\s\+$//e
