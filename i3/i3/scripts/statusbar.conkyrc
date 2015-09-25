@@ -11,10 +11,6 @@ double_buffer yes
 update_interval 1.0
 update_interval_on_battery 1.0
 
-mpd_host 10.11.11.190
-mpd_port 6600
-
-
 # pad_percents is useless without use_spacer, but the latter leads to some ugly gaps
 #pad_percents 2
 #use_spacer left
@@ -22,37 +18,16 @@ mpd_port 6600
 #${mpd_artist} - ${mpd_title} ${mpd_elapsed}/${mpd_length}\
 TEXT
 [\
-{ "full_text" : "\
-${if_mpd_playing}\
-${if_match "${mpd_status}" == "Paused"}\
-   \
-${else}\
-   \
-${endif}\
-${mpd_title} ${mpd_elapsed}/${mpd_length}\
-${else}\
-   stopped\
-${endif}\
- " , "name" : "mpd_toggle" },\
-\
-\
-\
 { "full_text" : "     \
 ${texeci 5 bash $HOME/.i3/scripts/pa-volume.bash status} " , "color" : "\#FFFFFF" , "name" : "volume" },\
 \
 \
 \
-${if_existing /sys/class/power_supply/BAT1}\
-${texeci 10 bash $HOME/.i3/scripts/status.d/battery.bash conky}\
-${endif}\
+${texeci 10 bash $HOME/.i3/scripts/battery.bash conky}\
 \
 \
 \
 { "full_text" : "     ${kernel} " , "color" : "\#FFFFFF" , "name" : "sysinfo" },\
-\
-\
-\
-{ "full_text" : "     ${texeci 60 bash ~/.i3/scripts/status.d/conky_pacman.bash} " , "color" : "\#FFFFFF" , "name" : "pacman" },\
 \
 \
 \
