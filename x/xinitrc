@@ -1,9 +1,10 @@
 #!/bin/bash
 
-export LOGDIR="$HOME/.var/log/"
+export LOGDIR="$HOME/.var/log"
 export RUNDIR="$HOME/.var/run"
 
 [[ ! -d "LOGDIR" ]] && mkdir -p "$LOGDIR"
+[[ ! -d "RUNDIR" ]] && mkdir -p "$RUNDIR"
 
 LOGFILE="$LOGDIR/xinitrc.log"
 
@@ -26,20 +27,8 @@ fi
 export LANG=en_US.UTF-8
 
 start_wm() {
-    log "generating i3 config"
-    I3_LOG="$LOGDIR/i3/i3.log"
-    I3_LOGOLD="${I3_LOG}.old"
-
-    # simple logrotate so we can still get info about the last session
-    if [[ -f "$I3_LOG" ]] ; then
-        log "moving old i3 log at $I3_LOG to $I3_LOGOLD"
-        mv -f "$I3_LOG" "$I3_LOGOLD"
-    fi
-
-    [[ ! -d "$(dirname $I3_LOG)" ]] && mkdir -p "$(dirname $I3_LOG)"
-    SESSION_CONF=$(bash "$HOME/.i3/scripts/genconfig.bash")
-    log "generated, starting i3"
-    exec i3 -c "$SESSION_CONF" >> "$LOGDIR/i3/i3.log"
+    log "starting i3"
+    exec i3 -c "$HOME/.i3/config" >> "$LOGDIR/i3/i3.log"
 }
 
 
@@ -47,10 +36,10 @@ start_wm() {
 keyboard_layout=de
 keyboard_variant=nodeadkeys
 keyboard_repeat_delay=150
-keyboard_repeat_speed=30
+keyboard_repeat_speed=50
 
 # path and options for the wallpaper changer script
-path_wallchanger="$HOME/development/projects/wallchanger/wallchanger"
+path_wallchanger="$HOME/dev/projects/wallchanger/wallchanger"
 wallchanger_pidfile="$RUNDIR/wallchanger.pid"
 wallpaper_directory="$HOME/pictures/wallpaper/misc"
 wallpaper_logfile="$LOGDIR/wallpaper.log"
@@ -80,11 +69,11 @@ pasystray & &>> $LOGFILE
 log "starting dropboxd"
 nice -n 10 ionice -c 3 dropboxd & &>> $LOGFILE
 
-log "starting conky clock on desktop"
-{   
-    sleep 1
-    conky -c "$HOME/.conky/clock.conkyrc"
-} & &>> $LOGFILE
+#log "starting conky clock on desktop"
+#{
+#    sleep 1
+#    conky -c "$HOME/.conky/clock.conkyrc"
+#} & &>> $LOGFILE
 
 # start the wallpaper changer
 log "starting $path_wallchanger"
@@ -115,9 +104,15 @@ xcompmgr & &>> $LOGFILE
 log "starting network tray application"
 nm-applet & &>> $LOGFILE
 
+log "starting seafile"
+seafile-applet & &>> $LOGFILE
+
 # disable auto screen disable
 xset -dpms & &>> $LOGFILE
 xset s off & &>> $LOGFILE
+
+
+xrandr --output eDP1 --primary
 
 # execute the host-specific .xinitrc-addition
 hostfile="$HOME/.xinitrc.d/$(hostname --short).xinitrc"
@@ -135,5 +130,10 @@ if [[ -f ~/.Xresources ]] ; then
 else
     log "~/.Xresources not found"
 fi
+
+synclient VertEdgeScroll=0
+synclient VertTwoFingerScroll=1
+synclient MaxSpeed=2.2
+synclient AccelFactor=0.08
 
 start_wm

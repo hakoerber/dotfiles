@@ -1,5 +1,5 @@
 [user]
-	name = Hannes Körber
+	name = Hannes Koerber
 	email = hannes.koerber@gmail.com
 [alias]
     untrack = "rm --cached"
@@ -20,6 +20,8 @@
     last = "log -1 HEAD"
 
     logl = log --graph --decorate --pretty=oneline --abbrev-commit --all
+
+    pushall = "!sh -c 'for r in $(git remote) ; do echo \"[$r] \" ; git push $r $1; done' -"
 
 [core]
     editor = vim

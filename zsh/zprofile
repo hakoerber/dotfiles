@@ -1,10 +1,28 @@
 # exec startx breaks some logind fuckery, without exec it works
 #tmux start-server &
-eval $(ssh-agent -s)
+_path=("$HOME/bin"
+       "/usr/local/sbin"
+       "/usr/local/bin"
+       "/usr/sbin"
+       "/usr/bin"
+       "/sbin"
+       "/bin"
+       "/usr/games")
+
+PATH=""
+for part in ${_path} ; do
+    PATH="$PATH:${part}"
+done
+PATH="${PATH#:}"
+export PATH
 
 export EDITOR="vim"
 export VISUAL="vim"
-export PATH="$HOME/bin:$PATH"
 export BROWSER="firefox"
 
-[[ -z $DISPLAY && $XDG_VTNR -eq 1 ]] && startx
+if [[ -z "$SSH_CONNECTION" ]] ; then
+    eval $(ssh-agent -s)
+    
+    [[ -z $DISPLAY && $XDG_VTNR -eq 1 ]] && startx
+fi
+
