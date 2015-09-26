@@ -17,6 +17,7 @@ Plugin 'nblock/vim-dokuwiki'
 Plugin 'reedes/vim-pencil'
 Plugin 'saltstack/salt-vim'
 Plugin 'sickill/vim-monokai'
+Plugin 'sjl/gundo.vim'
 Plugin 'tpope/vim-commentary'
 Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-speeddating'
@@ -45,7 +46,7 @@ filetype plugin indent on
 
 set t_Co=256
 
-" == tabs / spaces / indent ==
+" == formatting ==
 set tabstop=4
 set smarttab
 set softtabstop=4
@@ -54,6 +55,7 @@ set shiftwidth=4
 set autoindent
 set expandtab
 set smartindent
+set formatoptions=tcroqnj
 
 " == ui ==
 set cursorline
@@ -128,7 +130,7 @@ set hidden
 " == editing ==
 set backspace=indent,eol,start
 set esckeys
-set matchpairs="(:),{:},[:],<:>"
+set matchpairs=(:),{:},[:],<:>
 set notimeout
 set ttimeout
 set timeoutlen=1000
@@ -171,11 +173,15 @@ nnoremap <C-l> <C-w>l
 nmap <C-n> :bnext<CR>
 nmap <C-p> :bprev<CR>
 
+map N Nzz
+map n nzz
+
 inoremap jj <ESC>
 
 nnoremap <leader>v <C-w>v<C-w>l
 
-nmap ; :CtrlPBuffer<CR>
+nnoremap <leader>u :GundoToggle<CR>
+
 
 " no more ex mode
 nnoremap Q <nop>
