@@ -6,7 +6,7 @@
     unstage = "reset HEAD"
     unmodify = "checkout --"
     ignore-changes = "update-index --assume-unchangend"
-    unignore-changes = "update-index --no-assume-unchanged"    
+    unignore-changes = "update-index --no-assume-unchanged"
     visual = "!gitk"
     staged = "diff --staged"
 
@@ -21,7 +21,7 @@
 
     logl = log --graph --decorate --pretty=oneline --abbrev-commit --all
 
-    pushall = "!sh -c 'for r in $(git remote) ; do echo \"[$r] \" ; git push $r $1; done' -"
+    pushall = "!sh -c 'for r in $(git remote) ; do echo \"--- [$r] ---\" ; git push $r $1; done' -"
 
 [core]
     editor = vim
@@ -29,7 +29,7 @@
     whitespace = ""
     excludesfile = "~/.gitignore_global"
 [color]
-    ui = true 
+    ui = true
 [gui]
 	recentrepo = /home/hannes/programming/git-repositories/autobackup
 [push]

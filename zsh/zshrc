@@ -95,7 +95,7 @@ bm() {
 }
 
 
-[[ $TERM == "urxvt" ]] && export TERM="rxvt-unicode" 
+[[ $TERM == "urxvt" ]] && export TERM="rxvt-unicode"
 [[ $TERM == "screen" ]] && export TERM="screen-256color"
 
 ### ALIASES
@@ -151,6 +151,8 @@ alias cat="cat -v"
 
 alias vimrc="vim -c ':e \$MYVIMRC'"
 alias zshrc="vim -c ':e ~/.zshrc'"
+
+alias vim="nvim"
 
 # rebase the current branch onto WTF ARE YOU DOING YOU ARE DRUNNK TO GO BED
 ##alias rebase="git rebase -i $(git branch --contains HEAD | grep -v '\*.*' | head -1)"
@@ -214,7 +216,7 @@ extr()
             *.Z       ) uncompress "$1"   ;;
             *.7z      ) 7z x "$1"         ;;
             *)
-                echo "$1 cannot be extracted via $0" 
+                echo "$1 cannot be extracted via $0"
                 ;;
         esac
     else
@@ -370,7 +372,7 @@ tmux_wrap() {
 # if a shell is started, it automatically attaches to the lowest "s-x" session that has
 # no attached clients
 
-return 
+return
 
 [[ -n "$TMUX" ]] && return
 
