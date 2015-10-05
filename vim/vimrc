@@ -192,9 +192,9 @@ nnoremap Q <nop>
 
 " === autocommands ===
 
-" autosave views when closing and restoring when opening again.
-autocmd BufWinLeave *.* mkview
-autocmd BufWinEnter *.* silent loadview
+"" autosave views when closing and restoring when opening again.
+"autocmd BufWinLeave *.* mkview
+"autocmd BufWinEnter *.* silent loadview
 
 " === plugin setup ===
 
