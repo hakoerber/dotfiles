@@ -143,6 +143,7 @@ alias g="git"
 alias t="tmux"
 alias c="cd"
 alias l="ls"
+alias s="sudo"
 
 alias calc='python3 -ic "from math import *; import cmath"'
 
@@ -150,7 +151,7 @@ alias calc='python3 -ic "from math import *; import cmath"'
 alias cat="cat -v"
 
 alias vimrc="vim -c ':e \$MYVIMRC'"
-alias zshrc="vim -c ':e ~/.zshrc'"
+alias zshrc="vim -c ':e ~/.zshrc' ; source ~/.zshrc"
 
 alias vim="nvim"
 
