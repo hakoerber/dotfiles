@@ -1,20 +1,12 @@
 #!/bin/bash
 
 export LOGDIR="$HOME/.var/log"
-export RUNDIR="$HOME/.var/run"
-
-[[ ! -d "LOGDIR" ]] && mkdir -p "$LOGDIR"
-[[ ! -d "RUNDIR" ]] && mkdir -p "$RUNDIR"
-
 LOGFILE="$LOGDIR/xinitrc.log"
 
 log() {
     echo "[$(date +%FT%T)] $*" >> "$LOGFILE"
 }
 
-log "xinitrc startup"
-
-xsetroot -solid '#333333'
 
 if [ -d /etc/X11/xinit/xinitrc.d ]; then
   for f in /etc/X11/xinit/xinitrc.d/*; do
@@ -26,103 +18,23 @@ fi
 [ -f /etc/xprofile ] && source /etc/xprofile
 [ -f ~/.xprofile ] && source ~/.xprofile
 
-export LANG=en_US.UTF-8
-
 start_wm() {
     log "starting i3"
     exec i3 -c "$HOME/.i3/config" >> "$LOGDIR/i3/i3.log"
 }
 
+autostart() {
+    if [[ -d "$HOME/.autostart" ]] ; then
+        log "Looking for autostart files."
+        for f in "$HOME/.autostart/"*.sh ; do
+            if [[ -x "$f" ]] ; then
+                log "Executing autostart file \"$f\""
+                . "$f"
+            fi
+        done
+    fi
+}
 
-# keyboard options
-keyboard_layout=de
-keyboard_variant=nodeadkeys
-keyboard_repeat_delay=150
-keyboard_repeat_speed=50
-
-# path and options for the wallpaper changer script
-path_wallchanger="$HOME/projects/wallchanger/wallchanger"
-wallchanger_pidfile="$RUNDIR/wallchanger.pid"
-wallpaper_directory="$HOME/pictures/wallpaper/misc"
-wallpaper_logfile="$LOGDIR/wallpaper.log"
-wallpaper_fallback="$HOME/.i3/data/wallpaper/"
-wallpaper_interval="10800"
-
-# redshift settings
-redshift_lat_long="49.5:11"
-redshift_colortemp="5500:3700"
-
-# start mpd
-if ! pgrep --euid hannes --exact '^mpd$' ; then
-    log "mpd is not running, starting mpd"
-    mpd "$HOME/.mpd/mpd.conf" & &>> $LOGFILE
-else
-    log "mpd already running, will not start another instance"
-fi
-
-log "starting zim in tray"
-zim --plugin trayicon & &>> $LOGFILE
-
-# start the pulseaudio volume control tray applet
-log "starting pasystray"
-pasystray & &>> $LOGFILE
-
-# start dropbox
-log "starting dropboxd"
-nice -n 10 ionice -c 3 dropboxd & &>> $LOGFILE
-
-#log "starting conky clock on desktop"
-#{
-#    sleep 1
-#    conky -c "$HOME/.conky/clock.conkyrc"
-#} & &>> $LOGFILE
-
-# start the wallpaper changer
-log "starting $path_wallchanger"
-{
-    sleep 0
-    $path_wallchanger "$wallpaper_directory" "$wallpaper_interval" "$wallpaper_fallback" &
-    echo $! > "$wallchanger_pidfile"
-} & &>> $LOGFILE
-
-# start redshift
-log "starting redshift-gtk"
-redshift-gtk -l "$redshift_lat_long" -t "$redshift_colortemp" & &>> $LOGFILE
-
-# set keyboard layout
-log "setting keyboard layout"
-setxkbmap -layout "$keyboard_layout" -variant "$keyboard_variant" & &>> $LOGFILE
-
-# set key repeat delay
-log "setting key repeat delay"
-xset r rate "$keyboard_repeat_delay" "$keyboard_repeat_speed" & &>> $LOGFILE
-
-log "starting alarm clock applet"
-alarm-clock-applet --hidden & &>> $LOGFILE
-
-log "starting composite manager"
-xcompmgr & &>> $LOGFILE
-
-log "starting network tray application"
-nm-applet & &>> $LOGFILE
-
-log "starting seafile"
-seafile-applet & &>> $LOGFILE
-
-# disable auto screen disable
-xset -dpms & &>> $LOGFILE
-xset s off & &>> $LOGFILE
-
-if [[ -f ~/.Xresources ]] ; then
-    log "found ~/.Xresources, merging it into xrdb"
-    xrdb -merge ~/.Xresources &>> $LOGFILE
-else
-    log "~/.Xresources not found"
-fi
-
-synclient VertEdgeScroll=0
-synclient VertTwoFingerScroll=1
-synclient MaxSpeed=2.2
-synclient AccelFactor=0.08
+autostart
 
 start_wm
