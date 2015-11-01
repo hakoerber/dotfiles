@@ -145,6 +145,8 @@ alias c="cd"
 alias l="ls"
 alias s="sudo"
 
+alias cl="clear"
+
 alias calc='python3 -ic "from math import *; import cmath"'
 
 # show non-printable characters by default
@@ -154,6 +156,7 @@ alias vimrc="vim -c ':e \$MYVIMRC'"
 alias zshrc="vim -c ':e ~/.zshrc' ; source ~/.zshrc"
 
 alias vim="nvim"
+
 
 # rebase the current branch onto WTF ARE YOU DOING YOU ARE DRUNNK TO GO BED
 ##alias rebase="git rebase -i $(git branch --contains HEAD | grep -v '\*.*' | head -1)"
@@ -258,7 +261,7 @@ fnottype() {
     find . -maxdepth 1 ! -type $1
 }
 
-http() {
+httpcode() {
     curl http://httpcode.info/$1
 }
 

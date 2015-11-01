@@ -36,7 +36,7 @@ setvol() {
     else
         newvol="$1"
     fi
-    pactl set-sink-volume $SINK $(( $newvol * 65536 / 100 ))
+    pactl set-sink-volume $SINKNAME $(( $newvol * 65536 / 100 ))
 }
 
 ismuted() {

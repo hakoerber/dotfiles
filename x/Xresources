@@ -8,7 +8,7 @@ URxvt.letterSpace: -1
 
 ! clickable URLs
 URxvt.perl-ext-common: default,matcher,selection-to-clipboard
-URxvt.url-launcher: /usr/bin/chromium
+URxvt.url-launcher: /usr/bin/firefox
 URxvt.matcher.button: 1
 
 URxvt.intensityStyles: false
@@ -17,7 +17,7 @@ URxvt.intensityStyles: false
 
 URxvt.saveLines: 10000
 
-URxvt.fading: 30
+URxvt.fading: 20
 
 URxvt.termName: urxvt
 
