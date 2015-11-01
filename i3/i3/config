@@ -375,5 +375,5 @@ bar {
     }
 
     i3bar_command i3bar
-    status_command bash ~/.i3/scripts/i3bar_wrapper.bash ~/.i3/scripts/statusbar.conkyrc
+    status_command bash ~/.i3/scripts/i3bar_wrapper.bash ~/.i3/conky/statusbar.conkyrc
 }

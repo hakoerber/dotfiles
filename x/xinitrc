@@ -113,19 +113,6 @@ seafile-applet & &>> $LOGFILE
 xset -dpms & &>> $LOGFILE
 xset s off & &>> $LOGFILE
 
-
-xrandr --output eDP1 --primary
-
-# execute the host-specific .xinitrc-addition
-hostfile="$HOME/.xinitrc.d/$(hostname --short).xinitrc"
-log "looking for host specific xinitrc addition at $hostfile"
-if [[ -f "$hostfile" ]] ; then
-    log "found it. executing"
-    bash "$hostfile" & &>> $LOGFILE
-else
-    log "found none"
-fi
-
 if [[ -f ~/.Xresources ]] ; then
     log "found ~/.Xresources, merging it into xrdb"
     xrdb -merge ~/.Xresources &>> $LOGFILE
