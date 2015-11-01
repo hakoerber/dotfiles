@@ -52,7 +52,4 @@ will be used.
 Required third party software
 -----------------------------
 
-- ``zsh`` uses the configuration framework "oh-my-zsh", available at
-  http://github.com/robbyrussell/oh-my-zsh
-
 - ``vim`` uses the plugin manager "vundle", available at https://github.com/gmarik/vundle
