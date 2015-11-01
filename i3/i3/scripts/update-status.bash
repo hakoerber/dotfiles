@@ -1,1 +1,1 @@
-kill -SIGUSR1 $(cat $LOGDIR/i3/conky.pid)
+kill -USR1 $(cat $RUNDIR/i3/conky.pid)

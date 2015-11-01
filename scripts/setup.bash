@@ -14,7 +14,7 @@ backup_dir="$HOME/.dotfiles.bak/"
 
 # the following folders inside $config_dir will be inspected and the
 # contents symlinked:
-symlink_folders='git i3 vim zsh conky x mpd ncmpcpp tmux'
+symlink_folders='git i3 vim zsh x tmux'
 
 MAPPING_SEPARATOR='::'
 
@@ -86,5 +86,4 @@ done
 # copy everything from the skel directory into $HOME, but do not overwrite anything
 # the /. at the end of source is some cp magic that copies the content of a directory
 # instead of the directory inself
-echo "cp -a --no-clobber \"$skel_dir/.\" \"$HOME\""
-[[ $dryrun ]] || cp -a --no-clobber "$skel_dir/." "$HOME"
+[[ $dryrun ]] || rsync --archive --verbose --ignore-existing "$skel_dir/" "$HOME"
