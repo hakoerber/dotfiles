@@ -24,6 +24,7 @@ Plugin 'tpope/vim-speeddating'
 Plugin 'tpope/vim-surround'
 Plugin 'junegunn/goyo.vim'
 Plugin 'junegunn/limelight.vim'
+Plugin 'sheerun/vim-polyglot'
 
 "Plugin 'Lokaltog/vim-easymotion'
 "Plugin 'PeterRincker/vim-argumentative'

@@ -67,8 +67,8 @@
     set $up    k
     set $right l
 
-    set $splith c
-    set $splitv v
+    set $splith v
+    set $splitv c
     set $split_toggle x
 
     set $fullscreen f
@@ -98,6 +98,10 @@
     set $redshift_longitude 11
     set $redshift_colortemp_day 6500
     set $redshift_colortemp_night 4500
+
+    gaps inner 10
+    smart_gaps on
+    smart_borders on
 
 ################################################################################
 ### KEYBINDINGS ################################################################
@@ -283,10 +287,11 @@ client.urgent           #2f343a #900000 #ffffff #900000
 ### APPLICATION SPECIFIC SETTINGS ##############################################
 ################################################################################
 
+    for_window [class="^.*$"] border pixel 0
+
     for_window [class="^Wicd-client.py$"] floating enable
     for_window [class="^Xfce4-notifyd$"] floating enable , border none
     for_window [class="^Conky$"] floating enable
-    for_window [class="^Terminator$"] border 1pixel
     for_window [class="^Firefox$"] border none
     for_window [class="^Truecrypt$"] floating enable
     for_window [class="^URxvt$"] border 1pixel
@@ -308,8 +313,6 @@ client.urgent           #2f343a #900000 #ffffff #900000
     #for_window [class="^Xfce4-panel$"] floating enable
     for_window [class="^Thunderbird$"] border none
     for_window [instance="^shutdown-menu$"] border normal
-    for_window [class="^VirtualBox$" ] border normal
-    for_window [class="^Virt-manager$" ] border normal
 
     #assign [class="^Thunderbird"] $workspace9
     assign [class="^Firefox$" ] $workspace1
@@ -321,7 +324,6 @@ client.urgent           #2f343a #900000 #ffffff #900000
     assign [class="^Zim$" ] $workspace8
     assign [class="^Thunderbird$" ] $workspace9
     assign [class="^Skype$"] $workspace10
-    assign [class="^Mumble"] $workspace10
     assign [class="^Deluge$"] $workspace5
 
 
