@@ -20,9 +20,12 @@ export EDITOR="vim"
 export VISUAL="vim"
 export BROWSER="firefox"
 
+export LOGDIR="$HOME/.var/log"
+export RUNDIR="$HOME/.var/run"
+
 if [[ -z "$SSH_CONNECTION" ]] ; then
     eval $(ssh-agent -s)
-    
+
     [[ -z $DISPLAY && $XDG_VTNR -eq 1 ]] && startx
 fi
 

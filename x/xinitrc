@@ -1,6 +1,5 @@
 #!/bin/bash
 
-export LOGDIR="$HOME/.var/log"
 LOGFILE="$LOGDIR/xinitrc.log"
 
 log() {
