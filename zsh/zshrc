@@ -237,11 +237,16 @@ ruler() {
     done
 }
 
-if ! _remote ; then
-    if ! (ssh-add -l | grep -q 'id_rsa') ; then
-        ssh-add
+ssh_agent() {
+    if ! _remote ; then
+        if ! ssh-add -l >/dev/null ; then
+            ssh-add
+        fi
     fi
-fi
+}
+
+alias ssh='ssh_agent && unalias ssh; ssh'
+alias scp='ssh_agent && unalias scp; scp'
 
 addext() {
     [[ -z "$1" ]] || [[ -z "$2" ]] && { echo "Usage: $0 <file> <extension>" ; return }
