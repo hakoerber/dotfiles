@@ -1,0 +1,2 @@
+log "starting xbindkeys"
+xbindkeys
