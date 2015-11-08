@@ -40,16 +40,16 @@
     set $signal_reboot    reboot
     set $signal_shutdown  shutdown
 
-    set $workspace1  1:web
+    set $workspace1  1
     set $workspace2  2
     set $workspace3  3
     set $workspace4  4
     set $workspace5  5
-    set $workspace6  6:irc
-    set $workspace7  7:music
-    set $workspace8  8:notes
-    set $workspace9  9:mail
-    set $workspace10 10:im
+    set $workspace6  6
+    set $workspace7  7
+    set $workspace8  8
+    set $workspace9  9
+    set $workspace10 10
 
     set $key_workspace1  1
     set $key_workspace2  2
@@ -198,24 +198,16 @@
 
     # resize window (you can also use the mouse for that)
     mode "resize" {
-            # These bindings trigger as soon as you enter the resize mode
-
-            # Pressing left will shrink the window’s width.
-            # Pressing right will grow the window’s width.
-            # Pressing up will shrink the window’s height.
-            # Pressing down will grow the window’s height.
-            bindsym $left  resize shrink width 5 px or 5 ppt
-            bindsym $down  resize grow height 5 px or 5 ppt
+            bindsym $left  resize shrink width  5 px or 5 ppt
+            bindsym $down  resize grow   height 5 px or 5 ppt
             bindsym $up    resize shrink height 5 px or 5 ppt
-            bindsym $right resize grow width 5 px or 5 ppt
+            bindsym $right resize grow   width  5 px or 5 ppt
 
-            # same bindings, but for the arrow keys
-            bindsym 113 resize shrink width 5 px or 5 ppt
-            bindsym 116 resize grow height 5 px or 5 ppt
+            bindsym 113 resize shrink width  5 px or 5 ppt
+            bindsym 116 resize grow   height 5 px or 5 ppt
             bindsym 111 resize shrink height 5 px or 5 ppt
-            bindsym 114 resize grow width 5 px or 5 ppt
+            bindsym 114 resize grow   width  5 px or 5 ppt
 
-            # back to normal: Enter or Escape
             bindsym Return mode "default"
             bindsym Escape mode "default"
     }
@@ -287,32 +279,32 @@ client.urgent           #2f343a #900000 #ffffff #900000
 ### APPLICATION SPECIFIC SETTINGS ##############################################
 ################################################################################
 
-    for_window [class="^.*$"] border pixel 0
+    #for_window [class="^.*$"] border pixel 1
 
-    for_window [class="^Wicd-client.py$"] floating enable
-    for_window [class="^Xfce4-notifyd$"] floating enable , border none
-    for_window [class="^Conky$"] floating enable
-    for_window [class="^Firefox$"] border none
-    for_window [class="^Truecrypt$"] floating enable
-    for_window [class="^URxvt$"] border 1pixel
-    for_window [class="^Cairo-dock$"] floating enable , border none
-    for_window [class="^Pavucontrol$"] floating enable , border normal
-    for_window [class="^Chromium$" ] border none
-    for_window [class="^yad-status$" ] floating enable , border none
-    for_window [class="^Docky$" ] floating enable , border none
-    for_window [title="^Skype.*for Linux$" ] floating enable , border none
-    for_window [class="^Skype$" ] border none
-    for_window [class="^Steam$" ] border none
-    for_window [class="^Eclipse$" ] border none
-    #for_window [class="^Steam$" title="^Friends$" ] border 1pixel , floating enable , floating_maximum_size 200 x 700
-    #for_window [class="^Steam$" title="Chat$" ] border 1pixel , floating enable
-    for_window [class="^sublime-text$" ] border none
-    for_window [class="^Evince$" ] border none
-    for_window [class="^Designer$" ] border none
-    for_window [class="^main\.py$" ] floating enable
-    #for_window [class="^Xfce4-panel$"] floating enable
-    for_window [class="^Thunderbird$"] border none
-    for_window [instance="^shutdown-menu$"] border normal
+#    for_window [class="^Wicd-client.py$"] floating enable
+#    for_window [class="^Xfce4-notifyd$"] floating enable , border none
+#    for_window [class="^Conky$"] floating enable
+#    for_window [class="^Firefox$"] border none
+#    for_window [class="^Truecrypt$"] floating enable
+#    for_window [class="^URxvt$"] border 1pixel
+#    for_window [class="^Cairo-dock$"] floating enable , border none
+#    for_window [class="^Pavucontrol$"] floating enable , border normal
+#    for_window [class="^Chromium$" ] border none
+#    for_window [class="^yad-status$" ] floating enable , border none
+#    for_window [class="^Docky$" ] floating enable , border none
+#    for_window [title="^Skype.*for Linux$" ] floating enable , border none
+#    for_window [class="^Skype$" ] border none
+#    for_window [class="^Steam$" ] border none
+#    for_window [class="^Eclipse$" ] border none
+#    #for_window [class="^Steam$" title="^Friends$" ] border 1pixel , floating enable , floating_maximum_size 200 x 700
+#    #for_window [class="^Steam$" title="Chat$" ] border 1pixel , floating enable
+#    for_window [class="^sublime-text$" ] border none
+#    for_window [class="^Evince$" ] border none
+#    for_window [class="^Designer$" ] border none
+#    for_window [class="^main\.py$" ] floating enable
+#    #for_window [class="^Xfce4-panel$"] floating enable
+#    for_window [class="^Thunderbird$"] border none
+#    for_window [instance="^shutdown-menu$"] border normal
 
     #assign [class="^Thunderbird"] $workspace9
     assign [class="^Firefox$" ] $workspace1

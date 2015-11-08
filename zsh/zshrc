@@ -157,6 +157,8 @@ alias zshrc="vim -c ':e ~/.zshrc' ; source ~/.zshrc"
 
 alias vim="nvim"
 
+alias psc="ps axfo pid,user,cgroup,args"
+
 
 # rebase the current branch onto WTF ARE YOU DOING YOU ARE DRUNNK TO GO BED
 ##alias rebase="git rebase -i $(git branch --contains HEAD | grep -v '\*.*' | head -1)"
