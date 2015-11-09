@@ -1,1 +1,2 @@
-kill -USR1 $(cat $RUNDIR/i3/conky.pid)
+#!/usr/bin/env bash
+pkill --signal SIGRTMIN+1 i3blocks
