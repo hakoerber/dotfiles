@@ -18,13 +18,12 @@ THRESHOLD2=5
 acpi_output=$(acpi -b)
 if [[ -n "$acpi_output" ]] ; then
     has_battery=1
-    percent="$(echo "$acpi_output" | cut -d "," -f 2 | cut -d " " -f 2 | cut -d "%" -f 1)"
+    percent="$(echo "$acpi_output" | grep -oP '\d+(?=%)')"
     if [[ $percent == 100 ]] ; then
         status="Full"
     else
-        status="$(echo "$acpi_output" | cut -d "," -f 1 | cut -d " " -f 3)"
+        status="$(echo "$acpi_output" | grep -oP '(?<=: )\w+(?=,)' )"
     fi
-    time="$(echo "$acpi_output" | cut -d "," -f 3 | cut -d " " -f 2)"
     shortstatus="$(echo $status | cut -c 1)"
 else
     has_battery=0
@@ -32,19 +31,6 @@ fi
 
 log() {
     echo [$(date +%FT%T)] "$*" >> $logfile
-}
-
-
-pretty() {
-    if (( has_battery )) ; then
-        (
-        echo "Status:|$status"
-        echo "Charge:|${percent}%"
-        if [[ $percent != 100 ]] ; then
-            echo "Time left:|$time"
-        fi
-        ) | column -t --separator="|"
-    fi
 }
 
 charging() {
@@ -56,14 +42,14 @@ discharging() {
 }
 
 threshold1() {
-    [[ $percent -le $THRESHOLD1 ]]
+    (( $percent <= $THRESHOLD1 ))
 }
 
 threshold2() {
-    [[ $percent -le $THRESHOLD2 ]]
+    (( $percent <= $THRESHOLD2 ))
 }
 
-conky() {
+short() {
     if (( has_battery )) ; then
         if discharging ; then
             if threshold2 ; then
@@ -87,34 +73,27 @@ conky() {
                 rm "$PATH_WARN_1"
             fi
             [[ -f "$PATH_WARN_2" ]] && rm "$PATH_WARN_2"
-            #if [[ $percent -gt 25 ]] ; then
-            #    [[ -f "$PATH_WARN_1" ]] && rm "$PATH_WARN_1"
-            #elif [[ $percent -gt 5 ]] ; then
-            #    [[ -f "$PATH_WARN_2" ]] && rm "$PATH_WARN_2"
-            #fi
-
         fi
 
         if threshold2 ; then
             color="#FF0000" # red
+            urgent=1
         elif threshold1 ; then
             color="#FFFF00" # yellow
+            urgent=0
         else
             color="#FFFFFF" # white
+            urgent=0
         fi
 
-
-
-        echo "{ \"full_text\" : \"     ${shortstatus} ${percent}% \" , \"color\" : \"$color\" , \"name\" : \"battery\" },"
+        echo "${shortstatus}  ${percent}%"
+        echo
+        echo $color
+        (( $urgent )) && exit 33
+        exit 0
     else
-        echo "{ \"full_text\" : \"     no battery \" , \"color\" : \"#FFFFFF\" , \"name\" : \"battery\" },"
+        echo "no battery"
     fi
 }
 
-if [[ "$1" == "conky" ]] ; then
-    conky
-else
-    pretty
-fi
-
-
+short
