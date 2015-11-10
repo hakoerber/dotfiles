@@ -20,10 +20,8 @@
 
     # The default terminal
     set $terminal urxvt
-    #-e bash -c "tmux -q has-session && exec tmux attach-session -d || exec tmux new-session -n$USER -s$USER@$HOSTNAME"
 
-    # Path to the exit script
-    set $path_i3exit ~/.i3/scripts/i3exit.bash
+    set $scriptdir ~/.i3/scripts
 
     # Keys for the exit mode
     set $key_lock      l
@@ -93,15 +91,6 @@
     set $exit    Shift+E
 
     set $kill Shift+Q
-
-    set $redshift_latitude 49.5
-    set $redshift_longitude 11
-    set $redshift_colortemp_day 6500
-    set $redshift_colortemp_night 4500
-
-    gaps inner 10
-    smart_gaps on
-    smart_borders on
 
 ################################################################################
 ### KEYBINDINGS ################################################################
@@ -177,20 +166,17 @@
     bindsym $mod+Shift+$prev_on_output move container to workspace prev_on_output
     bindsym $mod+Shift+$next_on_output move container to workspace next_on_output
 
-    # regenerate and reload the configuration file
-    # if genconfig gets any paramters, it will invoke i3-msg reload
-    bindsym $mod+$reload exec --no-startup-id ~/.i3/scripts/genconfig.bash 1
-
+    bindsym $mod+$reload  reload
     bindsym $mod+$restart restart
     bindsym $mod+$exit    exit
 
     ### START APPLICATIONS #####################################################
 
-    bindsym $mod+d exec j4-dmenu-desktop --dmenu="dmenu -fn 'DejaVu Sans:size=11' -i -p '>' -nb '#000000' -nf '#ffffff' -sb '#e16b40' -sf '#000000'"
+    bindsym $mod+d exec --no-startup-id ~/.i3/scripts/appmenu
     bindsym $mod+Return exec $terminal
     bindsym $mod+F1 exec firefox
 
-    bindsym Pause exec --no-startup-id ~/.i3/scripts/shutdown-menu.bash
+    bindsym Pause exec --no-startup-id ~/.i3/scripts/shutdown-menu
 
 ################################################################################
 ### MODES ######################################################################
@@ -217,29 +203,14 @@
 ### GENERAL SETUP ##############################################################
 ################################################################################
 
-    #workspace $workspace1 output VBOX0
-    #workspace $workspace2 output VBOX0
-    #workspace $workspace3 output VBOX0
-    #workspace $workspace4 output VBOX0
-    #workspace $workspace5 output VBOX0
-    #workspace $workspace6 output VBOX0
-    #workspace $workspace7 output VBOX0
-    #workspace $workspace8 output VBOX0
-    #workspace $workspace9 output VBOX0
-    #workspace $workspace10 output VBOX1
-
     # Default orientation for new workspaces will be derived from aspect ratio
     default_orientation auto
 
     # New containers will start in tiling mode
     workspace_layout default
 
-    # Draw normal borders around all windows with 1-pixel borders
     new_window 1pixel
     new_float normal 1
-
-    # Do show borders at the screen edges
-    hide_edge_borders none
 
     focus_follows_mouse yes
 
@@ -265,6 +236,12 @@
     floating_minimum_size 0 x 0
     floating_maximum_size 0 x 0
 
+    gaps inner 10
+    smart_gaps on
+    smart_borders on
+
+    font pango:DejaVu Sans Mono 12
+
 ################################################################################
 ### COLOR SETTINGS #############################################################
 ################################################################################
@@ -279,81 +256,41 @@ client.urgent           #2f343a #900000 #ffffff #900000
 ### APPLICATION SPECIFIC SETTINGS ##############################################
 ################################################################################
 
-    #for_window [class="^.*$"] border pixel 1
+################################################################################
+### SPECIAL KEYBINDS ###########################################################
+################################################################################
 
-#    for_window [class="^Wicd-client.py$"] floating enable
-#    for_window [class="^Xfce4-notifyd$"] floating enable , border none
-#    for_window [class="^Conky$"] floating enable
-#    for_window [class="^Firefox$"] border none
-#    for_window [class="^Truecrypt$"] floating enable
-#    for_window [class="^URxvt$"] border 1pixel
-#    for_window [class="^Cairo-dock$"] floating enable , border none
-#    for_window [class="^Pavucontrol$"] floating enable , border normal
-#    for_window [class="^Chromium$" ] border none
-#    for_window [class="^yad-status$" ] floating enable , border none
-#    for_window [class="^Docky$" ] floating enable , border none
-#    for_window [title="^Skype.*for Linux$" ] floating enable , border none
-#    for_window [class="^Skype$" ] border none
-#    for_window [class="^Steam$" ] border none
-#    for_window [class="^Eclipse$" ] border none
-#    #for_window [class="^Steam$" title="^Friends$" ] border 1pixel , floating enable , floating_maximum_size 200 x 700
-#    #for_window [class="^Steam$" title="Chat$" ] border 1pixel , floating enable
-#    for_window [class="^sublime-text$" ] border none
-#    for_window [class="^Evince$" ] border none
-#    for_window [class="^Designer$" ] border none
-#    for_window [class="^main\.py$" ] floating enable
-#    #for_window [class="^Xfce4-panel$"] floating enable
-#    for_window [class="^Thunderbird$"] border none
-#    for_window [instance="^shutdown-menu$"] border normal
+bindsym XF86Sleep exec --no-startup-id $scriptdir/i3exit suspend
+bindsym XF86AudioMute exec --no-startup-id amixer set Master toggle ; exec --no-startup-id $update-status
+bindsym XF86AudioRaiseVolume exec --no-startup-id $scriptdir/pa-volume set-vol +5 ; exec --no-startup-id $scriptdir/update-status
+bindsym XF86AudioLowerVolume exec --no-startup-id $scriptdir/pa-volume set-vol -5 ; exec --no-startup-id $scriptdir/update-status
 
-    #assign [class="^Thunderbird"] $workspace9
-    assign [class="^Firefox$" ] $workspace1
-
-    assign [title=".*[Ss]team.*" ] $workspace5
-    assign [class=".*[Ss]team.*" ] $workspace5
-    assign [class="^Quassel$" ] $workspace6
-    assign [instance="^ncmpcpp$" ] $workspace7
-    assign [class="^Zim$" ] $workspace8
-    assign [class="^Thunderbird$" ] $workspace9
-    assign [class="^Skype$"] $workspace10
-    assign [class="^Deluge$"] $workspace5
-
-
-# bind some keys
-bindsym XF86Sleep exec --no-startup-id $path_i3exit suspend
-bindsym XF86AudioMute exec --no-startup-id amixer set Master toggle
-bindsym XF86AudioRaiseVolume exec --no-startup-id bash $HOME/.i3/scripts/pa-volume.bash set-vol +5 ; exec --no-startup-id "bash $HOME/.i3/scripts/update-status.bash"
-bindsym XF86AudioLowerVolume exec --no-startup-id bash $HOME/.i3/scripts/pa-volume.bash set-vol -5 ; exec --no-startup-id "bash $HOME/.i3/scripts/update-status.bash"
 # keys seemingly switched
-bindsym XF86MonBrightnessUp   exec --no-startup-id xbacklight -dec 5 ; exec --no-startup-id "bash $HOME/.i3/scripts/update-status.bash"
-bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -inc 5 ; exec --no-startup-id "bash $HOME/.i3/scripts/update-status.bash"
+bindsym XF86MonBrightnessUp   exec --no-startup-id xbacklight -dec 5 ; exec --no-startup-id $scriptdir/update-status
+bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -inc 5 ; exec --no-startup-id $scriptdir/update-status
 
 bindsym XF86AudioPlay exec --no-startup-id mpc toggle
-
 bindsym XF86AudioPrev exec --no-startup-id mpc prev
 bindsym XF86AudioNext exec --no-startup-id mpc next
 
-# font for window titles. ISO 10646 = Unicode
-font pango:DejaVu Sans Mono 11
+bindsym $mod+o exec --no-startup-id xautorandr ; exec --no-startup-id kill -SIGUSR2 $(cat $RUNDIR/wallchanger.pid)'"
+bindsym $mod+p exec --no-startup-id kill -SIGUSR1 $(cat $RUNDIR/wallchanger.pid)
 
-bindsym $mod+o exec --no-startup-id "bash -c '~/dev/projects/xautorandr/xautorandr ; kill -SIGUSR2 $(cat $HOME/.var/run/wallchanger.pid)'"
-bindsym $mod+p exec --no-startup-id "bash -c 'kill -SIGUSR1 $(cat $HOME/.var/run/wallchanger.pid)'"
-
-# start i3bar to display a workspace bar (plus the system information i3status
-# finds out, if available)
+################################################################################
+### BARS #######################################################################
+################################################################################
+#
 bar {
-    # always show at the top of the screen
     mode dock
     position top
 
     tray_output primary
 
-    # show workspace buttons
     workspace_buttons yes
 
     id bar-0
 
-    font pango:DejaVu Sans, Icons 11
+    font pango:DejaVu Sans, Icons 12
 
     colors {
         background #000000
@@ -363,7 +300,7 @@ bar {
         focused_workspace  #e16b40 #000000 #ffffff
         active_workspace   #000000 #5f676a #ffffff
         inactive_workspace #000000 #000000 #dddddd
-        urgent_workspace #D00000 #D00000 #000000
+        urgent_workspace   #D00000 #D00000 #000000
     }
 
     i3bar_command i3bar
