@@ -283,6 +283,11 @@ bar {
     position top
 
     tray_output primary
+    tray_padding 3
+
+    strip_workspace_numbers no
+
+    binding_mode_indicator yes
 
     workspace_buttons yes
 
@@ -299,6 +304,7 @@ bar {
         active_workspace   #000000 #5f676a #ffffff
         inactive_workspace #000000 #000000 #dddddd
         urgent_workspace   #D00000 #D00000 #000000
+        binding_mode       #000000 #e16b40 #000000
     }
 
     i3bar_command i3bar
