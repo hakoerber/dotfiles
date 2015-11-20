@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+[[ "$1" ]] || exit 1
+name="$1"
+
+pidfile="/run/openvpn@client-${name}.pid"
+
+if pgrep --pidfile "${pidfile}" >/dev/null 2>&1 ; then
+    status="UP"
+    color="#ffffff"
+else
+    status="DOWN"
+    color="#ff0000"
+fi
+
+output="${name} ${status}" 
+
+echo $output
+echo $output
+echo $color
