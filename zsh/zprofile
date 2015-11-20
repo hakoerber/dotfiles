@@ -24,7 +24,9 @@ export LOGDIR="$HOME/.var/log"
 export RUNDIR="$HOME/.var/run"
 
 if [[ -z "$SSH_CONNECTION" ]] ; then
-    eval $(ssh-agent -s)
+    if ! pgrep ssh-agent --uid $USER >/dev/null 2>&1 ; then
+        eval $(ssh-agent -s)
+    fi
 
     [[ -z $DISPLAY && $XDG_VTNR -eq 1 ]] && startx
 fi
