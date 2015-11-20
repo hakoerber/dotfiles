@@ -5,7 +5,7 @@ aps="$(nmcli --terse --fields IN-USE,SSID,SIGNAL device wifi list | grep '^\*:')
 ssid="$(echo $aps | cut -d ':' -f 2)"
 perc="$(echo $aps | cut -d ':' -f 3)"
 
-output="$ssid $perc%"
+output="$ssid  $perc%"
 
-echo $output
-echo $output
+echo "$output"
+echo "$output"
