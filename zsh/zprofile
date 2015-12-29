@@ -16,7 +16,7 @@ done
 PATH="${PATH#:}"
 export PATH
 
-export EDITOR="vim"
+export EDITOR="nvim"
 export VISUAL="vim"
 export BROWSER="firefox"
 
