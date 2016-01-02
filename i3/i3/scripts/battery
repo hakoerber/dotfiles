@@ -74,15 +74,16 @@ if (( has_battery )) ; then
         [[ -f "$_PATH_WARN_2" ]] && rm "$_PATH_WARN_2"
     fi
 
+    urgent=0
     if threshold2 ; then
         color="#FF0000" # red
-        urgent=1
+        if discharging ; then
+            urgent=1
+        fi
     elif threshold1 ; then
         color="#FFFF00" # yellow
-        urgent=0
     else
         color="#FFFFFF" # white
-        urgent=0
     fi
 
     printf '%s\n' "${status}  ${percent}%"
