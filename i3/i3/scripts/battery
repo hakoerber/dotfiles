@@ -89,6 +89,7 @@ if (( has_battery )) ; then
     printf '%s\n'
     printf '%s\n' $color
     (( $urgent )) && exit 33
+    exit 0
 else
     printf '%s\n' "no battery"
     printf '%s\n'
