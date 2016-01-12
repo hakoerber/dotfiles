@@ -145,6 +145,8 @@ alias c="cd"
 alias l="ls"
 alias s="sudo"
 
+alias tmuxa="tmux ls 2>/dev/null && tmux attach-session || tmux"
+
 alias cl="clear"
 
 alias calc='python3 -ic "from math import *; import cmath"'
@@ -377,6 +379,15 @@ tmux_after() {
 tmux_wrap() {
     tmux "$1" "$2" "$3"
     tmux_after "$3"
+}
+
+viewvm() {
+    virt-viewer -rw -c qemu+ssh://root@10.1.2.4/system "${1}"
+}
+
+diffdir() {
+    [[ "$1" ]] && [[ "$2" ]] || { echo "$0 <dir1> <dir2>" ; return 1 ; }
+    diff <(cd "$1" && find -type f | sort | xargs md5sum) <(cd "$2" && find -type f | sort | xargs md5sum)
 }
 
 # desired behavior is like this:
