@@ -20,6 +20,8 @@ export EDITOR="nvim"
 export VISUAL="vim"
 export BROWSER="firefox"
 
+export WINEPATH="/media/hdd1/games/wine"
+
 export LOGDIR="$HOME/.var/log"
 export RUNDIR="$HOME/.var/run"
 
