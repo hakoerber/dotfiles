@@ -21,7 +21,7 @@
 
     logl = log --graph --decorate --pretty=oneline --abbrev-commit --all
 
-    pushall = "!sh -c 'for r in $(git remote) ; do echo \"--- [$r] ---\" ; git push $r $1; done' -"
+    pushall = "!sh -c 'for r in $(git remote) ; do [[ "$r" != "upstream" ]] && { echo \"--- [$r] ---\" ; git push $r $1 ; } ; done' -"
 
 [core]
     editor = vim
