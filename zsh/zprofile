@@ -21,6 +21,8 @@ export EDITOR="nvim"
 export VISUAL="vim"
 export BROWSER="firefox"
 
+export VIMRC="$HOME/.vimrc"
+
 export WINEPATH="/media/hdd1/games/wine"
 
 export LOGDIR="$HOME/.var/log"

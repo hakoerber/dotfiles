@@ -157,7 +157,7 @@ alias cat="cat -v"
 alias vimrc="vim -c ':e \$MYVIMRC'"
 alias zshrc="vim -c ':e ~/.zshrc' ; source ~/.zshrc"
 
-alias vim="nvim"
+alias vim="nvim -u $VIMRC"
 
 alias psc="ps axfo pid,user,cgroup,args"
 
