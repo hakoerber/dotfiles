@@ -17,13 +17,13 @@ ignore_folders=('scripts' 'skel')
 
 MAPPING_SEPARATOR='::'
 
-dryrun=""
+dryrun=0
 
 while [[ $# -gt 0 ]] ; do
     case "$1" in
         -n|--dry-run)
             echo "dry run"
-            dryrun="yes"
+            dryrun=1
             ;;
         *)
             echo "invalid parameters"
@@ -80,19 +80,19 @@ while IFS= read -d $'\0' -r folder ; do
             backup_destination="$(path_combine "$backup_dir" "$(basename "$destination")")"
             if ! [[ -d "$backup_dir" ]] ; then
                 echo "mkdir -p \"$backup_dir\""
-                [[ $dryrun ]] || mkdir -p "$backup_dir"
+                (( $dryrun )) || mkdir -p "$backup_dir"
             fi
             echo "mv \"$destination\" -> \"$backup_destination\""
-            [[ $dryrun ]] || mv "$destination" "$backup_destination"
+            (( $dryrun )) || mv "$destination" "$backup_destination"
         fi
 
         [[ -e "$destination" ]] && [[ "$(readlink "$destination")" == "$file" ]] && continue
         echo "ln -sf \"$file\" -> \"$destination\""
-        [[ $dryrun ]] || ln -sf "$file" "$destination"
+        (( $dryrun )) || ln -sf "$file" "$destination"
     done
 done < <(find "$config_dir"/* -maxdepth 0 -mindepth 0 -type d -print0)
 
 # copy everything from the skel directory into $HOME, but do not overwrite anything
 # the /. at the end of source is some cp magic that copies the content of a directory
 # instead of the directory inself
-[[ $dryrun ]] || rsync --archive --verbose --ignore-existing "$skel_dir/" "$HOME"
+(( $dryrun )) || rsync --archive --verbose --ignore-existing "$skel_dir/" "$HOME"
