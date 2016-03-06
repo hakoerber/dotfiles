@@ -12,9 +12,8 @@ skel_dir="$config_dir/skel/"
 # backup directory, files that would otherwise be overwritten go there
 backup_dir="$HOME/.dotfiles.bak/"
 
-# the following folders inside $config_dir will be inspected and the
-# contents symlinked:
-symlink_folders='git i3 vim zsh x tmux autostart'
+# these folders inside $config_dir will be ignored
+ignore_folders=('scripts' 'skel')
 
 MAPPING_SEPARATOR='::'
 
@@ -54,7 +53,17 @@ backup_dir="$backup_dir/$(date +%Y-%m-%dT%H:%M:%S)"
 
 # backup the old config files, symlinks will be skipped
 # then symlink the files in $config_dir into the home directory
-for folder in $symlink_folders ; do
+while IFS= read -d $'\0' -r folder ; do
+    folder="$(basename "$folder")"
+    ignored=0
+    for ignore in "${ignore_folders[@]}" ; do
+        if [[ "$ignore" == "$folder" ]] ; then
+            ignored=1
+        fi
+    done
+    if (( "$ignored" )) ; then
+        continue
+    fi
     mapping="$(get_mapping "$folder")"
 
     source_folder="$(path_combine "$config_dir" "$folder")"
@@ -81,7 +90,7 @@ for folder in $symlink_folders ; do
         echo "ln -sf \"$file\" -> \"$destination\""
         [[ $dryrun ]] || ln -sf "$file" "$destination"
     done
-done
+done < <(find "$config_dir"/* -maxdepth 0 -mindepth 0 -type d -print0)
 
 # copy everything from the skel directory into $HOME, but do not overwrite anything
 # the /. at the end of source is some cp magic that copies the content of a directory
