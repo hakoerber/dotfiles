@@ -15,8 +15,6 @@ backup_dir="$HOME/.dotfiles.bak/"
 # these folders inside $config_dir will be ignored
 ignore_folders=('scripts' 'skel')
 
-MAPPING_SEPARATOR='::'
-
 dryrun=0
 
 while [[ $# -gt 0 ]] ; do
@@ -92,7 +90,4 @@ while IFS= read -d $'\0' -r folder ; do
     done
 done < <(find "$config_dir"/* -maxdepth 0 -mindepth 0 -type d -print0)
 
-# copy everything from the skel directory into $HOME, but do not overwrite anything
-# the /. at the end of source is some cp magic that copies the content of a directory
-# instead of the directory inself
 (( $dryrun )) || rsync --archive --verbose --ignore-existing "$skel_dir/" "$HOME"
