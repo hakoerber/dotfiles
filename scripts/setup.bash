@@ -15,6 +15,8 @@ backup_dir="$HOME/.dotfiles.bak/"
 # these folders inside $config_dir will be ignored
 ignore_folders=('scripts' 'skel')
 
+MAPPING_SEPARATOR='::'
+
 dryrun=0
 
 while [[ $# -gt 0 ]] ; do
