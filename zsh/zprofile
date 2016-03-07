@@ -1,5 +1,3 @@
-# exec startx breaks some logind fuckery, without exec it works
-#tmux start-server &
 _path=("$HOME/bin"
        "/usr/local/sbin"
        "/usr/local/bin"
@@ -28,11 +26,21 @@ export WINEPATH="/media/hdd1/games/wine"
 export LOGDIR="$HOME/.var/log"
 export RUNDIR="$HOME/.var/run"
 
-if [[ -z "$SSH_CONNECTION" ]] ; then
-    if ! pgrep ssh-agent --uid $USER >/dev/null 2>&1 ; then
-        eval $(ssh-agent -s)
-    fi
-
-    [[ -z $DISPLAY && $XDG_VTNR -eq 1 ]] && startx
+# Start the gpg-agent if not already running
+if ! pgrep -x --uid "${USER}" gpg-agent >/dev/null 2>&1; then
+    gpg-connect-agent /bye >/dev/null 2>&1
 fi
 
+# Set SSH to use gpg-agent
+unset SSH_AGENT_PID
+if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
+    export SSH_AUTH_SOCK="${HOME}/.gnupg/S.gpg-agent.ssh"
+fi
+
+# Set GPG TTY
+export GPG_TTY=$(tty)
+
+gpg-connect-agent updatestartuptty /bye >/dev/null
+
+# exec startx breaks some logind fuckery, without exec it works
+[[ -z $DISPLAY && $XDG_VTNR -eq 1 ]] && startx
