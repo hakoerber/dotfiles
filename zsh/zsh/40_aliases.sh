@@ -60,3 +60,5 @@ alias l="ls"
 alias s="sudo"
 alias t="tmux"
 alias cl="clear"
+
+alias nocolor="sed -r \"s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g\""

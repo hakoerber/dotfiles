@@ -1,15 +1,9 @@
 [[ -z "$PS1" ]] && return
 
-_files=(
-    'shellopts'
-    'functions'
-    'variables'
-    'aliases'
-    'prompt')
+_zshdir="$HOME/.zsh"
 
-for file in "${_files[@]}" ; do
-    _path="$HOME"/.zsh/"$file".sh
-    if [[ -e "$_path" ]] ; then
-        source "$_path"
+for file in "${_zshdir}"/* ; do
+    if [[ -e "$file" ]] ; then
+        source "$file"
     fi
 done
