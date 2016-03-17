@@ -21,7 +21,7 @@ export BROWSER="firefox"
 
 export VIMRC="$HOME/.vimrc"
 
-export WINEPATH="/media/hdd1/games/wine"
+export WINEPATH="$HOME/games/wine"
 
 export LOGDIR="$HOME/.var/log"
 export RUNDIR="$HOME/.var/run"
