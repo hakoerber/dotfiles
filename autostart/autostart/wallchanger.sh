@@ -1,5 +1,5 @@
 path_wallchanger="$HOME/projects/wallchanger/wallchanger"
-wallpaper_directory="$HOME/pictures/wallpaper/misc"
+wallpaper_directory="$LIBDIR/wallpaper/current"
 wallchanger_pidfile="$RUNDIR/wallchanger.${XDG_SESSION_ID}.pid"
 wallpaper_logfile="$LOGDIR/wallpaper.log"
 wallpaper_fallback="$HOME/.i3/data/wallpaper/"
