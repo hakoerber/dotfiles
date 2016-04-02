@@ -271,8 +271,8 @@ bindsym XF86AudioPlay exec --no-startup-id mpc toggle
 bindsym XF86AudioPrev exec --no-startup-id mpc prev
 bindsym XF86AudioNext exec --no-startup-id mpc next
 
-bindsym $mod+o exec --no-startup-id xautorandr ; exec --no-startup-id kill -SIGUSR2 $(cat $RUNDIR/wallchanger.pid)'"
-bindsym $mod+p exec --no-startup-id kill -SIGUSR1 $(cat $RUNDIR/wallchanger.pid)
+bindsym $mod+o exec --no-startup-id xautorandr ; exec --no-startup-id kill -SIGUSR2 $(cat $RUNDIR/wallchanger.$XDG_SESSION_ID.pid)'"
+bindsym $mod+p exec --no-startup-id kill -SIGUSR1 $(cat $RUNDIR/wallchanger.$XDG_SESSION_ID.pid)
 
 ################################################################################
 ### BARS #######################################################################

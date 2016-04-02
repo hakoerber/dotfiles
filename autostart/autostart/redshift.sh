@@ -4,4 +4,4 @@ redshift_colortemp="6000:3300"
 
 log "starting redshift-gtk"
 redshift-gtk -b 1 -l "$redshift_lat_long" -t "$redshift_colortemp" & &>> "$LOGFILE"
-printf '%s' $! > "$RUNDIR"/redshift.pid
+printf '%s' $! > "$RUNDIR"/redshift.${XDG_SESSION_ID}.pid
