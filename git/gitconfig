@@ -1,6 +1,7 @@
 [user]
-	name = Hannes Koerber
-	email = hannes.koerber@gmail.com
+    name = Hannes Körber
+    email = hannes.koerber@haktec.de
+    signingkey = 0x078A167A8741BD30
 [alias]
     untrack = "rm --cached"
     unstage = "reset HEAD"
@@ -51,3 +52,5 @@
     pushNonFastForward = false
     statusHints = false
     commitBeforeMerge = false
+[commit]
+    gpgSign = true
