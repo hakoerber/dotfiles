@@ -28,8 +28,8 @@ export RUNDIR="$HOME/.var/run"
 export LIBDIR="$HOME/.var/lib"
 export BINDIR="$HOME/bin"
 
-export LANG=en_US.UTF
-export LC_TIME=de_DE.UTF
+export LANG=en_US.UTF-8
+export LC_TIME=de_DE.UTF-8
 export LC_COLLATE=C
 
 # Start the gpg-agent if not already running
