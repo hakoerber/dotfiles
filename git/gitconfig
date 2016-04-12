@@ -54,3 +54,5 @@
     commitBeforeMerge = false
 [commit]
     gpgSign = true
+[status]
+    relativePaths = false
