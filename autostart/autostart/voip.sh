@@ -1,0 +1,2 @@
+mumble &
+teamspeak3 &
