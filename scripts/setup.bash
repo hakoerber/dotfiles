@@ -35,7 +35,7 @@ done
 
 path_combine()
 {
-    echo "$(dirname "$1")/$(basename "$1")/$(basename "$2")"
+    echo "$(dirname "$1")/$(basename "$1")/$2"
 }
 
 DEFAULT_ROOT="$HOME"
