@@ -66,6 +66,7 @@ while IFS= read -d $'\0' -r folder ; do
     fi
     mapping="$(get_mapping "$folder")"
 
+
     source_folder="$(path_combine "$config_dir" "$folder")"
     [[ "$(ls "$source_folder")" ]] || continue
     for file in "$source_folder"/* ; do
@@ -86,6 +87,9 @@ while IFS= read -d $'\0' -r folder ; do
             (( $dryrun )) || mv "$destination" "$backup_destination"
         fi
 
+        if [[ ! -e "$(dirname "$destination")" ]] ; then
+            mkdir "$(dirname "$destination")"
+        fi
         [[ -e "$destination" ]] && [[ "$(readlink "$destination")" == "$file" ]] && continue
         echo "ln -sf \"$file\" -> \"$destination\""
         (( $dryrun )) || ln -sf "$file" "$destination"
