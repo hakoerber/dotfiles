@@ -38,15 +38,15 @@
     set $signal_reboot    reboot
     set $signal_shutdown  shutdown
 
-    set $workspace1  1
+    set $workspace1  1:web
     set $workspace2  2
     set $workspace3  3
     set $workspace4  4
     set $workspace5  5
-    set $workspace6  6
-    set $workspace7  7
-    set $workspace8  8
-    set $workspace9  9
+    set $workspace6  6:voip
+    set $workspace7  7:music
+    set $workspace8  8:irc
+    set $workspace9  9:mail
     set $workspace10 10
 
     set $key_workspace1  1
@@ -253,6 +253,18 @@ client.urgent           #2f343a #900000 #ffffff #900000
 ################################################################################
 ### APPLICATION SPECIFIC SETTINGS ##############################################
 ################################################################################
+
+assign [class="^Mumble$"] $workspace6
+assign [class="^TeamSpeak 3$"] $workspace6
+assign [class="^Clementine$"] $workspace7
+assign [class="^quassel$"] $workspace8
+assign [class="^Thunderbird$"] $workspace9
+assign [class="^Evolution$"] $workspace9
+
+bindsym $mod+F6 exec --no-startup-id mumble
+bindsym $mod+F7 exec --no-startup-id clementine
+bindsym $mod+F8 exec --no-startup-id quasselclient
+bindsym $mod+F9 exec --no-startup-id evolution
 
 ################################################################################
 ### SPECIAL KEYBINDS ###########################################################
