@@ -1,6 +1,6 @@
 autoload -Uz vcs_info
 
-_vcsbase="%{$fg[grey]%}[%r] %{$fg[blue]%}[%B%b%{$fg[red]%}%m%{$fg[blue]%}] %{$fg[red]%}%B%c%u%f"
+_vcsbase="%{$fg[grey]%}[%r] %{$fg[blue]%}[%{%B%}%b%{$fg[red]%}%m%{$fg[blue]%}] %{$fg[red]%}%{%B%}%c%u"
 
 zstyle ':vcs_info:*' stagedstr 'I'
 zstyle ':vcs_info:*' unstagedstr 'M'

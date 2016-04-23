@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-j4-dmenu-desktop --dmenu="dmenu -fn 'DejaVu Sans:size=11' -i -p '>' -nb '#000000' -nf '#ffffff' -sb '#e16b40' -sf '#000000'"
+j4-dmenu-desktop --dmenu="dmenu -fn 'DejaVu Sans:size=11' -h 24 -i -p '>' -nb '#000000' -nf '#ffffff' -sb '#e16b40' -sf '#000000'"

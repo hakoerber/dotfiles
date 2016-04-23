@@ -13,8 +13,6 @@ URxvt.matcher.button: 1
 
 URxvt.intensityStyles: false
 
-!URxvt.scrollTtyKeypress:  true
-
 URxvt.saveLines: 10000
 
 URxvt.fading: 20
@@ -24,14 +22,11 @@ URxvt.termName: urxvt
 URxvt.cursorBlink: true
 
 URxvt.transparent:   true
-URxvt.shading:       10
+URxvt.shading:       0
 
 ! Solarized color scheme for the X Window System
 !
 ! http://ethanschoonover.com/solarized
-
-
-! Common
 
 #define S_yellow        #b58900
 #define S_orange        #cb4b16
@@ -42,9 +37,6 @@ URxvt.shading:       10
 #define S_cyan          #2aa198
 #define S_green         #859900
 
-
-! Dark
-
 #define S_base03        #002b36
 #define S_base02        #073642
 #define S_base01        #586e75
@@ -53,24 +45,6 @@ URxvt.shading:       10
 #define S_base1         #93a1a1
 #define S_base2         #eee8d5
 #define S_base3         #fdf6e3
-
-
-! Light
-
-!#define S_base03        #fdf6e3
-!#define S_base02        #eee8d5
-!#define S_base01        #93a1a1
-!#define S_base00        #839496
-!#define S_base0         #657b83
-!#define S_base1         #586e75
-!#define S_base2         #073642
-!#define S_base3         #002b36
-
-
-! To only apply colors to your terminal, for example, prefix
-! the color assignment statement with its name. Example:
-!
-! URxvt*background:            S_base03
 
 URxvt*background:              S_base03
 URxvt*foreground:              S_base0
@@ -97,11 +71,6 @@ URxvt*color13:                 S_violet
 URxvt*color14:                 S_base1
 URxvt*color15:                 S_base3
 
-
-
-
-
-
 urxvt*foreground: white
 urxvt*background: black
 
@@ -121,4 +90,3 @@ urxvt*background: black
 *color13: #AD7FA8
 *color14: #fcaf3e
 *color15: #EEEEEC
-

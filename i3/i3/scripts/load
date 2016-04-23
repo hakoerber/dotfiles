@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-load="$(cut -d ' ' -f 2 /proc/loadavg)"
+load="$(cut -d ' ' -f 1 /proc/loadavg)"
 cpus="$(nproc --all)"
 
 echo $load

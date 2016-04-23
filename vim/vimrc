@@ -250,4 +250,4 @@ function! DeleteTrailingWS()
      %s/\s\+$//e
      exe "normal `z"
 endfunction
-autocmd BufWrite * :call DeleteTrailingWS()
+autocmd BufWritePre * :call DeleteTrailingWS()
