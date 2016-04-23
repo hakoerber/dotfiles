@@ -3,7 +3,7 @@
 # --dry-run -n : only show what would be done without doing anything
 
 # config directory
-config_dir="$HOME/dotfiles/"
+config_dir="$HOME/projects/dotfiles/"
 
 mapping_file="$config_dir/MAPPING"
 
@@ -75,7 +75,7 @@ while IFS= read -d $'\0' -r folder ; do
         else
             destination="$(path_combine "$(path_combine "$HOME" "$mapping")" "$(basename "$file")")"
         fi
-        if [[ -L "$destination" ]]; then
+	if [[ "$(readlink "$destination")" == "$file" ]]; then
             continue
         elif [[ -e "$destination" ]]; then
             backup_destination="$(path_combine "$backup_dir" "$(basename "$destination")")"

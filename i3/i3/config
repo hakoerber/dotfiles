@@ -178,6 +178,8 @@
 
     bindsym Pause exec --no-startup-id ~/.i3/scripts/shutdown-menu
 
+    bindsym $mod+Shift+v exec --no-startup-id redshift-toggle
+
 ################################################################################
 ### MODES ######################################################################
 ################################################################################
@@ -238,7 +240,7 @@
 
     smart_borders on
 
-    font pango:DejaVu Sans Mono 12
+    font pango:DejaVu Sans Mono 11
 
 ################################################################################
 ### COLOR SETTINGS #############################################################
@@ -305,18 +307,18 @@ bar {
 
     id bar-0
 
-    font pango:DejaVu Sans, Icons 12
+    font pango:DejaVu Sans, Icons 11
 
     colors {
-        background #000000
+        background #222222
         statusline #ffffff
         separator #e16b40
 
-        focused_workspace  #e16b40 #000000 #ffffff
-        active_workspace   #000000 #5f676a #ffffff
-        inactive_workspace #000000 #000000 #dddddd
-        urgent_workspace   #D00000 #D00000 #000000
-        binding_mode       #000000 #e16b40 #000000
+        focused_workspace  #e16b40 #222222 #ffffff
+        active_workspace   #222222 #5f676a #ffffff
+        inactive_workspace #222222 #222222 #dddddd
+        urgent_workspace   #D00000 #D00000 #222222
+        binding_mode       #222222 #e16b40 #222222
     }
 
     i3bar_command i3bar

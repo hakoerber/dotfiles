@@ -94,7 +94,12 @@ myip6() {
 
 diffdir() {
     [[ "$1" ]] && [[ "$2" ]] || { echo "$0 <dir1> <dir2>" ; return 1 ; }
-    diff <(cd "$1" && find -type f | sort | xargs md5sum) <(cd "$2" && find -type f | sort | xargs md5sum)
+    diff <(cd "$1" && find -type f -exec md5sum {} \;) <(cd "$2" && find -type f -exec md5sum {} \;)
+}
+
+diffdir2() {
+    [[ "$1" ]] && [[ "$2" ]] || { echo "$0 <dir1> <dir2>" ; return 1 ; }
+    comm -13 <(cd "$1" && find -type f | sort -g) <(cd "$2" && find -type f | sort -g)
 }
 
 bm() {
@@ -122,3 +127,6 @@ man() {
         man "$@"
 }
 
+embiggen() {
+    enscript --no-header --media=A4 --landscape --font="DejaVuSansMono30" -o - | ps2pdf - | zathura -
+}
