@@ -17,7 +17,7 @@ export PATH
 
 export EDITOR="vim"
 export VISUAL="vim"
-export BROWSER="firefox"
+export BROWSER="qutebrowser"
 
 export VIMRC="$HOME/.vimrc"
 
