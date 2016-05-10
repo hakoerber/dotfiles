@@ -35,8 +35,6 @@
     intercommit = !bash -c 'interdiff <(git show $1) <(git show $2) | less -FRS' -
 
 [core]
-    editor = vim
-    pager = less
     whitespace = ""
     excludesfile = "~/.gitignore_global"
 [color]
