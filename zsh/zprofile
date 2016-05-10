@@ -19,6 +19,8 @@ export EDITOR="vim"
 export VISUAL="vim"
 export BROWSER="qutebrowser"
 
+export PAGER="less"
+
 export VIMRC="$HOME/.vimrc"
 
 export WINEPATH="$HOME/games/wine"
