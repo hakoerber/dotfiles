@@ -2,7 +2,7 @@
 Xcursor.theme: Vanilla-DMZ
 
 URxvt.scrollBar: false
-URxvt.font: xft:Droid Sans Mono:size=11
+URxvt.font: xft:Inconsolata:size=12
 
 URxvt.letterSpace: -1
 
