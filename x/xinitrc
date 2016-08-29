@@ -28,7 +28,7 @@ autostart() {
         for f in "$HOME/.autostart/"*.sh ; do
             if [[ -x "$f" ]] ; then
                 log "Executing autostart file \"$f\""
-                . "$f"
+                "$f"
             fi
         done
     fi
