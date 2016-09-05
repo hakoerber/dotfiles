@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # redshift settings
 redshift_lat_long="49.5:11"
 redshift_colortemp="6000:3300"
