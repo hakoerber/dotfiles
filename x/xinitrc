@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOGFILE="$LOGDIR/xinitrc.log"
+export LOGFILE="$LOGDIR/xinitrc.log"
 
 log() {
     echo "[$(date +%FT%T)] $*" >> "$LOGFILE"
