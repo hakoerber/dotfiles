@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-log "starting network tray application"
+printf '%s' "starting network tray application" >>"$LOGFILE"
 nm-applet & &>> $LOGFILE
