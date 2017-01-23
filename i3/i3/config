@@ -19,7 +19,7 @@
     set $mod Mod4
 
     # The default terminal
-    set $terminal urxvt
+    set $terminal urxvt256c
 
     set $scriptdir ~/.i3/scripts
 
