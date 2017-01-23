@@ -238,8 +238,6 @@
     floating_minimum_size 0 x 0
     floating_maximum_size 0 x 0
 
-    smart_borders on
-
     font pango:Insonsolata 11
 
 ################################################################################
