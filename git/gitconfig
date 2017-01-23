@@ -56,8 +56,6 @@
 [status]
     relativePaths = false
 [pager]
-	log = diff-so-fancy | less
-	show = diff-so-fancy | less
-	diff = diff-so-fancy | less
-[interactive]
-	diffFilter = diff-so-fancy
+	log = less
+	show = less
+	diff = less
