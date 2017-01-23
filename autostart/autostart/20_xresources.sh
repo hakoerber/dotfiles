@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-log "parsing .Xresources"
+printf '%s' "parsing .Xresources" >>"$LOGFILE"
 xrdb -merge ~/.Xresources &>> $LOGFILE
