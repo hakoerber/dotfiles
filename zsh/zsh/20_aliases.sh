@@ -1,5 +1,6 @@
 ### TRANSLATIONS
-alias vim="nvim -u $VIMRC"
+alias vim="vim -u $VIMRC"
+
 alias urxvt="urxvt256c"
 
 ### COMMON OPERATIONS
@@ -10,6 +11,7 @@ alias spm="sudo pacman"
 
 alias tml="tmux list-sessions"
 alias tma="tmux ls 2>/dev/null && tmux attach-session || tmux"
+alias tmn="tmux new-session -A -s"
 
 alias clip="xclip -selection clipboard"
 alias clipo="xclip -out -selection clipboard"
