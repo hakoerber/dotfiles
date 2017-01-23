@@ -1,5 +1,6 @@
 ### TRANSLATIONS
 alias vim="nvim -u $VIMRC"
+alias urxvt="urxvt256c"
 
 ### COMMON OPERATIONS
 alias ll='ls -AlFh'
