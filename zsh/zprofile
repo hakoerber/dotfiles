@@ -49,4 +49,10 @@ fi
 export GPG_TTY=$(tty)
 
 # exec startx breaks some logind fuckery, without exec it works
-[[ -z $DISPLAY && $XDG_VTNR -eq 1 ]] && startx
+if [[ -z $DISPLAY ]] ; then
+    if (( $XDG_VTNR == 1 )) ; then
+        startx
+    else
+        tmux new-session -A -s tmux-tty-$XDG_VTNR
+    fi
+fi
