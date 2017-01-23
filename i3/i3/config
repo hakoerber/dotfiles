@@ -320,5 +320,5 @@ bar {
     }
 
     i3bar_command i3bar
-    status_command i3blocks -c ~/.i3/i3blocks.conf
+    status_command py3status -c ~/.i3/i3status.conf
 }
