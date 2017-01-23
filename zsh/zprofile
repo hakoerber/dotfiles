@@ -17,7 +17,7 @@ export PATH
 
 export EDITOR="vim"
 export VISUAL="vim"
-export BROWSER="qutebrowser"
+export BROWSER="chromium"
 
 export PAGER="less"
 
