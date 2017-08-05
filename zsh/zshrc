@@ -2,6 +2,13 @@
 
 _zshdir="$HOME/.zsh"
 
+export GPG_TTY=$(tty)
+gpg-connect-agent updatestartuptty /bye >/dev/null
+
+if $(ssh-add -l 2>/dev/null | grep -q "no identities") ; then
+    ssh-add
+fi
+
 for file in "${_zshdir}"/* ; do
     if [[ -e "$file" ]] ; then
         source "$file"
