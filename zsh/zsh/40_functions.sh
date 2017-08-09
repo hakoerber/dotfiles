@@ -67,7 +67,20 @@ httpcode() {
 }
 
 bak() {
-    [[ -e "$1" ]] && cp -av "$1" "$1.bak"
+    if ! [[ "$1" ]] ; then
+        printf '%s\n' "usage: $0 FILE"
+        return 1
+    fi
+    if ! [[ -e "$1" ]] ; then
+        printf '%s\n' "\"$1\" not found"
+        return 1
+    fi
+    name="$1.$(date +%Y%m%d%H%M%S.bak)"
+    if [[ -e "${name}" ]] ; then
+        printf '%s\n' "Backup file \"$name\" already exists"
+        return 1
+    fi
+    cp --archive --verbose --no-clobber "$1" "${name}"
 }
 
 fstab() {
