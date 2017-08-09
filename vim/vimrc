@@ -9,7 +9,8 @@ call vundle#begin()
 
 Plugin 'VundleVim/Vundle.vim'
 
-Plugin 'bling/vim-airline'
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
 Plugin 'godlygeek/tabular'
 Plugin 'lepture/vim-jinja'
 Plugin 'majutsushi/tagbar'
@@ -25,10 +26,11 @@ Plugin 'tpope/vim-surround'
 Plugin 'junegunn/goyo.vim'
 Plugin 'junegunn/limelight.vim'
 Plugin 'sheerun/vim-polyglot'
+Plugin 'freitass/todo.txt-vim'
+Plugin 'Valloric/YouCompleteMe'
 
 "Plugin 'Lokaltog/vim-easymotion'
 "Plugin 'PeterRincker/vim-argumentative'
-"Plugin 'Valloric/YouCompleteMe'
 "Plugin 'flazz/vim-colorschemes'
 "Plugin 'jmcantrell/vim-virtualenv'
 "Plugin 'kien/ctrlp.vim'
@@ -58,7 +60,8 @@ set shiftwidth=4
 set autoindent
 set expandtab
 set smartindent
-set formatoptions=tcroqnj
+"set formatoptions=tcqjron
+set formatoptions=
 
 " == ui ==
 set cursorline
@@ -150,6 +153,7 @@ set wrapscan
 " === keybinds ===
 set pastetoggle=<F11>
 
+let maplocalleader = "ö"
 let mapleader = "\<Space>"
 map <leader>w: w!<cr>
 
@@ -228,6 +232,7 @@ let g:airline_left_sep = ''
 let g:airline#extensions#disable_rtp_load = 1
 let g:airline_extensions = ['whitespace']
 let g:airline_theme='powerlineish'
+let g:airline_powerline_fonts = 1
 let g:airline_section_x = airline#section#create(['%{tagbar#currenttag("%s", "", "f")}','' , ' %{PencilMode()}', ' [', 'filetype', ']'])
 let g:pencil#mode_indicators = {'hard': 'H', 'auto': 'A', 'soft': 'S', 'off': '',}
 let g:airline#extensions#whitespace#enabled = 1
@@ -251,3 +256,5 @@ function! DeleteTrailingWS()
      exe "normal `z"
 endfunction
 autocmd BufWritePre * :call DeleteTrailingWS()
+
+autocmd FileType yaml set shiftwidth=2
