@@ -1,6 +1,6 @@
 autoload -Uz vcs_info
 
-_vcsbase="%{$fg[grey]%}[%r] %{$fg[blue]%}[%{%B%}%b%{$fg[red]%}%m%{$fg[blue]%}] %{$fg[red]%}%{%B%}%c%u"
+_vcsbase="%{$fg[red]%}[%r] %{$fg[blue]%}[%{%B%}%b%{$fg[red]%}%m%{$fg[blue]%}] %{$fg[red]%}%{%B%}%c%u"
 
 zstyle ':vcs_info:*' stagedstr 'I'
 zstyle ':vcs_info:*' unstagedstr 'M'
@@ -41,7 +41,7 @@ zstyle ':vcs_info:git*+set-message:*' hooks git-untracked git-st git-remotebranc
         --symbolic-full-name 2>/dev/null)/refs\/remotes\/}
 
     if [[ -n ${remote} ]] ; then
-        hook_com[branch]="${hook_com[branch]} %b%{$fg[grey]%}<${remote}>"
+        hook_com[branch]="${hook_com[branch]} %b%{$fg[magenta]%}<${remote}>"
     fi
 }
 
