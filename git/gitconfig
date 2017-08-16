@@ -39,8 +39,6 @@
     excludesfile = "~/.gitignore_global"
 [color]
     ui = true
-[gui]
-	recentrepo = /home/hannes/programming/git-repositories/autobackup
 [push]
 	default = simple
 [merge]
