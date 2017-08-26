@@ -176,7 +176,7 @@
     bindsym $mod+Return exec $terminal
     bindsym $mod+F1 exec firefox
 
-    bindsym Pause exec --no-startup-id ~/.i3/scripts/shutdown-menu
+    bindsym Print exec --no-startup-id ~/.i3/scripts/shutdown-menu
 
     bindsym $mod+Shift+v exec --no-startup-id redshift-toggle
 
