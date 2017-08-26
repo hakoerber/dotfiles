@@ -155,9 +155,9 @@ set pastetoggle=<F11>
 
 let maplocalleader = "ö"
 let mapleader = "\<Space>"
-map <leader>w: w!<cr>
+" map <leader>w: w!<cr>
 
-nnoremap <leader>w :w<CR>
+" nnoremap <leader>w :w<CR>
 nmap <leader><leader> za
 map , :
 
@@ -190,6 +190,7 @@ nnoremap <leader>v <C-w>v<C-w>l
 
 nnoremap <leader>u :GundoToggle<CR>
 
+nmap <F9> :Goyo<CR>:TogglePencil<CR>:Limelight!!<CR>
 nmap <leader>w :Goyo<CR>:TogglePencil<CR>:Limelight!!<CR>
 
 " no more ex mode
@@ -245,9 +246,12 @@ let g:pencil#autoformat = 1
 let g:pencil#cursorwrap = 1
 
 " == goyo ==
-let g:goyo_width = 80
+let g:goyo_width = 100
 let g:goyo_height = "90%"
 let g:goyo_linenr = 0
+
+" == limelight ==
+let g:limelight_default_coefficient = 0.5
 
 " === functions ===
 function! DeleteTrailingWS()
