@@ -1,6 +1,6 @@
 [[ -z "$PS1" ]] && return
 
-_zshdir="$HOME/.zsh"
+_zshdir="$HOME/.zshrc.d"
 
 export GPG_TTY=$(tty)
 gpg-connect-agent updatestartuptty /bye >/dev/null
