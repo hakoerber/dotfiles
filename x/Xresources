@@ -2,7 +2,7 @@ Xcursor.theme: Vanilla-DMZ
 
 URxvt.scrollBar: false
 
-URxvt.font: xft:Inconsolata:size=11
+URxvt.font: xft:Inconsolata:size=9
 URxvt.letterSpace: -1
 
 URxvt.perl-ext-common: default,matcher,selection-to-clipboard

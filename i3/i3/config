@@ -238,7 +238,7 @@
     floating_minimum_size 0 x 0
     floating_maximum_size 0 x 0
 
-    font pango:Insonsolata 11
+    font pango:Insonsolata 9
 
 ################################################################################
 ### COLOR SETTINGS #############################################################
@@ -305,7 +305,7 @@ bar {
 
     id bar-0
 
-    font pango:Inconsolata, Icons 11
+    font pango:Inconsolata, Icons 9
 
     colors {
         background #222222
