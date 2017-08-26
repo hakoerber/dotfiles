@@ -1,0 +1,37 @@
+- defaults:
+    link:
+      relink: true
+      create: true
+      force: true
+      relative: true
+
+- link:
+    ~/.autostart:
+    ~/.gitconfig:
+      path: git/gitconfig
+    ~/.gitignore_global:
+      path: git/gitignore_global
+    ~/.gnupg/dirmngr.conf:
+      path: gnupg/dirmngr.conf
+    ~/.gnupg/gpg-agent.conf:
+      path: gnupg/gpg-agent.conf
+    ~/.gnupg/gpg.conf:
+      path: gnupg/gpg.conf
+    ~/.i3:
+    ~/.tmux.conf:
+      path: tmux/tmux.conf
+    ~/.vimrc:
+      path: vim/vimrc
+    ~/.Xresources:
+      path: x/Xresources
+    ~/.xinitrc:
+      path: x/xinitrc
+    ~/.zprofile:
+      path: zsh/zprofile
+    ~/.zshrc:
+      path: zsh/zshrc
+    ~/.zshrc.d:
+      path: zsh/zshrc.d
+
+- shell:
+  - xrdb ~/.Xresources
