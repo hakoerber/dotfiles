@@ -2,13 +2,13 @@
 Xcursor.theme: Vanilla-DMZ
 
 URxvt.scrollBar: false
-URxvt.font: xft:Inconsolata:size=12
+URxvt.font: xft:Inconsolata:size=11
 
 URxvt.letterSpace: -1
 
 ! clickable URLs
 URxvt.perl-ext-common: default,matcher,selection-to-clipboard
-URxvt.url-launcher: /usr/bin/firefox
+URxvt.url-launcher: /usr/bin/firefox-trunk
 URxvt.matcher.button: 1
 
 URxvt.intensityStyles: false
@@ -23,6 +23,8 @@ URxvt.cursorBlink: true
 
 URxvt.transparent:   true
 URxvt.shading:       0
+
+! URxvt.internalBorder: 6
 
 ! Solarized color scheme for the X Window System
 !

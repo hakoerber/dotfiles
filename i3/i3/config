@@ -38,15 +38,15 @@
     set $signal_reboot    reboot
     set $signal_shutdown  shutdown
 
-    set $workspace1  1:web
+    set $workspace1  1
     set $workspace2  2
     set $workspace3  3
     set $workspace4  4
     set $workspace5  5
-    set $workspace6  6:voip
-    set $workspace7  7:music
-    set $workspace8  8:irc
-    set $workspace9  9:mail
+    set $workspace6  6
+    set $workspace7  7
+    set $workspace8  8
+    set $workspace9  9
     set $workspace10 10
 
     set $key_workspace1  1
@@ -91,6 +91,24 @@
     set $exit    Shift+E
 
     set $kill Shift+Q
+
+
+################################################################################
+### WORKSPACE ASSIGNMENTS ######################################################
+################################################################################
+
+workspace $workspace1 output HDMI3
+workspace $workspace2 output HDMI3
+workspace $workspace3 output HDMI2
+workspace $workspace4 output HDMI2
+workspace $workspace5 output HDMI2
+workspace $workspace6 output HDMI2
+workspace $workspace7 output LVDS1
+workspace $workspace8 output LVDS1
+workspace $workspace9 output LVDS1
+workspace $workspace10 output LVDS1
+
+assign [class="^Keepassx$"] $workspace8
 
 ################################################################################
 ### KEYBINDINGS ################################################################
@@ -238,9 +256,7 @@
     floating_minimum_size 0 x 0
     floating_maximum_size 0 x 0
 
-    smart_borders on
-
-    font pango:Insonsolata 11
+    font pango:Inconsolata 10
 
 ################################################################################
 ### COLOR SETTINGS #############################################################
@@ -256,12 +272,6 @@ client.urgent           #2f343a #900000 #ffffff #900000
 ### APPLICATION SPECIFIC SETTINGS ##############################################
 ################################################################################
 
-assign [class="^Mumble$"] $workspace6
-assign [class="^TeamSpeak 3$"] $workspace6
-assign [class="^Clementine$"] $workspace7
-assign [class="^quassel$"] $workspace8
-assign [class="^Thunderbird$"] $workspace9
-assign [class="^Evolution$"] $workspace9
 
 bindsym $mod+F6 exec --no-startup-id mumble
 bindsym $mod+F7 exec --no-startup-id clementine
@@ -272,23 +282,35 @@ bindsym $mod+F9 exec --no-startup-id evolution
 ### SPECIAL KEYBINDS ###########################################################
 ################################################################################
 
+#bindsym XF86Sleep exec --no-stratup-id dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Pause ; exec --no-startup-id $scriptdir/i3exit suspend
 bindsym XF86Sleep exec --no-startup-id $scriptdir/i3exit suspend
-bindsym XF86AudioMute exec --no-startup-id amixer set Master toggle ; exec --no-startup-id $update-status
-bindsym XF86AudioRaiseVolume exec --no-startup-id $scriptdir/pa-volume set-vol +5 ; exec --no-startup-id $scriptdir/update-status
-bindsym XF86AudioLowerVolume exec --no-startup-id $scriptdir/pa-volume set-vol -5 ; exec --no-startup-id $scriptdir/update-status
+bindsym XF86AudioMute exec --no-startup-id $scriptdir/pa-volume mute-toggle ;  exec --no-startup-id $update-status
+bindsym XF86AudioRaiseVolume exec --no-startup-id $scriptdir/pa-volume set-vol +3 ; exec --no-startup-id $scriptdir/update-status
+bindsym XF86AudioLowerVolume exec --no-startup-id $scriptdir/pa-volume set-vol -3 ; exec --no-startup-id $scriptdir/update-status
+
+bindsym XF86AudioPlay exec dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause
+bindsym XF86AudioNext exec dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next
+bindsym XF86AudioPrev exec dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous
 
 # keys seemingly switched
 bindsym XF86MonBrightnessUp   exec --no-startup-id xbacklight -dec 5 ; exec --no-startup-id $scriptdir/update-status
 bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -inc 5 ; exec --no-startup-id $scriptdir/update-status
 
-bindsym XF86AudioPlay exec --no-startup-id mpc toggle
-bindsym XF86AudioPrev exec --no-startup-id mpc prev
-bindsym XF86AudioNext exec --no-startup-id mpc next
-
 bindsym $mod+o exec --no-startup-id xautorandr ; exec --no-startup-id kill -SIGUSR2 $(cat $RUNDIR/wallchanger.$XDG_SESSION_ID.pid)'"
 bindsym $mod+p exec --no-startup-id kill -SIGUSR1 $(cat $RUNDIR/wallchanger.$XDG_SESSION_ID.pid)
 
-################################################################################
+
+
+
+exec --no-startup-id autostart
+
+
+
+
+
+
+
+###############################################################################
 ### BARS #######################################################################
 ################################################################################
 #
@@ -296,6 +318,8 @@ bar {
     mode dock
     position top
 
+    
+#tray_output HDMI3
     tray_output primary
     tray_padding 3
 
@@ -307,7 +331,7 @@ bar {
 
     id bar-0
 
-    font pango:DejaVu Sans, Icons 11
+    font pango:DejaVu Sans, Icons 10
 
     colors {
         background #222222

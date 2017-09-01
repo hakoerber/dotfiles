@@ -28,7 +28,7 @@ Plugin 'sheerun/vim-polyglot'
 
 "Plugin 'Lokaltog/vim-easymotion'
 "Plugin 'PeterRincker/vim-argumentative'
-"Plugin 'Valloric/YouCompleteMe'
+Plugin 'Valloric/YouCompleteMe'
 "Plugin 'flazz/vim-colorschemes'
 "Plugin 'jmcantrell/vim-virtualenv'
 "Plugin 'kien/ctrlp.vim'
@@ -115,7 +115,7 @@ set undodir=~/.vim/undo
 set undofile
 
 " == environment / directories ==
-set autochdir
+set noautochdir
 set directory=/var/tmp,/tmp
 set viewdir=~/.vim/view
 
@@ -227,7 +227,7 @@ let g:airline_right_sep = ''
 let g:airline_left_sep = ''
 let g:airline#extensions#disable_rtp_load = 1
 let g:airline_extensions = ['whitespace']
-let g:airline_theme='powerlineish'
+"let g:airline_theme='powerlineish'
 let g:airline_section_x = airline#section#create(['%{tagbar#currenttag("%s", "", "f")}','' , ' %{PencilMode()}', ' [', 'filetype', ']'])
 let g:pencil#mode_indicators = {'hard': 'H', 'auto': 'A', 'soft': 'S', 'off': '',}
 let g:airline#extensions#whitespace#enabled = 1
@@ -250,4 +250,7 @@ function! DeleteTrailingWS()
      %s/\s\+$//e
      exe "normal `z"
 endfunction
-autocmd BufWritePre * :call DeleteTrailingWS()
+"autocmd BufWritePre * :call DeleteTrailingWS()
+
+set completeopt-=preview
+let g:ycm_add_preview_to_completeopt = 0

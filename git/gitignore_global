@@ -58,9 +58,9 @@ Icon
 *.rpm
 
 ### logs and databases
-*.log
-*.sql
-*.sqlite
+#*.log
+# *.sql
+# *.sqlite
 
 ### eclipse specific
 *.pydevproject

@@ -1,0 +1,20 @@
+[2017-01-04T10:35:52] Looking for autostart files.
+[2017-01-04T10:35:52] Executing autostart file "/home/hak/.autostart/keyboard.sh"
+[2017-01-04T10:35:52] Executing autostart file "/home/hak/.autostart/network.sh"
+[2017-01-04T10:35:52] Executing autostart file "/home/hak/.autostart/pasystray.sh"
+[2017-01-04T10:35:52] Executing autostart file "/home/hak/.autostart/redshift.sh"
+[2017-01-04T10:35:52] Executing autostart file "/home/hak/.autostart/screen.sh"
+[2017-01-04T10:35:52] Executing autostart file "/home/hak/.autostart/synclient.sh"
+[2017-01-04T10:35:52] Executing autostart file "/home/hak/.autostart/xbindkeys.sh"
+[2017-01-04T10:35:52] Executing autostart file "/home/hak/.autostart/xresources.sh"
+[2017-01-04T10:35:52] starting i3
+[2017-01-04T10:36:26] Looking for autostart files.
+[2017-01-04T10:36:26] Executing autostart file "/home/hak/.autostart/keyboard.sh"
+[2017-01-04T10:36:26] Executing autostart file "/home/hak/.autostart/network.sh"
+[2017-01-04T10:36:26] Executing autostart file "/home/hak/.autostart/pasystray.sh"
+[2017-01-04T10:36:26] Executing autostart file "/home/hak/.autostart/redshift.sh"
+[2017-01-04T10:36:26] Executing autostart file "/home/hak/.autostart/screen.sh"
+[2017-01-04T10:36:26] Executing autostart file "/home/hak/.autostart/synclient.sh"
+[2017-01-04T10:36:26] Executing autostart file "/home/hak/.autostart/xbindkeys.sh"
+[2017-01-04T10:36:26] Executing autostart file "/home/hak/.autostart/xresources.sh"
+[2017-01-04T10:36:26] starting i3

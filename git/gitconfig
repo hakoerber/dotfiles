@@ -1,7 +1,8 @@
 [user]
     name = Hannes Körber
-    email = hannes.koerber@haktec.de
-    signingkey = 0x078A167A8741BD30
+    email = hannes.koerber@tradebyte.com
+[github]
+    user = hakoerber
 [alias]
     untrack = "rm --cached"
     unstage = "reset HEAD"
@@ -16,7 +17,9 @@
     st = "status"
     br = "branch"
     rb = "rebase"
-    rbi = "rebase -i"
+    rbi = "rebase --interactive"
+    rbc = "rebase --continue"
+    rba = "rebase --abort"
     df = "diff"
     gr = "! git graph"
 
@@ -30,17 +33,24 @@
 
     pushall = "!sh -c 'for r in $(git remote) ; do [[ "$r" != "upstream" ]] && { echo \"--- [$r] ---\" ; git push $r \"$@\" ; } ; done' -"
 
-    graph = log --graph --pretty=format:'%C(yellow)%h%Creset%C(bold red)% D%Creset %C(green)(%cr) %C(blue)%an<%ae>%Creset%n        %C(bold white)%s%Creset' --all
+    graph = log --graph --pretty=format:'%C(yellow)%h%Creset%C(bold red)% D%Creset %C(green)(%cr) %C(blue)%an<%ae>%Creset%n        %C(bold white)%s%Creset' # --all
 
     intercommit = !bash -c 'interdiff <(git show $1) <(git show $2) | less -FRS' -
 
+    drop = !git rebase --onto $1^ --
+    ; drop = !bash -c 'echo $1' -
+
+    ; subcommit = '!sh -c 'git add $1 && git commit -m "Update submodule $1" -m "$(git diff --staged --submodule=log | tr ">" "*")''
+
 [core]
-    whitespace = ""
-    excludesfile = "~/.gitignore_global"
+    fileMode = true
+    whitespace = "blank-at-eol,space-before-tab,blank-at-eof"
+    ; excludesfile = "~/.gitignore_global"
+    abbrev = 8
 [color]
     ui = true
-[gui]
-	recentrepo = /home/hannes/programming/git-repositories/autobackup
+[column]
+    ui = auto
 [push]
 	default = simple
 [merge]
@@ -48,16 +58,29 @@
 [gc]
 	auto = 0
 [advice]
-    pushNonFastForward = false
+    pushUpdateRejected = false
     statusHints = false
     commitBeforeMerge = false
+    detachedHead = false
 [commit]
-    gpgSign = true
+#    gpgSign = true
+    cleanup = default
+    status = true
 [status]
     relativePaths = false
+    submoduleSummary = true
 [pager]
-	log = diff-so-fancy | less
-	show = diff-so-fancy | less
-	diff = diff-so-fancy | less
+   # log = diff-so-fancy | less
+   # show = diff-so-fancy | less
+   # diff = diff-so-fancy | less
 [interactive]
-	diffFilter = diff-so-fancy
+    #diffFilter = diff-so-fancy
+[rebase]
+	autoSquash = true
+[diff]
+    submodule = log
+    mnemonicPrefix = true
+[branch]
+    autoSetupMerge = true
+[clean]
+    requireForce = true
