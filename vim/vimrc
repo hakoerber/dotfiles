@@ -1,33 +1,31 @@
-" vim: set filetype=vim
-
 set nocompatible
 filetype off
-set rtp+=~/.vim/bundle/Vundle.vim/
-call vundle#begin()
+call plug#begin('~/.local/share/nvim/plugged')
 
-" === plugin setup ===
+" === plugins ===
 
-Plugin 'VundleVim/Vundle.vim'
-
-Plugin 'vim-airline/vim-airline'
-Plugin 'vim-airline/vim-airline-themes'
-Plugin 'godlygeek/tabular'
-Plugin 'lepture/vim-jinja'
-Plugin 'majutsushi/tagbar'
-Plugin 'nblock/vim-dokuwiki'
-Plugin 'reedes/vim-pencil'
-Plugin 'saltstack/salt-vim'
-Plugin 'sickill/vim-monokai'
-Plugin 'sjl/gundo.vim'
-Plugin 'tpope/vim-commentary'
-Plugin 'tpope/vim-fugitive'
-Plugin 'tpope/vim-speeddating'
-Plugin 'tpope/vim-surround'
-Plugin 'junegunn/goyo.vim'
-Plugin 'junegunn/limelight.vim'
-Plugin 'sheerun/vim-polyglot'
-Plugin 'freitass/todo.txt-vim'
-Plugin 'Valloric/YouCompleteMe'
+"Plug 'vim-airline/vim-airline'
+"Plug 'vim-airline/vim-airline-themes'
+Plug 'itchyny/lightline.vim'
+" Plug 'godlygeek/tabular'
+" Plug 'lepture/vim-jinja'
+Plug 'majutsushi/tagbar'
+" Plug 'nblock/vim-dokuwiki'
+Plug 'reedes/vim-pencil'
+" Plug 'saltstack/salt-vim'
+Plug 'sickill/vim-monokai'
+" Plug 'sjl/gundo.vim'
+" Plug 'tpope/vim-commentary'
+" Plug 'tpope/vim-fugitive'
+" Plug 'tpope/vim-speeddating'
+" Plug 'tpope/vim-surround'
+Plug 'airblade/vim-gitgutter'
+Plug 'junegunn/goyo.vim'
+Plug 'junegunn/limelight.vim'
+" Plug 'sheerun/vim-polyglot'
+" Plug 'freitass/todo.txt-vim'
+Plug 'Valloric/YouCompleteMe'
+Plug 'nathanaelkane/vim-indent-guides'
 
 "Plugin 'Lokaltog/vim-easymotion'
 "Plugin 'PeterRincker/vim-argumentative'
@@ -36,20 +34,15 @@ Plugin 'Valloric/YouCompleteMe'
 "Plugin 'kien/ctrlp.vim'
 "Plugin 'klen/python-mode'
 "Plugin 'mbbill/undotree'
-"Plugin 'scrooloose/nerdtree'
+Plug 'scrooloose/nerdtree'
 "Plugin 'sjl/gundo.vim'
 "Plugin 'terryma/vim-expand-region'
 "Plugin 'terryma/vim-multiple-cursors'
 "Plugin 'wellle/targets.vim'
 "Plugin 'wincent/Command-T'
 
-call vundle#end()
+call plug#end()
 filetype plugin indent on
-
-
-" === General options ===
-
-set t_Co=256
 
 " == formatting ==
 set tabstop=4
@@ -77,7 +70,7 @@ set matchtime=5
 set mouse=a
 set mousehide
 set noerrorbells
-set showmode
+set noshowmode
 set numberwidth=2
 set relativenumber
 set shortmess=rti
@@ -135,7 +128,7 @@ set hidden
 
 " == editing ==
 set backspace=indent,eol,start
-set esckeys
+" set esckeys
 set matchpairs=(:),{:},[:],<:>
 set notimeout
 set ttimeout
@@ -211,7 +204,7 @@ let g:solarized_termtrans=1
 let g:solarized_contrast="normal"
 let g:solarized_visibility="normal"
 syntax enable
-" colorscheme monokai
+colorscheme monokai
 
 " == tagbar ==
 nnoremap <F10> :TagbarToggle<CR>
@@ -225,21 +218,21 @@ let g:tagbar_sort = 0 " 1: sort by name, 0: sort by position
 let g:tagbar_compact = 1
 let g:tagbar_indent = 2
 let g:tagbar_show_linenumbers = 0
-let g:tagbar_foldlevel = 99 " unfold all
+"let g:airline_right_sep = ''
+"let g:airline_left_sep = ''
+"let g:airline#extensions#disable_rtp_load = 1
+"let g:airline_extensions = ['whitespace']
+"let g:airline_theme='powerlineish'
+"let g:airline_powerline_fonts = 1
+"let g:airline_section_x = airline#section#create(['%{tagbar#currenttag("%s", "", "f")}','' , ' %{PencilMode()}', ' [', 'filetype', ']'])
+"let g:pencil#mode_indicators = {'hard': 'H', 'auto': 'A', 'soft': 'S', 'off': '',}
+"let g:airline#extensions#whitespace#enabled = 1
+"let g:airline#extensions#whitespace#symbol = ''
+"let g:airline#extensions#whitespace#checks = ['trailing']
 
-" == airline ==
-let g:airline_right_sep = ''
-let g:airline_left_sep = ''
-let g:airline#extensions#disable_rtp_load = 1
-let g:airline_extensions = ['whitespace']
-let g:airline_theme='powerlineish'
-let g:airline_powerline_fonts = 1
-
-let g:airline_section_x = airline#section#create(['%{tagbar#currenttag("%s", "", "f")}','' , ' %{PencilMode()}', ' [', 'filetype', ']'])
-let g:pencil#mode_indicators = {'hard': 'H', 'auto': 'A', 'soft': 'S', 'off': '',}
-let g:airline#extensions#whitespace#enabled = 1
-let g:airline#extensions#whitespace#symbol = ''
-let g:airline#extensions#whitespace#checks = ['trailing']
+let g:lightline = {
+      \ 'colorscheme': 'powerline',
+      \ }
 
 " == pencil ==
 let g:pencil#textwidth = 80
