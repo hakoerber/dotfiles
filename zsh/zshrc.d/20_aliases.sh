@@ -1,7 +1,4 @@
 ### TRANSLATIONS
-alias vim="vim -u $VIMRC"
-
-alias urxvt="urxvt256c"
 
 ### COMMON OPERATIONS
 alias ll='ls -AlFh'
@@ -26,8 +23,6 @@ alias calc='python3 -ic "from math import *; import cmath"'
 alias le_haxxor_1='clear && dmesg | pv -qL 20'
 alias le_haxxor_2='clear && hexdump -C /dev/urandom | pv -qlL 2'
 
-alias b='cd $OLDPWD'
-
 alias root='sudo -sE'
 
 ### USEFUL DEFAULT OPTIONS
@@ -51,17 +46,15 @@ alias du='du -h'
 alias df='df -h'
 
 # show non-printable characters by default
-alias cat="cat -v"
+# alias cat="cat -v"
 
 ### SHORTENING COMMAND NAMES
 alias cs="cryptsetup"
 alias v="vim"
 alias g="git"
-alias t="tmux"
 alias c="cd"
 alias l="ls"
 alias s="sudo"
-alias t="tmux"
 alias cl="clear"
 
 alias nocolor="sed -r \"s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g\""
