@@ -50,9 +50,6 @@ alias ln='ln -v'
 alias du='du -h'
 alias df='df -h'
 
-# show non-printable characters by default
-alias cat="cat -v"
-
 ### SHORTENING COMMAND NAMES
 alias cs="cryptsetup"
 alias v="vim"
