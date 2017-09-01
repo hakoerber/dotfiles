@@ -4,7 +4,7 @@
 
 _logfile="$LOGDIR/i3/i3exit.log"
 
-_fallback_color=000000
+_fallback_color="000000"
 
 touch "$_logfile"
 
@@ -16,14 +16,25 @@ log()
 
 lock()
 {
-    if [[ "$LOCKSCREEN" ]] ; then
-        i3lock --show-failed-attempts --image "$LOCKSCREEN"
-    else
-        i3lock --show-failed-attempts --color "$_fallback_color"
+    set -x
+    playing=0
+    if dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Get string:'org.mpris.MediaPlayer2.Player' string:'PlaybackStatus'|grep -q Playing ; then
+        playing=1
     fi
+    echo $playing
+    (( $playing )) && dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Pause
+    if [[ "$LOCKSCREEN" ]] ; then
+        i3lock --nofork --show-failed-attempts --image "$LOCKSCREEN" &
+    else
+        i3lock --nofork --show-failed-attempts --color "$_fallback_color" &
+    fi
+    screen_off
+    wait
+    (( $playing )) && dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Play 
 }
 
 screen_off() {
+    :
     xset dpms force off
 }
 
@@ -33,7 +44,7 @@ log "[I] Received signal \"$signal\"."
 case "$signal" in
     lock)
         log "[I] Locking session."
-        lock && screen_off
+        lock
         ;;
     logout)
         log "[I] Exiting i3."

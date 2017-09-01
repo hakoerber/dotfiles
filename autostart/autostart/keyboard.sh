@@ -1,3 +1,4 @@
+#!/bin/bash
 keyboard_layout=de
 keyboard_variant=nodeadkeys
 keyboard_repeat_delay=150
