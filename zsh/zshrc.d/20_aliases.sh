@@ -1,5 +1,5 @@
 ### TRANSLATIONS
-alias vim="vim -u $VIMRC"
+alias vim="nvim"
 
 alias urxvt="urxvt256c"
 

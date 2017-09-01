@@ -20,7 +20,7 @@
     ~/.i3:
     ~/.tmux.conf:
       path: tmux/tmux.conf
-    ~/.vimrc:
+    ~/.config/nvim/init.vim:
       path: vim/vimrc
     ~/.Xresources:
       path: x/Xresources
@@ -34,4 +34,15 @@
       path: zsh/zshrc.d
 
 - shell:
+  - ln -sf ~/.config/nvim/init.vim ~/.vimrc
   - xrdb ~/.Xresources
+  - mkdir -p ~/.var/lib
+  - mkdir -p ~/.var/log
+  - mkdir -p ~/.var/run
+  - curl --fail --location --create-dirs --output ~/.local/share/nvim/site/autoload/plug.vim  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  - command: nvim -E +PlugInstall +qall || true
+    stdout: true
+    stderr: true
+  - command: cd ~/.local/share/nvim/plugged/YouCompleteMe && ./install.py || true
+    stdout: true
+    stderr: true
