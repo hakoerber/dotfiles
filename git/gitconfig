@@ -2,6 +2,8 @@
     name = Hannes Körber
     email = hannes.koerber@haktec.de
     signingkey = 0x078A167A8741BD30
+[github]
+    user = hakoerber
 [alias]
     untrack = "rm --cached"
     unstage = "reset HEAD"
@@ -16,7 +18,9 @@
     st = "status"
     br = "branch"
     rb = "rebase"
-    rbi = "rebase -i"
+    rbi = "rebase --interactive"
+    rbc = "rebase --continue"
+    rba = "rebase --abort"
     df = "diff"
     gr = "! git graph"
 
@@ -36,11 +40,17 @@
 
     intercommit = !bash -c 'interdiff <(git show $1) <(git show $2) | less -FRS' -
 
+    drop = !git rebase --onto $1^ --
+
 [core]
-    whitespace = ""
-    excludesfile = "~/.gitignore_global"
+    fileMode = true
+    whitespace = "blank-at-eol,space-before-tab,blank-at-eof"
+    ; excludesfile = "~/.gitignore_global"
+    abbrev = 8
 [color]
     ui = true
+[column]
+    ui = auto
 [push]
 	default = simple
 [merge]
@@ -49,15 +59,29 @@
 	auto = 0
 [advice]
     pushNonFastForward = false
+    pushUpdateRejected = false
     statusHints = false
     commitBeforeMerge = false
+    detachedHead = false
 [commit]
     gpgSign = true
+    cleanup = default
+    status = true
 [status]
     relativePaths = false
+    submoduleSummary = true
 [pager]
 	log = less
 	show = less
 	diff = less
 [gpg]
 	program = gpg2
+[rebase]
+	autoSquash = true
+[diff]
+    submodule = log
+    mnemonicPrefix = true
+[branch]
+    autoSetupMerge = true
+[clean]
+    requireForce = true

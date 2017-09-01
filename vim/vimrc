@@ -118,7 +118,7 @@ set undodir=~/.vim/undo
 set undofile
 
 " == environment / directories ==
-set autochdir
+set noautochdir
 set directory=/var/tmp,/tmp
 set viewdir=~/.vim/view
 
@@ -234,6 +234,7 @@ let g:airline#extensions#disable_rtp_load = 1
 let g:airline_extensions = ['whitespace']
 let g:airline_theme='powerlineish'
 let g:airline_powerline_fonts = 1
+
 let g:airline_section_x = airline#section#create(['%{tagbar#currenttag("%s", "", "f")}','' , ' %{PencilMode()}', ' [', 'filetype', ']'])
 let g:pencil#mode_indicators = {'hard': 'H', 'auto': 'A', 'soft': 'S', 'off': '',}
 let g:airline#extensions#whitespace#enabled = 1
@@ -262,3 +263,6 @@ endfunction
 autocmd BufWritePre * :call DeleteTrailingWS()
 
 autocmd FileType yaml set shiftwidth=2
+
+set completeopt-=preview
+let g:ycm_add_preview_to_completeopt = 0

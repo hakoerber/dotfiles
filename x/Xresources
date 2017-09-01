@@ -1,12 +1,10 @@
 Xcursor.theme: Vanilla-DMZ
 
 URxvt.scrollBar: false
-
-URxvt.font: xft:Inconsolata:size=9
+URxvt.font: xft:Inconsolata:size=10
 URxvt.letterSpace: -1
 
 URxvt.perl-ext-common: default,matcher,selection-to-clipboard
-
 URxvt.url-launcher: /usr/bin/xdg-open
 URxvt.matcher.button: 1
 URxvt.saveLines: 10000
@@ -60,4 +58,3 @@ URxvt.fading: 15
 ! white
 *.color7:       #f8f8f2
 *.color15:      #f9f8f5
-
