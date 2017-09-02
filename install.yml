@@ -45,6 +45,6 @@
   - command: nvim -E +PlugInstall +qall || true
     stdout: true
     stderr: true
-  - command: cd ~/.local/share/nvim/plugged/YouCompleteMe && ./install.py || true
+  - command: test -e ~/.local/share/nvim/plugged/YouCompleteMe/third_party/ycmd/ycm_core.so || bash -c "cd ~/.local/share/nvim/plugged/YouCompleteMe && ./install.py" || true
     stdout: true
     stderr: true
