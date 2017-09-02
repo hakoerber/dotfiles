@@ -1,0 +1,45 @@
+packages:
+  list:
+    ansible:
+      fedora: ["ansible"]
+      ubuntu: ["bla"]
+    arandr:
+      fedora: ["arandr"]
+    arandr2:
+      fedora: ["arandr"]
+    borgbackup:
+      fedora: ["borgbackup"]
+    docker:
+      fedora: ["docker"]
+    fontawesome:
+      fedora: ["fontawesome-fonts", "fontawesome-fonts-web"]
+    gitk:
+      fedora: ["gitk"]
+    htop:
+      fedora: ["htop"]
+    i3:
+      fedora: ["i3"]
+    i3lock:
+      fedora: ["i3lock"]
+    mousepad:
+      fedora: ["mousepad"]
+    neovim:
+      fedora: ["neovim"]
+    network-manager-applet:
+      fedora: ["network-manager-applet"]
+    pasystray:
+      fedora: ["pasystray"]
+    pavucontrol:
+      fedora: ["pavucontrol"]
+    pinentry-qt:
+      fedora: ["pinentry-qt"]
+    pinta:
+      fedora: ["pinta"]
+    py3status:
+      fedora: ["py3status"]
+    urxvt:
+      fedora: ["rxvt-unicode-256color"]
+    tmux:
+      fedora: ["tmux"]
+    zsh:
+      fedora: ["zsh"]

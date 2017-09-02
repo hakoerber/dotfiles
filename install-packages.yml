@@ -1,0 +1,27 @@
+- hosts: localhost
+  connection: local
+  become: true
+  tasks:
+    - name: load package list
+      include_vars:
+        file: packages.yml
+
+    - set_fact:
+        distro: "{{ ansible_distribution|lower }}"
+
+    - set_fact:
+        defined_packages: "{{ packages|json_query('keys(list)') }}"
+
+    - set_fact:
+        distro_packages: "{{ packages|json_query('list.*.%s'|format(distro)) }}"
+
+    - name: check list
+      assert:
+        that: "defined_packages|length == distro_packages|length"
+
+    - name: install packages
+      package:
+        name: "{{ packages|json_query(query) }}"
+        state: installed
+      vars:
+        query: "{{ 'list.*.%s[]'|format(distro) }}"
