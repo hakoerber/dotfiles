@@ -143,3 +143,7 @@ man() {
 embiggen() {
     enscript --no-header --media=A4 --landscape --font="DejaVuSansMono30" -o - | ps2pdf - | zathura -
 }
+
+resolvecd() {
+    cd "$(readlink -f $(pwd))"
+}
