@@ -37,27 +37,44 @@
     intercommit = !bash -c 'interdiff <(git show $1) <(git show $2) | less -FRS' -
 
 [core]
-    whitespace = ""
-    excludesfile = "~/.gitignore_global"
+    fileMode = true
+    whitespace = "blank-at-eol,space-before-tab,blank-at-eof"
+    abbrev = 8
+
 [color]
     ui = true
+[column]
+    ui = auto
 [push]
-	default = simple
+    default = simple
 [merge]
-	tool = vimdiff
+    tool = vimdiff
 [gc]
-	auto = 0
+    auto = 0
 [advice]
     pushNonFastForward = false
+    pushUpdateRejected = false
     statusHints = false
     commitBeforeMerge = false
+    detachedHead = false
 [commit]
     gpgSign = true
+    cleanup = default
 [status]
     relativePaths = false
+    submoduleSummary = true
 [pager]
-	log = less
-	show = less
-	diff = less
+    log = less
+    show = less
+    diff = less
 [gpg]
-	program = gpg2
+    program = gpg2
+[rebase]
+    autoSquash = true
+[diff]
+    submodule = log
+    mnemonicPrefix = true
+[branch]
+    autoSetupMerge = true
+[clean]
+    requireForce = true
