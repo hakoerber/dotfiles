@@ -147,3 +147,11 @@ embiggen() {
 resolvecd() {
     cd "$(readlink -f $(pwd))"
 }
+
+t() {
+    if [[ "$1" ]] ; then
+        tmux new-session -A -s "$1"
+    else
+        tmux attach-session
+    fi
+}
