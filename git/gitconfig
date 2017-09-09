@@ -2,6 +2,8 @@
     name = Hannes Körber
     email = hannes.koerber@haktec.de
     signingkey = 0x078A167A8741BD30
+[github]
+    user = hakoerber
 [alias]
     untrack = "rm --cached"
     unstage = "reset HEAD"
