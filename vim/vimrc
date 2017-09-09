@@ -40,6 +40,9 @@ Plug 'scrooloose/nerdtree'
 "Plugin 'terryma/vim-multiple-cursors'
 "Plugin 'wellle/targets.vim'
 "Plugin 'wincent/Command-T'
+Plug 'vimwiki/vimwiki'
+Plug 'blindFS/vim-taskwarrior'
+Plug 'tbabej/taskwiki'
 
 call plug#end()
 filetype plugin indent on
