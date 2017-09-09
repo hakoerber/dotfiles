@@ -75,6 +75,10 @@ usage() {
     echo "$0 set-vol VOL_PERC"
 }
 
+update_status_bar() {
+    ~/.i3/scripts/bar-update volume_status
+}
+
 case "$1" in
     "get-vol")
         echo $(getvol)
@@ -85,19 +89,19 @@ case "$1" in
         else
             setvol "$2"
         fi
-        hook="$3"
+        update_status_bar
         ;;
     "mute")
         mute
-        hook="$2"
+        update_status_bar
         ;;
     "unmute")
         unmute
-        hook="$2"
+        update_status_bar
         ;;
     "mute-toggle")
         mute-toggle
-        hook="$2"
+        update_status_bar
         ;;
     "is-muted")
         echo $(ismuted)
@@ -109,8 +113,3 @@ case "$1" in
         usage
         ;;
 esac
-
-if [[ -n "$hook" ]] ; then
-    echo "volume changed, executing hook: $hook"
-    $hook
-fi

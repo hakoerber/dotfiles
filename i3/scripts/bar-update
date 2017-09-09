@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [[ "$1" ]] ; then
+    modules="$1"
+else
+    modules=all
+fi
+
+py3-cmd refresh "$modules"
