@@ -9,7 +9,7 @@ _path=("$HOME/bin"
        "/usr/games")
 
 PATH=""
-for part in ${_path} ; do
+for part in ${_path[@]} ; do
     PATH="$PATH:${part}"
 done
 PATH="${PATH#:}"
