@@ -16,8 +16,8 @@ URxvt.externalBorder: 0
 
 URxvt.cursorBlink: true
 URxvt.title: term
-URxvt.jumpScroll: false
-URxvt.skipScroll: false
+URxvt.jumpScroll: true
+URxvt.skipScroll: true
 URxvt.secondaryScreen: 1
 URxvt.secondaryScroll: 0
 URxvt.secondaryWheel: 1
