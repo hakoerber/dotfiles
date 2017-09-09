@@ -14,6 +14,6 @@ output=$(
 for option in "${options[@]}"; do
     echo "($i) $option"
     (( i++ ))
-done | dmenu -fn 'DejaVu Sans Mono:size=11' -b -i -l 10 -p '>' -nb '#222222' -nf '#ffffff' -sb '#e16b40' -sf '#000000')
+done | dmenu -fn 'Inconsolata:size=9' -b -i -l 10 -p '>' -nb '#222222' -nf '#ffffff' -sb '#e16b40' -sf '#000000')
 
 [[ "$output" ]] && "$(dirname "$0")"/i3exit "${output#(*) }"
