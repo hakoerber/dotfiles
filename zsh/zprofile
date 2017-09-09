@@ -17,9 +17,10 @@ export PATH
 
 export EDITOR="vim"
 export VISUAL="vim"
-export BROWSER="chromium"
+export BROWSER="/usr/bin/xdg-open"
 
 export PAGER="less"
+export LESS="FRX"
 
 export VIMRC="$HOME/.vimrc"
 
@@ -33,6 +34,9 @@ export BINDIR="$HOME/bin"
 export LANG=en_US.UTF-8
 export LC_TIME=de_DE.UTF-8
 export LC_COLLATE=C
+
+export DOTFILES=~/dotfiles
+
 
 # Start the gpg-agent if not already running
 if ! pgrep -x --uid "${USER}" gpg-agent >/dev/null 2>&1; then
