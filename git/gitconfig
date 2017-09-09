@@ -18,7 +18,9 @@
     st = "status"
     br = "branch"
     rb = "rebase"
-    rbi = "rebase -i"
+    rbi = "rebase --interactive"
+    rbc = "rebase --continue"
+    rba = "rebase --abort"
     df = "diff"
     gr = "! git graph"
 
