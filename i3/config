@@ -254,12 +254,6 @@ client.urgent           #2f343a #900000 #ffffff #900000
 ### APPLICATION SPECIFIC SETTINGS ##############################################
 ################################################################################
 
-assign [class="^Mumble$"] $workspace6
-assign [class="^TeamSpeak 3$"] $workspace6
-assign [class="^Clementine$"] $workspace7
-assign [class="^quassel$"] $workspace8
-assign [class="^Thunderbird$"] $workspace9
-assign [class="^Evolution$"] $workspace9
 
 bindsym $mod+F6 exec --no-startup-id mumble
 bindsym $mod+F7 exec --no-startup-id clementine
@@ -278,10 +272,6 @@ bindsym XF86AudioLowerVolume exec --no-startup-id $scriptdir/pa-volume set-vol -
 # keys seemingly switched
 bindsym XF86MonBrightnessUp   exec --no-startup-id xbacklight -dec 5 ; exec --no-startup-id $scriptdir/update-status
 bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -inc 5 ; exec --no-startup-id $scriptdir/update-status
-
-bindsym XF86AudioPlay exec --no-startup-id mpc toggle
-bindsym XF86AudioPrev exec --no-startup-id mpc prev
-bindsym XF86AudioNext exec --no-startup-id mpc next
 
 bindsym $mod+o exec --no-startup-id xautorandr ; exec --no-startup-id kill -SIGUSR2 $(cat $RUNDIR/wallchanger.$XDG_SESSION_ID.pid)'"
 bindsym $mod+p exec --no-startup-id kill -SIGUSR1 $(cat $RUNDIR/wallchanger.$XDG_SESSION_ID.pid)
