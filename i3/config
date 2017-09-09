@@ -269,9 +269,9 @@ bindsym XF86AudioMute exec --no-startup-id $scriptdir/pa-volume mute-toggle
 bindsym XF86AudioRaiseVolume exec --no-startup-id $scriptdir/pa-volume set-vol +3
 bindsym XF86AudioLowerVolume exec --no-startup-id $scriptdir/pa-volume set-vol -3
 
-bindsym XF86AudioPlay exec dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause
-bindsym XF86AudioNext exec dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next
-bindsym XF86AudioPrev exec dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous
+bindsym XF86AudioPlay exec $scriptdir/spotify-control toggle
+bindsym XF86AudioNext exec $scriptdir/spotify-control next
+bindsym XF86AudioPrev exec $scriptdir/spotify-control previous
 
 # keys seemingly switched
 bindsym XF86MonBrightnessUp   exec --no-startup-id xbacklight -dec 5 ; exec --no-startup-id $scriptdir/update-status
