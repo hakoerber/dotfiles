@@ -262,3 +262,5 @@ endfunction
 autocmd BufWritePre * :call DeleteTrailingWS()
 
 autocmd FileType yaml set shiftwidth=2
+set completeopt-=preview
+let g:ycm_add_preview_to_completeopt = 0
