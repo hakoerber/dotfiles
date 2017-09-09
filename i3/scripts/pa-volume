@@ -49,15 +49,15 @@ ismuted() {
 }
 
 mute() {
-    pactl set-sink-mute $SINK 1
+    pactl set-sink-mute $SINKNAME 1
 }
 
 unmute() {
-    pactl set-sink-mute $SINK 0
+    pactl set-sink-mute $SINKNAME 0
 }
 
 mute-toggle() {
-    pactl set-sink-mute $SINK toggle
+    pactl set-sink-mute $SINKNAME toggle
 }
 
 status() {
