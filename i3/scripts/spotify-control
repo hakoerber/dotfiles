@@ -1,0 +1,19 @@
+#!/bin/bash
+
+case "$1" in
+toggle)
+    cmd="PlayPause"
+    ;;
+next)
+    cmd="Next"
+    ;;
+previous)
+    cmd="Previous"
+    ;;
+*)
+    echo "wrong argument $1"
+    exit 1
+    ;;
+esac
+
+dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player."${cmd}"
