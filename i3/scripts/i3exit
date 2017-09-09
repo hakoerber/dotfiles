@@ -5,7 +5,7 @@
 _logfile="$LOGDIR/i3/i3exit.log"
 LOCKSCREEN="$LIBDIR/wallpaper/lockscreen"
 
-_fallback_color=000000
+_fallback_color="000000"
 
 touch "$_logfile"
 
@@ -19,10 +19,10 @@ lock()
 {
     if [[ -f "$LOCKSCREEN" ]] ; then
         i3lock --nofork --show-failed-attempts --ignore-empty-password \
-            --pointer win --image "$LOCKSCREEN"
+            --pointer win --image "$LOCKSCREEN" &
     else
         i3lock --nofork --show-failed-attempts --ignore-empty-password \
-            --color "$_fallback_color"
+            --color "$_fallback_color" &
     fi
 }
 
