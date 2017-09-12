@@ -74,7 +74,7 @@ case "$signal" in
         ;;
     screen-off)
         log "[I] Turning screen off."
-        lock_and_screen_off
+        screen_off
         ;;
     *)
         echo "Usage: $0 {lock|logout|suspend|hibernate|reboot|shutdown}"
