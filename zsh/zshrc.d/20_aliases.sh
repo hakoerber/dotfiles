@@ -64,3 +64,8 @@ alias nocolor="sed -r \"s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g\""
 alias ip="ip -color"
 
 alias vimtask="vim -c :TW"
+
+alias tw="task"
+alias twl="task list"
+alias twa="task add"
+alias twd="task done"
