@@ -13,6 +13,7 @@
     visual = "!gitk --all"
     staged = "diff --staged"
 
+    fe = "fetch --all --prune"
     co = "checkout"
     ci = "commit"
     st = "status"
@@ -34,17 +35,19 @@
 
     pushall = "!sh -c 'for r in $(git remote) ; do [[ "$r" != "upstream" ]] && { echo \"--- [$r] ---\" ; git push $r \"$@\" ; } ; done' -"
 
-    branch-clean = "!sh -c 'git branch --merged | grep -v master | xargs --no-run-if-empty git branch -d'"
+    branch-clean = "!sh -c 'git branch --merged | grep -v -e master -e develop -e '^*' | xargs --no-run-if-empty git branch -d'"
+    brc = "!git branch-clean"
 
     graph = log --graph --pretty=format:'%C(yellow)%h%Creset%C(bold red)% D%Creset %C(green)(%cr) %C(blue)%an<%ae>%Creset%n        %C(bold white)%s%Creset' --all
 
     intercommit = !bash -c 'interdiff <(git show $1) <(git show $2) | less -FRS' -
 
+    drop = !git rebase --onto $1^ --
+
 [core]
     fileMode = true
     whitespace = "blank-at-eol,space-before-tab,blank-at-eof"
     abbrev = 8
-
 [color]
     ui = true
 [column]
@@ -64,6 +67,7 @@
 [commit]
     gpgSign = true
     cleanup = default
+    status = true
 [status]
     relativePaths = false
     submoduleSummary = true

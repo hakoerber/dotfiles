@@ -1,8 +1,3 @@
-### TRANSLATIONS
-alias vim="nvim"
-
-alias urxvt="urxvt256c"
-
 ### COMMON OPERATIONS
 alias ll='ls -AlFh'
 alias la='ls -A'
@@ -25,8 +20,6 @@ alias calc='python3 -ic "from math import *; import cmath"'
 
 alias le_haxxor_1='clear && dmesg | pv -qL 20'
 alias le_haxxor_2='clear && hexdump -C /dev/urandom | pv -qlL 2'
-
-alias b='cd $OLDPWD'
 
 alias root='sudo -sE'
 
@@ -69,3 +62,8 @@ alias tw="task"
 alias twl="task list"
 alias twa="task add"
 alias twd="task done"
+
+alias yaml2js="python -c 'import sys, yaml, json; json.dump(yaml.load(sys.stdin), sys.stdout, indent=4)'"
+
+alias currentbranch='git rev-parse --abbrev-ref HEAD'
+alias gpush='git push origin $(currentbranch)'

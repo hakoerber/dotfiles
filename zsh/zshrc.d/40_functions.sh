@@ -148,10 +148,32 @@ resolvecd() {
     cd "$(readlink -f $(pwd))"
 }
 
+sshmux () {
+    ssh -t $@ "tmux a || tmux";
+}
+
 t() {
     if [[ "$1" ]] ; then
         tmux new-session -A -s "$1"
     else
         tmux attach-session
     fi
+}
+
+b() {
+    bookmarks=${DOTFILES}/bookmarks
+    bookmark="$1"
+    if ! [[ "${bookmark}" ]] ; then
+        printf 'Need a bookmark' >&2
+        return 1
+    fi
+    if ! [[ -r "${bookmark}" ]] ; then
+        printf 'Invalid bookmark %s' "${bookmark}" >&2
+        return 1
+    fi
+    target="$(head -1 ${bookmark})"
+    if ! [[ -e "${target}" ]] ; then
+        printf 'Traget not found: %s' "${target}" >&2
+    fi
+    cd "$(eval ${target})"
 }
