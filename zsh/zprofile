@@ -17,7 +17,7 @@ export PATH
 
 export EDITOR="vim"
 export VISUAL="vim"
-export BROWSER="/usr/bin/xdg-open"
+export BROWSER="firefox"
 
 export PAGER="less"
 export LESS="FRX"

@@ -92,6 +92,24 @@
 
     set $kill Shift+Q
 
+
+################################################################################
+### WORKSPACE ASSIGNMENTS ######################################################
+################################################################################
+
+workspace $workspace1 output HDMI3
+workspace $workspace2 output HDMI3
+workspace $workspace3 output HDMI2
+workspace $workspace4 output HDMI2
+workspace $workspace5 output HDMI2
+workspace $workspace6 output HDMI2
+workspace $workspace7 output LVDS1
+workspace $workspace8 output LVDS1
+workspace $workspace9 output LVDS1
+workspace $workspace10 output LVDS1
+
+assign [class="^Keepassx$"] $workspace8
+
 ################################################################################
 ### KEYBINDINGS ################################################################
 ##################9#############################################################
@@ -174,11 +192,15 @@
 
     bindsym $mod+d exec --no-startup-id ~/.i3/scripts/appmenu
     bindsym $mod+Return exec $terminal
-    bindsym $mod+F1 exec firefox
 
-    bindsym Print exec --no-startup-id ~/.i3/scripts/shutdown-menu
+    bindsym F1 exec --no-startup-id ~/.i3/scripts/shutdown-menu
+    bindsym $mod+F1 exec --no-startup-id ~/.i3/scripts/i3exit lock
+    bindsym $mod+Home exec --no-startup-id ~/.i3/scripts/shutdown-menu
 
     bindsym $mod+Shift+v exec --no-startup-id redshift-toggle
+
+    bindsync $mod+Shift+$scratchpad move scratchpad
+    bindsync $mod+$scratchpad scratchpad show
 
 ################################################################################
 ### MODES ######################################################################
@@ -238,7 +260,7 @@
     floating_minimum_size 0 x 0
     floating_maximum_size 0 x 0
 
-    font pango:Insonsolata 9
+    font pango:Inconsolata 10
 
 ################################################################################
 ### COLOR SETTINGS #############################################################
@@ -280,7 +302,18 @@ bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -inc 5 ; exec --no
 bindsym $mod+o exec --no-startup-id xautorandr ; exec --no-startup-id kill -SIGUSR2 $(cat $RUNDIR/wallchanger.$XDG_SESSION_ID.pid)'"
 bindsym $mod+p exec --no-startup-id kill -SIGUSR1 $(cat $RUNDIR/wallchanger.$XDG_SESSION_ID.pid)
 
-################################################################################
+
+
+
+exec --no-startup-id autostart
+
+
+
+
+
+
+
+###############################################################################
 ### BARS #######################################################################
 ################################################################################
 #
@@ -288,6 +321,8 @@ bar {
     mode dock
     position top
 
+
+#tray_output HDMI3
     tray_output primary
     tray_padding 3
 
@@ -299,7 +334,7 @@ bar {
 
     id bar-0
 
-    font pango:Inconsolata, Icons 9
+    font pango:Inconsolata, FontAwesome 10
 
     colors {
         background #222222

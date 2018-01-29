@@ -8,14 +8,14 @@ call plug#begin('~/.local/share/nvim/plugged')
 "Plug 'vim-airline/vim-airline-themes'
 Plug 'itchyny/lightline.vim'
 " Plug 'godlygeek/tabular'
-" Plug 'lepture/vim-jinja'
+Plug 'lepture/vim-jinja'
 Plug 'majutsushi/tagbar'
 " Plug 'nblock/vim-dokuwiki'
 Plug 'reedes/vim-pencil'
 " Plug 'saltstack/salt-vim'
 Plug 'sickill/vim-monokai'
 " Plug 'sjl/gundo.vim'
-" Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-commentary'
 " Plug 'tpope/vim-fugitive'
 " Plug 'tpope/vim-speeddating'
 " Plug 'tpope/vim-surround'
@@ -43,6 +43,10 @@ Plug 'scrooloose/nerdtree'
 Plug 'vimwiki/vimwiki'
 Plug 'blindFS/vim-taskwarrior'
 Plug 'tbabej/taskwiki'
+Plug 'rodjek/vim-puppet'
+Plug 'suan/vim-instant-markdown'
+"Plug 'marshallward/vim-restructuredtext'
+Plug 'vim-syntastic/syntastic'
 
 call plug#end()
 filetype plugin indent on
@@ -114,7 +118,7 @@ set undodir=~/.vim/undo
 set undofile
 
 " == environment / directories ==
-set autochdir
+set noautochdir
 set directory=/var/tmp,/tmp
 set viewdir=~/.vim/view
 
@@ -184,7 +188,10 @@ inoremap jj <ESC>
 
 nnoremap <leader>v <C-w>v<C-w>l
 
+nnoremap <leader>m :InstantMarkdownPreview<CR>
+
 nnoremap <leader>u :GundoToggle<CR>
+nnoremap <leader>d :diffupdate<CR>
 
 nmap <F9> :Goyo<CR>:TogglePencil<CR>:Limelight!!<CR>
 nmap <leader>w :Goyo<CR>:TogglePencil<CR>:Limelight!!<CR>
@@ -264,3 +271,8 @@ autocmd BufWritePre * :call DeleteTrailingWS()
 autocmd FileType yaml set shiftwidth=2
 set completeopt-=preview
 let g:ycm_add_preview_to_completeopt = 0
+
+set completeopt-=preview
+let g:ycm_add_preview_to_completeopt = 0
+
+let g:instant_markdown_autostart = 0
