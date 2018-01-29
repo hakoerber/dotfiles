@@ -334,7 +334,7 @@ bar {
 
     id bar-0
 
-    font pango:DejaVu Sans, Icons 10
+    font pango:Inconsolata, FontAwesome 10
 
     colors {
         background #222222
