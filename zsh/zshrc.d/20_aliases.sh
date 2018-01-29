@@ -58,3 +58,8 @@ alias cl="clear"
 alias nocolor="sed -r \"s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g\""
 
 alias ip="ip -color"
+
+alias yaml2js="python -c 'import sys, yaml, json; json.dump(yaml.load(sys.stdin), sys.stdout, indent=4)'"
+
+alias currentbranch='git rev-parse --abbrev-ref HEAD'
+alias gpush='git push origin $(currentbranch)'
