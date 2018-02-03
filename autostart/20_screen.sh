@@ -2,7 +2,10 @@
 
 printf '%s\n' "execute xautorandr" >>"$LOGFILE"
 
-xautorandr
+xautorandr &
+
+printf '%s\n' "start compton" >>"$LOGFILE"
+compton --backend glx --vsync opengl &
 
 printf '%s\n' "disable screen blanking" >>"$LOGFILE"
 xset -dpms & &>> $LOGFILE
