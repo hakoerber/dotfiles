@@ -155,3 +155,7 @@ t() {
         tmux attach-session
     fi
 }
+
+sb() {
+    echo $(( $1 * $(cat /sys/class/backlight/intel_backlight/max_brightness) / 100)) | sudo tee /sys/class/backlight/intel_backlight/brightness
+}
