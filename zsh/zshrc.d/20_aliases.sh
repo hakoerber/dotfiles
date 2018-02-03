@@ -62,6 +62,7 @@ alias tw="task"
 alias twl="task list"
 alias twa="task add"
 alias twd="task done"
+alias inbox="task add +inbox"
 
 alias yaml2js="python -c 'import sys, yaml, json; json.dump(yaml.load(sys.stdin), sys.stdout, indent=4)'"
 

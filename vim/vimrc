@@ -12,7 +12,7 @@ Plug 'lepture/vim-jinja'
 Plug 'majutsushi/tagbar'
 " Plug 'nblock/vim-dokuwiki'
 Plug 'reedes/vim-pencil'
-" Plug 'saltstack/salt-vim'
+Plug 'saltstack/salt-vim'
 Plug 'sickill/vim-monokai'
 " Plug 'sjl/gundo.vim'
 Plug 'tpope/vim-commentary'
@@ -47,6 +47,8 @@ Plug 'rodjek/vim-puppet'
 Plug 'suan/vim-instant-markdown'
 "Plug 'marshallward/vim-restructuredtext'
 Plug 'vim-syntastic/syntastic'
+Plug 'ElmCast/elm-vim'
+Plug 'avh4/elm-format'
 
 call plug#end()
 filetype plugin indent on
