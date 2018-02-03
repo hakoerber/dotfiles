@@ -17,6 +17,8 @@ packages:
       fedora: ["gitk"]
     htop:
       fedora: ["htop"]
+    feh:
+      fedora: ["feh"]
     i3:
       fedora: ["i3"]
     i3lock:
@@ -29,6 +31,8 @@ packages:
       fedora: ["network-manager-applet"]
     pasystray:
       fedora: ["pasystray"]
+    redshift:
+      fedora: ["redshift-gtk"]
     pavucontrol:
       fedora: ["pavucontrol"]
     pinentry-qt:
@@ -37,9 +41,37 @@ packages:
       fedora: ["pinta"]
     py3status:
       fedora: ["py3status"]
+    pass:
+      fedora: ["pass"]
     urxvt:
       fedora: ["rxvt-unicode-256color"]
     tmux:
       fedora: ["tmux"]
     zsh:
-      fedora: ["zsh"]
+      fedora: ["zsh", "zsh-syntax-highlighting"]
+    zathura:
+      fedora: ["zathura-pdf-mupdf"]
+    mpv:
+      fedora: ["mpv"]
+    pandoc:
+      fedora: ["pandoc"]
+    libvirt:
+      fedora: ["virt-manager", "libvirt-client"]
+    firefox:
+      fedora: ["firefox"]
+    ranger:
+      fedora: ["ranger"]
+    digikam:
+      fedora: ["digikam"]
+    thunar:
+      fedora: ["thunar"]
+    unclutter:
+      fedora: ["unclutter"]
+    chromium:
+      fedora: ["chromium"]
+    compton:
+      fedora: ["compton"]
+    libreoffice:
+      fedora: ["libreoffice"]
+    rofi:
+      fedora: ["rofi"]
