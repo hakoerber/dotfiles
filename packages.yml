@@ -1,5 +1,9 @@
 packages:
   list:
+    xorg:
+      fedora: ["@base-x", "xorg-x11-drv-synaptics-legacy"]
+    dmenu:
+      fedora: ["dmenu"]
     ansible:
       fedora: ["ansible"]
       ubuntu: ["bla"]
@@ -11,8 +15,12 @@ packages:
       fedora: ["borgbackup"]
     docker:
       fedora: ["docker"]
-    fontawesome:
+    font-awesome:
       fedora: ["fontawesome-fonts", "fontawesome-fonts-web"]
+    font-inconsolata:
+      fedora: ["levien-inconsolata-fonts"]
+    taskwarrior:
+      fedora: ["task"]
     gitk:
       fedora: ["gitk"]
     htop:
@@ -25,8 +33,10 @@ packages:
       fedora: ["i3lock"]
     mousepad:
       fedora: ["mousepad"]
+    vim:
+      fedora: ["vim-enhanced"]
     neovim:
-      fedora: ["neovim"]
+      fedora: ["neovim", "python2-neovim"]
     network-manager-applet:
       fedora: ["network-manager-applet"]
     pasystray:
@@ -36,11 +46,11 @@ packages:
     pavucontrol:
       fedora: ["pavucontrol"]
     pinentry-qt:
-      fedora: ["pinentry-qt"]
+      fedora: ["pinentry", "pinentry-curses", "pinentry-qt"]
     pinta:
       fedora: ["pinta"]
     py3status:
-      fedora: ["py3status"]
+      fedora: ["py3status", "python3-pytz", "python3-tzlocal"]
     pass:
       fedora: ["pass"]
     urxvt:
@@ -51,8 +61,6 @@ packages:
       fedora: ["zsh", "zsh-syntax-highlighting"]
     zathura:
       fedora: ["zathura-pdf-mupdf"]
-    mpv:
-      fedora: ["mpv"]
     pandoc:
       fedora: ["pandoc"]
     libvirt:
@@ -69,9 +77,9 @@ packages:
       fedora: ["unclutter"]
     chromium:
       fedora: ["chromium"]
-    compton:
-      fedora: ["compton"]
     libreoffice:
       fedora: ["libreoffice"]
-    rofi:
-      fedora: ["rofi"]
+    oxygen:
+      fedora: ["breeze-cursor-theme", "breeze-icon-theme", "breeze-gtk"]
+    xcompmgr:
+      fedora: ["xcompmgr"]
