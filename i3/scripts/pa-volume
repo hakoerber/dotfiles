@@ -3,7 +3,7 @@
 # name of the sink. execute pactl list sinks to get a list
 SINKNAME="$(pactl info | grep '^Default Sink:' | cut -d ' ' -f 3-)"
 
-SINKNAME="alsa_output.usb-Logitech_Logitech_Wireless_Headset_88C626354D45-00.analog-stereo"
+#SINKNAME="alsa_output.usb-Logitech_Logitech_Wireless_Headset_88C626354D45-00.analog-stereo"
 # this is the worst
 SINK=$(( $(pactl list sinks | grep "Name: " | grep -n "${SINKNAME}"$ | grep -o "^[[:digit:]]*") -1))
 
