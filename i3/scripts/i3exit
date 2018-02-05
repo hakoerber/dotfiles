@@ -26,13 +26,11 @@ lock()
     (( $playing )) && dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Pause
     if [[ -f "$LOCKSCREEN" ]] ; then
         i3lock --nofork --show-failed-attempts --ignore-empty-password \
-            --pointer win --image "$LOCKSCREEN" &
+            --image "$LOCKSCREEN"
     else
         i3lock --nofork --show-failed-attempts --ignore-empty-password \
-            --color "$_fallback_color" &
+            --color "$_fallback_color"
     fi
-    screen_off
-    wait
     (( $playing )) && dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Play
 }
 
@@ -68,7 +66,8 @@ case "$signal" in
         ;;
     suspend)
         log "[I] Suspending."
-        lock_and_screen_off &
+        lock &
+        sleep 0.1
         systemctl suspend
         ;;
     hibernate)
