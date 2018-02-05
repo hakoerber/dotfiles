@@ -1,3 +1,2 @@
 #!/usr/bin/env bash
-rofi -show run
-#j4-dmenu-desktop --dmenu="dmenu -fn 'DejaVu Sans:size=11' -i -p '>' -nb '#000000' -nf '#ffffff' -sb '#e16b40' -sf '#000000'"
+dmenu_run -fn 'Inconsolata:size=10' -b -i -l 10 -p '>' -nb '#222222' -nf '#ffffff' -sb '#e16b40' -sf '#000001'
