@@ -2,16 +2,19 @@
   connection: local
   become: false
   tasks:
+    - set_fact:
+        user: "{{ ansible_user_id }}"
+
     - name: configure sudoers
       lineinfile:
         path: /etc/sudoers
-        line: hannes ALL=(ALL) NOPASSWD:ALL
-        regexp: '^hannes\s+'
+        line: "{{ user }} ALL=(ALL) NOPASSWD:ALL"
+        regexp: "^{{ user }}\\s+"
       become: true
 
     - name: set shell
       user:
-        name: hannes
+        name: "{{ user }}"
         shell: /usr/bin/zsh
       become: true
 
