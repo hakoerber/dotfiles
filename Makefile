@@ -17,7 +17,7 @@ $(dotbot):
 
 .PHONY: clean
 clean:
-	rm -r venv
+	rm -rf venv
 
 $(ansible): venv
 
