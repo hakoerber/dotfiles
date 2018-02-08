@@ -305,7 +305,7 @@ bindsym $mod+p exec --no-startup-id kill -SIGUSR1 $(cat $RUNDIR/wallchanger.$XDG
 
 
 
-exec --no-startup-id autostart
+# exec --no-startup-id autostart
 
 
 
