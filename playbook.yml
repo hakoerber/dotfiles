@@ -25,6 +25,12 @@
       include_vars:
         file: packages.yml
 
+    - name: enable neovim ppa
+      apt_repository:
+        repo: 'ppa:neovim-ppa/stable'
+        update_cache: true
+      become: true
+      when: distro == 'ubuntu'
 
     - set_fact:
         defined_packages: "{{ packages|json_query('keys(list)') }}"
