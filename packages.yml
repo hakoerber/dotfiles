@@ -1,85 +1,143 @@
 packages:
   list:
+    build-essentials:
+      fedora: []
+      ubuntu: ["build-essential"]
     xorg:
       fedora: ["@base-x", "xorg-x11-drv-synaptics-legacy"]
+      ubuntu: []
     dmenu:
       fedora: ["dmenu"]
+      ubuntu: ["dmenu"]
     ansible:
       fedora: ["ansible"]
-      ubuntu: ["bla"]
+      ubuntu: ["ansible"]
     arandr:
       fedora: ["arandr"]
-    arandr2:
-      fedora: ["arandr"]
+      ubuntu: ["arandr"]
     borgbackup:
       fedora: ["borgbackup"]
+      ubuntu: ["borgbackup"]
     docker:
       fedora: ["docker"]
+      ubuntu: ["docker.io"]
     font-awesome:
       fedora: ["fontawesome-fonts", "fontawesome-fonts-web"]
+      ubuntu: ["fonts-font-awesome"]
     font-inconsolata:
       fedora: ["levien-inconsolata-fonts"]
+      ubuntu: ["fonts-inconsolata"]
     taskwarrior:
       fedora: ["task"]
-    gitk:
-      fedora: ["gitk"]
+      ubuntu: ["task"]
+    git:
+      fedora: ["git", "gitk"]
+      ubuntu: ["git", "git-extras", "gitk"]
     htop:
       fedora: ["htop"]
+      ubuntu: ["htop"]
     feh:
       fedora: ["feh"]
+      ubuntu: ["feh"]
     i3:
       fedora: ["i3"]
+      ubuntu: ["i3"]
     i3lock:
       fedora: ["i3lock"]
+      ubuntu: ["i3lock"]
     mousepad:
       fedora: ["mousepad"]
+      ubuntu: ["mousepad"]
     vim:
       fedora: ["vim-enhanced"]
+      ubuntu: ["vim"]
     neovim:
       fedora: ["neovim", "python2-neovim"]
+      ubuntu: ["neovim"]
     network-manager-applet:
       fedora: ["network-manager-applet"]
+      ubuntu: []
     pasystray:
       fedora: ["pasystray"]
+      ubuntu: ["pasystray"]
     redshift:
       fedora: ["redshift-gtk"]
+      ubuntu: ["redshift-gtk"]
     pavucontrol:
       fedora: ["pavucontrol"]
+      ubuntu: ["pavucontrol"]
     pinentry-qt:
       fedora: ["pinentry", "pinentry-curses", "pinentry-qt"]
+      ubuntu: ["pinentry-curses", "pinentry-qt"]
     pinta:
       fedora: ["pinta"]
+      ubuntu: ["pinta"]
     py3status:
       fedora: ["py3status", "python3-pytz", "python3-tzlocal"]
+      ubuntu: ["python3-arrow", "python3-tzlocal"]
     pass:
       fedora: ["pass"]
+      ubuntu: ["pass"]
+    keepassx:
+      fedora: ["keepassx"]
+      ubuntu: ["keepassx"]
     urxvt:
       fedora: ["rxvt-unicode-256color"]
+      ubuntu: ["rxvt-unicode-256color"]
     tmux:
       fedora: ["tmux"]
+      ubuntu: ["tmux"]
     zsh:
       fedora: ["zsh", "zsh-syntax-highlighting"]
+      ubuntu: ["zsh", "zsh-syntax-highlighting"]
     zathura:
       fedora: ["zathura-pdf-mupdf"]
+      ubuntu: ["zathura", "zathura-pdf-poppler"]
     pandoc:
       fedora: ["pandoc"]
+      ubuntu: ["pandoc"]
     libvirt:
       fedora: ["virt-manager", "libvirt-client"]
+      ubuntu: ["virt-manager", "libvirt-bin"]
     firefox:
       fedora: ["firefox"]
+      ubuntu: ["firefox"]
     ranger:
       fedora: ["ranger"]
+      ubuntu: ["ranger"]
     digikam:
       fedora: ["digikam"]
+      ubuntu: ["digikam"]
     thunar:
       fedora: ["thunar"]
+      ubuntu: ["thunar"]
     unclutter:
       fedora: ["unclutter"]
+      ubuntu: ["unclutter"]
     chromium:
       fedora: ["chromium"]
+      ubuntu: ["chromium-browser"]
     libreoffice:
       fedora: ["libreoffice"]
+      ubuntu: ["libreoffice"]
     oxygen:
       fedora: ["breeze-cursor-theme", "breeze-icon-theme", "breeze-gtk"]
+      ubuntu: ["breeze-cursor-theme", "breeze-icon-theme", "breeze", "gtk3-engines-breeze"]
     xcompmgr:
       fedora: ["xcompmgr"]
+      ubuntu: ["xcompmgr"]
+    python:
+      fedora: ["python"]
+      ubuntu: ["python3", "python3-pip", "python3-venv", "virtualenv"]
+    xbacklight:
+      fedora: ["xbacklight"]
+      ubuntu: ["xbacklight"]
+    wireshark:
+      fedora: ["wireshark"]
+      ubuntu: ["wireshark", "wireshark-qt"]
+    dia:
+      fedora: ["dia"]
+      ubuntu: ["dia"]
+    shutter:
+      fedora: ["shutter"]
+      ubuntu: ["shutter"]
