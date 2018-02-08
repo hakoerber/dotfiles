@@ -7,7 +7,7 @@ dotbot = _dotbot/bin/dotbot
 
 .PHONY: all
 install: $(ansible) submodules
-	$(activate) && ansible-playbook --diff --verbose ./playbook.yml
+	$(activate) && ansible-playbook --diff -i localhost, --verbose ./playbook.yml
 
 .PHONY: submodules
 submodules: $(dotbot)
