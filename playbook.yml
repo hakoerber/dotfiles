@@ -3,6 +3,9 @@
   become: false
   tasks:
     - set_fact:
+        distro: "{{ ansible_distribution|lower }}"
+
+    - set_fact:
         user: "{{ ansible_user_id }}"
 
     - name: configure sudoers
@@ -22,8 +25,6 @@
       include_vars:
         file: packages.yml
 
-    - set_fact:
-        distro: "{{ ansible_distribution|lower }}"
 
     - set_fact:
         defined_packages: "{{ packages|json_query('keys(list)') }}"
