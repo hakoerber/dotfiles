@@ -1,6 +1,6 @@
 venv = ./venv
 requirements = requirements.txt
-activate = source $(venv)/bin/activate
+activate = . $(venv)/bin/activate
 pip = pip
 ansible = venv/bin/ansible-playbook
 dotbot = _dotbot/bin/dotbot
