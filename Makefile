@@ -22,8 +22,8 @@ clean:
 $(ansible): venv
 
 venv:
-	command -v virtualenv || sudo dnf install -y python2-virtualenv
-	virtualenv --system-site-packages --python=python2 $(venv)
+	command -v virtualenv || sudo dnf install -y python2-virtualenv || sudo apt-get -y install virtualenv
+	virtualenv --no-site-packages --python=python2 $(venv)
 	$(activate) && $(pip) install -r $(requirements)
 
 freeze:
