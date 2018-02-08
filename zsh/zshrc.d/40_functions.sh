@@ -148,7 +148,7 @@ resolvecd() {
     cd "$(readlink -f $(pwd))"
 }
 
-sshmux () {
+ssht () {
     ssh -t $@ "tmux a || tmux";
 }
 
