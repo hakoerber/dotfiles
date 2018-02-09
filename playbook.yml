@@ -50,5 +50,70 @@
       vars:
         query: "{{ 'list.*.%s[]'|format(distro) }}"
 
+    - name: disable services
+      service:
+        state: stopped
+        enabled: false
+        name: "{{ item }}"
+      with_items: []
+      become: true
+
+    - name: enable services
+      service:
+        state: started
+        enabled: true
+        name: "{{ item }}"
+      with_items:
+        - NetworkManager
+      become: true
+
+    - name: get systemd boot target
+      command: systemctl get-default
+      register: systemd_target
+      changed_when: false
+
+    - set_fact:
+        default_target: multi-user.target
+
+    - name: set systemd boot target
+      command: systemctl set-default {{ default_target }}
+      when: systemd_target.stdout != default_target
+      become: true
+
+    - name: handle lid switch
+      lineinfile:
+        path: /etc/systemd/logind.conf
+        regexp: '^HandleLidSwitch='
+        line: 'HandleLidSwitch=ignore'
+      become: true
+
+    - name: handle power key
+      lineinfile:
+        path: /etc/systemd/logind.conf
+        regexp: '^HandlePowerKey='
+        line: 'HandlePowerKey=suspend'
+      become: true
+
+    - name: create directory for getty autologin
+      file:
+        state: directory
+        path: /etc/systemd/system/getty@tty1.service.d
+        owner: root
+        group: root
+        mode: '0755'
+      become: true
+
+    - name: enable getty autologin
+      copy:
+        dest: /etc/systemd/system/getty@tty1.service.d/override.conf
+        owner: root
+        group: root
+        mode: '0644'
+        content: |
+          [Service]
+          ExecStart=
+          ExecStart=-/sbin/agetty --autologin {{ user }} --noclear %I $TERM
+      become: true
+
     - name: run dotbot
       command: ./dotbot
