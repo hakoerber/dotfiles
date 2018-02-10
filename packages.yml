@@ -1,8 +1,11 @@
 packages:
   list:
     build-essentials:
-      fedora: []
+      fedora: ["make", "autoconf", "automake", "strace", "gcc-c++", "gdb", "gcc", "ctags", "cmake", "libtool"]
       ubuntu: ["build-essential"]
+    sudo:
+      fedora: ["sudo"]
+      ubuntu: ["sudo"]
     xorg:
       fedora: ["@base-x", "xorg-x11-drv-synaptics-legacy"]
       ubuntu: []
@@ -87,6 +90,9 @@ packages:
     tmux:
       fedora: ["tmux"]
       ubuntu: ["tmux"]
+    screen:
+      fedora: ["screen"]
+      ubuntu: ["screen"]
     zsh:
       fedora: ["zsh", "zsh-syntax-highlighting"]
       ubuntu: ["zsh", "zsh-syntax-highlighting"]
@@ -118,7 +124,7 @@ packages:
       fedora: ["chromium"]
       ubuntu: ["chromium-browser"]
     libreoffice:
-      fedora: ["libreoffice"]
+      fedora: ["libreoffice", "libreoffice-langpack-de", "libreoffice-langpack-en"]
       ubuntu: ["libreoffice"]
     oxygen:
       fedora: ["breeze-cursor-theme", "breeze-icon-theme", "breeze-gtk"]
@@ -141,3 +147,47 @@ packages:
     shutter:
       fedora: ["shutter"]
       ubuntu: ["shutter"]
+    nmap:
+      fedora: ["nmap"]
+    openvpn:
+      fedora: ["openvpn"]
+    curl:
+      fedora: ["curl"]
+    wget:
+      fedora: ["wget"]
+    tree:
+      fedora: ["tree"]
+    which:
+      fedora: ["which"]
+    zip:
+      fedora: ["zip"]
+    traceroute:
+      fedora: ["traceroute"]
+    tcpdump:
+      fedora: ["tcpdump"]
+    tar:
+      fedora: ["tar"]
+    rsync:
+      fedora: ["rsync"]
+    nmap:
+      fedora: ["nmap"]
+    net-tools:
+      fedora: ["net-tools"]
+    ntfs:
+      fedora: ["ntfs-3g", "ntfsprogs"]
+    lsof:
+      fedora: ["lsof"]
+    iptables:
+      fedora: ["iptables"]
+    gpg:
+      fedora: ["gnupg2"]
+    networkmanager:
+      fedora: ["NetworkManager", "NetworkManager-wifi"]
+    pulseaudio:
+      fedora: ["pulseaudio", "pulseaudio-utils"]
+    iw:
+      fedora: ["iw"]
+    cowsay:
+      fedora: ["cowsay"]
+    ruby:
+      fedora: ["ruby", "ruby-devel", "rubygem-bundler"]
