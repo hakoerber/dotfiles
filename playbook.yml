@@ -117,3 +117,13 @@
 
     - name: run dotbot
       command: ./dotbot
+
+    - name: create directories
+      file:
+        state: directory
+        path: "{{ item }}"
+      with_items:
+        - ~/.var/lib
+        - ~/.var/log
+        - ~/.var/run
+        - ~/.usr/lib
