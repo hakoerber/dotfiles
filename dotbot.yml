@@ -22,6 +22,8 @@
       path: tmux/tmux.conf
     ~/.config/nvim/init.vim:
       path: vim/vimrc
+    ~/.vimrc:
+      path: vim/vimrc
     ~/.Xresources:
       path: x/Xresources
     ~/.xinitrc:
