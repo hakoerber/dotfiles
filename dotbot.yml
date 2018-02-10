@@ -7,6 +7,8 @@
 
 - link:
     ~/.autostart:
+    ~/.dotfiles:
+      path: .
     ~/.gitconfig:
       path: git/gitconfig
     ~/.gnupg/dirmngr.conf:
