@@ -21,6 +21,13 @@
         shell: /usr/bin/zsh
       become: true
 
+    - name: install selinux specials on fedora
+      package:
+        state: installed
+        name: libselinux-python
+      become: true
+      when: distro == 'fedora'
+
     - name: load package list
       include_vars:
         file: packages.yml
