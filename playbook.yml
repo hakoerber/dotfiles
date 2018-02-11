@@ -115,8 +115,24 @@
           ExecStart=-/sbin/agetty --autologin {{ user }} --noclear %I $TERM
       become: true
 
-    - name: run dotbot
-      command: ./dotbot
+    - name: load dotfile list
+      include_vars:
+        file: dotfiles.yml
+
+    - name: link this folder to ~/.dotfiles
+      file:
+        state: link
+        force: true
+        path: "{{ ansible_user_dir }}/.dotfiles"
+        src: "{{ playbook_dir }}"
+
+    - name: link dotfiles
+      file:
+        state: link
+        force: true
+        path: "{{ ansible_user_dir }}/{{ item.to }}"
+        src: ~/.dotfiles/{{ item.from }}
+      with_items: "{{ dotfiles }}"
 
     - name: create directories
       file:

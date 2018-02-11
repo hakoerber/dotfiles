@@ -1,0 +1,29 @@
+dotfiles:
+  - from: autostart
+    to: .autostart
+  - from: git/gitconfig
+    to: .gitconfig
+  - from: gnupg/dirmngr.conf
+    to: .gnupg/dirmngr.conf
+  - from: gnupg/gpg-agent.conf
+    to: .gnupg/gpg-agent.conf
+  - from: gnupg/gpg.conf
+    to: .gnupg/gpg.conf
+  - from: i3
+    to: .i3
+  - from: tmux/tmux.conf
+    to: .tmux.conf
+  - from: vim/vimrc
+    to: .config/nvim/init.vim
+  - from: vim/vimrc
+    to: .vimrc
+  - from: x/Xresources
+    to: .Xresources
+  - from: x/xinitrc
+    to: .xinitrc
+  - from: zsh/zprofile
+    to: .zprofile
+  - from: zsh/zshrc
+    to: .zshrc
+  - from: zsh/zshrc.d
+    to: .zshrc.d
