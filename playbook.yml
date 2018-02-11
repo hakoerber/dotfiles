@@ -150,3 +150,31 @@
         - ~/.var/log
         - ~/.var/run
         - ~/.usr/lib
+
+    - name: create intermediate directories for vim-plug
+      file:
+        path: "{{ item }}"
+        state: directory
+      with_items:
+        - ~/.local/
+        - ~/.local/share/
+        - ~/.local/share/nvim/
+        - ~/.local/share/nvim/site/
+        - ~/.local/share/nvim/site/autoload/
+        - ~/.vim/
+        - ~/.vim/autoload
+
+    - name: install vim-plug
+      get_url:
+        dest: ~/.vim/autoload/plug.vim
+        url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+    - name: symlink vim-plug for neovim
+      file:
+        state: link
+        path: ~/.local/share/nvim/site/autoload/plug.vim
+        src: ~/.vim/autoload/plug.vim
+        force: true
+
+    - name: install vim plugins
+      command: /usr/bin/vim -f -E -s -c "source ~/.vimrc" +PlugInstall +qall
