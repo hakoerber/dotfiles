@@ -1,13 +1,28 @@
 packages:
   list:
     build-essentials:
-      fedora: ["make", "autoconf", "automake", "strace", "gcc-c++", "gdb", "gcc", "ctags", "cmake", "libtool"]
+      fedora:
+        - make
+        - autoconf
+        - automake
+        - strace
+        - gcc-c++
+        - gdb
+        - gcc
+        - ctags
+        - cmake
+        - libtool
+        - elfutils-libelf-devel
       ubuntu: ["build-essential"]
     sudo:
       fedora: ["sudo"]
       ubuntu: ["sudo"]
     xorg:
-      fedora: ["@base-x", "xorg-x11-drv-synaptics-legacy"]
+      fedora:
+        - '@base-x'
+        - xorg-x11-drv-synaptics-legacy
+        - xorg-x11-drv-libinput
+        - libinput
       ubuntu: []
     dmenu:
       fedora: ["dmenu"]
@@ -191,3 +206,7 @@ packages:
       fedora: ["cowsay"]
     ruby:
       fedora: ["ruby", "ruby-devel", "rubygem-bundler"]
+    lxc:
+      fedora: ["lxc"]
+    acpi:
+      fedora: ["acpi"]
