@@ -216,7 +216,7 @@ let g:solarized_termtrans=1
 let g:solarized_contrast="normal"
 let g:solarized_visibility="normal"
 syntax enable
-colorscheme monokai
+silent! colorscheme monokai
 
 " == tagbar ==
 nnoremap <F10> :TagbarToggle<CR>
