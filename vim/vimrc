@@ -24,7 +24,7 @@ Plug 'junegunn/goyo.vim'
 Plug 'junegunn/limelight.vim'
 " Plug 'sheerun/vim-polyglot'
 " Plug 'freitass/todo.txt-vim'
-Plug 'Valloric/YouCompleteMe'
+" Plug 'Valloric/YouCompleteMe'
 Plug 'nathanaelkane/vim-indent-guides'
 
 "Plugin 'Lokaltog/vim-easymotion'
