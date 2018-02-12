@@ -6,11 +6,8 @@ ansible = venv/bin/ansible-playbook
 dotbot = _dotbot/bin/dotbot
 
 .PHONY: all
-install: $(ansible) submodules
+install: $(ansible)
 	$(activate) && ansible-playbook --inventory localhost, --diff --verbose ./playbook.yml
-
-.PHONY: submodules
-submodules: $(dotbot)
 
 $(dotbot):
 	git submodule update --init _dotbot
