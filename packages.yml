@@ -2,18 +2,24 @@ packages:
   list:
     build-essentials:
       fedora:
-        - make
         - autoconf
         - automake
-        - strace
         - gcc-c++
-        - gdb
         - gcc
         - ctags
         - cmake
         - libtool
         - elfutils-libelf-devel
+        - maven
       ubuntu: ["build-essential"]
+    eclipse:
+      fedora: ["eclipse"]
+    make:
+      fedora: ["make"]
+    gdb:
+      fedora: ["gdb"]
+    strace:
+      fedora: ["strace"]
     sudo:
       fedora: ["sudo"]
       ubuntu: ["sudo"]
@@ -46,7 +52,7 @@ packages:
       fedora: ["levien-inconsolata-fonts"]
       ubuntu: ["fonts-inconsolata"]
     taskwarrior:
-      fedora: ["task"]
+      fedora: ["task", "tasksh"]
       ubuntu: ["task"]
     git:
       fedora: ["git", "gitk"]
@@ -210,3 +216,9 @@ packages:
       fedora: ["lxc"]
     acpi:
       fedora: ["acpi"]
+    npm:
+      fedora: ["npm"]
+    xdg:
+      fedora: ["xdg-utils"]
+    docs:
+      fedora: ["man-pages"]
