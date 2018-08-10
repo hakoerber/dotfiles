@@ -15,6 +15,7 @@
 
     fe = "fetch --all --prune"
     co = "checkout"
+    cm = "commit --message"
     ci = "commit"
     st = "status"
     br = "branch"
@@ -24,6 +25,7 @@
     rba = "rebase --abort"
     df = "diff"
     gr = "! git graph"
+    ap = "add --patch"
 
     k = "!gitk --all"
 
@@ -66,7 +68,7 @@
     detachedHead = false
 [commit]
     gpgSign = true
-    ; cleanup = default
+    cleanup = strip
     status = true
 [status]
     relativePaths = false

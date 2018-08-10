@@ -51,6 +51,7 @@ Plug 'ElmCast/elm-vim'
 Plug 'avh4/elm-format'
 
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+Plug 'hashivim/vim-terraform'
 
 call plug#end()
 filetype plugin indent on
@@ -280,3 +281,5 @@ set completeopt-=preview
 let g:ycm_add_preview_to_completeopt = 0
 
 let g:instant_markdown_autostart = 0
+
+let g:terraform_align = 1

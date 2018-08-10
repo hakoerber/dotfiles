@@ -26,6 +26,9 @@ packages:
     sudo:
       fedora: ["sudo"]
       ubuntu: ["sudo"]
+    apt:
+      fedora: []
+      ubuntu: ["apt-file"]
     xorg:
       fedora:
         - '@base-x'
@@ -56,7 +59,7 @@ packages:
       ubuntu: ["fonts-inconsolata"]
     taskwarrior:
       fedora: ["task", "tasksh"]
-      ubuntu: ["task"]
+      ubuntu: ["taskwarrior"]
     git:
       fedora: ["git", "gitk"]
       ubuntu: ["git", "git-extras", "gitk"]
@@ -101,7 +104,7 @@ packages:
       ubuntu: ["pinta"]
     py3status:
       fedora: ["py3status", "python3-pytz", "python3-tzlocal"]
-      ubuntu: ["python3-arrow", "python3-tzlocal"]
+      ubuntu: ["py3status", "python3-arrow", "python3-tzlocal"]
     pass:
       fedora: ["pass"]
       ubuntu: ["pass"]
@@ -173,55 +176,82 @@ packages:
       ubuntu: ["shutter"]
     nmap:
       fedora: ["nmap"]
+      ubuntu: ["nmap"]
     openvpn:
       fedora: ["openvpn"]
+      ubuntu: ["openvpn"]
     curl:
       fedora: ["curl"]
+      ubuntu: ["curl"]
     wget:
       fedora: ["wget"]
+      ubuntu: ["wget"]
     tree:
       fedora: ["tree"]
+      ubuntu: ["tree"]
     which:
       fedora: ["which"]
+      ubuntu: []
     zip:
       fedora: ["zip"]
+      ubuntu: ["zip", "unzip"]
     traceroute:
       fedora: ["traceroute"]
+      ubuntu: ["traceroute"]
     tcpdump:
       fedora: ["tcpdump"]
+      ubuntu: ["tcpdump"]
     tar:
       fedora: ["tar"]
+      ubuntu: ["tar"]
     rsync:
       fedora: ["rsync"]
+      ubuntu: ["rsync"]
     nmap:
       fedora: ["nmap"]
+      ubuntu: ["nmap"]
     net-tools:
       fedora: ["net-tools"]
+      ubuntu: ["net-tools"]
     ntfs:
       fedora: ["ntfs-3g", "ntfsprogs"]
+      ubuntu: ["ntfs-3g"]
     lsof:
       fedora: ["lsof"]
+      ubuntu: ["lsof"]
     iptables:
       fedora: ["iptables"]
+      ubuntu: ["iptables"]
     gpg:
       fedora: ["gnupg2"]
+      ubuntu: ["gnupg2"]
     networkmanager:
       fedora: ["NetworkManager", "NetworkManager-wifi"]
+      ubuntu: ["network-manager", "network-manager-openvpn", "network-manager-openconnect"]
     pulseaudio:
       fedora: ["pulseaudio", "pulseaudio-utils"]
+      ubuntu: ["pulseaudio", "pulseaudio-utils"]
     iw:
       fedora: ["iw"]
+      ubuntu: ["iw"]
     cowsay:
       fedora: ["cowsay"]
+      ubuntu: ["cowsay"]
     ruby:
       fedora: ["ruby", "ruby-devel", "rubygem-bundler"]
+      ubuntu: ["ruby", "ruby-dev", "ruby-bundler"]
     lxc:
       fedora: ["lxc"]
+      ubuntu: ["lxc"]
     acpi:
       fedora: ["acpi"]
+      ubuntu: ["acpid"]
     npm:
       fedora: ["npm"]
+      ubuntu: ["npm"]
     xdg:
       fedora: ["xdg-utils"]
+      ubuntu: ["xdg-utils"]
     docs:
       fedora: ["man-pages"]
+      ubuntu: ["manpages"]
