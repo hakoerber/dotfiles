@@ -74,6 +74,17 @@
         - NetworkManager
       become: true
 
+    - name: set groups
+      user:
+        name: "{{ user }}"
+        groups:
+          - libvirt
+          - wheel
+          - vboxusers
+          - wireshark
+          - docker
+      become: true
+
     - name: get systemd boot target
       command: systemctl get-default
       register: systemd_target

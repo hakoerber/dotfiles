@@ -50,6 +50,8 @@ Plug 'vim-syntastic/syntastic'
 Plug 'ElmCast/elm-vim'
 Plug 'avh4/elm-format'
 
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+
 call plug#end()
 filetype plugin indent on
 
