@@ -66,7 +66,7 @@
     detachedHead = false
 [commit]
     gpgSign = true
-    cleanup = default
+    ; cleanup = default
     status = true
 [status]
     relativePaths = false

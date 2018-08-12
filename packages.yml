@@ -12,6 +12,9 @@ packages:
         - elfutils-libelf-devel
         - maven
       ubuntu: ["build-essential"]
+    golang:
+      fedora: ["golang", "glibc-static"]
+      ubuntu: ["golang-go"]
     eclipse:
       fedora: ["eclipse"]
     make:

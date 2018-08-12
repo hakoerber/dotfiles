@@ -20,6 +20,7 @@
 
     # The default terminal
     set $terminal "urxvt -title terminal"
+    set $calc "urxvt256c -title term -e $SHELL -i -c calc"
 
     set $scriptdir ~/.i3/scripts
 
@@ -192,6 +193,7 @@ assign [class="^Keepassx$"] $workspace8
 
     bindsym $mod+d exec --no-startup-id ~/.i3/scripts/appmenu
     bindsym $mod+Return exec $terminal
+    bindsym $mod+Shift+Return exec $calc
 
     bindsym F1 exec --no-startup-id ~/.i3/scripts/shutdown-menu
     bindsym $mod+F1 exec --no-startup-id ~/.i3/scripts/i3exit lock

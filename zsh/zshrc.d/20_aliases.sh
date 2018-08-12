@@ -9,6 +9,7 @@ alias tma="tmux ls 2>/dev/null && tmux attach-session || tmux"
 alias tmn="tmux new-session -A -s"
 
 alias clip="xclip -selection clipboard"
+alias clipc="xclip -selection primary"
 alias clipo="xclip -out -selection clipboard"
 
 alias rgrep="grep -r"
@@ -68,3 +69,7 @@ alias yaml2js="python -c 'import sys, yaml, json; json.dump(yaml.load(sys.stdin)
 
 alias currentbranch='git rev-parse --abbrev-ref HEAD'
 alias gpush='git push origin $(currentbranch)'
+
+alias pass=mypass
+
+alias issh="ssh -o StrictHostKeyChecking=false -o UserKnownHostsFile=/dev/null"

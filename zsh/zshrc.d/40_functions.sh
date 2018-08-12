@@ -181,3 +181,24 @@ b() {
 sb() {
     echo $(( $1 * $(cat /sys/class/backlight/intel_backlight/max_brightness) / 100)) | sudo tee /sys/class/backlight/intel_backlight/brightness
 }
+
+journal() {
+    journaldir=~/journal/
+    file=~/journal/$(date +%Y-%m-%d).md
+    if [[ ! -e $file ]] ; then
+        cp $journaldir/template.md $file || return
+    fi
+    vim +Goyo +PencilSoft $file
+}
+
+syncfolder() {
+    folder=$1
+    mv $folder ~/sync
+    ln -s ~/sync/$folder ~/$folder
+}
+
+prefix() {
+    prefix=$2
+    file=$1
+    mv $file ${prefix}${file}
+}
