@@ -85,6 +85,8 @@
 
     set $workspace_back_and_forth asciicircum
 
+    set $pim_toggle Tab
+
     set $reload  Shift+C
     set $restart Shift+R
     set $exit    Shift+E
@@ -206,6 +208,16 @@ assign [class="^Keepassx$"] $workspace8
 
     bindsym $mod+Shift+$scratchpad move scratchpad
     bindsym $mod+$scratchpad scratchpad show
+
+    bindsym $mod+$pim_toggle \
+        workspace $workspace10; \
+        mark --add pim_toggle; \
+        workspace $workspace1; \
+        move container to workspace $workspace10; \
+        [con_mark="pim_toggle"] focus; \
+        move container to workspace $workspace1; \
+        workspace $workspace1; \
+        [con_mark="pim_toggle"] focus
 
     # bindsym $mod+$swap workspace $workspace1; move container to workspace $workspace10; workspace $workspace10; move container to workspace $workspace1; workspace $workspace1;
 
