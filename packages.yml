@@ -17,12 +17,16 @@ packages:
       ubuntu: ["golang-go"]
     eclipse:
       fedora: ["eclipse"]
+      ubuntu: ["eclipse"]
     make:
       fedora: ["make"]
+      ubuntu: ["make"]
     gdb:
       fedora: ["gdb"]
+      ubuntu: ["gdb"]
     strace:
       fedora: ["strace"]
+      ubuntu: ["strace"]
     sudo:
       fedora: ["sudo"]
       ubuntu: ["sudo"]
@@ -255,3 +259,9 @@ packages:
     docs:
       fedora: ["man-pages"]
       ubuntu: ["manpages"]
+    compton:
+      fedora: ["compton"]
+      ubuntu: ["compton"]
+    dunst:
+      fedora: ["dunst"]
+      ubuntu: ["dunst"]
