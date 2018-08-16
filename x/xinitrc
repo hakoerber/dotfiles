@@ -22,16 +22,20 @@ start_wm() {
 }
 
 autostart() {
-    if [[ -d "$HOME/.autostart" ]] ; then
+    if [ -d "$HOME/.autostart" ] ; then
         log "Looking for autostart files."
         for f in "$HOME/.autostart/"*.sh ; do
-            if [[ -x "$f" ]] ; then
+            if [ -x "$f" ] ; then
                 log "Executing autostart file \"$f\""
-                . "$f"
+                "$f" >>"${LOGFILE}" 2>&1
             fi
         done
     fi
 }
 
+exec >> "$LOGFILE" 2>&1
+set -x
+log "the"
 autostart
+log "fuck"
 start_wm
