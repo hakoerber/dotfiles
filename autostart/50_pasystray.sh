@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-printf '%s' "starting pasystray" >>"$LOGFILE"
-pasystray & &>> $LOGFILE
+printf '%s' "starting pasystray"
+pasystray &

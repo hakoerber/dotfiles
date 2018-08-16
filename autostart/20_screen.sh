@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 
-printf '%s\n' "execute xautorandr" >>"$LOGFILE"
+printf '%s\n' "start compton"
+compton --backend xrender --vsync opengl &
 
-xautorandr &
+printf '%s\n' "disable screen blanking"
+xset -dpms &
+xset s off &
 
-printf '%s\n' "start compton" >>"$LOGFILE"
-compton --backend glx --vsync opengl &
-
-printf '%s\n' "disable screen blanking" >>"$LOGFILE"
-xset -dpms & &>> $LOGFILE
-xset s off & &>> $LOGFILE
+printf '%s\n' "disable wakeup when lid switched"
+grep "^${ACPI_LID_NAME}.*enabled" /proc/acpi/wakeup && echo " ${ACPI_LID_NAME}" | sudo tee /proc/acpi/wakeup

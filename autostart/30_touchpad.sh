@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-printf '%s' "configuring synclient" >>"$LOGFILE"
+printf '%s' "configuring synclient"
 synclient VertEdgeScroll=0
 synclient VertTwoFingerScroll=1
 synclient MaxSpeed=2.2
