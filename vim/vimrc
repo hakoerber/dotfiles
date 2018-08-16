@@ -24,7 +24,7 @@ Plug 'junegunn/goyo.vim'
 Plug 'junegunn/limelight.vim'
 " Plug 'sheerun/vim-polyglot'
 " Plug 'freitass/todo.txt-vim'
-" Plug 'Valloric/YouCompleteMe'
+Plug 'Valloric/YouCompleteMe'
 Plug 'nathanaelkane/vim-indent-guides'
 
 "Plugin 'Lokaltog/vim-easymotion'
@@ -123,7 +123,7 @@ set undodir=~/.vim/undo
 set undofile
 
 " == environment / directories ==
-set noautochdir
+set autochdir
 set directory=/var/tmp,/tmp
 set viewdir=~/.vim/view
 
