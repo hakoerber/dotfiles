@@ -1,6 +1,6 @@
 [user]
     name = Hannes Körber
-    email = hannes.koerber@haktec.de
+    email = {{ machine.mail }}
     signingkey = 0x078A167A8741BD30
 [github]
     user = hakoerber
@@ -67,7 +67,7 @@
     commitBeforeMerge = false
     detachedHead = false
 [commit]
-    gpgSign = true
+    gpgSign = {{ machine.git_gpg_sign|bool }}
     cleanup = strip
     status = true
 [status]

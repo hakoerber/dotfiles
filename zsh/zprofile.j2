@@ -51,6 +51,12 @@ fi
 # because gpg-agent is somehow broken for ssh, use the usual ssh-agent
 eval $(ssh-agent -s)
 
+{% if distro == 'fedora' %}
+alias urxvt=urxvt256c
+{% endif %}
+
+alias vim="nvim"
+
 # exec startx breaks some logind fuckery, without exec it works
 if [[ -z $DISPLAY ]] ; then
     if (( $XDG_VTNR == 1 )) ; then

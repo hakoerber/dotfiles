@@ -1,0 +1,6 @@
+font_size: 10
+letter_space: 0
+mail: hannes.koerber@tradebyte.com
+git_gpg_sign: false
+gpg_agent: false
+ssh_agent: false

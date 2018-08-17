@@ -1,16 +1,25 @@
+empty_directories:
+  - .i3
 dotfiles:
   - from: autostart
     to: .autostart
   - from: git/gitconfig
     to: .gitconfig
+    template: true
   - from: gnupg/dirmngr.conf
     to: .gnupg/dirmngr.conf
   - from: gnupg/gpg-agent.conf
     to: .gnupg/gpg-agent.conf
   - from: gnupg/gpg.conf
     to: .gnupg/gpg.conf
-  - from: i3
-    to: .i3
+  - from: i3/config
+    to: .i3/config
+    template: true
+  - from: i3/i3status.conf
+    to: .i3/i3status.conf
+    template: true
+  - from: i3/scripts
+    to: .i3/scripts
   - from: tmux/tmux.conf
     to: .tmux.conf
   - from: vim/vimrc
@@ -19,11 +28,14 @@ dotfiles:
     to: .vimrc
   - from: x/Xresources
     to: .Xresources
+    template: true
   - from: x/xinitrc
     to: .xinitrc
   - from: zsh/zprofile
     to: .zprofile
+    template: true
   - from: zsh/zshrc
     to: .zshrc
+    template: true
   - from: zsh/zshrc.d
     to: .zshrc.d

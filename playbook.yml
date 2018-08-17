@@ -2,11 +2,22 @@
   connection: local
   become: false
   tasks:
+    - name: read machine-specific variables
+      include_vars:
+        file: _machines/{{ ansible_hostname }}.yml
+        name: machine
+      tags:
+        - always
+
     - set_fact:
         distro: "{{ ansible_distribution|lower }}"
+      tags:
+        - always
 
     - set_fact:
         user: "{{ ansible_user_id }}"
+      tags:
+        - always
 
     - name: configure sudoers
       lineinfile:
@@ -153,6 +164,16 @@
     - name: load dotfile list
       include_vars:
         file: dotfiles.yml
+      tags:
+        - dotfiles
+
+    - name: create empty directories for dotfiles
+      file:
+        state: directory
+        path: ~/{{ item }}
+      with_items: "{{ empty_directories }}"
+      tags:
+        - dotfiles
 
     - name: link this folder to ~/.dotfiles
       file:
@@ -160,6 +181,8 @@
         force: true
         path: "{{ ansible_user_dir }}/.dotfiles"
         src: "{{ playbook_dir }}"
+      tags:
+        - dotfiles
 
     - name: link dotfiles
       file:
@@ -167,7 +190,20 @@
         force: true
         path: "{{ ansible_user_dir }}/{{ item.to }}"
         src: ~/.dotfiles/{{ item.from }}
+      when: not item.template|default(false)
       with_items: "{{ dotfiles }}"
+      tags:
+        - dotfiles
+
+    - name: deploy dotfiles templates
+      template:
+        src: ~/.dotfiles/{{ item.from }}.j2
+        dest: "{{ ansible_user_dir }}/{{ item.to }}"
+        force: true
+      when: item.template|default(false)
+      with_items: "{{ dotfiles }}"
+      tags:
+        - dotfiles
 
     - name: create directories
       file:
