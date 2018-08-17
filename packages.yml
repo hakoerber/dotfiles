@@ -211,9 +211,6 @@ packages:
     rsync:
       fedora: ["rsync"]
       ubuntu: ["rsync"]
-    nmap:
-      fedora: ["nmap"]
-      ubuntu: ["nmap"]
     net-tools:
       fedora: ["net-tools"]
       ubuntu: ["net-tools"]
