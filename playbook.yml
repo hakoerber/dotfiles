@@ -74,7 +74,7 @@
         - NetworkManager
       become: true
 
-    - name: set groups
+    - name: set groups for fedora
       user:
         name: "{{ user }}"
         groups:
@@ -84,6 +84,23 @@
           - wireshark
           - docker
       become: true
+      when: distro == 'fedora'
+
+    - name: set groups for ubuntu
+      user:
+        name: "{{ user }}"
+        groups:
+          - adm
+          - cdrom
+          - sudo
+          - dip
+          - plugdev
+          - lpadmin
+          - sambashare
+          - docker
+          - libvirt
+      become: true
+      when: distro == 'ubuntu'
 
     - name: get systemd boot target
       command: systemctl get-default
