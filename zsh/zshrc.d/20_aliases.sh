@@ -1,3 +1,5 @@
+alias vim="nvim"
+
 ### COMMON OPERATIONS
 alias ll='ls -AlFh'
 alias la='ls -A'
