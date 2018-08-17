@@ -275,6 +275,8 @@
       get_url:
         dest: ~/.vim/autoload/plug.vim
         url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+      tags:
+        - vim
 
     - name: symlink vim-plug for neovim
       file:
@@ -282,6 +284,22 @@
         path: ~/.local/share/nvim/site/autoload/plug.vim
         src: ~/.vim/autoload/plug.vim
         force: true
+      tags:
+        - vim
 
     - name: install vim plugins
-      command: /usr/bin/vim -f -E -s -c "source ~/.vimrc" +PlugInstall +qall
+      command: /usr/bin/nvim -f -E -s -c "source ~/.vimrc" +PlugInstall +qall
+      register: vim_plugins_stdout
+      changed_when: vim_plugins_stdout.stdout_lines|length != 0
+      tags:
+        - vim
+
+    - name: compile youcompleteme
+      shell: |
+        cd ~/.local/share/nvim/plugged/YouCompleteMe/
+        ./install.py --go-completer
+      args:
+        creates: ~/.local/share/nvim/plugged/YouCompleteMe/third_party/ycmd/ycm_core.so
+      when: vim_plugins_stdout.stdout_lines|length != 0 or true
+      tags:
+        - vim
