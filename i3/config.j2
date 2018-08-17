@@ -18,7 +18,7 @@
 
     # The default terminal
     set $terminal "urxvt -title terminal"
-    set $calc "urxvt256c -title term -e $SHELL -i -c calc"
+    set $calc "urxvt -title calc -e $SHELL -i -c calc"
 
     set $scriptdir ~/.i3/scripts
 
@@ -279,7 +279,7 @@ assign [class="^Keepassx$"] $workspace8
     floating_minimum_size 0 x 0
     floating_maximum_size 0 x 0
 
-    font pango:Inconsolata 10
+    font pango:Inconsolata {{ machine.font_size }}
 
 ################################################################################
 ### COLOR SETTINGS #############################################################
@@ -353,7 +353,7 @@ bar {
 
     id bar-0
 
-    font pango:Inconsolata, FontAwesome 10
+    font pango:Inconsolata, FontAwesome {{ machine.font_size }}
 
     colors {
         background #222222

@@ -1,0 +1,6 @@
+font_size: 9
+letter_space: 0
+mail: hannes.koerber@haktec.de
+git_gpg_sign: true
+gpg_agent: true
+ssh_agent: true
