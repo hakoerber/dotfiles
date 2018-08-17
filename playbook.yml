@@ -167,6 +167,23 @@
       tags:
         - dotfiles
 
+    - name: get state of empty directories
+      stat:
+        path: ~/{{ item }}
+      register: empty_dir_stat
+      with_items: "{{ empty_directories }}"
+      tags:
+        - dotfiles
+
+    - name: remove sysmlinks
+      file:
+        path: "{{ item.stat.path }}"
+        state: absent
+      when: item.stat.exists and item.stat.islnk
+      with_items: "{{ empty_dir_stat.results }}"
+      tags:
+        - dotfiles
+
     - name: create empty directories for dotfiles
       file:
         state: directory
@@ -192,6 +209,32 @@
         src: ~/.dotfiles/{{ item.from }}
       when: not item.template|default(false)
       with_items: "{{ dotfiles }}"
+      tags:
+        - dotfiles
+
+    - name: get state of template targets
+      stat:
+        path: ~/{{ item.to }}
+      register: template_stat
+      when: item.template|default(false)
+      with_items: "{{ dotfiles }}"
+      tags:
+        - dotfiles
+
+    - debug:
+        var: template_stat
+      tags:
+        - dotfiles
+
+    - name: remove invalid template target (directory or symlink)
+      file:
+        path: "{{ item.stat.path }}"
+        state: absent
+      when:
+        - not item.skipped is defined or not item.skipped
+        - item.stat.exists
+        - not item.stat.isreg
+      with_items: "{{ template_stat.results }}"
       tags:
         - dotfiles
 
