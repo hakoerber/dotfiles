@@ -39,3 +39,5 @@ dotfiles:
     template: true
   - from: zsh/zshrc.d
     to: .zshrc.d
+  - from: dunst/dunstrc
+    to: .config/dunstrc
