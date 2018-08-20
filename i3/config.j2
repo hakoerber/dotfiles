@@ -98,16 +98,16 @@
 ### WORKSPACE ASSIGNMENTS ######################################################
 ################################################################################
 
-workspace $workspace1 output HDMI3
-workspace $workspace2 output HDMI3
-workspace $workspace3 output HDMI2
-workspace $workspace4 output HDMI2
-workspace $workspace5 output HDMI2
-workspace $workspace6 output HDMI2
-workspace $workspace7 output LVDS1
-workspace $workspace8 output LVDS1
-workspace $workspace9 output LVDS1
-workspace $workspace10 output LVDS1
+workspace $workspace1 output {{ machine.screen.1 }}
+workspace $workspace2 output {{ machine.screen.2 }}
+workspace $workspace3 output {{ machine.screen.3 }}
+workspace $workspace4 output {{ machine.screen.4 }}
+workspace $workspace5 output {{ machine.screen.5 }}
+workspace $workspace6 output {{ machine.screen.6 }}
+workspace $workspace7 output {{ machine.screen.7 }}
+workspace $workspace8 output {{ machine.screen.8 }}
+workspace $workspace9 output {{ machine.screen.9 }}
+workspace $workspace10 output {{ machine.screen.0 }}
 
 assign [class="^Keepassx$"] $workspace8
 
