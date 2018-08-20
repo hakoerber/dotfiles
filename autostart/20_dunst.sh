@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-dunst -config ~/.config/dunstrc &
+systemd-run --remain-after-exit --user --setenv=DISPLAY=${DISPLAY} dunst -config ~/.config/dunstrc &
