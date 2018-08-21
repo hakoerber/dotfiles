@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 printf '%s\n' "start compton"
-systemd-run --remain-after-exit --user --setenv=DISPLAY=${DISPLAY} compton --backend xrender --vsync opengl &
+systemd-run --property=Restart=always --user --setenv=DISPLAY=${DISPLAY} compton --backend xrender --vsync opengl &
 
 printf '%s\n' "disable screen blanking"
 xset -dpms &
