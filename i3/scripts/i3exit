@@ -52,6 +52,10 @@ lock_and_screen_off() {
     reset_screen
 }
 
+disable_lid_switch() {
+    grep "^${ACPI_LID_NAME}.*enabled" /proc/acpi/wakeup && echo " ${ACPI_LID_NAME}" | sudo tee /proc/acpi/wakeup
+}
+
 signal="$1"
 log "[I] Received signal \"$signal\"."
 
@@ -67,11 +71,13 @@ case "$signal" in
     suspend)
         log "[I] Suspending."
         lock &
+        disable_lid_switch
         sleep 0.1
         systemctl suspend
         ;;
     hibernate)
         log "[I] Hibernating."
+        disable_lid_switch
         systemctl hibernate
         ;;
     reboot)
