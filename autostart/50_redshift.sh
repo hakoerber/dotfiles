@@ -5,5 +5,5 @@ redshift_lat_long="49.5:11"
 redshift_colortemp="6000:3300"
 
 printf '%s' "starting redshift-gtk"
-systemd-run --remain-after-exit --user --setenv=DISPLAY=${DISPLAY} redshift-gtk -b 1 -l "$redshift_lat_long" -t "$redshift_colortemp"
+systemd-run --property=Restart=always --user --setenv=DISPLAY=${DISPLAY} redshift-gtk -b 1 -l "$redshift_lat_long" -t "$redshift_colortemp"
 printf '%s' $! > "$RUNDIR"/redshift.${XDG_SESSION_ID}.pid
