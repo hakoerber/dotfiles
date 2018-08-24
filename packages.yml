@@ -262,3 +262,6 @@ packages:
     dunst:
       fedora: ["dunst"]
       ubuntu: ["dunst"]
+    cloc:
+      fedora: ["cloc"]
+      ubuntu: ["cloc"]
