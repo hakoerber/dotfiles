@@ -281,7 +281,10 @@ clip() {
 }
 
 gb() {
-    while [[ ! -e ./.git ]] ; do
-        cd ..
-    done
+    _superproject="$(git rev-parse --show-superproject-working-tree)"
+    if [[ -n "${_superproject}" ]] ; then
+        builtin cd "${_superproject}"
+    else
+        builtin cd "$(git rev-parse --show-toplevel)"
+    fi
 }
