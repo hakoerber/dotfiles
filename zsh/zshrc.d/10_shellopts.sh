@@ -15,6 +15,8 @@ setopt CHECK_JOBS
 setopt HUP
 setopt LONG_LIST_JOBS
 
+setopt share_history
+
 bindkey -e
 
 autoload -U promptinit
