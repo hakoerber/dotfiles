@@ -265,3 +265,6 @@ packages:
     cloc:
       fedora: ["cloc"]
       ubuntu: ["cloc"]
+    bluetooth:
+      fedora: []
+      ubuntu: ["blueman"]
