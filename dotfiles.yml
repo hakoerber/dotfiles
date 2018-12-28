@@ -1,8 +1,8 @@
 empty_directories:
   - .i3
 dotfiles:
-  - from: autostart
-    to: .autostart
+  - from: autostart.sh
+    to: .autostart.sh
   - from: git/gitconfig
     to: .gitconfig
     template: true
