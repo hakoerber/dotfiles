@@ -16,7 +16,7 @@ Plug 'saltstack/salt-vim'
 Plug 'sickill/vim-monokai'
 " Plug 'sjl/gundo.vim'
 Plug 'tpope/vim-commentary'
-" Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-fugitive'
 " Plug 'tpope/vim-speeddating'
 " Plug 'tpope/vim-surround'
 Plug 'airblade/vim-gitgutter'
@@ -250,7 +250,26 @@ let g:tagbar_foldlevel = 99 " unfold all
 
 let g:lightline = {
       \ 'colorscheme': 'powerline',
+      \ 'active': {
+      \   'left': [ [ 'mode', 'paste' ],
+      \             [ 'readonly', 'filename', 'modified', 'helloworld' ] ],
+      \   'right': [ [ 'gitbranch' ],
+      \              [ 'lineinfo' ],
+      \              [ 'percent' ],
+      \              [ 'fileformat', 'fileencoding', 'filetype', 'charvaluehex' ],
+      \              [ 'directory' ] ],
+      \ },
+      \ 'component_function': {
+      \   'gitbranch': 'fugitive#head',
+      \   'directory': 'LightLineFilename',
+      \ },
+      \ 'component': {
+      \ },
       \ }
+
+function! LightLineFilename()
+    return fnamemodify(expand('%F'), ":~:h")
+endfunction
 
 " == pencil ==
 let g:pencil#textwidth = 80

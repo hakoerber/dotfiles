@@ -165,7 +165,7 @@ packages:
       ubuntu: ["xcompmgr"]
     python:
       fedora: ["python"]
-      ubuntu: ["python3", "python3-pip", "python3-venv", "virtualenv"]
+      ubuntu: ["python3", "python3-pip", "python3-venv", "virtualenv", "pylint3"]
     xbacklight:
       fedora: ["xbacklight"]
       ubuntu: ["xbacklight"]
@@ -268,3 +268,27 @@ packages:
     bluetooth:
       fedora: []
       ubuntu: ["blueman"]
+    autorandr:
+      fedora: []
+      ubuntu: ["autorandr"]
+    bwm-ng:
+      fedora: []
+      ubuntu: ["bwm-ng"]
+    virtualbox:
+      fedora: []
+      ubuntu: ["virtualbox"]
+    sshfs:
+      fedora: []
+      ubuntu: ["sshfs"]
+    expect:
+      fedora: []
+      ubuntu: ["expect"]
+    pluma:
+      fedora: []
+      ubuntu: ["pluma"]
+    inotify:
+      fedora: []
+      ubuntu: ["inotify-tools"]
+    rclone:
+      fedora: ["rclone"]
+      ubuntu: ["rclone"]

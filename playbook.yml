@@ -73,7 +73,8 @@
         state: stopped
         enabled: false
         name: "{{ item }}"
-      with_items: []
+      with_items:
+        - ssh
       become: true
 
     - name: enable services
@@ -83,6 +84,8 @@
         name: "{{ item }}"
       with_items:
         - NetworkManager
+        - docker
+        - libvirtd
       become: true
 
     - name: set groups for fedora

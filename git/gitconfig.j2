@@ -15,7 +15,7 @@
 
     fe = "fetch --all --prune"
     co = "checkout"
-    cm = "commit --message"
+    cm = "!f() { git commit --message \"$*\" ; };f"
     ci = "commit"
     st = "status"
     br = "branch"
@@ -45,6 +45,17 @@
     intercommit = !bash -c 'interdiff <(git show $1) <(git show $2) | less -FRS' -
 
     drop = !git rebase --onto $1^ --
+
+    up = !git pull --rebase --prune $@ && git submodule update --init --recursive && git branch-clean
+
+    save = "!f() { set -x ; if ! [ $1 ]; then echo 'usage: git save <branch name>'; return 1; fi; git add -A && git commit -m 'SAVEPOINT' && git branch save-$1 && git reset --hard HEAD~1; };f"
+    ;save = !f(){echo "x$1x" && test -n $1 && echo "wat $?" && }; echo x$1x ; f()
+    anchor = "!f() { if ! [ $1 ]; then echo 'usage: git anchor <anchor name>'; return 1; fi; git branch anchor-$1 ; };f"
+    load = reset HEAD~1 --mixed
+    amend = commit -a --amend
+    wipe = !git add -A && git commit -m 'WIPE SAVEPOINT' && git reset HEAD~1 --hard
+
+    exec = "!exec "
 
 [core]
     fileMode = true

@@ -37,16 +37,16 @@
     set $signal_reboot    reboot
     set $signal_shutdown  shutdown
 
-    set $workspace1  1
-    set $workspace2  2
-    set $workspace3  3
-    set $workspace4  4
-    set $workspace5  5
-    set $workspace6  6
-    set $workspace7  7
-    set $workspace8  8
-    set $workspace9  9
-    set $workspace10 10
+    set $workspace1  "1{{ "" if machine.workspace.1 is not defined else ': ' ~ machine.workspace.1 }}"
+    set $workspace2  "2{{ "" if machine.workspace.2 is not defined else ': ' ~ machine.workspace.2 }}"
+    set $workspace3  "3{{ "" if machine.workspace.3 is not defined else ': ' ~ machine.workspace.3 }}"
+    set $workspace4  "4{{ "" if machine.workspace.4 is not defined else ': ' ~ machine.workspace.4 }}"
+    set $workspace5  "5{{ "" if machine.workspace.5 is not defined else ': ' ~ machine.workspace.5 }}"
+    set $workspace6  "6{{ "" if machine.workspace.6 is not defined else ': ' ~ machine.workspace.6 }}"
+    set $workspace7  "7{{ "" if machine.workspace.7 is not defined else ': ' ~ machine.workspace.7 }}"
+    set $workspace8  "8{{ "" if machine.workspace.8 is not defined else ': ' ~ machine.workspace.8 }}"
+    set $workspace9  "9{{ "" if machine.workspace.9 is not defined else ': ' ~ machine.workspace.9 }}"
+    set $workspace10 "10{{ "" if machine.workspace.10 is not defined else ': ' ~ machine.workspace.10 }}"
 
     set $key_workspace1  1
     set $key_workspace2  2
@@ -110,6 +110,7 @@ workspace $workspace9 output {{ machine.screen.9 }}
 workspace $workspace10 output {{ machine.screen.0 }}
 
 assign [class="^Keepassx$"] $workspace8
+assign [class="^Spotify$"] $workspace9
 
 ################################################################################
 ### KEYBINDINGS ################################################################
@@ -210,16 +211,16 @@ assign [class="^Keepassx$"] $workspace8
     bindsym $mod+$scratchpad scratchpad show
 
     bindsym $mod+$pim_toggle \
+        unmark pim_toggle; \
         workspace $workspace10; \
         mark --add pim_toggle; \
         workspace $workspace1; \
         move container to workspace $workspace10; \
-        [con_mark="pim_toggle"] focus; \
+        [con_mark="^pim_toggle$"] focus; \
         move container to workspace $workspace1; \
         workspace $workspace1; \
-        [con_mark="pim_toggle"] focus
-
-    # bindsym $mod+$swap workspace $workspace1; move container to workspace $workspace10; workspace $workspace10; move container to workspace $workspace1; workspace $workspace1;
+        [con_mark="^pim_toggle$"] focus; \
+        unmark pim_toggle;
 
 ################################################################################
 ### MODES ######################################################################
