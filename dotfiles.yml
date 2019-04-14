@@ -1,6 +1,7 @@
 empty_directories:
-  - .i3
-  - .gnupg
+  - name: .i3
+  - name: .gnupg
+    mode: '0700'
 dotfiles:
   - from: autostart.sh
     to: .autostart.sh

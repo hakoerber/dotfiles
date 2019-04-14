@@ -174,7 +174,7 @@
 
     - name: get state of empty directories
       stat:
-        path: ~/{{ item }}
+        path: ~/{{ item.name }}
       register: empty_dir_stat
       with_items: "{{ empty_directories }}"
       tags:
@@ -192,7 +192,8 @@
     - name: create empty directories for dotfiles
       file:
         state: directory
-        path: ~/{{ item }}
+        path: ~/{{ item.name }}
+        mode: "{{ item.mode | default('0755') }}"
       with_items: "{{ empty_directories }}"
       tags:
         - dotfiles
