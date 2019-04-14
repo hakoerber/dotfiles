@@ -292,3 +292,6 @@ packages:
     rclone:
       fedora: ["rclone"]
       ubuntu: ["rclone"]
+    dnf:
+      fedora: ["python3-dnf"]
+      ubuntu: []

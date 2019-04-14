@@ -85,6 +85,8 @@ alias newpw="pwgen --secure 25 1"
 alias sys="systemctl"
 alias sysu="systemctl --user"
 
+alias gpg=gpg2
+
 gitmaster() {
     git stash push -m gitmaster-$(date -uIseconds) -u || return 1
     _branch=$(git rev-parse --abbrev-ref HEAD)

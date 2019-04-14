@@ -202,3 +202,7 @@ prefix() {
     file=$1
     mv $file ${prefix}${file}
 }
+
+tmp() {
+    cd "$(mktemp -d)"
+}

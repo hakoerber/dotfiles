@@ -306,3 +306,7 @@ let g:terraform_align = 1
 if has("autocmd")
   au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 endif
+
+let g:ycm_server_python_interpreter = "python2"
+
+au FileType html setl shiftwidth=2
