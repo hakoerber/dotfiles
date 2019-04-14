@@ -1,5 +1,6 @@
 empty_directories:
   - .i3
+  - .gnupg
 dotfiles:
   - from: autostart.sh
     to: .autostart.sh

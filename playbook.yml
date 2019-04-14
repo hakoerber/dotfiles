@@ -33,9 +33,11 @@
       become: true
 
     - name: install selinux specials on fedora
-      package:
+      dnf:
         state: installed
-        name: libselinux-python
+        name:
+          - python2-libselinux
+          - policycoreutils-python
       become: true
       when: distro == 'fedora'
 
