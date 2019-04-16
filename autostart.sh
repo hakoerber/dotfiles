@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 set -o nounset
-set -o xtrace
 
 run_raw() {
     name="$1"
@@ -34,7 +33,6 @@ run_oneshot_multiple() {
     done
     cmd+=(true)
 
-    echo $cmd
     run_oneshot "$name" "${cmd[@]}"
 }
 
@@ -97,10 +95,9 @@ run gpg-agent gpg-agent --homedir "$HOME/.gnupg" --no-detach --daemon
 # a service called dunst already exists and conflicts
 run dunst_user dunst -config ~/.config/dunstrc
 
-# run compton compton --config ~/.config/compton.conf --backend glx --vsync opengl -CG -d :0
-# run xcompmgr xcompmgr
+run compton compton --backend glx --vsync opengl --no-dock-shadow --no-dnd-shadow
 
-run_oneshot feh --property=ExecStartPre="/bin/sleep 5" feh --bg-scale "${wallpaper}"
+run_oneshot wallpaper --property=ExecStartPre="/bin/sleep 1" feh --bg-scale "${wallpaper}"
 
 run blueman blueman-applet
 
@@ -114,4 +111,6 @@ run keepassx keepassx --keyfile ~/.secret/main.key ~/.secret/main.kdbx
 
 run spotify spotify
 
-schedule backup "Mon..Fri 12:00:00" ~/bin/gdrive-backup
+run nextcloud nextcloud
+
+[[ -x ~/bin/gdrive-backup ]] && schedule backup "Mon..Fri 12:00:00" ~/bin/gdrive-backup
