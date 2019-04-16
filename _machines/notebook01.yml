@@ -3,7 +3,6 @@ letter_space: 0
 mail: hannes.koerber@haktec.de
 git_gpg_sign: true
 gpg_agent: true
-ssh_agent: true
 terminal_binary: urxvt256c
 
 screen:

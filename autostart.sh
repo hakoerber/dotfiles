@@ -92,6 +92,8 @@ run_oneshot_multiple touchpad \
 
 run_oneshot pulseaudio start-pulseaudio-x11 --start --daemonize=false --fail=true --log-target=stderr
 
+run gpg-agent gpg-agent --homedir "$HOME/.gnupg" --no-detach --daemon
+
 # a service called dunst already exists and conflicts
 run dunst_user dunst -config ~/.config/dunstrc
 
