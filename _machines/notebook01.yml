@@ -18,3 +18,8 @@ screen:
   0: eDP-1
 
 workspace:
+
+environment:
+  MACHINE_HAS_KEEPASSX: 0
+  MACHINE_HAS_NEXTCLOUD: 1
+  MACHINE_HAS_GDRIVE_BACKUP: 0

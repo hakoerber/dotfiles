@@ -53,3 +53,7 @@ if [[ -z $DISPLAY ]] ; then
         tmux new-session -A -s tmux-tty-$XDG_VTNR
     fi
 fi
+
+{% for k, v in machine.environment.items() %}
+{{ k }}="{{ v }}"
+{% endfor %}

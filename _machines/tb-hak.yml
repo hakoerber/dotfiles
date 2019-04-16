@@ -26,3 +26,8 @@ workspace:
   8: pass
   9: music
   10: pim
+
+environment:
+  MACHINE_HAS_KEEPASSX: 1
+  MACHINE_HAS_NEXTCLOUD: 0
+  MACHINE_HAS_GDRIVE_BACKUP: 0
