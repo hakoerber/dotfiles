@@ -107,10 +107,16 @@ run pasystray pasystray
 
 run redshift redshift-gtk -b 1 -l "$redshift_lat_long" -t "$redshift_colortemp"
 
-run keepassx keepassx --keyfile ~/.secret/main.key ~/.secret/main.kdbx
+if [[ "${MACHINE_HAS_KEEPASSX}" ]] ; then
+    run keepassx keepassx --keyfile ~/.secret/main.key ~/.secret/main.kdbx
+fi
 
 run spotify spotify
 
-run nextcloud nextcloud
+if [[ "${MACHINE_HAS_NEXTCLOUD}" ]] ; then
+    run nextcloud nextcloud
+fi
 
-[[ -x ~/bin/gdrive-backup ]] && schedule backup "Mon..Fri 12:00:00" ~/bin/gdrive-backup
+if [[ "${MACHINE_HAS_GDRIVE_BACKUP}" ]] ; then
+    [[ -x ~/bin/gdrive-backup ]] && schedule backup "Mon..Fri 12:00:00" ~/bin/gdrive-backup
+fi
