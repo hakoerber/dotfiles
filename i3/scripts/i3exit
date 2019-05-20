@@ -48,6 +48,7 @@ lock_and_screen_off() {
     lock &
     _pid=$!
     screen_off
+    xset dpms 0 0 5
     wait $_pid
     reset_screen
 }
