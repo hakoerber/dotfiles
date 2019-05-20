@@ -70,13 +70,22 @@
       vars:
         query: "{{ 'list.*.%s[]'|format(distro) }}"
 
+    - set_fact:
+        disable_services:
+          - sshd
+      when: distro == 'fedora'
+
+    - set_fact:
+        disable_services:
+          - ssh
+      when: distro != 'fedora'
+
     - name: disable services
       service:
         state: stopped
         enabled: false
         name: "{{ item }}"
-      with_items:
-        - ssh
+      with_items: "{{ disable_services }}"
       become: true
 
     - name: enable services
