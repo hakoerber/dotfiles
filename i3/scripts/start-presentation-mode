@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+systemctl --user stop dunst_user
+systemctl --user stop redshift
