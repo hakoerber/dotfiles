@@ -293,3 +293,10 @@ gb() {
         builtin cd "$(git rev-parse --show-toplevel)"
     fi
 }
+
+meetingnotes() {
+    [[ "${1}" ]] || return 1
+    file="$(date +%Y-%m-%d)-${1}.md"
+    cp ~/snippets/meetingnotes.md "${file}"
+    $EDITOR "${file}"
+}
