@@ -79,7 +79,7 @@ case "$signal" in
     hibernate)
         log "[I] Hibernating."
         disable_lid_switch
-        systemctl hibernate
+        sudo systemctl hibernate
         ;;
     reboot)
         log "[I] Rebooting."
