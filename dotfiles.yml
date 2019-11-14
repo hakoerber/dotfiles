@@ -2,6 +2,7 @@ empty_directories:
   - name: .i3
   - name: .gnupg
     mode: '0700'
+  - name: .config/nvim
 dotfiles:
   - from: autostart.sh
     to: .autostart.sh
