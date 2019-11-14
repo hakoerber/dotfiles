@@ -5,6 +5,16 @@ git_gpg_sign: false
 gpg_agent: false
 terminal_binary: urxvt
 
+users:
+- name: hannes-work
+  group: hak
+  vt: 1
+  firefox_profiles:
+    - name: 3wmp9hdb.default-1565075150057
+- name: hannes-private
+  group: tpp
+  vt: 2
+
 screen:
   1: DP-1-1
   2: DP-1-1
