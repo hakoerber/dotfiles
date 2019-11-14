@@ -240,7 +240,7 @@
 - name: compile youcompleteme
   shell: |
     cd ~/.local/share/nvim/plugged/YouCompleteMe/
-    ./install.py # --go-completer
+    python3 ./install.py # --go-completer
   args:
     creates: ~/.local/share/nvim/plugged/YouCompleteMe/third_party/ycmd/ycm_core.so
   when: vim_plugins_stdout.stdout_lines|length != 0 or true
