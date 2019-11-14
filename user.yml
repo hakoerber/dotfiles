@@ -13,23 +13,8 @@
   become: true
   become_user: root
 
-- name: set groups for fedora
-  user:
-    name: "{{ user.name }}"
-    groups:
-      - libvirt
-      - wheel
-      - vboxusers
-      - wireshark
-      - docker
-  become: true
-  become_user: root
-  when: distro == 'fedora'
-
-- name: set groups for ubuntu
-  user:
-    name: "{{ user.name }}"
-    groups:
+- set_fact:
+    user_groups:
       - adm
       - cdrom
       - sudo
@@ -39,9 +24,30 @@
       - sambashare
       - docker
       - libvirt
+  when: distro == 'ubuntu'
+
+- set_fact:
+    user_groups:
+      - libvirt
+      - wheel
+      - vboxusers
+      - wireshark
+      - docker
+  when: distro == 'fedora'
+
+- name: create user group
+  group:
+    name: "{{ user.name }}"
+    state: present
   become: true
   become_user: root
-  when: distro == 'ubuntu'
+
+- name: set groups
+  user:
+    name: "{{ user.name }}"
+    groups: "{{ [user.name, 'dotfiles'] + user_groups }}"
+  become: true
+  become_user: root
 
 - name: create directory for getty autologin
   file:
@@ -102,6 +108,7 @@
   file:
     state: link
     force: true
+    follow: false
     owner: "{{ user.name }}"
     group: "{{ user.group }}"
     path: "/home/{{ user.name }}/.dotfiles"
@@ -111,14 +118,37 @@
   become: true
   become_user: root
 
+- name: get state of copy targets
+  stat:
+    path: ~/{{ item.to }}
+  register: copy_stat
+  when: not item.template|default(false)
+  with_items: "{{ dotfiles }}"
+  tags:
+    - dotfiles
+
+- name: remove invalid copy target (directories)
+  file:
+    path: "{{ item.stat.path }}"
+    state: absent
+  when:
+    - not item.skipped is defined or not item.skipped
+    - item.stat.exists
+    - item.stat.isdir
+  with_items: "{{ copy_stat.results }}"
+  tags:
+    - dotfiles
+
 - name: link dotfiles
   file:
     state: link
     force: true
+    follow: false
+    path: "/home/{{ user.name }}/{{ item.to }}"
+    src: /var/lib/dotfiles/{{ item.from }}
     owner: "{{ user.name }}"
     group: "{{ user.group }}"
-    path: "/home/{{ user.name }}/{{ item.to }}"
-    src: /home/{{ user.name }}/.dotfiles/{{ item.from }}
+    mode: "{{ item.mode | default('0644') }}"
   when: not item.template|default(false)
   with_items: "{{ dotfiles }}"
   become: true
@@ -149,7 +179,7 @@
 
 - name: deploy dotfiles templates
   template:
-    src: ~/.dotfiles/{{ item.from }}.j2
+    src: /home/{{ user.name }}/.dotfiles/{{ item.from }}.j2
     dest: "/home/{{ user.name }}/{{ item.to }}"
     owner: "{{ user.name }}"
     group: "{{ user.group }}"
