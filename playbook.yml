@@ -108,6 +108,22 @@
         line: 'HandlePowerKey=suspend'
       become: true
 
+    - name: create dotfiles group
+      group:
+        name: dotfiles
+        state: present
+      become: true
+      become_user: root
+
+    - name: create dotfiles directory
+      file:
+        state: directory
+        path: /var/lib/dotfiles
+        owner: nobody
+        group: dotfiles
+      become: true
+      become_user: root
+
     - set_fact:
         users: "{{ machine.users }}"
       tags:
