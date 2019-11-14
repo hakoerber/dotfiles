@@ -302,6 +302,7 @@ let g:ycm_add_preview_to_completeopt = 0
 let g:instant_markdown_autostart = 0
 
 let g:terraform_align = 1
+let g:terraform_fmt_on_save=1
 
 if has("autocmd")
   au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
