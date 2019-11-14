@@ -95,7 +95,8 @@ run gpg-agent gpg-agent --homedir "$HOME/.gnupg" --no-detach --daemon
 # a service called dunst already exists and conflicts
 run dunst_user dunst -config ~/.config/dunstrc
 
-run compton compton --backend glx --vsync opengl --no-dock-shadow --no-dnd-shadow
+# disabled due to firefox flicker
+# run compton compton --backend glx --vsync opengl --no-dock-shadow --no-dnd-shadow
 
 run_oneshot wallpaper --property=ExecStartPre="/bin/sleep 1" feh --bg-scale "${wallpaper}"
 
