@@ -46,6 +46,10 @@ export ACPI_LID_NAME=LID
 
 umask 0022
 
+{% for k, v in machine.environment.items() %}
+export {{ k }}="{{ v }}"
+{% endfor %}
+
 # exec startx breaks some logind fuckery, without exec it works
 if [[ -z $DISPLAY ]] ; then
     if (( $XDG_VTNR == {{ user.vt }} )) ; then
@@ -54,7 +58,3 @@ if [[ -z $DISPLAY ]] ; then
         tmux new-session -A -s tmux-tty-$XDG_VTNR
     fi
 fi
-
-{% for k, v in machine.environment.items() %}
-{{ k }}="{{ v }}"
-{% endfor %}
