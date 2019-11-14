@@ -66,7 +66,7 @@ packages:
       ubuntu: ["taskwarrior"]
     git:
       fedora: ["git", "gitk"]
-      ubuntu: ["git", "git-extras", "gitk"]
+      ubuntu: ["git", "git-extras", "gitk", "git-email"]
     htop:
       fedora: ["htop"]
       ubuntu: ["htop"]
@@ -295,3 +295,15 @@ packages:
     dnf:
       fedora: ["python3-dnf"]
       ubuntu: []
+    rust:
+      fedora: []
+      ubuntu: ["rustc", "cargo"]
+    musescore:
+      fedora: []
+      ubuntu: ["musescore"]
+    sipcalc:
+      fedora: []
+      ubuntu: ["sipcalc"]
+    rofi:
+      fedora: []
+      ubuntu: ["rofi"]
