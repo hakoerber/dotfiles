@@ -1,0 +1,246 @@
+- name: configure sudoers
+  lineinfile:
+    path: /etc/sudoers
+    line: "{{ user.name }} ALL=(ALL) NOPASSWD:ALL"
+    regexp: "^{{ user.name }}\\s+"
+  become: true
+  become_user: root
+
+- name: set shell
+  user:
+    name: "{{ user.name }}"
+    shell: /usr/bin/zsh
+  become: true
+  become_user: root
+
+- name: set groups for fedora
+  user:
+    name: "{{ user.name }}"
+    groups:
+      - libvirt
+      - wheel
+      - vboxusers
+      - wireshark
+      - docker
+  become: true
+  become_user: root
+  when: distro == 'fedora'
+
+- name: set groups for ubuntu
+  user:
+    name: "{{ user.name }}"
+    groups:
+      - adm
+      - cdrom
+      - sudo
+      - dip
+      - plugdev
+      - lpadmin
+      - sambashare
+      - docker
+      - libvirt
+  become: true
+  become_user: root
+  when: distro == 'ubuntu'
+
+- name: create directory for getty autologin
+  file:
+    state: directory
+    path: /etc/systemd/system/getty@tty{{ user.vt }}.service.d
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+  become_user: root
+
+- name: enable getty autologin
+  copy:
+    dest: /etc/systemd/system/getty@tty{{ user.vt }}.service.d/override.conf
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      [Service]
+      ExecStart=
+      ExecStart=-/sbin/agetty --autologin {{ user.name }} --noclear %I $TERM
+  become: true
+  become_user: root
+
+- name: load dotfile list
+  include_vars:
+    file: dotfiles.yml
+  tags:
+    - dotfiles
+
+- name: get state of empty directories
+  stat:
+    path: ~/{{ item.name }}
+  register: empty_dir_stat
+  with_items: "{{ empty_directories }}"
+  tags:
+    - dotfiles
+
+- name: remove sysmlinks
+  file:
+    path: "{{ item.stat.path }}"
+    state: absent
+  when: item.stat.exists and item.stat.islnk
+  with_items: "{{ empty_dir_stat.results }}"
+  tags:
+    - dotfiles
+
+- name: create empty directories for dotfiles
+  file:
+    state: directory
+    path: ~/{{ item.name }}
+    mode: "{{ item.mode | default('0755') }}"
+  with_items: "{{ empty_directories }}"
+  tags:
+    - dotfiles
+
+- name: link this folder to ~/.dotfiles
+  file:
+    state: link
+    force: true
+    owner: "{{ user.name }}"
+    group: "{{ user.group }}"
+    path: "/home/{{ user.name }}/.dotfiles"
+    src: "{{ playbook_dir }}"
+  tags:
+    - dotfiles
+  become: true
+  become_user: root
+
+- name: link dotfiles
+  file:
+    state: link
+    force: true
+    owner: "{{ user.name }}"
+    group: "{{ user.group }}"
+    path: "/home/{{ user.name }}/{{ item.to }}"
+    src: /home/{{ user.name }}/.dotfiles/{{ item.from }}
+  when: not item.template|default(false)
+  with_items: "{{ dotfiles }}"
+  become: true
+  become_user: root
+  tags:
+    - dotfiles
+
+- name: get state of template targets
+  stat:
+    path: ~/{{ item.to }}
+  register: template_stat
+  when: item.template|default(false)
+  with_items: "{{ dotfiles }}"
+  tags:
+    - dotfiles
+
+- name: remove invalid template target (directory or symlink)
+  file:
+    path: "{{ item.stat.path }}"
+    state: absent
+  when:
+    - not item.skipped is defined or not item.skipped
+    - item.stat.exists
+    - not item.stat.isreg
+  with_items: "{{ template_stat.results }}"
+  tags:
+    - dotfiles
+
+- name: deploy dotfiles templates
+  template:
+    src: ~/.dotfiles/{{ item.from }}.j2
+    dest: "/home/{{ user.name }}/{{ item.to }}"
+    owner: "{{ user.name }}"
+    group: "{{ user.group }}"
+    force: true
+  become: true
+  become_user: root
+  when: item.template|default(false)
+  with_items: "{{ dotfiles }}"
+  tags:
+    - dotfiles
+
+- name: create directories
+  file:
+    state: directory
+    path: "{{ item }}"
+  with_items:
+    - ~/.var/lib
+    - ~/.var/log
+    - ~/.var/run
+    - ~/.usr/lib
+
+- name: create intermediate directories for vim-plug
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - ~/.local/
+    - ~/.local/share/
+    - ~/.local/share/nvim/
+    - ~/.local/share/nvim/site/
+    - ~/.local/share/nvim/site/autoload/
+    - ~/.vim/
+    - ~/.vim/autoload
+
+- name: install vim-plug
+  get_url:
+    dest: ~/.vim/autoload/plug.vim
+    url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  tags:
+    - vim
+
+- name: symlink vim-plug for neovim
+  file:
+    state: link
+    path: ~/.local/share/nvim/site/autoload/plug.vim
+    src: ~/.vim/autoload/plug.vim
+    force: true
+  tags:
+    - vim
+
+- name: install vim plugins
+  command: /usr/bin/nvim -f -E -s -c "source ~/.vimrc" +PlugInstall +qall
+  register: vim_plugins_stdout
+  changed_when: vim_plugins_stdout.stdout_lines|length != 0
+  tags:
+    - vim
+
+- name: compile youcompleteme
+  shell: |
+    cd ~/.local/share/nvim/plugged/YouCompleteMe/
+    ./install.py # --go-completer
+  args:
+    creates: ~/.local/share/nvim/plugged/YouCompleteMe/third_party/ycmd/ycm_core.so
+  when: vim_plugins_stdout.stdout_lines|length != 0 or true
+  tags:
+    - vim
+
+- name: firefox - create chrome directory
+  file:
+    path: ~/.mozilla/firefox/{{ item.name }}/chrome/
+    state: directory
+    mode: '0755'
+  with_items: "{{ user.firefox_profiles }}"
+  when: user.firefox_profiles is defined
+  tags:
+    - firefox
+
+- name: firefox - configure firefox custom css
+  copy:
+    dest: ~/.mozilla/firefox/{{ item.name }}/chrome/userChrome.css
+    content: |
+      #TabsToolbar {
+        visibility: collapse !important;
+      }
+      #titlebar {
+        visibility: collapse !important;
+      }
+      #sidebar-header {
+        visibility: collapse !important;
+      }
+  with_items: "{{ user.firefox_profiles }}"
+  when: user.firefox_profiles is defined
+  tags:
+    - firefox

@@ -14,24 +14,6 @@
       tags:
         - always
 
-    - set_fact:
-        user: "{{ ansible_user_id }}"
-      tags:
-        - always
-
-    - name: configure sudoers
-      lineinfile:
-        path: /etc/sudoers
-        line: "{{ user }} ALL=(ALL) NOPASSWD:ALL"
-        regexp: "^{{ user }}\\s+"
-      become: true
-
-    - name: set shell
-      user:
-        name: "{{ user }}"
-        shell: /usr/bin/zsh
-      become: true
-
     - name: install selinux specials on fedora
       dnf:
         state: installed
@@ -99,34 +81,6 @@
         - libvirtd
       become: true
 
-    - name: set groups for fedora
-      user:
-        name: "{{ user }}"
-        groups:
-          - libvirt
-          - wheel
-          - vboxusers
-          - wireshark
-          - docker
-      become: true
-      when: distro == 'fedora'
-
-    - name: set groups for ubuntu
-      user:
-        name: "{{ user }}"
-        groups:
-          - adm
-          - cdrom
-          - sudo
-          - dip
-          - plugdev
-          - lpadmin
-          - sambashare
-          - docker
-          - libvirt
-      become: true
-      when: distro == 'ubuntu'
-
     - name: get systemd boot target
       command: systemctl get-default
       register: systemd_target
@@ -154,162 +108,16 @@
         line: 'HandlePowerKey=suspend'
       become: true
 
-    - name: create directory for getty autologin
-      file:
-        state: directory
-        path: /etc/systemd/system/getty@tty1.service.d
-        owner: root
-        group: root
-        mode: '0755'
-      become: true
-
-    - name: enable getty autologin
-      copy:
-        dest: /etc/systemd/system/getty@tty1.service.d/override.conf
-        owner: root
-        group: root
-        mode: '0644'
-        content: |
-          [Service]
-          ExecStart=
-          ExecStart=-/sbin/agetty --autologin {{ user }} --noclear %I $TERM
-      become: true
-
-    - name: load dotfile list
-      include_vars:
-        file: dotfiles.yml
+    - set_fact:
+        users: "{{ machine.users }}"
       tags:
-        - dotfiles
+        - always
 
-    - name: get state of empty directories
-      stat:
-        path: ~/{{ item.name }}
-      register: empty_dir_stat
-      with_items: "{{ empty_directories }}"
-      tags:
-        - dotfiles
-
-    - name: remove sysmlinks
-      file:
-        path: "{{ item.stat.path }}"
-        state: absent
-      when: item.stat.exists and item.stat.islnk
-      with_items: "{{ empty_dir_stat.results }}"
-      tags:
-        - dotfiles
-
-    - name: create empty directories for dotfiles
-      file:
-        state: directory
-        path: ~/{{ item.name }}
-        mode: "{{ item.mode | default('0755') }}"
-      with_items: "{{ empty_directories }}"
-      tags:
-        - dotfiles
-
-    - name: link this folder to ~/.dotfiles
-      file:
-        state: link
-        force: true
-        path: "{{ ansible_user_dir }}/.dotfiles"
-        src: "{{ playbook_dir }}"
-      tags:
-        - dotfiles
-
-    - name: link dotfiles
-      file:
-        state: link
-        force: true
-        path: "{{ ansible_user_dir }}/{{ item.to }}"
-        src: ~/.dotfiles/{{ item.from }}
-      when: not item.template|default(false)
-      with_items: "{{ dotfiles }}"
-      tags:
-        - dotfiles
-
-    - name: get state of template targets
-      stat:
-        path: ~/{{ item.to }}
-      register: template_stat
-      when: item.template|default(false)
-      with_items: "{{ dotfiles }}"
-      tags:
-        - dotfiles
-
-    - name: remove invalid template target (directory or symlink)
-      file:
-        path: "{{ item.stat.path }}"
-        state: absent
-      when:
-        - not item.skipped is defined or not item.skipped
-        - item.stat.exists
-        - not item.stat.isreg
-      with_items: "{{ template_stat.results }}"
-      tags:
-        - dotfiles
-
-    - name: deploy dotfiles templates
-      template:
-        src: ~/.dotfiles/{{ item.from }}.j2
-        dest: "{{ ansible_user_dir }}/{{ item.to }}"
-        force: true
-      when: item.template|default(false)
-      with_items: "{{ dotfiles }}"
-      tags:
-        - dotfiles
-
-    - name: create directories
-      file:
-        state: directory
-        path: "{{ item }}"
-      with_items:
-        - ~/.var/lib
-        - ~/.var/log
-        - ~/.var/run
-        - ~/.usr/lib
-
-    - name: create intermediate directories for vim-plug
-      file:
-        path: "{{ item }}"
-        state: directory
-      with_items:
-        - ~/.local/
-        - ~/.local/share/
-        - ~/.local/share/nvim/
-        - ~/.local/share/nvim/site/
-        - ~/.local/share/nvim/site/autoload/
-        - ~/.vim/
-        - ~/.vim/autoload
-
-    - name: install vim-plug
-      get_url:
-        dest: ~/.vim/autoload/plug.vim
-        url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-      tags:
-        - vim
-
-    - name: symlink vim-plug for neovim
-      file:
-        state: link
-        path: ~/.local/share/nvim/site/autoload/plug.vim
-        src: ~/.vim/autoload/plug.vim
-        force: true
-      tags:
-        - vim
-
-    - name: install vim plugins
-      command: /usr/bin/nvim -f -E -s -c "source ~/.vimrc" +PlugInstall +qall
-      register: vim_plugins_stdout
-      changed_when: vim_plugins_stdout.stdout_lines|length != 0
-      tags:
-        - vim
-
-    - name: compile youcompleteme
-      shell: |
-        cd ~/.local/share/nvim/plugged/YouCompleteMe/
-        ./install.py --go-completer
+    - include_tasks: user.yml
       args:
-        creates: ~/.local/share/nvim/plugged/YouCompleteMe/third_party/ycmd/ycm_core.so
-      when: vim_plugins_stdout.stdout_lines|length != 0 or true
-      tags:
-        - vim
+        apply:
+          become: true
+          become_user: "{{ user.name }}"
+      with_items: "{{ users }}"
+      loop_control:
+        loop_var: user

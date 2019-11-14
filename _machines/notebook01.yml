@@ -5,6 +5,10 @@ git_gpg_sign: true
 gpg_agent: true
 terminal_binary: urxvt256c
 
+users:
+- name: hannes
+  vt: 1
+
 screen:
   1: eDP-1
   2: eDP-1
