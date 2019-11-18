@@ -270,6 +270,9 @@
       #sidebar-header {
         visibility: collapse !important;
       }
+      #sidebar {
+        width: 400px !important;
+      }
   with_items: "{{ user.firefox_profiles }}"
   when: user.firefox_profiles is defined
   tags:
