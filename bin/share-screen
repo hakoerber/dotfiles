@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+~/code/helper-scripts/sysop-share-screen.sh pi@monitor-sysop-${1:-middle}-${2:-top} 1
