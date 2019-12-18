@@ -201,6 +201,21 @@
     - ~/.var/run
     - ~/.usr/lib
 
+- name: create bin directory
+  file:
+    state: directory
+    path: ~/bin
+
+- name: copy bin directory
+  synchronize:
+    src: bin
+    dest: ~/bin
+    archive: true
+    checksum: true
+    copy_links: false
+    delete: true
+
+
 - name: create intermediate directories for vim-plug
   file:
     path: "{{ item }}"
