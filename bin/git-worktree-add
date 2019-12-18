@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -o nounset
+set -o xtrace
+set -o errexit
+
+cd ./.gitdir
+git fetch
+if git rev-parse --verify "${1}" >/dev/null 2>&1 ; then
+    # local branch exists, use that
+    git worktree add --force ../${1} "${1}"
+elif git rev-parse --verify origin/"${1}" >/dev/null 2>&1 ; then
+    # remove branch exists, use that
+    git worktree add --force -b ${1} ../${1} origin/${1}
+
+else
+    git worktree add --no-track --force -b ${1} ../${1} origin/master
+fi
+cd ../"${1}"
+git push --set-upstream origin ${1}
+git submodule update --init
