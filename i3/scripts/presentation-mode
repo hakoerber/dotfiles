@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+_status_file="${RUNDIR}/presentation-mode-on"
+_autostart="$HOME/.autostart.sh"
+
+is_on() {
+    [[ -e "${_status_file}" ]]
+}
+
+switch_on() {
+    touch "${_status_file}"
+    systemctl --user --no-block stop dunst_user
+    systemctl --user --no-block stop redshift
+}
+
+switch_off() {
+    rm -f "${_status_file}"
+    "$_autostart" dunst_user redshift
+}
+
+
+case "$1" in
+    status)
+        if is_on ; then
+            printf "on\n"
+            printf '#F4BF75'
+        else
+            printf "off\n"
+            # printf '#F4BF75'
+        fi
+        ;;
+    toggle)
+        if is_on ; then
+            switch_off
+        else
+            switch_on
+        fi
+esac
+
+
