@@ -1,10 +1,37 @@
 #!/usr/bin/env bash
 
 set -o nounset
+# set -x
+
+selective=0
+if (( $# > 0 )) ; then
+    selective=1
+    services=("${@}")
+fi
+
+do_run() {
+    name="$1"
+    shift
+
+    run=0
+    if (( $selective )) ; then
+        for s in "${services[@]}" ; do
+            if [[ "$s" == "$name" ]] ; then
+                run=1
+            fi
+        done
+    else
+        run=1
+    fi
+
+    return $(( ! $run ))
+}
 
 run_raw() {
     name="$1"
     shift
+
+    do_run "$name" || return
 
     systemd-run \
         --user \
@@ -46,6 +73,7 @@ run_oneshot() {
 schedule() {
     name="$1"; shift
     spec="$1"; shift
+    do_run "$name" || return
     systemd-run \
         --user \
         --unit "${name}" \
