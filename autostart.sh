@@ -136,17 +136,17 @@ run pasystray pasystray
 
 run redshift redshift-gtk -b 1 -l "$redshift_lat_long" -t "$redshift_colortemp"
 
-if [[ "${MACHINE_HAS_KEEPASSX}" ]] ; then
+if [[ "${MACHINE_HAS_KEEPASSX}" == "true" ]] ; then
     run keepassx keepassx --keyfile ~/.secret/main.key ~/.secret/main.kdbx
 fi
 
 run spotify spotify
 
-if [[ "${MACHINE_HAS_NEXTCLOUD}" ]] ; then
+if [[ "${MACHINE_HAS_NEXTCLOUD}" == "true" ]] ; then
     run nextcloud nextcloud
 fi
 
-if [[ "${MACHINE_HAS_RESTIC_BACKUP}" ]] ; then
+if [[ "${MACHINE_HAS_RESTIC_BACKUP}" == "true" ]] ; then
     [[ -x ~/bin/restic-backup ]] && schedule restic-backup "Mon..Fri 12:00:00" ~/bin/restic-backup
 fi
 
