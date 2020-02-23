@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-_status_file="${RUNDIR}/presentation-mode-on"
+_status_file="${XDG_RUNTIME_DIR}/presentation-mode-on"
 _autostart="$HOME/.autostart.sh"
 
 is_on() {
