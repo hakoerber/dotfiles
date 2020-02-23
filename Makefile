@@ -15,8 +15,7 @@ clean:
 $(ansible): venv
 
 venv:
-	command -v virtualenv || sudo dnf install -y python3-virtualenv || sudo apt-get -y install virtualenv
-	virtualenv --no-site-packages --python=python2 $(venv)
+	python3 -m venv $(venv)
 	$(activate) && $(pip) install -r $(requirements)
 
 freeze:

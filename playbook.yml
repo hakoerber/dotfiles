@@ -18,8 +18,8 @@
       dnf:
         state: installed
         name:
-          - python2-libselinux
-          - policycoreutils-python
+          - python3-libselinux
+          - policycoreutils-python-utils
       become: true
       when: distro == 'fedora'
 
