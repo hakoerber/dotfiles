@@ -35,9 +35,12 @@
       - docker
   when: distro == 'fedora'
 
+- set_fact:
+    user_group_name: "{{ user.group|default(user.name) }}"
+
 - name: create user group
   group:
-    name: "{{ user.name }}"
+    name: "{{ user_group_name }}"
     state: present
   become: true
   become_user: root
@@ -45,7 +48,7 @@
 - name: set groups
   user:
     name: "{{ user.name }}"
-    groups: "{{ [user.name, 'dotfiles'] + user_groups }}"
+    groups: "{{ [user_group_name, 'dotfiles'] + user_groups }}"
   become: true
   become_user: root
 
@@ -110,7 +113,7 @@
     force: true
     follow: false
     owner: "{{ user.name }}"
-    group: "{{ user.name }}"
+    group: "{{ user_group_name }}"
     path: "/home/{{ user.name }}/.dotfiles"
     src: "{{ playbook_dir }}"
   tags:
@@ -147,7 +150,7 @@
     path: "/home/{{ user.name }}/{{ item.to }}"
     src: /var/lib/dotfiles/{{ item.from }}
     owner: "{{ user.name }}"
-    group: "{{ user.name }}"
+    group: "{{ user_group_name }}"
     mode: "{{ item.mode | default('0644') }}"
   when: not item.template|default(false)
   with_items: "{{ dotfiles }}"
@@ -182,7 +185,7 @@
     src: /home/{{ user.name }}/.dotfiles/{{ item.from }}.j2
     dest: "/home/{{ user.name }}/{{ item.to }}"
     owner: "{{ user.name }}"
-    group: "{{ user.name }}"
+    group: "{{ user_group_name }}"
     force: true
   become: true
   become_user: root
