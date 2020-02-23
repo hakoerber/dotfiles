@@ -132,6 +132,7 @@
         path: /var/lib/dotfiles
         owner: nobody
         group: dotfiles
+        mode: '0775' # group needs write access!
       become: true
       become_user: root
 
