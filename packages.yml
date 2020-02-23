@@ -86,7 +86,7 @@ packages:
       fedora: ["vim-enhanced"]
       ubuntu: ["vim"]
     neovim:
-      fedora: ["neovim", "python2-neovim"]
+      fedora: ["neovim", "python3-neovim"]
       ubuntu: ["neovim"]
     network-manager-applet:
       fedora: ["network-manager-applet"]
