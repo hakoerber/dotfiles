@@ -110,7 +110,7 @@
     force: true
     follow: false
     owner: "{{ user.name }}"
-    group: "{{ user.group }}"
+    group: "{{ user.name }}"
     path: "/home/{{ user.name }}/.dotfiles"
     src: "{{ playbook_dir }}"
   tags:
@@ -147,7 +147,7 @@
     path: "/home/{{ user.name }}/{{ item.to }}"
     src: /var/lib/dotfiles/{{ item.from }}
     owner: "{{ user.name }}"
-    group: "{{ user.group }}"
+    group: "{{ user.name }}"
     mode: "{{ item.mode | default('0644') }}"
   when: not item.template|default(false)
   with_items: "{{ dotfiles }}"
@@ -182,7 +182,7 @@
     src: /home/{{ user.name }}/.dotfiles/{{ item.from }}.j2
     dest: "/home/{{ user.name }}/{{ item.to }}"
     owner: "{{ user.name }}"
-    group: "{{ user.group }}"
+    group: "{{ user.name }}"
     force: true
   become: true
   become_user: root
