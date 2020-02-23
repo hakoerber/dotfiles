@@ -15,9 +15,6 @@ packages:
     golang:
       fedora: ["golang", "glibc-static"]
       ubuntu: ["golang-go"]
-    eclipse:
-      fedora: ["eclipse"]
-      ubuntu: ["eclipse"]
     make:
       fedora: ["make"]
       ubuntu: ["make"]
