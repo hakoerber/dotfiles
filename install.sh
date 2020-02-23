@@ -6,8 +6,13 @@
 # - python3-virtualenv (needed for ansible)
 
 set -o errexit
-set -o xtrace
 set -o nounset
+
+os_release_file=/etc/os-release
+if [[ ! -e "${os_release_file}" ]] ; then
+    2>&1 printf "Could not find ${os_release_file}, exiting"
+    exit 1
+fi
 
 source /etc/os-release
 
