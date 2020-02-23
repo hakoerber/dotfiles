@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+_max=${1:-6}
+for i in $(seq $_max) ; do
+    printf '%02X' $[RANDOM%256]
+    (( $i != $_max )) && printf ':'
+done
+printf '\n'

@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+
+import datetime
+import sys
+
+USAGE="""Usage: {program} PATH_TO_FILE""".format(program=sys.argv[0])
+
+def die(message, code=1):
+    print(message)
+    sys.exit(code)
+
+def die_usage(code=1):
+    die(USAGE, code)
+
+def read_date_from_file(path):
+    text = open(path).readline().strip()
+    try:
+        time = datetime.datetime.strptime(text, '%Y-%m-%d')
+    except ValueError as e:
+        die(e)
+    return time
+
+def main(argv):
+    if len(argv) < 2:
+        die_usage()
+    last = read_date_from_file(argv[1])
+    now = datetime.datetime.now()
+    diff = now - last
+    days = diff.days
+    #hours = diff.seconds // (60 * 60)
+    if days == 1:
+        msg = "1 day"
+    else:
+        msg = "{days} days".format(days=days)
+
+    #msg += " "
+    #if hours == 1:
+    #    msg += "1 hour "
+    #else:
+    #    msg += "{hours} hours ".format(hours=hours)
+
+    print(msg)
+
+main(sys.argv)
