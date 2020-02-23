@@ -149,3 +149,6 @@ fi
 if [[ "${MACHINE_HAS_RESTIC_BACKUP}" ]] ; then
     [[ -x ~/bin/restic-backup ]] && schedule restic-backup "Mon..Fri 12:00:00" ~/bin/restic-backup
 fi
+
+
+run firefox firefox -P default
