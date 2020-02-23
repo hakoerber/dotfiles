@@ -8,6 +8,8 @@ terminal_binary: urxvt256c
 users:
 - name: hannes
   vt: 1
+  firefox_profiles:
+    - name: lu9k8ywl.default
 
 screen:
   1: eDP-1
