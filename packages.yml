@@ -142,9 +142,6 @@ packages:
     ranger:
       fedora: ["ranger"]
       ubuntu: ["ranger"]
-    digikam:
-      fedora: ["digikam"]
-      ubuntu: ["digikam"]
     thunar:
       fedora: ["thunar"]
       ubuntu: ["thunar"]
