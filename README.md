@@ -4,11 +4,10 @@ My configuration files.
 
 # Installation
 
-
-This project uses [dotbot](https://github.com/anishathalye/dotbot), which makes setup really easy:
+To setup the dotfiles:
 
 1. `git clone git://github.com:whatevsz/dotfiles ~/dotfiles`
-2. `./install`
+2. `cd ~/dotfiles && make`
 
 # Required third party software
 

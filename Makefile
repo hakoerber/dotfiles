@@ -3,14 +3,10 @@ requirements = requirements.txt
 activate = . $(venv)/bin/activate
 pip = pip
 ansible = venv/bin/ansible-playbook
-dotbot = _dotbot/bin/dotbot
 
 .PHONY: all
 install: $(ansible)
 	$(activate) && ansible-playbook --inventory localhost, --diff --verbose ./playbook.yml
-
-$(dotbot):
-	git submodule update --init _dotbot
 
 .PHONY: clean
 clean:
