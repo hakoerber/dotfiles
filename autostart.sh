@@ -146,6 +146,6 @@ if [[ "${MACHINE_HAS_NEXTCLOUD}" ]] ; then
     run nextcloud nextcloud
 fi
 
-if [[ "${MACHINE_HAS_GDRIVE_BACKUP}" ]] ; then
-    [[ -x ~/bin/gdrive-backup ]] && schedule backup "Mon..Fri 12:00:00" ~/bin/gdrive-backup
+if [[ "${MACHINE_HAS_RESTIC_BACKUP}" ]] ; then
+    [[ -x ~/bin/restic-backup ]] && schedule restic-backup "Mon..Fri 12:00:00" ~/bin/restic-backup
 fi
