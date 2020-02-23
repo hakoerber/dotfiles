@@ -43,6 +43,9 @@ packages:
     ansible:
       fedora: ["ansible"]
       ubuntu: ["ansible"]
+    xdotool:
+      fedora: ["xdotool"]
+      ubuntu: ["xdotool"]
     arandr:
       fedora: ["arandr"]
       ubuntu: ["arandr"]
