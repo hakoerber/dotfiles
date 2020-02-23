@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+
+import sys
+
+hash = {
+    'A': 'Alpha',
+    'B': 'Bravo',
+    'C': 'Charlie',
+    'D': 'Delta',
+    'E': 'Echo',
+    'F': 'Foxtrot',
+    'G': 'Golf',
+    'H': 'Hotel',
+    'I': 'India',
+    'J': 'Juliett',
+    'K': 'Kilo',
+    'L': 'Lima',
+    'M': 'Mike',
+    'N': 'November',
+    'O': 'Oscar',
+    'P': 'Papa',
+    'Q': 'Quebec',
+    'R': 'Romeo',
+    'S': 'Sierra',
+    'T': 'Tango',
+    'U': 'Uniform',
+    'V': 'Victor',
+    'W': 'Whiskey',
+    'X': 'Xray',
+    'Y': 'Yankee',
+    'Z': 'Zulu',
+    '0': 'Zero',
+    '1': 'One',
+    '2': 'Two',
+    '3': 'Tree',
+    '4': 'Fower',
+    '5': 'Fife',
+    '6': 'Six',
+    '7': 'Seven',
+    '8': 'Eight',
+    '9': 'Niner',
+    '-': 'Dash',
+    '.': 'Stop',
+}
+
+if len(sys.argv) < 2 or sys.argv[1] == '-':
+    text = [line.strip() for line in sys.stdin.readlines()]
+else:
+    text = sys.argv[1:]
+
+for i in range(len(text)):
+    for char in text[i].upper():
+        if char in hash.keys():
+            print(hash[char])
+        elif char == ' ':
+            print()
+        else:
+            print(">> " + char)
+    if i != len(text) - 1:
+        print()
+        print("===")
+        print()

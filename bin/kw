@@ -1,0 +1,20 @@
+#!/usr/bin/env python3
+
+import datetime
+import sys
+
+formats = (
+    '%Y-%m-%d',
+    '%d.%m.%Y')
+
+for format in formats:
+    try:
+        day = datetime.datetime.strptime(sys.argv[1], format).date()
+    except ValueError:
+        continue
+    print(day.isocalendar()[1])
+    sys.exit(0)
+
+print("no format matched:")
+print("\n".join("  {}".format(f) for f in formats))
+sys.exit(1)

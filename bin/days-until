@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+
+formats = (
+    '%Y-%m-%d',
+    '%d.%m.%Y',
+    '%Y-%m',
+    '%d.%m')
+
+import datetime
+import sys
+
+for format in formats:
+    try:
+        day = datetime.datetime.strptime(sys.argv[1], format).date()
+    except ValueError:
+        continue
+    diff = (day - datetime.datetime.now().date()).days
+    print(str(diff) + " days")
+    print()
+    if abs(diff) > 14:
+        print("{} weeks and {} days".format(
+            diff // 7,
+            diff % 7))
+    if abs(diff) > 365:
+        print("{} years, {} weeks and {} days".format(
+            diff // 365,
+            (diff % 365) // 7,
+            (diff % 365 % 7)))
+    print()
+    for i in range(abs(diff) // 7):
+        print("X X X X X X X")
+        if (i+1) % 4 == 0:
+            print()
+    for _ in range(abs(diff) % 7):
+        print("X ", end="")
+    if abs(diff) % 7 != 0:
+        print()
+
+    sys.exit(0)
+
+print("No format matched:")
+print()
+sys.exit(1)

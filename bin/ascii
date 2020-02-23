@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+
+import sys
+import os.path
+
+SEP = '='*10
+
+decode = False
+tohex = False
+if os.path.basename(sys.argv[0]) == 'unascii':
+    decode = True
+if os.path.basename(sys.argv[0]) == 'asciihex':
+    tohex = True
+
+if len(sys.argv) < 2 or sys.argv[1] == '-':
+    text = sys.stdin.readlines()
+else:
+    text = sys.argv[1:]
+
+for i in range(len(text)):
+    if decode:
+        line = text[i]
+        if line.strip() == SEP:
+            pass
+        else:
+            print(chr(int(line)), end='')
+    else:
+        for char in text[i]:
+            if tohex:
+                print('0x' + format(ord(char), '02x'))
+            else:
+                print(ord(char))
+        if i != len(text) - 1:
+            print(SEP)

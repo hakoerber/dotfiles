@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+xdotool click --repeat 1000000000 --delay 20ms 1

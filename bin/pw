@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+pwgen -s 25 1
