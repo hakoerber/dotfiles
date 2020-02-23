@@ -4,6 +4,7 @@ cffi==1.12.3
 cryptography==2.7
 ipaddress==1.0.22
 Jinja2==2.10.1
+jmespath==0.9.4
 MarkupSafe==1.1.1
 pycparser==2.19
 PyYAML==5.1.1
