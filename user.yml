@@ -204,6 +204,20 @@
     - ~/.var/run
     - ~/.usr/lib
 
+- name: stat ~/bin
+  stat:
+    path: "/home/{{ user.name }}/bin"
+  register: bin_stat
+
+- name: remove ~/bin if not a link
+  file:
+    state: absent
+    path: "/home/{{ user.name }}/bin"
+  when:
+    - bin_stat.stat.exists
+    - not bin_stat.stat.islnk
+
+
 - name: link bin directory
   file:
     state: link
