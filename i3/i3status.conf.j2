@@ -22,7 +22,7 @@ general {
 order += volume_status
 order += spotify
 order += "wifi"
-order += presentation_mode
+order += "external_script presentation_mode"
 order += online_status
 order += "battery_level all"
 order += "clock"
@@ -61,9 +61,12 @@ spotify {
     on_click 2 = "exec $HOME/.i3/scripts/spotify-control next"
 }
 
-async_script presentation_mode {
-    format = "{output}"
-    script = "$HOME/.i3/scripts/presentation-mode status"
+external_script presentation_mode {
+    format = " Present: {output} "
+    script_path = "$HOME/.i3/scripts/presentation-mode status"
+    strip_output = True
+    on_click 1 = "exec $HOME/.i3/scripts/presentation-mode toggle"
+
 }
 
 online_status {
