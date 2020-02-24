@@ -1,1 +1,2 @@
+#!/usr/bin/env bash
 restic -r rclone:gdrive:restic --password-file=$HOME/restic_password backup --exclude-file=$HOME/restic_exclude.lst $HOME
