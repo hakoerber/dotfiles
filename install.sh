@@ -1,4 +1,4 @@
-#/usr/bin/env bash
+#!/usr/bin/env bash
 #
 # Wraps "make" and ensures basic packages are installed:
 #
