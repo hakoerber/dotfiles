@@ -1,4 +1,4 @@
-#/usr/bin/env bash
+#!/usr/bin/env bash
 #
 # Makes sure the dotfiles directory is in /var/lib/dotfiles and then calls
 # install.sh
