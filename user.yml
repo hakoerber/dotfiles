@@ -204,20 +204,16 @@
     - ~/.var/run
     - ~/.usr/lib
 
-- name: create bin directory
+- name: link bin directory
   file:
-    state: directory
-    path: ~/bin
-
-- name: copy bin directory
-  synchronize:
-    src: bin/
-    dest: ~/bin/
-    archive: true
-    checksum: true
-    copy_links: false
-    delete: true
-
+    state: link
+    force: true
+    follow: false
+    path: "/home/{{ user.name }}/bin"
+    src: /var/lib/dotfiles/bin
+    owner: "{{ user.name }}"
+    group: "{{ user_group_name }}"
+    mode: "{{ item.mode | default('0644') }}"
 
 - name: create intermediate directories for vim-plug
   file:
