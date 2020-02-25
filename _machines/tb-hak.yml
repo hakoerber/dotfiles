@@ -11,6 +11,7 @@ users:
   vt: 1
   firefox_profiles:
     - name: 3wmp9hdb.default-1565075150057
+      manage_css: true
 - name: hannes-private
   group: tpp
   vt: 2
