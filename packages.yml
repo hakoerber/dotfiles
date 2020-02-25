@@ -163,7 +163,7 @@ packages:
       fedora: ["xcompmgr"]
       ubuntu: ["xcompmgr"]
     python:
-      fedora: ["python"]
+      fedora: ["python", "python3-devel"]
       ubuntu: ["python3", "python3-pip", "python3-venv", "virtualenv", "pylint3"]
     xbacklight:
       fedora: ["xbacklight"]
