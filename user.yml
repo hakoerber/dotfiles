@@ -332,6 +332,6 @@
         width: 400px !important;
       }
   when: item.manage_css
-  with_items: "{{ user.firefox_profiles | default [] }}"
+  with_items: "{{ user.firefox_profiles | default([]) }}"
   tags:
     - firefox
