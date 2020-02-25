@@ -10,6 +10,7 @@ users:
   vt: 1
   firefox_profiles:
     - name: lu9k8ywl.default
+      manage_css: false
 
 screen:
   1: eDP-1

@@ -301,7 +301,7 @@
       #sidebar {
         width: 400px !important;
       }
-  with_items: "{{ user.firefox_profiles }}"
-  when: user.firefox_profiles is defined
+  when: item.manage_css
+  with_items: "{{ user.firefox_profiles | default [] }}"
   tags:
     - firefox
