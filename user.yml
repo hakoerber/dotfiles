@@ -208,6 +208,7 @@
   stat:
     path: "/home/{{ user.name }}/bin"
   register: bin_stat
+  tags: [bin]
 
 - name: remove ~/bin if not a link
   file:
@@ -216,7 +217,36 @@
   when:
     - bin_stat.stat.exists
     - not bin_stat.stat.islnk
+  tags: [bin]
 
+- name: create ~/.opt and ~/.optbin
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - ~/.opt/
+    - ~/.optbin/
+  tags: [bin]
+
+- name: symlink opt programs
+  file:
+    state: link
+    force: true
+    follow: false
+    path: "/home/{{ user.name }}/.optbin/{{ item.name }}"
+    src: "/home/{{ user.name }}/.opt/{{ item.optpath }}"
+    owner: "{{ user.name }}"
+    group: "{{ user_group_name }}"
+  with_items:
+    - name: terraform
+      optpath: terraform
+    - name: kubectl
+      optpath: kubectl
+    - name: hugo
+      optpath: hugo
+    - name: drone
+      optpath: drone
+  tags: [bin]
 
 - name: link bin directory
   file:
