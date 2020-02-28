@@ -142,7 +142,9 @@ if [[ "${MACHINE_HAS_KEEPASSX}" == "true" ]] ; then
     run keepassx keepassx --keyfile ~/.secret/main.key ~/.secret/main.kdbx
 fi
 
-run spotify spotify
+if [[ "${MACHINE_HAS_SPOTIFY}" == "true" ]] ; then
+    run spotify spotify
+fi
 
 if [[ "${MACHINE_HAS_NEXTCLOUD}" == "true" ]] ; then
     run nextcloud nextcloud

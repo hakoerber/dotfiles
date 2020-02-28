@@ -42,3 +42,4 @@ environment:
   MACHINE_HAS_KEEPASSX: "true"
   MACHINE_HAS_NEXTCLOUD: "false"
   MACHINE_HAS_RESTIC_BACKUP: "true"
+  MACHINE_HAS_SPOTIFY: "true"
