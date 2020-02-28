@@ -27,6 +27,11 @@ do_run() {
     return $(( ! $run ))
 }
 
+get_unit_name() {
+    name="$1" ; shift
+    printf '%s' "${name}"
+}
+
 run_raw() {
     name="$1"
     shift
@@ -35,7 +40,7 @@ run_raw() {
 
     systemd-run \
         --user \
-        --unit "${name}" \
+        --unit "$(get_unit_name "${name}")" \
         --no-block \
         --remain-after-exit \
         --setenv=DISPLAY=${DISPLAY} \
@@ -76,7 +81,7 @@ schedule() {
     do_run "$name" || return
     systemd-run \
         --user \
-        --unit "${name}" \
+        --unit "$(get_unit_name "${name}")" \
         --no-block \
         --setenv=DISPLAY=${DISPLAY} \
         --on-calendar="${spec}" \
