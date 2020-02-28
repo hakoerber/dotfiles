@@ -89,10 +89,6 @@ schedule() {
 }
 
 
-# redshift settings
-redshift_lat_long="49.5:11"
-redshift_colortemp="6000:4000"
-
 # wallpaper config
 wallpaper="$LIBDIR/wallpaper/current"
 
@@ -139,7 +135,8 @@ run nm-applet nm-applet
 
 run pasystray pasystray
 
-run redshift redshift-gtk -b 1 -l "$redshift_lat_long" -t "$redshift_colortemp"
+# redshift unit already exists
+run redshift_user redshift-gtk -c ~/.config/redshift.conf
 
 if [[ "${MACHINE_HAS_KEEPASSX}" == "true" ]] ; then
     run keepassx keepassx --keyfile ~/.secret/main.key ~/.secret/main.kdbx

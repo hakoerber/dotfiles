@@ -44,3 +44,5 @@ dotfiles:
     to: .zshrc.d
   - from: dunst/dunstrc
     to: .config/dunstrc
+  - from: redshift/redshift.conf
+    to: .config/redshift.conf
