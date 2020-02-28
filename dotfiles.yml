@@ -4,7 +4,7 @@ empty_directories:
     mode: '0700'
   - name: .config/nvim
 dotfiles:
-  - from: autostart.sh
+  - from: autostart/autostart.sh
     to: .autostart.sh
   - from: git/gitconfig
     to: .gitconfig
