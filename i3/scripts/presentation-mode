@@ -37,6 +37,13 @@ case "$1" in
         else
             switch_on
         fi
+        ;;
+    off)
+        switch_off
+        ;;
+    on)
+        switch_on
+        ;;
 esac
 
 
