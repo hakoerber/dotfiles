@@ -14,6 +14,37 @@
       tags:
         - always
 
+    - block:
+      - block:
+        - name: Update apt cache
+          apt:
+            upgrade: dist
+            update_cache: true
+            autoclean: true
+            autoremove: true
+          become: true
+
+        - name: Upgrade system
+          apt:
+            upgrade: dist
+          become: true
+
+        - name: Remove unused packages
+          apt:
+            autoremove: true
+          become: true
+
+        - name: Clean apt cache
+          apt:
+            autoclean: true
+          become: true
+        when: distro == 'ubuntu'
+      - block:
+        - fail:
+            msg: "NotImplementedError: Implement system upgrade for fedora"
+        when: distro == 'fedora'
+      tags: [update_system]
+
     - name: install selinux specials on fedora
       dnf:
         state: installed
