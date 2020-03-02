@@ -151,7 +151,7 @@ if [[ "${MACHINE_HAS_NEXTCLOUD}" == "true" ]] ; then
 fi
 
 if [[ "${MACHINE_HAS_RESTIC_BACKUP}" == "true" ]] ; then
-    [[ -x ~/bin/restic-backup ]] && schedule restic-backup "Mon..Fri 12:00:00" ~/bin/restic-backup
+    [[ -x ~/bin/restic-backup ]] && schedule restic-backup "Mon..Fri 12:00:00" --on-calendar "Mon..Fri 09:00:00" --on-calendar "Mon..Fri 16:00:00" ~/bin/restic-backup
 fi
 
 
