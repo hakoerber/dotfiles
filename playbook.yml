@@ -14,6 +14,10 @@
       tags:
         - always
 
+    - name: Check for valid distro
+      assert:
+        that: distro in ('fedora', 'ubuntu')
+
     - block:
       - block:
         - name: Update apt cache
