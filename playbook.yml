@@ -22,10 +22,7 @@
       - block:
         - name: Update apt cache
           apt:
-            upgrade: dist
             update_cache: true
-            autoclean: true
-            autoremove: true
           become: true
 
         - name: Upgrade system
