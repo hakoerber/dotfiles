@@ -25,6 +25,7 @@
       - docker
       - libvirt
   when: distro == 'ubuntu'
+  tags: [always]
 
 - set_fact:
     user_groups:
@@ -34,9 +35,11 @@
       - wireshark
       - docker
   when: distro == 'fedora'
+  tags: [always]
 
 - set_fact:
     user_group_name: "{{ user.group|default(user.name) }}"
+  tags: [always]
 
 - name: create user group
   group:
@@ -75,189 +78,166 @@
   become: true
   become_user: root
 
-- name: load dotfile list
-  include_vars:
-    file: dotfiles.yml
+- block:
+  - name: load dotfile list
+    include_vars:
+      file: dotfiles.yml
+
+  - name: get state of empty directories
+    stat:
+      path: ~/{{ item.name }}
+    register: empty_dir_stat
+    with_items: "{{ empty_directories }}"
+
+  - name: remove sysmlinks
+    file:
+      path: "{{ item.stat.path }}"
+      state: absent
+    when: item.stat.exists and item.stat.islnk
+    with_items: "{{ empty_dir_stat.results }}"
+
+  - name: create empty directories for dotfiles
+    file:
+      state: directory
+      path: ~/{{ item.name }}
+      mode: "{{ item.mode | default('0755') }}"
+    with_items: "{{ empty_directories }}"
+
+  - name: link this folder to ~/.dotfiles
+    file:
+      state: link
+      force: true
+      follow: false
+      owner: "{{ user.name }}"
+      group: "{{ user_group_name }}"
+      path: "/home/{{ user.name }}/.dotfiles"
+      src: "{{ playbook_dir }}"
+    become: true
+    become_user: root
+
+  - name: get state of copy targets
+    stat:
+      path: ~/{{ item.to }}
+    register: copy_stat
+    when: not item.template|default(false)
+    with_items: "{{ dotfiles }}"
+
+  - name: remove invalid copy target (directories)
+    file:
+      path: "{{ item.stat.path }}"
+      state: absent
+    when:
+      - not item.skipped is defined or not item.skipped
+      - item.stat.exists
+      - item.stat.isdir
+    with_items: "{{ copy_stat.results }}"
+
+  - name: link dotfiles
+    file:
+      state: link
+      force: true
+      follow: false
+      path: "/home/{{ user.name }}/{{ item.to }}"
+      src: /var/lib/dotfiles/{{ item.from }}
+      owner: "{{ user.name }}"
+      group: "{{ user_group_name }}"
+      mode: "{{ item.mode | default('0644') }}"
+    when: not item.template|default(false)
+    with_items: "{{ dotfiles }}"
+    become: true
+    become_user: root
+
+  - name: get state of template targets
+    stat:
+      path: ~/{{ item.to }}
+    register: template_stat
+    when: item.template|default(false)
+    with_items: "{{ dotfiles }}"
+
+  - name: remove invalid template target (directory or symlink)
+    file:
+      path: "{{ item.stat.path }}"
+      state: absent
+    when:
+      - not item.skipped is defined or not item.skipped
+      - item.stat.exists
+      - not item.stat.isreg
+    with_items: "{{ template_stat.results }}"
+
+  - name: deploy dotfiles templates
+    template:
+      src: /home/{{ user.name }}/.dotfiles/{{ item.from }}.j2
+      dest: "/home/{{ user.name }}/{{ item.to }}"
+      owner: "{{ user.name }}"
+      group: "{{ user_group_name }}"
+      force: true
+    become: true
+    become_user: root
+    when: item.template|default(false)
+    with_items: "{{ dotfiles }}"
+
+  - name: create directories
+    file:
+      state: directory
+      path: "{{ item }}"
+    with_items:
+      - ~/.var/lib
+      - ~/.var/log
+      - ~/.var/run
+      - ~/.usr/lib
+
+  - name: stat ~/bin
+    stat:
+      path: "/home/{{ user.name }}/bin"
+    register: bin_stat
+
+  - name: remove ~/bin if not a link
+    file:
+      state: absent
+      path: "/home/{{ user.name }}/bin"
+    when:
+      - bin_stat.stat.exists
+      - not bin_stat.stat.islnk
+
+  - name: create ~/.opt and ~/.optbin
+    file:
+      path: "{{ item }}"
+      state: directory
+    with_items:
+      - ~/.opt/
+      - ~/.optbin/
+
+  - name: symlink opt programs
+    file:
+      state: link
+      force: true
+      follow: false
+      path: "/home/{{ user.name }}/.optbin/{{ item.name }}"
+      src: "/home/{{ user.name }}/.opt/{{ item.optpath }}"
+      owner: "{{ user.name }}"
+      group: "{{ user_group_name }}"
+    with_items:
+      - name: terraform
+        optpath: terraform
+      - name: kubectl
+        optpath: kubectl
+      - name: hugo
+        optpath: hugo
+      - name: drone
+        optpath: drone
+
+  - name: link bin directory
+    file:
+      state: link
+      force: true
+      follow: false
+      path: "/home/{{ user.name }}/bin"
+      src: /var/lib/dotfiles/bin
+      owner: "{{ user.name }}"
+      group: "{{ user_group_name }}"
+      mode: "{{ item.mode | default('0644') }}"
   tags:
     - dotfiles
-
-- name: get state of empty directories
-  stat:
-    path: ~/{{ item.name }}
-  register: empty_dir_stat
-  with_items: "{{ empty_directories }}"
-  tags:
-    - dotfiles
-
-- name: remove sysmlinks
-  file:
-    path: "{{ item.stat.path }}"
-    state: absent
-  when: item.stat.exists and item.stat.islnk
-  with_items: "{{ empty_dir_stat.results }}"
-  tags:
-    - dotfiles
-
-- name: create empty directories for dotfiles
-  file:
-    state: directory
-    path: ~/{{ item.name }}
-    mode: "{{ item.mode | default('0755') }}"
-  with_items: "{{ empty_directories }}"
-  tags:
-    - dotfiles
-
-- name: link this folder to ~/.dotfiles
-  file:
-    state: link
-    force: true
-    follow: false
-    owner: "{{ user.name }}"
-    group: "{{ user_group_name }}"
-    path: "/home/{{ user.name }}/.dotfiles"
-    src: "{{ playbook_dir }}"
-  tags:
-    - dotfiles
-  become: true
-  become_user: root
-
-- name: get state of copy targets
-  stat:
-    path: ~/{{ item.to }}
-  register: copy_stat
-  when: not item.template|default(false)
-  with_items: "{{ dotfiles }}"
-  tags:
-    - dotfiles
-
-- name: remove invalid copy target (directories)
-  file:
-    path: "{{ item.stat.path }}"
-    state: absent
-  when:
-    - not item.skipped is defined or not item.skipped
-    - item.stat.exists
-    - item.stat.isdir
-  with_items: "{{ copy_stat.results }}"
-  tags:
-    - dotfiles
-
-- name: link dotfiles
-  file:
-    state: link
-    force: true
-    follow: false
-    path: "/home/{{ user.name }}/{{ item.to }}"
-    src: /var/lib/dotfiles/{{ item.from }}
-    owner: "{{ user.name }}"
-    group: "{{ user_group_name }}"
-    mode: "{{ item.mode | default('0644') }}"
-  when: not item.template|default(false)
-  with_items: "{{ dotfiles }}"
-  become: true
-  become_user: root
-  tags:
-    - dotfiles
-
-- name: get state of template targets
-  stat:
-    path: ~/{{ item.to }}
-  register: template_stat
-  when: item.template|default(false)
-  with_items: "{{ dotfiles }}"
-  tags:
-    - dotfiles
-
-- name: remove invalid template target (directory or symlink)
-  file:
-    path: "{{ item.stat.path }}"
-    state: absent
-  when:
-    - not item.skipped is defined or not item.skipped
-    - item.stat.exists
-    - not item.stat.isreg
-  with_items: "{{ template_stat.results }}"
-  tags:
-    - dotfiles
-
-- name: deploy dotfiles templates
-  template:
-    src: /home/{{ user.name }}/.dotfiles/{{ item.from }}.j2
-    dest: "/home/{{ user.name }}/{{ item.to }}"
-    owner: "{{ user.name }}"
-    group: "{{ user_group_name }}"
-    force: true
-  become: true
-  become_user: root
-  when: item.template|default(false)
-  with_items: "{{ dotfiles }}"
-  tags:
-    - dotfiles
-
-- name: create directories
-  file:
-    state: directory
-    path: "{{ item }}"
-  with_items:
-    - ~/.var/lib
-    - ~/.var/log
-    - ~/.var/run
-    - ~/.usr/lib
-
-- name: stat ~/bin
-  stat:
-    path: "/home/{{ user.name }}/bin"
-  register: bin_stat
-  tags: [bin]
-
-- name: remove ~/bin if not a link
-  file:
-    state: absent
-    path: "/home/{{ user.name }}/bin"
-  when:
-    - bin_stat.stat.exists
-    - not bin_stat.stat.islnk
-  tags: [bin]
-
-- name: create ~/.opt and ~/.optbin
-  file:
-    path: "{{ item }}"
-    state: directory
-  with_items:
-    - ~/.opt/
-    - ~/.optbin/
-  tags: [bin]
-
-- name: symlink opt programs
-  file:
-    state: link
-    force: true
-    follow: false
-    path: "/home/{{ user.name }}/.optbin/{{ item.name }}"
-    src: "/home/{{ user.name }}/.opt/{{ item.optpath }}"
-    owner: "{{ user.name }}"
-    group: "{{ user_group_name }}"
-  with_items:
-    - name: terraform
-      optpath: terraform
-    - name: kubectl
-      optpath: kubectl
-    - name: hugo
-      optpath: hugo
-    - name: drone
-      optpath: drone
-  tags: [bin]
-
-- name: link bin directory
-  file:
-    state: link
-    force: true
-    follow: false
-    path: "/home/{{ user.name }}/bin"
-    src: /var/lib/dotfiles/bin
-    owner: "{{ user.name }}"
-    group: "{{ user_group_name }}"
-    mode: "{{ item.mode | default('0644') }}"
 
 - name: create intermediate directories for vim-plug
   file:
@@ -272,66 +252,60 @@
     - ~/.vim/
     - ~/.vim/autoload
 
-- name: install vim-plug
-  get_url:
-    dest: ~/.vim/autoload/plug.vim
-    url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  tags:
-    - vim
+- block:
+  - name: install vim-plug
+    get_url:
+      dest: ~/.vim/autoload/plug.vim
+      url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
-- name: symlink vim-plug for neovim
-  file:
-    state: link
-    path: ~/.local/share/nvim/site/autoload/plug.vim
-    src: ~/.vim/autoload/plug.vim
-    force: true
-  tags:
-    - vim
+  - name: symlink vim-plug for neovim
+    file:
+      state: link
+      path: ~/.local/share/nvim/site/autoload/plug.vim
+      src: ~/.vim/autoload/plug.vim
+      force: true
 
-- name: install vim plugins
-  command: /usr/bin/nvim -f -E -s -c "source ~/.vimrc" +PlugInstall +qall
-  register: vim_plugins_stdout
-  changed_when: vim_plugins_stdout.stdout_lines|length != 0
-  tags:
-    - vim
+  - name: install vim plugins
+    command: /usr/bin/nvim -f -E -s -c "source ~/.vimrc" +PlugInstall +qall
+    register: vim_plugins_stdout
+    changed_when: vim_plugins_stdout.stdout_lines|length != 0
 
-- name: compile youcompleteme
-  shell: |
-    cd ~/.local/share/nvim/plugged/YouCompleteMe/
-    python3 ./install.py # --go-completer
-  args:
-    creates: ~/.local/share/nvim/plugged/YouCompleteMe/third_party/ycmd/ycm_core.so
-  when: vim_plugins_stdout.stdout_lines|length != 0 or true
-  tags:
-    - vim
+  - name: compile youcompleteme
+    shell: |
+      cd ~/.local/share/nvim/plugged/YouCompleteMe/
+      python3 ./install.py # --go-completer
+    args:
+      creates: ~/.local/share/nvim/plugged/YouCompleteMe/third_party/ycmd/ycm_core.so
+    when: vim_plugins_stdout.stdout_lines|length != 0 or true
 
-- name: firefox - create chrome directory
-  file:
-    path: ~/.mozilla/firefox/{{ item.name }}/chrome/
-    state: directory
-    mode: '0755'
-  with_items: "{{ user.firefox_profiles }}"
-  when: user.firefox_profiles is defined
-  tags:
-    - firefox
+- block:
+  - name: firefox - create chrome directory
+    file:
+      path: ~/.mozilla/firefox/{{ item.name }}/chrome/
+      state: directory
+      mode: '0755'
+    with_items: "{{ user.firefox_profiles }}"
+    when: user.firefox_profiles is defined
+    tags:
+      - firefox
 
-- name: firefox - configure firefox custom css
-  copy:
-    dest: ~/.mozilla/firefox/{{ item.name }}/chrome/userChrome.css
-    content: |
-      #TabsToolbar {
-        visibility: collapse !important;
-      }
-      #titlebar {
-        visibility: collapse !important;
-      }
-      #sidebar-header {
-        visibility: collapse !important;
-      }
-      #sidebar {
-        width: 400px !important;
-      }
-  when: item.manage_css
-  with_items: "{{ user.firefox_profiles | default([]) }}"
-  tags:
-    - firefox
+  - name: firefox - configure firefox custom css
+    copy:
+      dest: ~/.mozilla/firefox/{{ item.name }}/chrome/userChrome.css
+      content: |
+        #TabsToolbar {
+          visibility: collapse !important;
+        }
+        #titlebar {
+          visibility: collapse !important;
+        }
+        #sidebar-header {
+          visibility: collapse !important;
+        }
+        #sidebar {
+          width: 400px !important;
+        }
+    when: item.manage_css
+    with_items: "{{ user.firefox_profiles | default([]) }}"
+    tags:
+      - firefox

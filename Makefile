@@ -3,10 +3,23 @@ requirements = requirements.txt
 activate = . $(venv)/bin/activate
 pip = pip
 ansible = venv/bin/ansible-playbook
+ansible_run = $(activate) && ansible-playbook --inventory localhost, --diff --verbose ./playbook.yml
 
 .PHONY: all
 install: $(ansible)
-	$(activate) && ansible-playbook --inventory localhost, --diff --verbose ./playbook.yml
+	$(ansible_run)
+
+.PHONY: update
+update: $(ansible)
+	$(ansible_run) --tags update_system
+
+.PHONY: packages
+packages: $(ansible)
+	$(ansible_run) --tags packages
+
+.PHONY: dotfiles
+dotfiles: $(ansible)
+	$(ansible_run) --tags dotfiles
 
 .PHONY: clean
 clean:

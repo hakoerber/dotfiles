@@ -58,34 +58,36 @@
       become: true
       when: distro == 'fedora'
 
-    - name: load package list
-      include_vars:
-        file: packages.yml
+    - block:
+      - name: load package list
+        include_vars:
+          file: packages.yml
 
-    - name: enable neovim ppa
-      apt_repository:
-        repo: 'ppa:neovim-ppa/stable'
-        update_cache: true
-      become: true
-      when: distro == 'ubuntu'
+      - name: enable neovim ppa
+        apt_repository:
+          repo: 'ppa:neovim-ppa/stable'
+          update_cache: true
+        become: true
+        when: distro == 'ubuntu'
 
-    - set_fact:
-        defined_packages: "{{ packages|json_query('keys(list)') }}"
+      - set_fact:
+          defined_packages: "{{ packages|json_query('keys(list)') }}"
 
-    - set_fact:
-        distro_packages: "{{ packages|json_query('list.*.%s'|format(distro)) }}"
+      - set_fact:
+          distro_packages: "{{ packages|json_query('list.*.%s'|format(distro)) }}"
 
-    - name: check list
-      assert:
-        that: "defined_packages|length == distro_packages|length"
+      - name: check list
+        assert:
+          that: "defined_packages|length == distro_packages|length"
 
-    - name: install packages
-      package:
-        name: "{{ packages|json_query(query) }}"
-        state: installed
-      become: true
-      vars:
-        query: "{{ 'list.*.%s[]'|format(distro) }}"
+      - name: install packages
+        package:
+          name: "{{ packages|json_query(query) }}"
+          state: installed
+        become: true
+        vars:
+          query: "{{ 'list.*.%s[]'|format(distro) }}"
+      tags: [packages]
 
     - set_fact:
         disable_services:
@@ -184,3 +186,5 @@
       with_items: "{{ users }}"
       loop_control:
         loop_var: user
+      tags:
+        - always
