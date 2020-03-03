@@ -6,7 +6,7 @@ ansible = venv/bin/ansible-playbook
 ansible_run = $(activate) && ansible-playbook --inventory localhost, --diff --verbose ./playbook.yml
 
 .PHONY: all
-install: $(ansible)
+all: $(ansible)
 	$(ansible_run)
 
 .PHONY: update
