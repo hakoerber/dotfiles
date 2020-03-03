@@ -40,9 +40,23 @@
             autoclean: true
           become: true
         when: distro == 'ubuntu'
+
       - block:
-        - fail:
-            msg: "NotImplementedError: Implement system upgrade for fedora"
+        - name: Update dnf cache
+          dnf:
+            update_cache: true
+          become: true
+
+        - name: Upgrade system
+          dnf:
+            name: '*'
+            state: latest
+          become: true
+
+        - name: Remove unused packages
+          dnf:
+            autoremove: true
+          become: true
         when: distro == 'fedora'
       tags: [update_system]
 
