@@ -70,7 +70,6 @@ alias yaml2json="python -c 'import sys, yaml, json; json.dump(yaml.load(sys.stdi
 alias json2yaml="python -c 'import sys, yaml, json; yaml.safe_dump(json.loads(sys.stdin.read()), stream=sys.stdout)'"
 
 alias currentbranch='git rev-parse --abbrev-ref HEAD'
-alias gpush='git push origin $(currentbranch)'
 
 alias pass=mypass
 
