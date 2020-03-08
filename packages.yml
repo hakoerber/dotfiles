@@ -226,7 +226,7 @@ packages:
       fedora: ["pwgen"]
       ubuntu: ["pwgen"]
     gpg:
-      fedora: ["gnupg2"]
+      fedora: ["gnupg2", "paperkey", "yubikey-manager"]
       ubuntu: ["gnupg2"]
     networkmanager:
       fedora: ["NetworkManager", "NetworkManager-wifi"]
