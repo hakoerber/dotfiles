@@ -51,11 +51,13 @@
           dnf:
             name: '*'
             state: latest
+            update_cache: false
           become: true
 
         - name: Remove unused packages
           dnf:
             autoremove: true
+            update_cache: false
           become: true
         when: distro == 'fedora'
       tags: [update_system]
