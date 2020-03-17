@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -o nounset
+
+cmd="${@}"
+name="${1}"
+
+${cmd[@]}
+
+exit_code="$?"
+
+notify-send "Command \"${name}\" finished" "Exit code: ${exit_code}\nFull command: ${cmd}"
