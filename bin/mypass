@@ -69,8 +69,25 @@ def cmd_get(*args):
         print(keydata)
 
 cmds = ['get']
+git_push_commands = ['insert', 'edit', 'generate', 'rm', 'mv', 'cp']
 
-if len(sys.argv) == 1 or sys.argv[1] not in cmds:
-    sys.exit(run([PASS] + sys.argv[1:]))
+def run_pass(argv):
+    return run([PASS] + argv[1:])
+
+def just_call_pass(argv):
+    sys.exit(run_pass(argv))
+
+if len(sys.argv) == 1:
+    just_call_pass(sys.argv)
+elif sys.argv[1] not in cmds:
+    if sys.argv[1] not in git_push_commands:
+        just_call_pass(sys.argv)
+    else:
+        e = run_pass(sys.argv)
+        if e == 0:
+            print("Pushing to remote repository...")
+            run([PASS, 'git', 'push'])
+            print("Done")
+        sys.exit(e)
 else:
     sys.exit(globals()['cmd_' + sys.argv[1]](*sys.argv[2:]))
