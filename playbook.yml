@@ -24,6 +24,7 @@
           apt:
             update_cache: true
           become: true
+          changed_when: false
 
         - name: Upgrade system
           apt:
