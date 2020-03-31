@@ -309,3 +309,6 @@ packages:
     rofi:
       fedora: []
       ubuntu: ["rofi"]
+    anki:
+      fedora: ["anki"]
+      ubuntu: ["anki"]
