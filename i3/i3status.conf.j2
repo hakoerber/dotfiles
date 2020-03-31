@@ -19,7 +19,8 @@ general {
 }
 
 
-order += volume_status
+order += "volume_status output"
+order += "volume_status input"
 order += spotify
 order += "wifi"
 order += "external_script presentation_mode"
@@ -73,11 +74,21 @@ online_status {
     format = " {icon} "
 }
 
-volume_status {
+volume_status output {
     cache_timeout = 10
     format = "      {percentage}% "
     format_muted = "      mute "
     thresholds = []
     command = "pactl"
     color_muted = '#FFFFFF'
+}
+
+volume_status input {
+    cache_timeout = 10
+    format = "      active "
+    format_muted = "      mute "
+    thresholds = [(0, 'good'), (1, 'bad')]
+    command = "pactl"
+    color_muted = '#FFFFFF'
+    is_input = True
 }
