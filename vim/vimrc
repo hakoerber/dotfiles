@@ -314,5 +314,9 @@ au FileType html setl shiftwidth=2
 
 " Use // in visual mode to search for selection
 " https://vim.fandom.com/wiki/Search_for_visually_selected_text
-
 vnoremap // y/\V<C-R>=escape(@",'/\')<CR><CR>
+
+if v:version >= 700
+  au BufLeave * let b:winview = winsaveview()
+  au BufEnter * if(exists('b:winview')) | call winrestview(b:winview) | endif
+endif
