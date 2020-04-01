@@ -258,9 +258,12 @@
 
 - block:
   - name: install vim-plug
-    get_url:
+    copy:
+      src: contrib/vim-plug/plug.vim
       dest: ~/.vim/autoload/plug.vim
-      url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+      owner: "{{ user.name }}"
+      group: "{{ user_group_name }}"
+      mode: "0644"
 
   - name: symlink vim-plug for neovim
     file:
