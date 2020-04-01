@@ -9,6 +9,10 @@ ansible_run = $(activate) && ansible-playbook --inventory localhost, --diff --ve
 all: $(ansible)
 	$(ansible_run)
 
+.PHONY: dryrun
+dryrun: $(ansible)
+	$(ansible_run) --check
+
 .PHONY: update
 update: $(ansible)
 	$(ansible_run) --tags update_system
