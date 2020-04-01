@@ -1,9 +1,10 @@
 [user]
     name = Hannes Körber
     email = {{ machine.mail }}
-    {% if machine.git_gpg_sign|bool %}
+    useConfigOnly = true
+{% if machine.git_gpg_sign|bool %}
     signingkey = 0xB5C002530C6A2053
-    {% endif %}
+{% endif %}
 [github]
     user = hakoerber
 [alias]
