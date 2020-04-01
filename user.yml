@@ -88,6 +88,7 @@
       path: ~/{{ item.name }}
     register: empty_dir_stat
     with_items: "{{ empty_directories }}"
+    check_mode: false
 
   - name: remove sysmlinks
     file:
@@ -121,6 +122,7 @@
     register: copy_stat
     when: not item.template|default(false)
     with_items: "{{ dotfiles }}"
+    check_mode: false
 
   - name: remove invalid copy target (directories)
     file:
@@ -153,6 +155,7 @@
     register: template_stat
     when: item.template|default(false)
     with_items: "{{ dotfiles }}"
+    check_mode: false
 
   - name: remove invalid template target (directory or symlink)
     file:
@@ -190,6 +193,7 @@
     stat:
       path: "/home/{{ user.name }}/bin"
     register: bin_stat
+    check_mode: false
 
   - name: remove ~/bin if not a link
     file:
@@ -268,6 +272,7 @@
   - name: install vim plugins
     command: /usr/bin/nvim -f -E -s -c "source ~/.vimrc" +PlugInstall +qall
     register: vim_plugins_stdout
+    check_mode: false
     changed_when: vim_plugins_stdout.stdout_lines|length != 0
 
   - name: compile youcompleteme
