@@ -348,7 +348,7 @@ bar {
 
 #tray_output HDMI3
     tray_output primary
-    tray_padding 3
+    tray_padding 2
 
     strip_workspace_numbers no
 
@@ -361,15 +361,19 @@ bar {
     font pango:Inconsolata, FontAwesome {{ machine.font_size }}
 
     colors {
-        background #222222
+        background #272822
         statusline #ffffff
-        separator #e16b40
+        separator #444444
+        # separator #e16b40
 
-        focused_workspace  #e16b40 #222222 #ffffff
-        active_workspace   #222222 #5f676a #ffffff
-        inactive_workspace #222222 #222222 #dddddd
-        urgent_workspace   #D00000 #D00000 #222222
-        binding_mode       #222222 #e16b40 #222222
+        # focused_background #303030
+        # focused_separator #272822
+
+        focused_workspace  #e16b40 #272822 #ffffff
+        active_workspace   #272822 #5f676a #ffffff
+        inactive_workspace #272822 #272822 #dddddd
+        urgent_workspace   #D00000 #D00000 #272822
+        binding_mode       #272822 #e16b40 #272822
     }
 
     i3bar_command i3bar
