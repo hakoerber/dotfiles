@@ -143,7 +143,6 @@
       src: /var/lib/dotfiles/{{ item.from }}
       owner: "{{ user.name }}"
       group: "{{ user_group_name }}"
-      mode: "{{ item.mode | default('0644') }}"
     when: not item.template|default(false)
     with_items: "{{ dotfiles }}"
     become: true
@@ -239,7 +238,6 @@
       src: /var/lib/dotfiles/bin
       owner: "{{ user.name }}"
       group: "{{ user_group_name }}"
-      mode: "{{ item.mode | default('0644') }}"
   tags:
     - dotfiles
 
