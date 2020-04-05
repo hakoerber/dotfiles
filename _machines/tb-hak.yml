@@ -15,7 +15,7 @@ users:
 - name: hannes-private
   group: tpp
   vt: 2
-  mail: hannes.koerber@haktec.de
+  mail: hannes@hkoerber.de
   git_gpg_sign: true
   gpg_agent: true
   gpg_keys:
