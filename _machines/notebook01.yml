@@ -1,8 +1,5 @@
 font_size: 10
 letter_space: 0
-mail: hannes.koerber@haktec.de
-git_gpg_sign: true
-gpg_agent: true
 terminal_binary: urxvt256c
 
 users:
@@ -11,6 +8,9 @@ users:
   firefox_profiles:
     - name: lu9k8ywl.default
       manage_css: false
+  mail: hannes.koerber@haktec.de
+  git_gpg_sign: true
+  gpg_agent: true
 
 screen:
   1: eDP-1

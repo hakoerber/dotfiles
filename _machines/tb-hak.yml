@@ -1,8 +1,5 @@
 font_size: 11
 letter_space: 0
-mail: hannes.koerber@tradebyte.com
-git_gpg_sign: false
-gpg_agent: false
 terminal_binary: urxvt
 
 users:
@@ -12,9 +9,17 @@ users:
   firefox_profiles:
     - name: 3wmp9hdb.default-1565075150057
       manage_css: true
+  mail: hannes.koerber@tradebyte.com
+  git_gpg_sign: false
+  gpg_agent: false
 - name: hannes-private
   group: tpp
   vt: 2
+  mail: hannes.koerber@haktec.de
+  git_gpg_sign: true
+  gpg_agent: true
+  gpg_keys:
+    master_key: "0xB5C002530C6A2053"
 
 screen:
   1: DP-1-1

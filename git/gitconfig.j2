@@ -1,9 +1,9 @@
 [user]
     name = Hannes Körber
-    email = {{ machine.mail }}
+    email = {{ user.mail }}
     useConfigOnly = true
-{% if machine.git_gpg_sign|bool %}
-    signingkey = 0xB5C002530C6A2053
+{% if user.git_gpg_sign|bool %}
+    signingkey = {{ user.gpg_keys.master_key }}
 {% endif %}
 [github]
     user = hakoerber
@@ -86,7 +86,7 @@
     commitBeforeMerge = false
     detachedHead = false
 [commit]
-    gpgSign = {{ machine.git_gpg_sign|bool }}
+    gpgSign = {{ user.git_gpg_sign|bool }}
     cleanup = strip
     status = true
 [status]

@@ -2,7 +2,7 @@
 
 _zshdir="$HOME/.zshrc.d"
 
-{% if machine.gpg_agent %}
+{% if user.gpg_agent %}
 export GPG_TTY=$(tty)
 export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
 {% endif %}
