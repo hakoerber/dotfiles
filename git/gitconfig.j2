@@ -40,7 +40,7 @@
 
     logl = log --graph --decorate --pretty=oneline --abbrev-commit --all
 
-    pushall = "!sh -c 'for r in $(git remote) ; do [[ "$r" != "upstream" ]] && { echo \"--- [$r] ---\" ; git push $r \"$@\" ; } ; done' -"
+    pushall = "!bash -c 'for r in $(git remote) ; do [[ "$r" != "upstream" ]] && { echo \"--- [$r] ---\" ; git push $r \"$@\" ; } ; done' -"
 
     branch-clean = "!sh -c 'git branch --merged | grep -v -e master -e develop -e '^*' | xargs --no-run-if-empty git branch -d'"
     brc = "!git branch-clean"
