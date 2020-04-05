@@ -15,6 +15,7 @@ dotfiles:
     to: .gnupg/gpg-agent.conf
   - from: gnupg/gpg.conf
     to: .gnupg/gpg.conf
+    template: true
   - from: i3/config
     to: .i3/config
     template: true
