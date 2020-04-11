@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+# From:
+# https://security.stackexchange.com/questions/181551/create-backup-yubikey-with-identical-pgp-keys
+
+gpg-connect-agent "scd serialno" "learn --force" /bye
