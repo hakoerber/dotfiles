@@ -121,6 +121,8 @@ run_oneshot pulseaudio start-pulseaudio-x11 --start --daemonize=false --fail=tru
 
 run gpg-agent gpg-agent --homedir "$HOME/.gnupg" --no-detach --daemon
 
+run gnome-keyring gnome-keyring-daemon --components secrets --foreground
+
 # a service called dunst already exists and conflicts
 run dunst_user dunst -config ~/.config/dunstrc
 
