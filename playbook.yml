@@ -1,4 +1,5 @@
-- hosts: localhost
+- name: configure system
+  hosts: localhost
   connection: local
   become: false
   tasks:
