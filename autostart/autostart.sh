@@ -149,7 +149,7 @@ if [[ "${MACHINE_HAS_SPOTIFY}" == "true" ]] ; then
 fi
 
 if [[ "${MACHINE_HAS_NEXTCLOUD}" == "true" ]] ; then
-    run nextcloud nextcloud
+    run nextcloud nextcloud --background
 fi
 
 if [[ "${MACHINE_HAS_RESTIC_BACKUP}" == "true" ]] ; then
