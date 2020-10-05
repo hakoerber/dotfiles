@@ -47,7 +47,8 @@ export ACPI_LID_NAME=LID
 
 umask 0022
 
-{% for k, v in machine.environment.items() %}
+{% set env = machine.environment | combine(user.environment) %}
+{% for k, v in env.items() %}
 export {{ k }}="{{ v }}"
 {% endfor %}
 

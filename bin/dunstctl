@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+set -o nounset
+
+_logfile="$LOGDIR/dunstctl.log"
+
+log() {
+    printf '[%s] %s\n' "$(date -uIseconds)" "$*" >> "$_logfile"
+}
+
+case "$1" in
+    enable)
+        log "Enabling dunst"
+        systemctl --user --no-block kill --signal SIGUSR2 dunst_user
+
+        ;;
+    disable)
+        log "Disabling dunst"
+        systemctl --user --no-block kill --signal SIGUSR1 dunst_user
+        ;;
+    *)
+        >&2 printf 'Unknown command\n'
+        exit 1
+esac
+

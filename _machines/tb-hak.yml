@@ -12,6 +12,8 @@ users:
   mail: hannes.koerber@tradebyte.com
   git_gpg_sign: false
   gpg_agent: false
+  environment:
+    MACHINE_HAS_NEXTCLOUD: "false"
 - name: hannes-private
   group: tpp
   vt: 2
@@ -20,6 +22,8 @@ users:
   gpg_agent: true
   gpg_keys:
     master_key: "0xB5C002530C6A2053"
+  environment:
+    MACHINE_HAS_NEXTCLOUD: "true"
 
 screen:
   1: DP-1-1
@@ -45,6 +49,5 @@ workspace:
 
 environment:
   MACHINE_HAS_KEEPASSX: "true"
-  MACHINE_HAS_NEXTCLOUD: "false"
   MACHINE_HAS_RESTIC_BACKUP: "true"
   MACHINE_HAS_SPOTIFY: "true"

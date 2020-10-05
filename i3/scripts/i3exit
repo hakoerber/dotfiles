@@ -47,11 +47,11 @@ reset_screen() {
 lock_and_screen_off() {
     lock &
     _pid=$!
-    systemctl --user --no-block kill --signal SIGUSR1 dunst_user
+    dunstctl disable
     screen_off
     xset dpms 0 0 5
     wait $_pid
-    systemctl --user --no-block kill --signal SIGUSR2 dunst_user
+    dunstctl enable
     reset_screen
 }
 

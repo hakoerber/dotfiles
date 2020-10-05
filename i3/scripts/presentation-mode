@@ -9,14 +9,14 @@ is_on() {
 
 switch_on() {
     touch "${_status_file}"
-    systemctl --user --no-block kill --signal SIGUSR1 dunst_user
+    dunstctl disable &
     systemctl --user --no-block stop redshift_user
     systemctl --user --no-block stop spotify
 }
 
 switch_off() {
     rm -f "${_status_file}"
-    systemctl --user --no-block kill --signal SIGUSR2 dunst_user
+    dunstctl enable &
     "$_autostart" redshift_user spotify
 }
 
