@@ -17,6 +17,17 @@ dryrun: $(ansible)
 update: $(ansible)
 	$(ansible_run) --tags update_system
 
+.PHONY: reboot
+reboot:
+	sudo reboot
+
+.PHONY: poweroff
+poweroff:
+	sudo poweroff
+
+.PHONY: weekend
+weekend: | update poweroff
+
 .PHONY: packages
 packages: $(ansible)
 	$(ansible_run) --tags packages
