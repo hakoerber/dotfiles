@@ -134,6 +134,16 @@
       - item.stat.isdir
     with_items: "{{ copy_stat.results }}"
 
+  - name: make sure target directories exist
+    file:
+      state: directory
+      path: "{{ (['/home', user.name, item.to]|join('/')) | dirname }}"
+      owner: "{{ user.name }}"
+      group: "{{ user_group_name }}"
+    with_items: "{{ dotfiles }}"
+    become: true
+    become_user: root
+
   - name: link dotfiles
     file:
       state: link
