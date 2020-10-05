@@ -206,3 +206,7 @@ prefix() {
 tmp() {
     cd "$(mktemp -d)"
 }
+
+kubectl_pod() {
+    kubectl get pods --field-selector=status.phase=Running --selector=${1} -o jsonpath='{.items[*].metadata.name}'
+}
