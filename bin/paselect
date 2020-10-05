@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+# Sinks
+
+sinks=$(pactl list short sinks | awk '{print $2}')
+chosen_sink=$(echo -e "$sinks" | rofi -dmenu -selected-row 0)
+if [ "$chosen_sink" != "" ]; then
+    pactl set-default-sink "$chosen_sink"
+fi
+
+
+# Sources
+
+sources=$(pactl list short sources | grep -h 'alsa_input' | awk '{print $2}')
+chosen_source=$(echo -e "$sources" | rofi -dmenu -selected-row 0)
+if [ "$chosen_source" != "" ]; then
+    pactl set-default-source "$chosen_source"
+fi
+
+
+# If nothing new has been selected -> exit gracefully now
+if [ "$chosen_sink" == "" ] && [ "$chosen_source" == "" ]; then
+    exit 0;
+fi
+
+
+# Move all streams?
+
+chosen=$(echo -e "Send all streams to new defaults?\nYes\nNo" | rofi -dmenu -selected-row 1)
+if [ "$chosen" == "Yes" ]; then
+    if [ "$chosen_sink" != "" ]; then
+        pactl list short sink-inputs|while read stream; do
+            streamId=$(echo $stream|cut '-d ' -f1)
+            echo "moving stream $streamId to $chosen_sink"
+            pactl move-sink-input "$streamId" "$chosen_sink"
+        done
+    fi
+
+    if [ "$chosen_source" != "" ]; then
+        pactl list short source-outputs|while read stream; do
+            streamId=$(echo $stream|cut '-d ' -f1)
+            echo "moving stream $streamId to $chosen_source"
+            pactl move-source-output "$streamId" "$chosen_source"
+        done
+    fi
+fi
+
+exit 0
+
