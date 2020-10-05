@@ -95,6 +95,16 @@
         assert:
           that: "defined_packages|length == distro_packages|length"
 
+      - set_fact:
+          defined_packages_remove: "{{ packages|json_query('keys(remove)') }}"
+
+      - set_fact:
+          distro_packages_remove: "{{ packages|json_query('remove.*.%s'|format(distro)) }}"
+
+      - name: check list
+        assert:
+          that: "defined_packages_remove|length == distro_packages_remove|length"
+
       - name: install packages
         package:
           name: "{{ packages|json_query(query) }}"
@@ -102,6 +112,14 @@
         become: true
         vars:
           query: "{{ 'list.*.%s[]'|format(distro) }}"
+
+      - name: remove packages
+        package:
+          name: "{{ packages|json_query(query) }}"
+          state: absent
+        become: true
+        vars:
+          query: "{{ 'remove.*.%s[]'|format(distro) }}"
       tags: [packages]
 
     - set_fact:
