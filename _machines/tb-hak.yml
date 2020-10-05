@@ -18,7 +18,7 @@ users:
   group: tpp
   vt: 2
   mail: hannes@hkoerber.de
-  git_gpg_sign: true
+  git_gpg_sign: false
   gpg_agent: true
   gpg_keys:
     master_key: "0xB5C002530C6A2053"
