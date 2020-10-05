@@ -383,3 +383,43 @@
 
   tags:
     - portfolio-performance
+
+- block:
+  - name: set kubectl version
+    set_fact:
+      kubectl_version: v1.19.0
+
+  - name: get current stable version
+    uri:
+      url: https://storage.googleapis.com/kubernetes-release/release/stable.txt
+      return_content: true
+    register: kubectl_stable_version_api
+
+  - set_fact:
+      kubectl_stable_version: "{{ kubectl_stable_version_api.content|trim }}"
+
+  - set_fact:
+      kubectl_outdated: "{{ kubectl_version != kubectl_stable_version }}"
+
+  - name: warn if not on stable version
+    debug:
+      msg: "installing kubectl {{ kubectl_version }}, stable version would be {{ kubectl_stable_version }}"
+    changed_when: kubectl_outdated is sameas true
+    when: kubectl_outdated is sameas true
+
+  - name: get kubectl
+    get_url:
+      url: https://storage.googleapis.com/kubernetes-release/release/{{ kubectl_version }}/bin/linux/amd64/kubectl
+      dest: /home/{{ user.name }}/.opt/kubectl-{{ kubectl_version }}
+      owner: "{{ user.name }}"
+      group: "{{ user_group_name }}"
+      mode: '0755'
+
+  - name: link kubectl
+    file:
+      src: /home/{{ user.name }}/.opt/kubectl-{{ kubectl_version }}
+      dest: /home/{{ user.name }}/.optbin/kubectl
+      state: link
+
+  tags:
+    - kubectl
