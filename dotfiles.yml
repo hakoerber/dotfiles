@@ -47,3 +47,7 @@ dotfiles:
     to: .config/dunstrc
   - from: redshift/redshift.conf
     to: .config/redshift.conf
+  - from: vscode/settings.json
+    to: .config/Code/User/settings.json
+  - from: vscode/keybindings.json
+    to: .config/Code/User/keybindings.json
