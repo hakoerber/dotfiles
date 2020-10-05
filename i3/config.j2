@@ -212,6 +212,7 @@ assign [class="^Spotify$"] $workspace9
 
     bindsym $mod+$pim_toggle \
         unmark pim_toggle; \
+        mark origin; \
         workspace $workspace10; \
         mark --add pim_toggle; \
         workspace $workspace1; \
@@ -220,7 +221,9 @@ assign [class="^Spotify$"] $workspace9
         move container to workspace $workspace1; \
         workspace $workspace1; \
         [con_mark="^pim_toggle$"] focus; \
-        unmark pim_toggle;
+        unmark pim_toggle; \
+        [con_mark="^origin$"] focus; \
+        unmark origin;
 
 ################################################################################
 ### MODES ######################################################################
