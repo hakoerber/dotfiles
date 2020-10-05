@@ -81,9 +81,9 @@ packages:
     i3lock:
       fedora: ["i3lock"]
       ubuntu: ["i3lock"]
-    mousepad:
-      fedora: ["mousepad"]
-      ubuntu: ["mousepad"]
+    pluma:
+      fedora: ["pluma"]
+      ubuntu: ["pluma"]
     vim:
       fedora: ["vim-enhanced"]
       ubuntu: ["vim"]
@@ -285,9 +285,6 @@ packages:
     expect:
       fedora: []
       ubuntu: ["expect"]
-    pluma:
-      fedora: []
-      ubuntu: ["pluma"]
     inotify:
       fedora: []
       ubuntu: ["inotify-tools"]
@@ -312,3 +309,7 @@ packages:
     anki:
       fedora: ["anki"]
       ubuntu: ["anki"]
+  remove:
+    mousepad:
+      fedora: ["mousepad"]
+      ubuntu: ["mousepad"]
