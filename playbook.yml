@@ -148,6 +148,14 @@
         become: true
         vars:
           query: "{{ 'remove.*.%s[]'|format(distro) }}"
+
+      - name: install machine-specific packages
+        package:
+          name: "{{ machine.packages }}"
+          state: present
+        when: machine.packages is defined
+        become: true
+
       tags: [packages]
 
     - block:
