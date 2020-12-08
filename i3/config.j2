@@ -212,19 +212,15 @@ assign [class="^Google-chrome$"] $workspace7
     bindsym $mod+$scratchpad scratchpad show
 
     bindsym $mod+$pim_toggle \
-        unmark pim_toggle; \
-        mark origin; \
+        unmark _destination; \
+        mark _source; \
         workspace $workspace10; \
-        mark --add pim_toggle; \
-        workspace $workspace1; \
-        move container to workspace $workspace10; \
-        [con_mark="^pim_toggle$"] focus; \
-        move container to workspace $workspace1; \
-        workspace $workspace1; \
-        [con_mark="^pim_toggle$"] focus; \
-        unmark pim_toggle; \
-        [con_mark="^origin$"] focus; \
-        unmark origin;
+        mark --add _destination; \
+        [con_mark="^_destination$"] swap container with mark "_source"; \
+        [con_mark="^_source$"] focus; \
+        unmark _source; \
+        [con_mark="^_destination$"] focus; \
+        unmark _destination;
 
 ################################################################################
 ### MODES ######################################################################
@@ -264,13 +260,14 @@ assign [class="^Google-chrome$"] $workspace7
     hide_edge_borders smart
 
     focus_follows_mouse yes
+    mouse_warping output
 
     # Only map a popup in fullscreen mode if it belongs to the fullscreen window
     # <smart|ignore|leave_fullscreen>
     popup_during_fullscreen leave_fullscreen
 
     # Do not always wrap but change to a container on the same level instead
-    force_focus_wrapping no
+    force_focus_wrapping yes
 
     force_xinerama no
 
@@ -280,6 +277,8 @@ assign [class="^Google-chrome$"] $workspace7
     # Draw a window as urgent when switching to its workspace, even if focused, for
     # 500 ms
     force_display_urgency_hint 500 ms
+
+    show_marks yes
 
     # Use Mouse+$mod to drag floating windows to their wanted position
     floating_modifier $mod
