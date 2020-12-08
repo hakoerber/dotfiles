@@ -394,6 +394,7 @@
       url: https://storage.googleapis.com/kubernetes-release/release/stable.txt
       return_content: true
     register: kubectl_stable_version_api
+    check_mode: false
 
   - set_fact:
       kubectl_stable_version: "{{ kubectl_stable_version_api.content|trim }}"
