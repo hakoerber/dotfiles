@@ -36,6 +36,13 @@ if ! command -v make >/dev/null ; then
     printf 'Done\n'
 fi
 
+# Required for compiling modules in venv.
+if ! command -v gcc >/dev/null ; then
+    printf 'gcc not installed, installing ...\n'
+    _install "gcc"
+    printf 'Done\n'
+fi
+
 if ! python3 -c 'import venv' 2>/dev/null ; then
     printf 'Python3 venv module not installed, installing ...\n'
     _install python3-venv
