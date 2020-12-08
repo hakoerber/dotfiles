@@ -3,7 +3,7 @@ requirements = requirements.txt
 activate = . $(venv)/bin/activate
 pip = pip
 ansible = venv/bin/ansible-playbook
-ansible_run = $(activate) && env ANSIBLE_STDOUT_CALLBACK=actionable ansible-playbook --inventory localhost, --diff --verbose ./playbook.yml
+ansible_run = $(activate) && ansible-playbook --inventory localhost, --diff --verbose ./playbook.yml
 
 .PHONY: all
 all: $(ansible)
