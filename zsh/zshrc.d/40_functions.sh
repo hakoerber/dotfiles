@@ -208,5 +208,9 @@ tmp() {
 }
 
 kubectl_pod() {
-    kubectl get pods --field-selector=status.phase=Running --selector=${1} -o jsonpath='{.items[*].metadata.name}'
+    kubectl get -n "${1}" pods --field-selector=status.phase=Running --selector=${2} -o jsonpath='{.items[*].metadata.name}'
+}
+
+kubectl_deployment() {
+    kubectl get -n "${1}" deployment --selector=${2} -o jsonpath='{.items[*].metadata.name}'
 }
