@@ -2,6 +2,8 @@ font_size: 10
 letter_space: 0
 terminal_binary: urxvt
 
+gpu: amd
+
 users:
 - name: hannes
   vt: 1

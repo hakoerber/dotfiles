@@ -14,24 +14,32 @@ packages:
       ubuntu:
         - build-essential
         - exuberant-ctags
+      archlinux:
+        - gcc
     golang:
       fedora: ["golang", "glibc-static"]
       ubuntu: ["golang-go"]
+      archlinux: ["go"]
     make:
       fedora: ["make"]
       ubuntu: ["make"]
+      archlinux: ["make"]
     gdb:
       fedora: ["gdb"]
       ubuntu: ["gdb"]
+      archlinux: ["gdb"]
     strace:
       fedora: ["strace"]
       ubuntu: ["strace"]
+      archlinux: ["strace"]
     sudo:
       fedora: ["sudo"]
       ubuntu: ["sudo"]
+      archlinux: ["sudo"]
     apt:
       fedora: []
       ubuntu: ["apt-file"]
+      archlinux: []
     xorg:
       fedora:
         - '@base-x'
@@ -39,277 +47,396 @@ packages:
         - xorg-x11-drv-libinput
         - libinput
       ubuntu: []
+      archlinux:
+        - xorg-server
+        - xorg-xrandr
+        - xorg-xkill
+        - xorg-setxkbmap
+        - xorg-xev
+        - xorg-xprop
+        - xorg-xset
     dmenu:
       fedora: ["dmenu"]
       ubuntu: ["dmenu"]
+      archlinux: ["dmenu"]
     ansible:
       fedora: ["ansible"]
       ubuntu: ["ansible"]
+      archlinux: ["ansible"]
     xdotool:
       fedora: ["xdotool"]
       ubuntu: ["xdotool"]
+      archlinux: ["xdotool"]
     arandr:
       fedora: ["arandr"]
       ubuntu: ["arandr"]
+      archlinux: ["arandr"]
     borgbackup:
       fedora: ["borgbackup"]
       ubuntu: ["borgbackup"]
+      archlinux: ["borgbackup"]
     docker:
       fedora: ["docker"]
       ubuntu: ["docker.io"]
+      archlinux: ["docker", "docker-compose"]
     font-awesome:
       fedora: ["fontawesome-fonts", "fontawesome-fonts-web"]
       ubuntu: ["fonts-font-awesome"]
+      archlinux: ["ttf-font-awesome"]
     font-inconsolata:
       fedora: ["levien-inconsolata-fonts"]
       ubuntu: ["fonts-inconsolata"]
-    taskwarrior:
-      fedora: ["task", "tasksh"]
-      ubuntu: ["taskwarrior"]
+      archlinux: ["ttf-inconsolata"]
+    font-dejavu:
+      fedora: []
+      ubuntu: []
+      archlinux: ["ttf-dejavu"]
+    font-libertine:
+      fedora: []
+      ubuntu: []
+      archlinux: ["ttf-linux-libertine"]
     git:
       fedora: ["git", "gitk"]
       ubuntu: ["git", "git-extras", "gitk", "git-email"]
+      archlinux: ["git"]
     htop:
       fedora: ["htop"]
       ubuntu: ["htop"]
+      archlinux: ["htop"]
     feh:
       fedora: ["feh"]
       ubuntu: ["feh"]
+      archlinux: ["feh"]
     i3:
       fedora: ["i3"]
       ubuntu: ["i3"]
+      archlinux: ["i3"]
     i3lock:
       fedora: ["i3lock"]
       ubuntu: ["i3lock"]
+      archlinux: ["i3lock"]
     pluma:
       fedora: ["pluma"]
       ubuntu: ["pluma"]
+      archlinux: ["pluma"]
     vim:
       fedora: ["vim-enhanced"]
       ubuntu: ["vim"]
+      archlinux: ["gvim"]
     neovim:
       fedora: ["neovim", "python3-neovim"]
       ubuntu: ["neovim"]
+      archlinux: ["neovim"]
     network-manager-applet:
       fedora: ["network-manager-applet"]
       ubuntu: []
+      archlinux: ["network-manager-applet"]
     pasystray:
       fedora: ["pasystray"]
       ubuntu: ["pasystray"]
+      archlinux: ["pasystray"]
     redshift:
       fedora: ["redshift-gtk"]
       ubuntu: ["redshift-gtk"]
+      archlinux: ["redshift"]
     pavucontrol:
       fedora: ["pavucontrol"]
       ubuntu: ["pavucontrol"]
+      archlinux: ["pavucontrol-qt"]
     pinentry-qt:
       fedora: ["pinentry", "pinentry-curses", "pinentry-qt"]
       ubuntu: ["pinentry-curses", "pinentry-qt"]
+      archlinux: ["pinentry"]
     pinta:
       fedora: ["pinta"]
       ubuntu: ["pinta"]
+      archlinux: ["pinta"]
     py3status:
       fedora: ["py3status", "python3-pytz", "python3-tzlocal"]
       ubuntu: ["py3status", "python3-arrow", "python3-tzlocal"]
+      archlinux: ["py3status"]
     pass:
       fedora: ["pass"]
       ubuntu: ["pass"]
+      archlinux: ["pass"]
     keepassx:
       fedora: ["keepassx"]
       ubuntu: ["keepassx"]
+      archlinux: []
     urxvt:
       fedora: ["rxvt-unicode-256color"]
       ubuntu: ["rxvt-unicode-256color"]
+      archlinux: ["rxvt-unicode"]
     tmux:
       fedora: ["tmux"]
       ubuntu: ["tmux"]
+      archlinux: ["tmux"]
     screen:
       fedora: ["screen"]
       ubuntu: ["screen"]
+      archlinux: ["screen"]
     zsh:
       fedora: ["zsh", "zsh-syntax-highlighting"]
       ubuntu: ["zsh", "zsh-syntax-highlighting"]
+      archlinux: ["zsh", "zsh-syntax-highlighting", "zsh-autosuggestions", "zsh-completions"]
     zathura:
       fedora: ["zathura-pdf-mupdf"]
       ubuntu: ["zathura", "zathura-pdf-poppler"]
+      archlinux: ["zathura", "zathura-pdf-mupdf"]
     pandoc:
       fedora: ["pandoc"]
       ubuntu: ["pandoc"]
+      archlinux: ["pandoc"]
     libvirt:
       fedora: ["virt-manager", "libvirt-client"]
       ubuntu: ["virt-manager", "libvirt-bin"]
+      archlinux: ["virt-manager", "libvirt"]
     firefox:
       fedora: ["firefox"]
       ubuntu: ["firefox"]
+      archlinux: ["firefox"]
     ranger:
       fedora: ["ranger"]
       ubuntu: ["ranger"]
+      archlinux: ["ranger"]
     thunar:
       fedora: ["thunar"]
       ubuntu: ["thunar"]
+      archlinux: ["thunar"]
     unclutter:
       fedora: ["unclutter"]
       ubuntu: ["unclutter"]
+      archlinux: ["unclutter"]
     chromium:
       fedora: ["chromium"]
       ubuntu: ["chromium-browser"]
+      archlinux: ["chromium"]
     libreoffice:
       fedora: ["libreoffice", "libreoffice-langpack-de", "libreoffice-langpack-en"]
       ubuntu: ["libreoffice"]
+      archlinux: ["libreoffice-fresh", "libreoffice-fresh-de"]
     oxygen:
       fedora: ["breeze-cursor-theme", "breeze-icon-theme", "breeze-gtk"]
       ubuntu: ["breeze-cursor-theme", "breeze-icon-theme", "breeze", "gtk3-engines-breeze"]
+      archlinux: ["breeze", "breeze-icons", "breeze-gtk", "breeze-grub"]
     xcompmgr:
       fedora: ["xcompmgr"]
       ubuntu: ["xcompmgr"]
+      archlinux: ["xcompmgr"]
     python:
       fedora: ["python", "python3-devel"]
       ubuntu: ["python3", "python3-pip", "python3-venv", "virtualenv", "pylint3"]
+      archlinux: ["python3"]
     xbacklight:
       fedora: ["xbacklight"]
       ubuntu: ["xbacklight"]
+      archlinux: ["xorg-xbacklight"]
     wireshark:
       fedora: ["wireshark"]
       ubuntu: ["wireshark", "wireshark-qt"]
+      archlinux: ["wireshark-cli", "wireshark-qt"]
     dia:
       fedora: ["dia"]
       ubuntu: ["dia"]
+      archlinux: ["dia"]
     shutter:
       fedora: ["shutter"]
       ubuntu: ["shutter"]
+      archlinux: []
     nmap:
       fedora: ["nmap"]
       ubuntu: ["nmap"]
+      archlinux: ["nmap"]
     openvpn:
       fedora: ["openvpn"]
       ubuntu: ["openvpn"]
+      archlinux: ["openvpn"]
     curl:
       fedora: ["curl"]
       ubuntu: ["curl"]
+      archlinux: ["curl"]
     wget:
       fedora: ["wget"]
       ubuntu: ["wget"]
+      archlinux: ["wget"]
     tree:
       fedora: ["tree"]
       ubuntu: ["tree"]
+      archlinux: ["tree"]
     which:
       fedora: ["which"]
       ubuntu: []
+      archlinux: ["which"]
     zip:
       fedora: ["zip"]
       ubuntu: ["zip", "unzip"]
+      archlinux: ["zip", "unzip"]
     traceroute:
       fedora: ["traceroute"]
       ubuntu: ["traceroute"]
+      archlinux: ["traceroute"]
     tcpdump:
       fedora: ["tcpdump"]
       ubuntu: ["tcpdump"]
+      archlinux: ["tcpdump"]
     tar:
       fedora: ["tar"]
       ubuntu: ["tar"]
+      archlinux: ["tar"]
     rsync:
       fedora: ["rsync"]
       ubuntu: ["rsync"]
+      archlinux: ["rsync"]
     net-tools:
       fedora: ["net-tools"]
       ubuntu: ["net-tools"]
+      archlinux: ["net-tools"]
     ntfs:
       fedora: ["ntfs-3g", "ntfsprogs"]
       ubuntu: ["ntfs-3g"]
+      archlinux: ["ntfs-3g"]
     lsof:
       fedora: ["lsof"]
       ubuntu: ["lsof"]
+      archlinux: ["lsof"]
     iptables:
       fedora: ["iptables"]
       ubuntu: ["iptables"]
+      archlinux: ["iptables"]
     pwgen:
       fedora: ["pwgen"]
       ubuntu: ["pwgen"]
+      archlinux: ["pwgen"]
     gpg:
       fedora: ["gnupg2", "paperkey", "yubikey-manager"]
       ubuntu: ["gnupg2"]
+      archlinux: ["gnupg", "paperkey", "yubikey-manager"]
     networkmanager:
       fedora: ["NetworkManager", "NetworkManager-wifi"]
       ubuntu: ["network-manager", "network-manager-openvpn", "network-manager-openconnect"]
+      archlinux: ["networkmanager"]
     pulseaudio:
       fedora: ["pulseaudio", "pulseaudio-utils"]
       ubuntu: ["pulseaudio", "pulseaudio-utils"]
+      archlinux: ["pulseaudio", "pulseaudio-alsa"]
     iw:
       fedora: ["iw"]
       ubuntu: ["iw"]
+      archlinux: ["iw"]
     cowsay:
       fedora: ["cowsay"]
       ubuntu: ["cowsay"]
+      archlinux: ["cowsay"]
     ruby:
       fedora: ["ruby", "ruby-devel", "rubygem-bundler"]
       ubuntu: ["ruby", "ruby-dev", "ruby-bundler"]
+      archlinux: ["ruby"]
     lxc:
       fedora: ["lxc"]
       ubuntu: ["lxc"]
+      archlinux: ["lxc"]
     acpi:
       fedora: ["acpi"]
       ubuntu: ["acpid"]
+      archlinux: ["acpi", "acpid"]
     npm:
       fedora: ["npm"]
       ubuntu: ["npm"]
+      archlinux: ["npm"]
     xdg:
       fedora: ["xdg-utils"]
       ubuntu: ["xdg-utils"]
+      archlinux: ["xdg-utils"]
     docs:
       fedora: ["man-pages"]
       ubuntu: ["manpages"]
+      archlinux: ["man-pages"]
     compton:
       fedora: ["compton"]
       ubuntu: ["compton"]
+      archlinux: []
     dunst:
       fedora: ["dunst"]
       ubuntu: ["dunst"]
+      archlinux: ["dunst"]
     cloc:
       fedora: ["cloc"]
       ubuntu: ["cloc"]
+      archlinux: ["cloc"]
     bluetooth:
       fedora: []
       ubuntu: ["blueman"]
+      archlinux: ["bluez", "bluez-tools", "blueman"]
     autorandr:
       fedora: []
       ubuntu: ["autorandr"]
+      archlinux: ["autorandr"]
     bwm-ng:
       fedora: []
       ubuntu: ["bwm-ng"]
+      archlinux: ["bwm-ng"]
     virtualbox:
       fedora: []
       ubuntu: ["virtualbox"]
+      archlinux: ["virtualbox", "virtualbox-host-modules-arch"]
+    ssh:
+      fedora: []
+      ubuntu: []
+      archlinux: ["openssh"]
     sshfs:
       fedora: []
       ubuntu: ["sshfs"]
+      archlinux: ["sshfs"]
     expect:
       fedora: []
       ubuntu: ["expect"]
+      archlinux: ["expect"]
     inotify:
       fedora: []
       ubuntu: ["inotify-tools"]
+      archlinux: ["inotify-tools"]
     rclone:
       fedora: ["rclone"]
       ubuntu: ["rclone"]
+      archlinux: ["rclone"]
     dnf:
       fedora: ["python3-dnf"]
       ubuntu: []
+      archlinux: []
     rust:
       fedora: []
       ubuntu: ["rustc", "cargo"]
+      archlinux: ["rust", "rustup", "cargo"]
     musescore:
       fedora: []
       ubuntu: ["musescore"]
+      archlinux: ["musescore"]
     sipcalc:
       fedora: []
       ubuntu: ["sipcalc"]
+      archlinux: ["sipcalc"]
     rofi:
       fedora: []
       ubuntu: ["rofi"]
+      archlinux: ["rofi"]
     anki:
       fedora: ["anki"]
       ubuntu: ["anki"]
+      archlinux: ["anki"]
+    imv:
+      fedora: []
+      ubuntu: []
+      archlinux: ["imv"]
+    pacman:
+      fedora: []
+      ubuntu: []
+      archlinux: ["pacman", "pacman-contrib"]
+    steam:
+      fedora: []
+      ubuntu: []
+      archlinux: ["steam"]
   remove:
     mousepad:
       fedora: ["mousepad"]
       ubuntu: ["mousepad"]
+      archlinux: ["mousepad"]

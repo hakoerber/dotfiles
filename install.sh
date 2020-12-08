@@ -24,6 +24,8 @@ _install() {
         sudo dnf install --assumeyes "${_package}"
     elif [[ $NAME == "Ubuntu" ]] ; then
         sudo apt-get install --assume-yes "${_package}"
+    elif [[ $NAME == "Arch Linux" ]] ; then
+        sudo pacman -S --noconfirm "${_package}"
     else
         2>&1 printf "Unsupported distro $NAME, exiting"
         exit 1

@@ -17,7 +17,7 @@
 
     - name: Check for valid distro
       assert:
-        that: distro in ('fedora', 'ubuntu')
+        that: distro in ('fedora', 'ubuntu', 'archlinux')
 
     - block:
       - block:
@@ -62,6 +62,34 @@
             update_cache: false
           become: true
         when: distro == 'fedora'
+
+      - block:
+        - name: enable multilib repository
+          blockinfile:
+            path: /etc/pacman.conf
+            block: |
+              [multilib]
+              Include = /etc/pacman.d/mirrorlist
+          become: true
+
+        - name: Upgrade system
+          pacman:
+            upgrade: true
+            update_cache: true
+          become: true
+          changed_when: false
+
+        - name: install pacman-contrib for paccache
+          package:
+            name: pacman-contrib
+            state: installed
+          become: true
+
+        - name: Clean cache
+          command: paccache -rk2 -ruk0
+          become: true
+
+        when: distro == 'archlinux'
       tags: [update_system]
 
     - name: install selinux specials on fedora
@@ -122,6 +150,18 @@
           query: "{{ 'remove.*.%s[]'|format(distro) }}"
       tags: [packages]
 
+    - block:
+      - name: configure timesyncd on arch
+        copy:
+          owner: root
+          group: root
+          mode: "0644"
+          dest: /etc/systemd/timesyncd.conf
+          content: |
+            [Time]
+            NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org 2.arch.pool.ntp.org 3.arch.pool.ntp.org
+            FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org
+
     - set_fact:
         disable_services:
           - sshd
@@ -130,7 +170,12 @@
     - set_fact:
         disable_services:
           - ssh
-      when: distro != 'fedora'
+      when: distro == 'ubuntu'
+
+    - set_fact:
+        disable_services:
+          - sshd
+      when: distro == 'archlinux'
 
     - name: disable services
       service:
@@ -139,28 +184,41 @@
         name: "{{ item }}"
       with_items: "{{ disable_services }}"
       become: true
+      when: manage_services|bool|default(true)
+
+    - set_fact:
+        enable_services:
+          - NetworkManager
+          # does not work with fedora 31 due to the switch to cgroups v2:
+          # https://github.com/docker/cli/issues/2104
+          # https://bugzilla.redhat.com/show_bug.cgi?id=1746355#c1
+          # - docker
+          - libvirtd
+      when: distro == 'fedora'
+
+    - set_fact:
+        enable_services:
+          - NetworkManager
+          - docker
+          - libvirtd
+      when: distro == 'ubuntu'
+
+    - set_fact:
+        enable_services:
+          - NetworkManager
+          - docker
+          - libvirtd
+          - systemd-timesyncd
+      when: distro == 'archlinux'
 
     - name: enable services
       service:
         state: started
         enabled: true
         name: "{{ item }}"
-      with_items:
-        - NetworkManager
-        # - docker
-        - libvirtd
+      with_items: "{{ enable_services }}"
       become: true
-
-    - name: enable docker on ubuntu
-      # does not work with fedora 31 due to the switch to cgroups v2:
-      # https://github.com/docker/cli/issues/2104
-      # https://bugzilla.redhat.com/show_bug.cgi?id=1746355#c1
-      service:
-        state: started
-        enabled: true
-        name: docker
-      when: distro != 'fedora'
-      become: true
+      when: manage_services|bool|default(true)
 
     - name: get systemd boot target
       command: systemctl get-default
@@ -189,6 +247,59 @@
         regexp: '^HandlePowerKey='
         line: 'HandlePowerKey=suspend'
       become: true
+
+    - block:
+      - name: create sudonopw group
+        group:
+          name: sudonopw
+          system: true
+
+      - name: configure passwordless sudo
+        copy:
+          owner: root
+          group: root
+          mode: "0600"
+          dest: /etc/sudoers.d/sudonopw
+          content: |
+            %sudonopw ALL=(ALL) NOPASSWD: ALL
+        become: true
+
+      when: distro == 'archlinux'
+
+    - block:
+      - name: install AMDGPU packages
+        package:
+          name:
+            - mesa
+            - lib32-mesa
+            - xf86-video-amdgpu
+            - vulkan-radeon
+            - lib32-vulkan-radeon
+            - libva-mesa-driver
+            - lib32-libva-mesa-driver
+            - mesa-vdpau
+            - lib32-mesa-vdpau
+          state: installed
+        become: true
+
+      - name: set AMDGPU options
+        copy:
+          owner: root
+          group: root
+          mode: "0600"
+          dest: /etc/X11/xorg.conf.d/20-amdgpu.conf
+          content: |
+            Section "Device"
+                Identifier "AMD"
+                Driver "amdgpu"
+                Option "VariableRefresh" "true"
+                Option "TearFree" "true"
+            EndSection
+
+      when:
+        - distro == 'archlinux'
+        - machine.gpu is defined and machine.gpu == 'amd'
+
 
     - name: create dotfiles group
       group:

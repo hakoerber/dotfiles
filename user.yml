@@ -38,6 +38,17 @@
   tags: [always]
 
 - set_fact:
+    user_groups:
+      - libvirt
+      - wheel
+      - vboxusers
+      - wireshark
+      - docker
+      - sudonopw
+  when: distro == 'archlinux'
+  tags: [always]
+
+- set_fact:
     user_group_name: "{{ user.group|default(user.name) }}"
   tags: [always]
 
