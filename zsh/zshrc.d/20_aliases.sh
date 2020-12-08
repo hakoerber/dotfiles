@@ -289,10 +289,15 @@ clip() {
 
 gb() {
     _superproject="$(git rev-parse --show-superproject-working-tree)"
+    _root="$(git rev-parse --show-toplevel)"
     if [[ -n "${_superproject}" ]] ; then
-        builtin cd "${_superproject}"
+        if [[ "$(pwd)" == "${_root}" ]] ; then
+            builtin cd "${_superproject}"
+        else
+            builtin cd "${_root}"
+        fi
     else
-        builtin cd "$(git rev-parse --show-toplevel)"
+        builtin cd "${_root}"
     fi
 }
 
