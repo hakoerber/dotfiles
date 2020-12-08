@@ -42,7 +42,7 @@ workspace:
   2: www
   3: term-local
   4: term-remote
-  7: time
+  7: comm
   8: pass
   9: music
   10: pim
