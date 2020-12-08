@@ -3,7 +3,7 @@ requirements = requirements.txt
 activate = . $(venv)/bin/activate
 pip = pip
 ansible = venv/bin/ansible-playbook
-ansible_run = $(activate) && ansible-playbook --inventory localhost, --diff --verbose ./playbook.yml
+ansible_run = $(activate) && ansible-playbook --inventory localhost, --diff --verbose ./playbook.yml ${ANSIBLE_EXTRA_ARGS}
 
 .PHONY: all
 all: $(ansible)
@@ -39,6 +39,10 @@ dotfiles: $(ansible)
 .PHONY: clean
 clean:
 	rm -rf venv
+
+.PHONY: test
+test:
+	./test-in-docker.sh
 
 $(ansible): venv
 
