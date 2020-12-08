@@ -71,8 +71,8 @@ set shiftwidth=4
 set autoindent
 set expandtab
 set smartindent
-"set formatoptions=tcqjron
-set formatoptions=
+set formatoptions=tcqjron
+"set formatoptions=
 
 " == ui ==
 set cursorline
