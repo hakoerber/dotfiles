@@ -16,7 +16,11 @@ if [[ "$(readlink "${_SCRIPT_DIR}")" != "${DOTDIR}" ]] ; then
         exit 1
     fi
     printf "Moving directory to $DOTDIR ...\n"
-    sudo mv --no-target-directory "${_SCRIPT_DIR}" "${DOTDIR}"
+    sudo=""
+    if (( $(id -u ) != 0 )) ; then
+        sudo=sudo
+    fi
+    $sudo mv --no-target-directory "${_SCRIPT_DIR}" "${DOTDIR}"
     printf "Done\n"
 else
     printf "Already working in ${DOTDIR}, nothing to do\n"

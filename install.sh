@@ -18,14 +18,22 @@ source /etc/os-release
 
 _SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+sudowrap() {
+    if (( $(id -u ) != 0 )) ; then
+        sudo "${@}"
+    else
+        "${@}"
+    fi
+}
+
 _install() {
     _package="$1" ; shift
     if [[ $NAME == "Fedora" ]] ; then
-        sudo dnf install --assumeyes "${_package}"
+        sudowrap dnf install --assumeyes "${_package}"
     elif [[ $NAME == "Ubuntu" ]] ; then
-        sudo apt-get install --assume-yes "${_package}"
+        sudowrap apt-get install --assume-yes "${_package}"
     elif [[ $NAME == "Arch Linux" ]] ; then
-        sudo pacman -S --noconfirm "${_package}"
+        sudowrap pacman -S --noconfirm "${_package}"
     else
         2>&1 printf "Unsupported distro $NAME, exiting"
         exit 1
