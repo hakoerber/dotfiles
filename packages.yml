@@ -443,6 +443,10 @@ packages:
       fedora: []
       ubuntu: []
       archlinux: ["man-db", "man-pages"]
+    discord:
+      fedora: []
+      ubuntu: []
+      archlinux: ["discord"]
 
   remove:
     mousepad:
