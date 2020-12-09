@@ -86,3 +86,7 @@ if ! python3 -c 'import venv' 2>/dev/null ; then
 fi
 
 cd "$DOTDIR" && make
+
+# fix permissions of the directory
+sudowrap chgrp -R dotfiles "${DOTDIR}"
+sudowrap chmod g+wX "${DOTDIR}"
