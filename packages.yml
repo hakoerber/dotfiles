@@ -447,6 +447,14 @@ packages:
       fedora: []
       ubuntu: []
       archlinux: ["discord"]
+    nextcloud:
+      fedora: []
+      ubuntu: []
+      archlinux: ["nextcloud-client"]
+    kwallet:
+      fedora: []
+      ubuntu: []
+      archlinux: ["kwallet", "kwalletmanager"]
 
   remove:
     mousepad:

@@ -122,7 +122,7 @@ fi
 run gpg-agent gpg-agent --homedir "$HOME/.gnupg" --no-detach --daemon
 
 # run gnome-keyring_user gnome-keyring-daemon --start --components pkcs11,secrets --foreground
-run kwallet kwalletd --nofork
+run kwallet kwalletd5
 
 # a service called dunst already exists and conflicts
 run dunst dunst -config ~/.config/dunstrc
