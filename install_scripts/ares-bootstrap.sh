@@ -11,11 +11,11 @@ git clone --recursive https://code.hkoerber.de/hannes/dotfiles.git
 ./dotfiles/install_scripts/ares.sh /dev/sda
 
 mv /root/dotfiles /mnt/root/dotfiles
-cat << EOF > /mnt/root/.bashrc
-set -o errexit
-/root/dotfiles/install.sh
-rm /root/.bashrc
-reboot
+cat << EOF > /mnt/root/.bash_profile
+if /root/dotfiles/install.sh ; then
+    rm -f /root/.bash_profile
+    reboot
+fi
 EOF
 
 umount -R /mnt
