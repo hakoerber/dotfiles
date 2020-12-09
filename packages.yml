@@ -16,6 +16,9 @@ packages:
         - exuberant-ctags
       archlinux:
         - gcc
+        - ctags
+        - cmake
+        - maven
     golang:
       fedora: ["golang", "glibc-static"]
       ubuntu: ["golang-go"]
@@ -55,6 +58,7 @@ packages:
         - xorg-xev
         - xorg-xprop
         - xorg-xset
+        - xorg-xinit
     dmenu:
       fedora: ["dmenu"]
       ubuntu: ["dmenu"]
@@ -110,7 +114,7 @@ packages:
     i3:
       fedora: ["i3"]
       ubuntu: ["i3"]
-      archlinux: ["i3"]
+      archlinux: ["i3-wm"]
     i3lock:
       fedora: ["i3lock"]
       ubuntu: ["i3lock"]
@@ -406,7 +410,7 @@ packages:
     rust:
       fedora: []
       ubuntu: ["rustc", "cargo"]
-      archlinux: ["rust", "rustup", "cargo"]
+      archlinux: ["rustup", "cargo"]
     musescore:
       fedora: []
       ubuntu: ["musescore"]
@@ -435,6 +439,11 @@ packages:
       fedora: []
       ubuntu: []
       archlinux: ["steam"]
+    man:
+      fedora: []
+      ubuntu: []
+      archlinux: ["man-db", "man-pages"]
+
   remove:
     mousepad:
       fedora: ["mousepad"]
