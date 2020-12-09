@@ -19,6 +19,7 @@ packages:
         - ctags
         - cmake
         - maven
+        - base-devel
     golang:
       fedora: ["golang", "glibc-static"]
       ubuntu: ["golang-go"]
