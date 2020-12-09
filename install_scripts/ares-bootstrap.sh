@@ -19,4 +19,5 @@ reboot
 EOF
 
 read -p "> Remove installation medium and press enter "
+umount -R /mnt
 reboot

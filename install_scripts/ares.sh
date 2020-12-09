@@ -111,4 +111,3 @@ CHROOTSCRIPT
 chmod +x /mnt/chroot-script.sh
 arch-chroot /mnt /chroot-script.sh
 rm -f /mnt/chroot-script.sh
-umount -R /mnt
