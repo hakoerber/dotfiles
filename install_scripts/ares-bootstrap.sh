@@ -18,6 +18,7 @@ rm /root/.bashrc
 reboot
 EOF
 
-read -p "> Remove installation medium and press enter "
 umount -R /mnt
-reboot
+
+read -p "> Ready for reboot. Press enter for shutdown, then remove the installation media and boot again "
+poweroff
