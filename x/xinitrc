@@ -2,6 +2,8 @@
 
 export LOGFILE="$LOGDIR/xinitrc.log"
 
+mkdir -p "${LOGDIR}/i3"
+
 log() {
     echo "[$(date +%FT%T)] $*" >> "$LOGFILE"
 }
