@@ -455,6 +455,14 @@ packages:
       fedora: []
       ubuntu: []
       archlinux: ["kwallet", "kwalletmanager"]
+    wallpapers:
+      fedora: []
+      ubuntu: []
+      archlinux: ["elementary-wallpapers", "deepin-community-wallpapers"]
+    wallutils:
+      fedora: []
+      ubuntu: []
+      archlinux: ["wallutils"]
 
   remove:
     mousepad:

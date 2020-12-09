@@ -77,14 +77,12 @@ run_oneshot() {
 
 schedule() {
     name="$1"; shift
-    spec="$1"; shift
     do_run "$name" || return
     systemd-run \
         --user \
         --unit "$(get_unit_name "${name}")" \
         --no-block \
         --setenv=DISPLAY=${DISPLAY} \
-        --on-calendar="${spec}" \
         "${@}"
 }
 
@@ -130,7 +128,8 @@ run dunst dunst -config ~/.config/dunstrc
 # disabled due to firefox flicker
 # run compton compton --backend glx --vsync opengl --no-dock-shadow --no-dnd-shadow
 
-run_oneshot wallpaper --property=ExecStartPre="/bin/sleep 1" feh --bg-scale "${wallpaper}"
+schedule wallpaper --on-active=50s --on-calendar hourly \
+  setrandom --recursive --onlylarge --mode=stretch /usr/share/wallpapers
 
 run blueman blueman-applet
 
@@ -154,7 +153,7 @@ if [[ "${MACHINE_HAS_NEXTCLOUD}" == "true" ]] ; then
 fi
 
 if [[ "${MACHINE_HAS_RESTIC_BACKUP}" == "true" ]] ; then
-    [[ -x ~/bin/restic-backup ]] && schedule restic-backup "Mon..Fri 12:00:00" --on-calendar "Mon..Fri 09:00:00" --on-calendar "Mon..Fri 16:00:00" ~/bin/restic-backup
+    [[ -x ~/bin/restic-backup ]] && schedule restic-backup --on-calendar "Mon..Fri 12:00:00" --on-calendar "Mon..Fri 09:00:00" --on-calendar "Mon..Fri 16:00:00" ~/bin/restic-backup
 fi
 
 
