@@ -13,7 +13,7 @@ git clone --recursive https://code.hkoerber.de/hannes/dotfiles.git
 mv /root/dotfiles /mnt/root/dotfiles
 cat << EOF > /mnt/root/.bashrc
 set -o errexit
-/root/dotfiles/bootstrap.sh
+/root/dotfiles/install.sh
 rm /root/.bashrc
 reboot
 EOF

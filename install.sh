@@ -8,6 +8,27 @@
 set -o errexit
 set -o nounset
 
+DOTDIR="/var/lib/dotfiles"
+_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+if [[ "$(readlink "${_SCRIPT_DIR}")" != "${DOTDIR}" ]] ; then
+    if [[ -e "${DOTDIR}" ]] ; then
+        2>&1 printf "${DOTDIR} already exists. This seems unsafe.\n"
+        exit 1
+    fi
+    printf "Moving directory to $DOTDIR ...\n"
+    sudo=""
+    if (( $(id -u ) != 0 )) ; then
+        sudo=sudo
+    fi
+    $sudo mv --no-target-directory "${_SCRIPT_DIR}" "${DOTDIR}"
+    printf "Done\n"
+else
+    printf "Already working in ${DOTDIR}, nothing to do\n"
+fi
+
+cd "${DOTDIR}"
+
 os_release_file=/etc/os-release
 if [[ ! -e "${os_release_file}" ]] ; then
     2>&1 printf "Could not find ${os_release_file}, exiting"

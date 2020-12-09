@@ -10,7 +10,7 @@ at `/var/lib/dotfiles`.
 To setup the dotfiles:
 
 1. `git clone https://github.com/hakoerber/dotfiles.git ~/dotfiles`
-2. `cd ~/dotfiles && ./bootstrap.sh`
+2. `cd ~/dotfiles && ./install.sh`
 
 # Partial application
 

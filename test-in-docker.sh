@@ -26,7 +26,7 @@ docker run -ti --rm -v ${tmpdir}/dotfiles.tar.gz:/tmp/dotfiles.tar.gz:ro --hostn
     pacman -Syu --noconfirm python3
     cd $(mktemp -d)
     tar xf /tmp/dotfiles.tar.gz -C .
-    ANSIBLE_EXTRA_ARGS="-e manage_services=false" ./bootstrap.sh
+    ANSIBLE_EXTRA_ARGS="-e manage_services=false" ./install.sh
     read -p "Done, [return] to continue "
 '
 
@@ -36,5 +36,5 @@ docker run -ti --rm -v ${tmpdir}/dotfiles.tar.gz:/tmp/dotfiles.tar.gz:ro --hostn
 
     cd $(mktemp -d)
     tar xf /tmp/dotfiles.tar.gz -C .
-    ANSIBLE_EXTRA_ARGS="-e manage_services=false" ./bootstrap.sh
+    ANSIBLE_EXTRA_ARGS="-e manage_services=false" ./install.sh
 '
