@@ -40,6 +40,13 @@ _install() {
     fi
 }
 
+
+if ! command -v python3 >/dev/null ; then
+    printf 'Python3 not installed, installing ...\n'
+    _install "python3"
+    printf 'Done\n'
+fi
+
 if ! command -v make >/dev/null ; then
     printf 'Make not installed, installing ...\n'
     _install "make"
