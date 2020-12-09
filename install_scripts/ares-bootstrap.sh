@@ -18,4 +18,5 @@ rm /root/.bashrc
 reboot
 EOF
 
-poweroff
+read -p "> Remove installation medium and press enter "
+reboot
