@@ -303,6 +303,7 @@
                 Option "VariableRefresh" "true"
                 Option "TearFree" "true"
             EndSection
+        become: true
 
       when:
         - distro == 'archlinux'
