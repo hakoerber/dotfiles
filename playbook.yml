@@ -183,6 +183,8 @@
           regexp: '^#?COMPRESSION=.*$'
           line: 'COMPRESSION="lz4"'
         become: true
+        notify:
+          - rebuild initrd
       when: distro == 'archlinux'
 
     - set_fact:
@@ -357,3 +359,8 @@
         loop_var: user
       tags:
         - always
+
+  handlers:
+    - name: rebuild initrd
+      command: mkinitcpio -P
+      become: true
