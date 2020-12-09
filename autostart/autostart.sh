@@ -29,7 +29,7 @@ do_run() {
 
 get_unit_name() {
     name="$1" ; shift
-    printf '%s' "${name}"
+    printf 'user:%s' "${name}"
 }
 
 run_raw() {
@@ -125,7 +125,7 @@ run gpg-agent gpg-agent --homedir "$HOME/.gnupg" --no-detach --daemon
 run kwallet kwalletd --nofork
 
 # a service called dunst already exists and conflicts
-run dunst_user dunst -config ~/.config/dunstrc
+run dunst dunst -config ~/.config/dunstrc
 
 # disabled due to firefox flicker
 # run compton compton --backend glx --vsync opengl --no-dock-shadow --no-dnd-shadow
@@ -139,7 +139,7 @@ run nm-applet nm-applet
 run pasystray pasystray
 
 # redshift unit already exists
-run redshift_user redshift-gtk -c ~/.config/redshift.conf
+run redshift redshift-gtk -c ~/.config/redshift.conf
 
 if [[ "${MACHINE_HAS_KEEPASSX}" == "true" ]] ; then
     run keepassx keepassx --keyfile ~/.secret/main.key ~/.secret/main.kdbx
