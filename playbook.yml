@@ -88,6 +88,7 @@
         - name: Clean cache
           command: paccache -rk2 -ruk0
           become: true
+          changed_when: false
 
         when: distro == 'archlinux'
       tags: [update_system]
