@@ -37,8 +37,6 @@ fi
 
 source /etc/os-release
 
-_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-
 sudowrap() {
     if (( $(id -u ) != 0 )) ; then
         sudo "${@}"
@@ -87,4 +85,4 @@ if ! python3 -c 'import venv' 2>/dev/null ; then
     printf 'Done\n'
 fi
 
-cd "$_SCRIPT_DIR" && make
+cd "$DOTDIR" && make
