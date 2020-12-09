@@ -102,6 +102,43 @@
       when: distro == 'fedora'
 
     - block:
+      - name: build paru on arch
+        shell: |
+          set -o errexit
+
+          if pacman -Qi paru >/dev/null 2>&1; then
+              exit 100
+          fi
+
+          mkdir -p /tmp/paru-build
+          cd /tmp/paru-build
+
+          curl -L -O https://aur.archlinux.org/cgit/aur.git/snapshot/paru.tar.gz
+          tar xvf paru.tar.gz
+          cd paru
+          makepkg
+        args:
+          executable: /bin/bash
+        register: result
+        become: false # do not build as root!
+        changed_when: result.rc != 100
+        failed_when: result.rc not in (0, 100)
+
+      - name: install paru
+        shell: |
+          set -o errexit
+
+          pacman --noconfirm -U /tmp/paru-build/paru/paru-*.pkg.tar.zst
+          rm -rf /tmp/paru-build
+        args:
+          executable: /bin/bash
+        become: true
+        when: result.rc != 100
+
+      when: distro == 'archlinux'
+
+
+    - block:
       - name: load package list
         include_vars:
           file: packages.yml
