@@ -243,8 +243,6 @@
     with_items:
       - name: terraform
         optpath: terraform
-      - name: kubectl
-        optpath: kubectl
       - name: hugo
         optpath: hugo
       - name: drone
