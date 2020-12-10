@@ -14,6 +14,6 @@ output=$(
 for option in "${options[@]}"; do
     echo "($i) $option"
     (( i++ ))
-done | dmenu -fn 'Inconsolata:size=10' -b -i -l 10 -p '>' -nb '#222222' -nf '#ffffff' -sb '#e16b40' -sf '#000000')
+done | rofi -dmenu -p "action" -u "2,4" -no-custom)
 
 [[ "$output" ]] && "$(dirname "$0")"/i3exit "${output#(*) }"

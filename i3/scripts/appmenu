@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-dmenu_run -fn 'Inconsolata:size=10' -b -i -l 10 -p '>' -nb '#222222' -nf '#ffffff' -sb '#e16b40' -sf '#000001'
+rofi -show combi -combi-modi run,drun -display-combi run
