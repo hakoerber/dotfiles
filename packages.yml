@@ -220,10 +220,14 @@ packages:
       fedora: ["libreoffice", "libreoffice-langpack-de", "libreoffice-langpack-en"]
       ubuntu: ["libreoffice"]
       archlinux: ["libreoffice-fresh", "libreoffice-fresh-de"]
-    oxygen:
-      fedora: ["breeze-cursor-theme", "breeze-icon-theme", "breeze-gtk"]
-      ubuntu: ["breeze-cursor-theme", "breeze-icon-theme", "breeze", "gtk3-engines-breeze"]
-      archlinux: ["breeze", "breeze-icons", "breeze-gtk", "breeze-grub"]
+    qt-theming:
+      fedora: ["breeze-cursor-theme", "breeze-icon-theme"]
+      ubuntu: ["breeze-cursor-theme", "breeze-icon-theme", "breeze"]
+      archlinux: ["breeze", "breeze-icons", "breeze-grub", "qt5ct"]
+    gtk-theming:
+      fedora: ["breeze-gtk"]
+      ubuntu: ["gtk3-engines-breeze"]
+      archlinux: ["breeze-gtk", "lxappearance"]
     xcompmgr:
       fedora: ["xcompmgr"]
       ubuntu: ["xcompmgr"]

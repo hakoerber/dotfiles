@@ -45,6 +45,8 @@ export PATH=$PATH:$(go env GOPATH)/bin
 
 export ACPI_LID_NAME=LID
 
+export QT_QPA_PLATFORMTHEME=qt5ct
+
 umask 0022
 
 {% set env = machine.environment | combine(user.environment) %}
