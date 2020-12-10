@@ -53,3 +53,4 @@ dotfiles:
     to: .config/Code/User/keybindings.json
   - from: alacritty/alacritty.yml
     to: .config/alacritty.yml
+    template: true
