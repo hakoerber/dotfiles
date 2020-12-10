@@ -14,6 +14,6 @@ output=$(
 for option in "${options[@]}"; do
     echo "($i) $option"
     (( i++ ))
-done | rofi -dmenu -p "action" -u "2,4" -no-custom)
+done | rofi -dmenu -p "action: " -no-custom)
 
 [[ "$output" ]] && "$(dirname "$0")"/i3exit "${output#(*) }"
