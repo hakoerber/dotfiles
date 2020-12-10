@@ -17,8 +17,8 @@
     set $mod Mod4
 
     # The default terminal
-    set $terminal "{{ machine.terminal_binary }} -title terminal"
-    set $calc "{{ machine.terminal_binary }} -title calc -e $SHELL -i -c calc"
+    set $terminal "{{ machine.terminal_binary }} --title terminal"
+    set $calc "{{ machine.terminal_binary }} --title calc -e $SHELL -i -c calc"
 
     set $scriptdir ~/.i3/scripts
 

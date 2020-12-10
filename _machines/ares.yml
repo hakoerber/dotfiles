@@ -1,6 +1,6 @@
 font_size: 10
 letter_space: 0
-terminal_binary: urxvt
+terminal_binary: alacritty
 
 gpu: amd
 

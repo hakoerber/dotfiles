@@ -172,6 +172,10 @@ packages:
       fedora: ["rxvt-unicode-256color"]
       ubuntu: ["rxvt-unicode-256color"]
       archlinux: ["rxvt-unicode"]
+    alacritty:
+      fedora: []
+      ubuntu: []
+      archlinux: ["alacritty"]
     tmux:
       fedora: ["tmux"]
       ubuntu: ["tmux"]

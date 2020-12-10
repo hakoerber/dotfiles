@@ -34,7 +34,7 @@
     "explorer.incrementalNaming": "smart",
     "search.smartCase": true,
     "extensions.ignoreRecommendations": true,
-    "terminal.external.linuxExec": "urxvt",
+    "terminal.external.linuxExec": "alacritty",
     "problems.showCurrentInStatus": true,
     "problems.decorations.enabled": false,
     "update.mode": "none",
