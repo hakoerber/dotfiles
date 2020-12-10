@@ -131,7 +131,7 @@ packages:
     neovim:
       fedora: ["neovim", "python3-neovim"]
       ubuntu: ["neovim"]
-      archlinux: ["neovim"]
+      archlinux: ["neovim", "python-pynvim"]
     network-manager-applet:
       fedora: ["network-manager-applet"]
       ubuntu: []
