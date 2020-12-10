@@ -51,3 +51,5 @@ dotfiles:
     to: .config/Code/User/settings.json
   - from: vscode/keybindings.json
     to: .config/Code/User/keybindings.json
+  - from: alacritty/alacritty.yml
+    to: .config/alacritty.yml
