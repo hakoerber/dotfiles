@@ -472,6 +472,10 @@ packages:
       fedora: []
       ubuntu: []
       archlinux: ["wallutils"]
+    pv:
+      fedora: ["pv"]
+      ubuntu: ["pv"]
+      archlinux: ["pv"]
 
   remove:
     mousepad:
