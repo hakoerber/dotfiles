@@ -117,6 +117,7 @@
             - cargo
             - asp
             - bat
+        become: true
 
       - name: create build user on arch
         user:
