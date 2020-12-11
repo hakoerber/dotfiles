@@ -128,7 +128,7 @@ run dunst dunst -config ~/.config/dunstrc
 # disabled due to firefox flicker
 # run compton compton --backend glx --vsync opengl --no-dock-shadow --no-dnd-shadow
 
-schedule wallpaper --on-active=50s --on-calendar hourly \
+schedule wallpaper --on-active=1s --on-calendar hourly \
   setrandom --recursive --onlylarge --mode=stretch /usr/share/wallpapers
 
 run blueman blueman-applet
