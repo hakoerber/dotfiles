@@ -159,7 +159,7 @@ packages:
     py3status:
       fedora: ["py3status", "python3-pytz", "python3-tzlocal"]
       ubuntu: ["py3status", "python3-arrow", "python3-tzlocal"]
-      archlinux: ["py3status", "python-pytz", "python-tzlocal"]
+      archlinux: ["py3status", "python-pytz", "python-tzlocal", "python-dbus"]
     pass:
       fedora: ["pass"]
       ubuntu: ["pass"]
