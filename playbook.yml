@@ -297,6 +297,7 @@
           - docker
           - libvirtd
           - systemd-timesyncd
+          - pcscd
       when: distro == 'archlinux'
 
     - name: enable services
