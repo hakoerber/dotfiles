@@ -66,6 +66,19 @@
   become: true
   become_user: root
 
+- name: disable and mask systemd user units
+  systemd:
+    name: "{{ item }}"
+    enabled: false
+    masked: true
+    scope: user
+  with_items:
+    - gpg-agent.service
+    - gpg-agent.socket
+    - gpg-agent-browser.socket
+    - gpg-agent-ssh.socket
+  tags: [test]
+
 - name: create directory for getty autologin
   file:
     state: directory

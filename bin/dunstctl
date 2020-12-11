@@ -11,12 +11,12 @@ log() {
 case "$1" in
     enable)
         log "Enabling dunst"
-        systemctl --user --no-block kill --signal SIGUSR2 dunst_user
+        systemctl --user --no-block kill --signal SIGUSR2 user:dunst
 
         ;;
     disable)
         log "Disabling dunst"
-        systemctl --user --no-block kill --signal SIGUSR1 dunst_user
+        systemctl --user --no-block kill --signal SIGUSR1 user:dunst
         ;;
     *)
         >&2 printf 'Unknown command\n'
