@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-rofi -show combi -combi-modi run,drun -display-combi run
+rofi -show combi -combi-modi run,drun -display-combi "run > "
