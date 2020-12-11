@@ -103,6 +103,11 @@
       when: distro == 'fedora'
 
     - block:
+      - name: install sudo
+        package:
+          state: installed
+          name: sudo
+
       - name: create build user on arch
         user:
           name: makepkg
