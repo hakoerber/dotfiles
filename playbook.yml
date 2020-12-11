@@ -103,6 +103,14 @@
       when: distro == 'fedora'
 
     - block:
+      - name: create build user on arch
+        user:
+          name: makepkg
+          home: /var/lib/makepkg
+          create_home: true
+          shell: /bin/bash
+          system: true
+
       - name: build paru on arch
         shell: |
           set -o errexit
@@ -121,7 +129,8 @@
         args:
           executable: /bin/bash
         register: result
-        become: false # do not build as root!
+        become: true # do not build as root!
+        become_user: makepkg
         changed_when: result.rc != 100
         failed_when: result.rc not in (0, 100)
 
