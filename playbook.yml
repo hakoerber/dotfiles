@@ -108,6 +108,16 @@
           state: installed
           name: sudo
 
+      - name: install dependencies for paru
+        package:
+          state: installed
+          name:
+            - base-devel
+            - git
+            - cargo
+            - asp
+            - bat
+
       - name: create build user on arch
         user:
           name: makepkg
