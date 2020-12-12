@@ -100,6 +100,10 @@ packages:
       fedora: []
       ubuntu: []
       archlinux: ["ttf-linux-libertine"]
+    font-emoji:
+      fedora: []
+      ubuntu: []
+      archlinux: ["noto-fonts-emoji"]
     git:
       fedora: ["git", "gitk"]
       ubuntu: ["git", "git-extras", "gitk", "git-email"]
