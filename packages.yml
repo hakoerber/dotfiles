@@ -476,6 +476,10 @@ packages:
       fedora: ["pv"]
       ubuntu: ["pv"]
       archlinux: ["pv"]
+    stress:
+      fedora: []
+      ubuntu: []
+      archlinux: ["stress"]
 
   remove:
     mousepad:
