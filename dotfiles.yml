@@ -46,6 +46,7 @@ dotfiles:
     to: .zshrc.d
   - from: dunst/dunstrc
     to: .config/dunstrc
+    template: true
   - from: redshift/redshift.conf
     to: .config/redshift.conf
   - from: vscode/settings.json
