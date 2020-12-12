@@ -140,6 +140,8 @@ run pasystray pasystray
 # redshift unit already exists
 run redshift redshift-gtk -c ~/.config/redshift.conf
 
+run yubikey-touch-detector yubikey-touch-detector -libnotify
+
 if [[ "${MACHINE_HAS_KEEPASSX}" == "true" ]] ; then
     run keepassx keepassx --keyfile ~/.secret/main.key ~/.secret/main.kdbx
 fi

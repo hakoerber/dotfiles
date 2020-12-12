@@ -19,6 +19,7 @@ general {
 }
 
 
+order += "yubikey"
 order += "volume_status output"
 order += "volume_status input"
 order += spotify
@@ -39,6 +40,10 @@ battery_level all {
     hide_seconds = true
     notify_low_level = true
     threshold_full = 95
+}
+
+yubikey {
+    format = '[   YubiKey[\?if=is_gpg ][\?if=is_u2f ] ]'
 }
 
 clock {

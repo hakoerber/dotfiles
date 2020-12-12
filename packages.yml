@@ -323,7 +323,7 @@ packages:
     gpg:
       fedora: ["gnupg2", "paperkey", "yubikey-manager"]
       ubuntu: ["gnupg2"]
-      archlinux: ["gnupg", "paperkey", "yubikey-manager"]
+      archlinux: ["gnupg", "paperkey", "yubikey-manager", "yubikey-touch-detector"]
     networkmanager:
       fedora: ["NetworkManager", "NetworkManager-wifi"]
       ubuntu: ["network-manager", "network-manager-openvpn", "network-manager-openconnect"]
