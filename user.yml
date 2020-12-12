@@ -45,6 +45,7 @@
       - wireshark
       - docker
       - sudonopw
+      - games
   when: distro == 'archlinux'
   tags: [always]
 
