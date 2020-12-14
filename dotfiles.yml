@@ -4,6 +4,8 @@ empty_directories:
     mode: '0700'
   - name: .config/nvim
   - name: .config/rofi
+  - name: .config/gtk-3.0
+  - name: .config/qt5ct
 dotfiles:
   - from: autostart/autostart.sh
     to: .autostart.sh
@@ -58,3 +60,9 @@ dotfiles:
     template: true
   - from: rofi/config
     to: .config/rofi/config
+  - from: gtk/gtk-3.0.ini
+    to: .config/gtk-3.0/settings.ini
+  - from: gtk/gtkrc-2.0
+    to: .gtkrc-2.0
+  - from: qt/qt5ct.conf
+    to: .config/qt5ct/qt5ct.conf
