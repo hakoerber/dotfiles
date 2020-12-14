@@ -66,3 +66,5 @@ dotfiles:
     to: .gtkrc-2.0
   - from: qt/qt5ct.conf
     to: .config/qt5ct/qt5ct.conf
+  - from: screencfg
+    to: .screencfg

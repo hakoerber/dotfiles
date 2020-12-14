@@ -142,6 +142,10 @@ run redshift redshift-gtk -c ~/.config/redshift.conf
 
 run yubikey-touch-detector yubikey-touch-detector -libnotify
 
+if [[ "${MACHINE_DEFAULT_SCREENPROFILE}" ]] ; then
+    run screencfg "$HOME/.screencfg/${MACHINE_DEFAULT_SCREENPROFILE}.sh"
+fi
+
 if [[ "${MACHINE_HAS_KEEPASSX}" == "true" ]] ; then
     run keepassx keepassx --keyfile ~/.secret/main.key ~/.secret/main.kdbx
 fi
