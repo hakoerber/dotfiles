@@ -29,7 +29,7 @@ sed -e 's/\s*\([^#]*\).*/\1/' << EOF | sfdisk ${DEVICE}
     device: ${DEVICE}
 
     ${DEVICE}1 : name=uefi      , size=512M , type=uefi
-    ${DEVICE}2 : name=boot      , size=200M , type=linux
+    ${DEVICE}2 : name=boot      , size=512M , type=linux
     ${DEVICE}3 : name=cryptpart ,             type=linux
 EOF
 
