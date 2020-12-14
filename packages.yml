@@ -395,7 +395,7 @@ packages:
     virtualbox:
       fedora: []
       ubuntu: ["virtualbox"]
-      archlinux: ["virtualbox", "virtualbox-host-modules-arch"]
+      archlinux: []
     ssh:
       fedora: []
       ubuntu: []
