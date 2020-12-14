@@ -359,12 +359,12 @@
       path: /home/{{ user.name }}/.opt/portfolio-performance-{{ portfolio_performace_version }}
     register: stat_portfolio_performance_installation
 
-  - name: create temporary directory
-    tempfile:
-      state: directory
-    register: tempdir
-
   - block:
+    - name: create temporary directory
+      tempfile:
+        state: directory
+      register: tempdir
+
     - name: download portfolio performance
       get_url:
         url: https://github.com/buchen/portfolio/releases/download/{{ portfolio_performace_version }}/PortfolioPerformance-{{ portfolio_performace_version }}-linux.gtk.x86_64.tar.gz
