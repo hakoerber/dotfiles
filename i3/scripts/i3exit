@@ -3,7 +3,7 @@
 ### From http://www.archlinux.org/index.php/i3
 
 _logfile="$LOGDIR/i3/i3exit.log"
-LOCKSCREEN="$LIBDIR/wallpaper/lockscreen"
+LOCKSCREEN="$LIBDIR/lockscreen"
 
 _fallback_color="000000"
 
@@ -19,29 +19,34 @@ lock()
 {
     set -x
     playing=0
-    # if dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Get string:'org.mpris.MediaPlayer2.Player' string:'PlaybackStatus'|grep -q Playing ; then
-    #     playing=1
-    # fi
-    # echo $playing
-    # (( $playing )) && dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Pause
+    if [[ "$(playerctl status)" == "Playing" ]] ; then
+        playing=1
+    fi
+    if (( $playing )) ; then
+        playerctl pause
+    fi
+
     if [[ -f "$LOCKSCREEN" ]] ; then
+        resized_lockscreen=$(mktemp)
+        convert "${LOCKSCREEN}" -resize "${MACHINE_RESOLUTION_X}x${MACHINE_RESOLUTION_Y}" "${resized_lockscreen}"
         i3lock --nofork --show-failed-attempts --ignore-empty-password \
-            --image "$LOCKSCREEN"
+            --image "${resized_lockscreen}"
+        rm "${resized_lockscreen}"
     else
         i3lock --nofork --show-failed-attempts --ignore-empty-password \
             --color "$_fallback_color"
     fi
-    # (( $playing )) && dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Play
+    if (( $playing )) ; then
+        playerctl play
+    fi
 }
 
 screen_off() {
-    :
     xset dpms force off
 }
 
 reset_screen() {
-    xset -dpms
-    xset s off
+    systemctl --user restart dpms.service
 }
 
 lock_and_screen_off() {
@@ -49,14 +54,9 @@ lock_and_screen_off() {
     _pid=$!
     dunstctl disable
     screen_off
-    xset dpms 0 0 5
     wait $_pid
     dunstctl enable
     reset_screen
-}
-
-disable_lid_switch() {
-    grep "^${ACPI_LID_NAME}.*enabled" /proc/acpi/wakeup && echo " ${ACPI_LID_NAME}" | sudo tee /proc/acpi/wakeup
 }
 
 signal="$1"
@@ -74,13 +74,11 @@ case "$signal" in
     suspend)
         log "[I] Suspending."
         lock &
-        disable_lid_switch
         sleep 0.1
         systemctl suspend
         ;;
     hibernate)
         log "[I] Hibernating."
-        disable_lid_switch
         sudo systemctl hibernate
         ;;
     reboot)
