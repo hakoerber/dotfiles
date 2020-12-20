@@ -12,6 +12,9 @@ switch_on() {
     dunstctl disable &
     systemctl --user --no-block stop redshift.service
     systemctl --user --no-block stop spotify.service
+    ~/.i3/scripts/bar-update "external_script presentation_mode"
+    ~/.i3/scripts/bar-update "systemd redshift"
+    ~/.i3/scripts/bar-update "systemd spotify"
 }
 
 switch_off() {
@@ -19,6 +22,9 @@ switch_off() {
     dunstctl enable &
     systemctl --user --no-block start redshift.service
     systemctl --user --no-block start spotify.service
+    ~/.i3/scripts/bar-update "external_script presentation_mode"
+    ~/.i3/scripts/bar-update "systemd redshift"
+    ~/.i3/scripts/bar-update "systemd spotify"
 }
 
 
