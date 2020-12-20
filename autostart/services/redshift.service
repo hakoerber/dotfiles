@@ -1,0 +1,5 @@
+[Unit]
+BindsTo=autostart.target
+
+[Service]
+ExecStart=/usr/bin/redshift-gtk -c %h/.config/redshift.conf

@@ -447,3 +447,28 @@
 
   tags:
     - kubectl
+
+- name: handle autostart units
+  block:
+  - name: create systemd user directory
+    file:
+      state: directory
+      path: ~/{{ item }}
+    loop:
+      - .config/
+      - .config/systemd/
+      - .config/systemd/user/
+
+  - name: link autostart service files
+    file:
+      state: link
+      force: true
+      follow: false
+      path: "/home/{{ user.name }}/.config/systemd/user/{{ item | basename }}"
+      src: "{{ item }}"
+      owner: "{{ user.name }}"
+      group: "{{ user_group_name }}"
+    with_fileglob: /var/lib/dotfiles/autostart/services/*
+
+  tags:
+    - autostart

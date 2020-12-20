@@ -1,0 +1,7 @@
+[Unit]
+BindsTo=autostart.target
+
+ConditionEnvironment=MACHINE_HAS_NEXTCLOUD=true
+
+[Service]
+ExecStart=/usr/bin/nextcloud --background

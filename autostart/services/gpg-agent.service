@@ -1,0 +1,6 @@
+[Unit]
+BindsTo=autostart.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/gpg-agent --homedir %h/.gnupg --no-detach --daemon

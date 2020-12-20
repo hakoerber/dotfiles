@@ -7,8 +7,6 @@ empty_directories:
   - name: .config/gtk-3.0
   - name: .config/qt5ct
 dotfiles:
-  - from: autostart/autostart.sh
-    to: .autostart.sh
   - from: git/gitconfig
     to: .gitconfig
     template: true

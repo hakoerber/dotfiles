@@ -1,0 +1,16 @@
+[Unit]
+BindsTo=autostart.target
+ConditionEnvironment=MACHINE_TYPE=laptop
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/synclient VertEdgeScroll=0
+ExecStart=/usr/bin/synclient VertTwoFingerScroll=1
+ExecStart=/usr/bin/synclient MaxSpeed=2.2
+ExecStart=/usr/bin/synclient AccelFactor=0.08
+ExecStart=/usr/bin/synclient TapButton1=1
+ExecStart=/usr/bin/synclient CoastingSpeed=0
+ExecStart=/usr/bin/synclient PalmDetect=1
+ExecStart=/usr/bin/synclient PalmMinWidth=20
+ExecStart=/usr/bin/synclient PalmMinZ=1
+RemainAfterExit=true

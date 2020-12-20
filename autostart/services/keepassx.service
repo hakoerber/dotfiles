@@ -1,0 +1,6 @@
+[Unit]
+BindsTo=autostart.target
+ConditionEnvironment=MACHINE_HAS_KEEPASSX=true
+
+[Service]
+ExecStart=/usr/bin/keepassx --keyfile %h/.secret/main.key %h/.secret/main.kdbx

@@ -33,9 +33,8 @@ screen:
 workspace:
 
 environment:
+  MACHINE_TYPE: "workstation"
   MACHINE_HAS_KEEPASSX: "false"
   MACHINE_HAS_NEXTCLOUD: "true"
   MACHINE_HAS_RESTIC_BACKUP: "false"
-  MACHINE_HAS_SPOTIFY: "true"
-  MACHINE_HAS_TOUCHPAD: "false"
   MACHINE_DEFAULT_SCREENPROFILE: "ares"

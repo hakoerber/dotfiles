@@ -1,0 +1,8 @@
+[Unit]
+BindsTo=autostart.target
+
+[Timer]
+OnActiveSec=0s
+OnCalendar=hourly
+Unit=wallpaper.service
+RemainAfterElapse=true

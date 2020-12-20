@@ -48,7 +48,6 @@ workspace:
   10: pim
 
 environment:
+  MACHINE_TYPE: "laptop"
   MACHINE_HAS_KEEPASSX: "true"
   MACHINE_HAS_RESTIC_BACKUP: "true"
-  MACHINE_HAS_SPOTIFY: "true"
-  MACHINE_HAS_TOUCHPAD: "true"

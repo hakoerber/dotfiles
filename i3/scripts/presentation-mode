@@ -10,14 +10,15 @@ is_on() {
 switch_on() {
     touch "${_status_file}"
     dunstctl disable &
-    systemctl --user --no-block stop user:redshift
-    systemctl --user --no-block stop user:spotify
+    systemctl --user --no-block stop redshift.service
+    systemctl --user --no-block stop spotify.service
 }
 
 switch_off() {
     rm -f "${_status_file}"
     dunstctl enable &
-    "$_autostart" redshift spotify
+    systemctl --user --no-block start redshift.service
+    systemctl --user --no-block start spotify.service
 }
 
 

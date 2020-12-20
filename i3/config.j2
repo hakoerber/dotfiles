@@ -201,8 +201,8 @@ assign [class="^Google-chrome$"] $workspace7
     bindsym F2 exec --no-startup-id ~/.i3/scripts/screenmenu
 
     bindsym $mod+F1 exec --no-startup-id ~/.i3/scripts/i3exit lock
-    bindsym $mod+F2 exec --no-startup-id screencfg ~/.screencfg/all.yml ; exec --no-startup-id ~/.autostart/30_keyboard.sh
-    bindsym $mod+F3 exec --no-startup-id screencfg ~/.screencfg/laptop.yml ; exec --no-startup-id ~/.autostart/30_keyboard.sh
+    bindsym $mod+F2 exec --no-startup-id screencfg ~/.screencfg/all.yml ; exec systemctl --user restart keyboard.service
+    bindsym $mod+F3 exec --no-startup-id screencfg ~/.screencfg/laptop.yml ; exec systemctl --user restart keyboard.service
     bindsym $mod+F4 exec --no-startup-id ~/.i3/scripts/i3exit suspend
     bindsym $mod+Home exec --no-startup-id ~/.i3/scripts/shutdown-menu
 

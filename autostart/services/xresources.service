@@ -1,0 +1,7 @@
+[Unit]
+BindsTo=autostart.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/xrdb -merge -I%h %h/.Xresources
+RemainAfterExit=true

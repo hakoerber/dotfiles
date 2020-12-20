@@ -1,0 +1,5 @@
+[Unit]
+BindsTo=autostart.target
+
+[Service]
+ExecStart=/usr/bin/spotify

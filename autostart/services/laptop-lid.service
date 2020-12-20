@@ -1,0 +1,7 @@
+[Unit]
+BindsTo=autostart.target
+
+ConditionEnvironment=MACHINE_TYPE=laptop
+
+[Service]
+ExecStart=/usr/bin/bash -c 'grep "^${ACPI_LID_NAME}.*enabled" /proc/acpi/wakeup && echo " ${ACPI_LID_NAME}" | sudo tee /proc/acpi/wakeup'
