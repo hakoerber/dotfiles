@@ -49,6 +49,8 @@ systemd redshift {
     user = true
     format = "  "
     on_click 1 = "exec $HOME/.i3/scripts/toggle-app redshift"
+    color_bad = '#F4Bf75'
+    color_degraded = '#F4Bf75'
 }
 
 systemd spotify {
@@ -56,6 +58,8 @@ systemd spotify {
     user = true
     format = "  "
     on_click 1 = "exec $HOME/.i3/scripts/toggle-app spotify"
+    color_bad = '#F4Bf75'
+    color_degraded = '#F4Bf75'
 }
 
 yubikey {
@@ -71,6 +75,7 @@ wifi {
     bitrate_bad = 0
     bitrate_degraded = 0
     format = "   {signal_percent} {ssid} |   down "
+    down_color = "good"
 }
 
 spotify {
