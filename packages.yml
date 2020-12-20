@@ -489,6 +489,10 @@ packages:
       fedora: []
       ubuntu: []
       archlinux: ["playerctl"]
+    imagemagick:
+      fedora: []
+      ubuntu: []
+      archlinux: ["imagemagick"]
 
   remove:
     mousepad:
