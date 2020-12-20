@@ -1,0 +1,7 @@
+[Unit]
+BindsTo=autostart.target
+
+[Service]
+Type=oneshot
+ExecStart=xset s off
+ExecStart=xset dpms 0 0 300

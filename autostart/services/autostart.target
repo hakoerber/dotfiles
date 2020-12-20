@@ -1,5 +1,6 @@
 [Unit]
 Wants=blueman.service
+Wants=dpms.service
 Wants=dunst.service
 Wants=firefox.service
 Wants=gpg-agent.service
