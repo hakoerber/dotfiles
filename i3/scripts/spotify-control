@@ -2,13 +2,13 @@
 
 case "$1" in
 toggle)
-    cmd="PlayPause"
+    cmd="play-pause"
     ;;
 next)
-    cmd="Next"
+    cmd="next"
     ;;
 previous)
-    cmd="Previous"
+    cmd="previous"
     ;;
 *)
     echo "wrong argument $1"
@@ -16,5 +16,5 @@ previous)
     ;;
 esac
 
-dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player."${cmd}"
+playerctl "${cmd}"
 ~/.i3/scripts/bar-update spotify
