@@ -107,7 +107,8 @@ packages:
     git:
       fedora: ["git", "gitk"]
       ubuntu: ["git", "git-extras", "gitk", "git-email"]
-      archlinux: ["git"]
+      # tk required for gitk
+      archlinux: ["git", "tk"]
     htop:
       fedora: ["htop"]
       ubuntu: ["htop"]
