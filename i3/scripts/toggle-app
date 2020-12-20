@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+app="${1:?app missing}"
+
+unitname="${app}.service"
+
+running() {
+    systemctl --user --quiet status "${unitname}" >/dev/null
+}
+
+if running ; then
+    systemctl --user stop "${unitname}"
+else
+    systemctl --user start "${unitname}"
+fi
+
+py3-cmd refresh "systemd $app"
