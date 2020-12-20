@@ -410,7 +410,7 @@
 - block:
   - name: set kubectl version
     set_fact:
-      kubectl_version: v1.20.0
+      kubectl_version: v1.20.1
 
   - name: get current stable version
     uri:
