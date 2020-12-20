@@ -485,6 +485,10 @@ packages:
       fedora: []
       ubuntu: []
       archlinux: ["stress"]
+    mpris:
+      fedora: []
+      ubuntu: []
+      archlinux: ["playerctl"]
 
   remove:
     mousepad:
