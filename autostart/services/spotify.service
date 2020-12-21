@@ -1,5 +1,6 @@
 [Unit]
 BindsTo=autostart.target
+After=windowmanager.target
 
 [Service]
 ExecStart=/usr/bin/spotify

@@ -1,0 +1,3 @@
+[Unit]
+Requires=i3.service
+After=i3.service

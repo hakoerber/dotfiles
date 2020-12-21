@@ -1,5 +1,6 @@
 [Unit]
 BindsTo=autostart.target
+After=windowmanager.target
 ConditionEnvironment=MACHINE_DEFAULT_SCREENPROFILE
 
 [Service]

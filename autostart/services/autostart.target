@@ -1,4 +1,7 @@
 [Unit]
+BindsTo=windowmanager.target
+After=windowmanager.target
+
 Wants=blueman.service
 Wants=dpms.service
 Wants=dunst.service

@@ -1,0 +1,5 @@
+[Service]
+Type=exec
+ExecStart=i3 --config %h/.i3/config
+
+Restart=no

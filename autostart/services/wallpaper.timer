@@ -1,5 +1,6 @@
 [Unit]
 BindsTo=autostart.target
+After=windowmanager.target
 
 [Timer]
 OnActiveSec=0s
