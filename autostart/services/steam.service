@@ -1,0 +1,9 @@
+[Unit]
+BindsTo=autostart.target
+After=windowmanager.target
+After=i3.service
+
+ConditionEnvironment=MACHINE_HAS_STEAM=true
+
+[Service]
+ExecStart=/usr/bin/steam
