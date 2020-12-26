@@ -196,7 +196,7 @@ packages:
     zathura:
       fedora: ["zathura-pdf-mupdf"]
       ubuntu: ["zathura", "zathura-pdf-poppler"]
-      archlinux: ["zathura", "zathura-pdf-mupdf"]
+      archlinux: ["zathura", "zathura-pdf-poppler"]
     pandoc:
       fedora: ["pandoc"]
       ubuntu: ["pandoc"]
