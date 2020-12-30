@@ -21,6 +21,8 @@ fi
 start_wm() {
     log "starting i3"
     systemctl --user start windowmanager.target
+    sleep 1
+    systemctl --user start autostart.target
     sleep inf
     # exec systemd-run --user --unit i3_user --pty --setenv=DISPLAY=${DISPLAY} i3 -c "$HOME/.i3/config" >> "$LOGDIR/i3/i3.log"
 }
