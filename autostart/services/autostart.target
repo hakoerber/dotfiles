@@ -3,6 +3,7 @@ BindsTo=windowmanager.target
 After=windowmanager.target
 
 Wants=blueman.service
+Wants=discord.service
 Wants=dpms.service
 Wants=dunst.service
 Wants=firefox.service
@@ -17,7 +18,9 @@ Wants=redshift.service
 Wants=restic.timer
 Wants=screencfg.service
 Wants=spotify.service
+Wants=steam.service
 Wants=touchpad.service
 Wants=wallpaper.timer
 Wants=xresources.service
 Wants=yubikey-touch-detector.service
+
