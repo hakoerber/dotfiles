@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+case "$1" in
+mycloud)
+    shift
+    command kubectl --kubeconfig=<(pass show mycloud/kubeconfig) "${@}"
+    ;;
+*)
+    command kubectl "${@}"
+    ;;
+esac
