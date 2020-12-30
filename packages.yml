@@ -493,6 +493,10 @@ packages:
       fedora: []
       ubuntu: []
       archlinux: ["imagemagick"]
+    mpv:
+      fedora: []
+      ubuntu: []
+      archlinux: ["mpv"]
 
   remove:
     mousepad:
