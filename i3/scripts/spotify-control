@@ -16,5 +16,5 @@ previous)
     ;;
 esac
 
-playerctl "${cmd}"
+playerctl -p spotify "${cmd}"
 ~/.i3/scripts/bar-update spotify

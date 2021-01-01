@@ -19,11 +19,11 @@ lock()
 {
     set -x
     playing=0
-    if [[ "$(playerctl status)" == "Playing" ]] ; then
+    if [[ "$(playerctl -p spotify status)" == "Playing" ]] ; then
         playing=1
     fi
     if (( $playing )) ; then
-        playerctl pause
+        playerctl -p spotify pause
     fi
 
     if [[ -f "$LOCKSCREEN" ]] ; then
@@ -37,7 +37,7 @@ lock()
             --color "$_fallback_color"
     fi
     if (( $playing )) ; then
-        playerctl play
+        playerctl -p spotify play
     fi
 }
 
