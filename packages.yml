@@ -168,7 +168,7 @@ packages:
     pass:
       fedora: ["pass"]
       ubuntu: ["pass"]
-      archlinux: ["pass"]
+      archlinux: ["pass", "passff-host"]
     keepassx:
       fedora: ["keepassx"]
       ubuntu: ["keepassx"]
