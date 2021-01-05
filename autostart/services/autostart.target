@@ -8,6 +8,7 @@ Wants=dpms.service
 Wants=dunst.service
 Wants=firefox.service
 Wants=gpg-agent.service
+Wants=gnome-keyring.service
 Wants=keepassx.service
 Wants=keyboard.service
 Wants=laptop-lid.service

@@ -1,6 +1,7 @@
 [Unit]
 BindsTo=autostart.target
 After=windowmanager.target
+After=gnome-keyring.service
 
 ConditionEnvironment=MACHINE_HAS_NEXTCLOUD=true
 

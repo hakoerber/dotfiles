@@ -1,0 +1,6 @@
+[Unit]
+BindsTo=autostart.target
+After=windowmanager.target
+
+[Service]
+ExecStart=/usr/bin/env gnome-keyring-daemon --start --foreground --components secrets
