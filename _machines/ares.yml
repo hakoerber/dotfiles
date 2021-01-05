@@ -19,16 +19,16 @@ users:
     MACHINE_HAS_NEXTCLOUD: "true"
 
 screen:
-  1: eDP-1
-  2: eDP-1
-  3: eDP-1
-  4: eDP-1
-  5: eDP-1
-  6: eDP-1
-  7: eDP-1
-  8: eDP-1
-  9: eDP-1
-  0: eDP-1
+  1: DisplayPort-0
+  2: DisplayPort-0
+  3: DisplayPort-0
+  4: DisplayPort-0
+  5: DisplayPort-0
+  6: DisplayPort-0
+  7: DisplayPort-0
+  8: DisplayPort-0
+  9: DisplayPort-0
+  0: DisplayPort-0
 
 workspace:
 
