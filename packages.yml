@@ -497,6 +497,10 @@ packages:
       fedora: []
       ubuntu: []
       archlinux: ["mpv"]
+    gnome-keyring:
+      fedora: []
+      ubuntu: []
+      archlinux: ["gnome-keyring"]
 
   remove:
     mousepad:
