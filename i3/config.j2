@@ -109,9 +109,17 @@ workspace $workspace8 output {{ machine.screen.8 }}
 workspace $workspace9 output {{ machine.screen.9 }}
 workspace $workspace10 output {{ machine.screen.0 }}
 
+
 assign [class="^Keepassx$"] $workspace8
+
+# See https://github.com/i3/i3/issues/2060
+for_window [class="^Spotify$"] move to workspace $workspace9
 assign [class="^Spotify$"] $workspace9
+
 assign [class="^Google-chrome$"] $workspace7
+assign [class="^Chromium$"] $workspace7
+assign [class="^discord"] $workspace7
+assign [class="^Steam"] $workspace5
 
 ################################################################################
 ### KEYBINDINGS ################################################################
