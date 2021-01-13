@@ -66,3 +66,5 @@ dotfiles:
     to: .config/qt5ct/qt5ct.conf
   - from: screencfg
     to: .screencfg
+  - from: scripts
+    to: scripts
