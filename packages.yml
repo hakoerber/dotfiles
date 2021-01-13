@@ -200,7 +200,7 @@ packages:
     pandoc:
       fedora: ["pandoc"]
       ubuntu: ["pandoc"]
-      archlinux: ["pandoc"]
+      archlinux: ["pandoc", "texlive-core", "texlive-fontsextra", "texlive-latexextra"]
     libvirt:
       fedora: ["virt-manager", "libvirt-client"]
       ubuntu: ["virt-manager", "libvirt-bin"]
