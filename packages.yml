@@ -487,19 +487,19 @@ packages:
       archlinux: ["stress"]
     mpris:
       fedora: []
-      ubuntu: []
+      ubuntu: ["stress"]
       archlinux: ["playerctl"]
     imagemagick:
       fedora: []
-      ubuntu: []
+      ubuntu: ["imagemagick"]
       archlinux: ["imagemagick"]
     mpv:
       fedora: []
-      ubuntu: []
+      ubuntu: ["mpv"]
       archlinux: ["mpv"]
     gnome-keyring:
       fedora: []
-      ubuntu: []
+      ubuntu: ["gnome-keyring"]
       archlinux: ["gnome-keyring"]
 
   remove:
