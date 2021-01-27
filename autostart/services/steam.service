@@ -3,7 +3,7 @@ BindsTo=autostart.target
 After=windowmanager.target
 After=i3.service
 
-ConditionEnvironment=MACHINE_HAS_STEAM=true
+ConditionPathExists=%h/.var/run/features/steam
 
 [Service]
 ExecStart=/usr/bin/env steam

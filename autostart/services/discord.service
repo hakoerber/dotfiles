@@ -2,7 +2,7 @@
 BindsTo=autostart.target
 After=windowmanager.target
 
-ConditionEnvironment=MACHINE_HAS_DISCORD=true
+ConditionPathExists=%h/.var/run/features/discord
 
 [Service]
 ExecStart=/usr/bin/env discord

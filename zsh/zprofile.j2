@@ -54,6 +54,18 @@ umask 0022
 export {{ k }}="{{ v }}"
 {% endfor %}
 
+export FEATURE_DIR="${RUNDIR}/features/"
+rm -rf "${FEATURE_DIR}"/
+mkdir -p "${FEATURE_DIR}"
+
+[[ $MACHINE_HAS_NEXTCLOUD     == "true" ]] && touch "${FEATURE_DIR}"/nextcloud
+[[ $MACHINE_HAS_KEEPASSX      == "true" ]] && touch "${FEATURE_DIR}"/keepassx
+[[ $MACHINE_HAS_STEAM         == "true" ]] && touch "${FEATURE_DIR}"/steam
+[[ $MACHINE_HAS_DISCORD       == "true" ]] && touch "${FEATURE_DIR}"/discord
+[[ $MACHINE_HAS_RESTIC_BACKUP == "true" ]] && touch "${FEATURE_DIR}"/restic_backup
+
+[[ $MACHINE_TYPE == "laptop" ]] && touch "${FEATURE_DIR}"/matchine_is_laptop
+
 # Make all environment variables also usable in the systemd user instancee
 systemctl --user import-environment
 

@@ -1,5 +1,5 @@
 [Unit]
-ConditionEnvironment=MACHINE_HAS_RESTIC_BACKUP=true
+ConditionPathExists=%h/.var/run/features/restic_backup
 
 [Service]
 Type=oneshot
