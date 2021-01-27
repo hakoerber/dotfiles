@@ -31,7 +31,7 @@ args = parser.parse_args()
 config_path = args.config
 
 try:
-    config = yaml.load(open(config_path))
+    config = yaml.safe_load(open(config_path))
 except FileNotFoundError:
     fail("File {0} not found".format(config_path))
 
