@@ -3,6 +3,4 @@ BindsTo=autostart.target
 After=windowmanager.target
 
 [Timer]
-OnCalendar=Mon..Fri 09:00:00
 OnCalendar=Mon..Fri 12:00:00
-OnCalendar=Mon..Fri 16:00:00
