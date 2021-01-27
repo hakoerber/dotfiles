@@ -392,7 +392,9 @@
         checksum: true
         delete: true
 
-    when: not stat_portfolio_performance_installation.stat.exists
+    when:
+      - not stat_portfolio_performance_installation.stat.exists
+      - not ansible_check_mode
 
   - name: link portfolio performance
     file:
