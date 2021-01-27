@@ -3,4 +3,5 @@ BindsTo=autostart.target
 After=windowmanager.target
 
 [Service]
-ExecStart=/usr/bin/spotify
+ExecStart=/usr/bin/env spotify
+Environment=DISPLAY=:0

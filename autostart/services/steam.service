@@ -6,4 +6,5 @@ After=i3.service
 ConditionEnvironment=MACHINE_HAS_STEAM=true
 
 [Service]
-ExecStart=/usr/bin/steam
+ExecStart=/usr/bin/env steam
+Environment=DISPLAY=:0

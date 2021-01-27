@@ -3,4 +3,5 @@ BindsTo=autostart.target
 After=windowmanager.target
 
 [Service]
-ExecStart=/usr/bin/pasystray
+ExecStart=/usr/bin/env pasystray
+Environment=DISPLAY=:0

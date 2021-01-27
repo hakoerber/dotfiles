@@ -4,6 +4,7 @@ After=windowmanager.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/setxkbmap -layout de -variant nodeadkeys
-ExecStart=/usr/bin/xset r rate 150 50
+ExecStart=/usr/bin/env setxkbmap -layout de -variant nodeadkeys
+ExecStart=/usr/bin/env xset r rate 150 50
 RemainAfterExit=true
+Environment=DISPLAY=:0

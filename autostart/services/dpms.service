@@ -4,5 +4,6 @@ After=windowmanager.target
 
 [Service]
 Type=oneshot
-ExecStart=xset s off
-ExecStart=xset dpms 0 0 300
+ExecStart=/usr/bin/env xset s off
+ExecStart=/usr/bin/env xset dpms 0 0 300
+Environment=DISPLAY=:0

@@ -3,4 +3,5 @@ BindsTo=autostart.target
 After=windowmanager.target
 
 [Service]
-ExecStart=/usr/bin/yubikey-touch-detector -libnotify
+ExecStart=/usr/bin/env yubikey-touch-detector -libnotify
+Environment=DISPLAY=:0

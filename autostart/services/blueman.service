@@ -3,4 +3,5 @@ BindsTo=autostart.target
 After=windowmanager.target
 
 [Service]
-ExecStart=/usr/bin/blueman-applet
+ExecStart=/usr/bin/env blueman-applet
+Environment=DISPLAY=:0
