@@ -4,4 +4,5 @@ After=windowmanager.target
 ConditionEnvironment=MACHINE_HAS_KEEPASSX=true
 
 [Service]
-ExecStart=/usr/bin/keepassx --keyfile %h/.secret/main.key %h/.secret/main.kdbx
+ExecStart=/usr/bin/env keepassx --keyfile %h/.secret/main.key %h/.secret/main.kdbx
+Environment=DISPLAY=:0

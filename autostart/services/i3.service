@@ -1,5 +1,6 @@
 [Service]
 Type=exec
-ExecStart=i3 --config %h/.i3/config
+ExecStart=/usr/bin/env i3 --config %h/.i3/config
+Environment=DISPLAY=:0
 
 Restart=no

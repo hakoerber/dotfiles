@@ -4,5 +4,6 @@ After=windowmanager.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/xrdb -merge -I%h %h/.Xresources
+ExecStart=/usr/bin/env xrdb -merge -I%h %h/.Xresources
 RemainAfterExit=true
+Environment=DISPLAY=:0

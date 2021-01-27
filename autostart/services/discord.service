@@ -5,4 +5,5 @@ After=windowmanager.target
 ConditionEnvironment=MACHINE_HAS_DISCORD=true
 
 [Service]
-ExecStart=/usr/bin/discord
+ExecStart=/usr/bin/env discord
+Environment=DISPLAY=:0

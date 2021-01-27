@@ -3,4 +3,5 @@ BindsTo=autostart.target
 After=windowmanager.target
 
 [Service]
-ExecStart=/usr/bin/nm-applet
+ExecStart=/usr/bin/env nm-applet
+Environment=DISPLAY=:0

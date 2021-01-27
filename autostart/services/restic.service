@@ -5,3 +5,4 @@ ConditionEnvironment=MACHINE_HAS_RESTIC_BACKUP=true
 Type=oneshot
 ExecStart=%h/bin/restic-backup
 RemainAfterExit=true
+Environment=DISPLAY=:0

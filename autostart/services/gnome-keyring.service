@@ -4,3 +4,4 @@ After=windowmanager.target
 
 [Service]
 ExecStart=/usr/bin/env gnome-keyring-daemon --start --foreground --components secrets
+Environment=DISPLAY=:0

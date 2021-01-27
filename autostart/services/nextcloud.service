@@ -6,4 +6,5 @@ After=gnome-keyring.service
 ConditionEnvironment=MACHINE_HAS_NEXTCLOUD=true
 
 [Service]
-ExecStart=/usr/bin/nextcloud --background
+ExecStart=/usr/bin/env nextcloud --background
+Environment=DISPLAY=:0

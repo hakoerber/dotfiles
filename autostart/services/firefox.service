@@ -3,4 +3,5 @@ BindsTo=autostart.target
 After=windowmanager.target
 
 [Service]
-ExecStart=/usr/bin/firefox --setDefaultBrowser -P default
+ExecStart=/usr/bin/env firefox --setDefaultBrowser -P default
+Environment=DISPLAY=:0

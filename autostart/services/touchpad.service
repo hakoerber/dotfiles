@@ -5,13 +5,14 @@ ConditionEnvironment=MACHINE_TYPE=laptop
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/synclient VertEdgeScroll=0
-ExecStart=/usr/bin/synclient VertTwoFingerScroll=1
-ExecStart=/usr/bin/synclient MaxSpeed=2.2
-ExecStart=/usr/bin/synclient AccelFactor=0.08
-ExecStart=/usr/bin/synclient TapButton1=1
-ExecStart=/usr/bin/synclient CoastingSpeed=0
-ExecStart=/usr/bin/synclient PalmDetect=1
-ExecStart=/usr/bin/synclient PalmMinWidth=20
-ExecStart=/usr/bin/synclient PalmMinZ=1
+ExecStart=/usr/bin/env synclient VertEdgeScroll=0
+ExecStart=/usr/bin/env synclient VertTwoFingerScroll=1
+ExecStart=/usr/bin/env synclient MaxSpeed=2.2
+ExecStart=/usr/bin/env synclient AccelFactor=0.08
+ExecStart=/usr/bin/env synclient TapButton1=1
+ExecStart=/usr/bin/env synclient CoastingSpeed=0
+ExecStart=/usr/bin/env synclient PalmDetect=1
+ExecStart=/usr/bin/env synclient PalmMinWidth=20
+ExecStart=/usr/bin/env synclient PalmMinZ=1
 RemainAfterExit=true
+Environment=DISPLAY=:0
