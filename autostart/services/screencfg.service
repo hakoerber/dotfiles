@@ -1,7 +1,6 @@
 [Unit]
 BindsTo=autostart.target
 After=windowmanager.target
-ConditionEnvironment=MACHINE_DEFAULT_SCREENPROFILE
 
 [Service]
 Type=oneshot
@@ -9,6 +8,6 @@ Type=oneshot
 
 # > The command to execute may contain spaces, but control characters are not
 # > allowed.
-ExecStart=/usr/bin/env bash -c '%h/.screencfg/${MACHINE_DEFAULT_SCREENPROFILE}.sh'
+ExecStart=/usr/bin/env screencfg "%h/.screencfg/%H/default.yml"
 RemainAfterExit=true
 Environment=DISPLAY=:0
