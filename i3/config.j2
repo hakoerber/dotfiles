@@ -212,8 +212,10 @@ assign [class="^Wine$"] $workspace10
     bindsym F2 exec --no-startup-id ~/.i3/scripts/screenmenu
 
     bindsym $mod+F1 exec --no-startup-id ~/.i3/scripts/i3exit lock
-    bindsym $mod+F2 exec --no-startup-id screencfg ~/.screencfg/all.yml ; exec systemctl --user restart keyboard.service
-    bindsym $mod+F3 exec --no-startup-id screencfg ~/.screencfg/laptop.yml ; exec systemctl --user restart keyboard.service
+    bindsym $mod+F2 exec --no-startup-id screencfg ~/.screencfg/{{ ansible_hostname }}/default.yml ; exec systemctl --user restart keyboard.service
+    {% for screencfg in machine.screencfgs -%}
+    bindsym $mod+{{ screencfg.key }} exec --no-startup-id screencfg ~/.screencfg/{{ ansible_hostname }}/{{ screencfg.name }}.yml ; exec systemctl --user restart keyboard.service
+    {% endfor -%}
     bindsym $mod+F4 exec --no-startup-id ~/.i3/scripts/i3exit suspend
     bindsym $mod+Home exec --no-startup-id ~/.i3/scripts/shutdown-menu
 
