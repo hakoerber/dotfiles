@@ -231,11 +231,11 @@ packages:
       archlinux: ["libreoffice-fresh", "libreoffice-fresh-de"]
     qt-theming:
       fedora: ["breeze-cursor-theme", "breeze-icon-theme"]
-      ubuntu: ["breeze-cursor-theme", "breeze-icon-theme", "breeze"]
+      ubuntu: ["breeze-cursor-theme", "breeze-icon-theme", "breeze", "qt5ct"]
       archlinux: ["breeze", "breeze-icons", "breeze-grub", "qt5ct"]
     gtk-theming:
       fedora: ["breeze-gtk"]
-      ubuntu: ["gtk3-engines-breeze"]
+      ubuntu: ["gtk3-engines-breeze", "lxappearance"]
       archlinux: ["breeze-gtk", "lxappearance"]
     xcompmgr:
       fedora: ["xcompmgr"]
