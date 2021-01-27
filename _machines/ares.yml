@@ -30,6 +30,8 @@ screen:
   9: DisplayPort-0
   0: DisplayPort-0
 
+screencfgs: []
+
 workspace:
 
 environment:

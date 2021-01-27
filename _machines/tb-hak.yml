@@ -47,6 +47,10 @@ workspace:
   9: music
   10: pim
 
+screencfgs:
+  - name: three-screens
+    key: F3
+
 environment:
   MACHINE_TYPE: "laptop"
   MACHINE_HAS_KEEPASSX: "true"
