@@ -54,6 +54,8 @@ for output in config['outputs']:
         # cmd.append('--auto')
         for k, v in output['opts'].items():
             cmd.extend(['--{}'.format(k), str(v)])
+        for k,v  in output.get('set', {}).items():
+            cmd.extend(['--set', k, v])
 
 run(cmd)
 run(['i3-msg', 'restart'])
