@@ -163,7 +163,7 @@ packages:
       archlinux: ["pinta"]
     py3status:
       fedora: ["py3status", "python3-pytz", "python3-tzlocal"]
-      ubuntu: ["py3status", "python3-arrow", "python3-tzlocal"]
+      ubuntu: ["py3status", "python3-arrow", "python3-tzlocal", "python3-pydbus"]
       archlinux: ["py3status", "python-pytz", "python-tzlocal", "python-dbus", "python-pydbus"]
     pass:
       fedora: ["pass"]
