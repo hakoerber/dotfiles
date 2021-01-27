@@ -60,8 +60,10 @@ dotfiles:
     to: .config/rofi/config
   - from: gtk/gtk-3.0.ini
     to: .config/gtk-3.0/settings.ini
+    template: true
   - from: gtk/gtkrc-2.0
     to: .gtkrc-2.0
+    template: true
   - from: qt/qt5ct.conf
     to: .config/qt5ct/qt5ct.conf
   - from: screencfg
