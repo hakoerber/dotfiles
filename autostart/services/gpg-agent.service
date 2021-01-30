@@ -5,4 +5,4 @@ After=windowmanager.target
 [Service]
 Type=forking
 ExecStart=/usr/bin/env gpg-agent --homedir %h/.gnupg --no-detach --daemon
-Environment=DISPLAY=:0
+PassEnvironment=DISPLAY

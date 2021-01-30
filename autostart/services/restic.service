@@ -5,4 +5,4 @@ ConditionPathExists=%h/.var/run/features/restic_backup
 Type=oneshot
 ExecStart=%h/bin/restic-backup
 RemainAfterExit=true
-Environment=DISPLAY=:0
+PassEnvironment=DISPLAY
