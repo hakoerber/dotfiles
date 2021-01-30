@@ -15,6 +15,7 @@ users:
   gpg_agent_for_ssh: false
   environment:
     MACHINE_HAS_NEXTCLOUD: "false"
+    MACHINE_HAS_RESTIC_BACKUP: "true"
 - name: hannes-private
   group: tpp
   vt: 2
@@ -26,6 +27,7 @@ users:
     master_key: "0xB5C002530C6A2053"
   environment:
     MACHINE_HAS_NEXTCLOUD: "true"
+    MACHINE_HAS_RESTIC_BACKUP: "false"
 
 screen:
   1: DP-1-1
@@ -56,6 +58,5 @@ screencfgs:
 environment:
   MACHINE_TYPE: "laptop"
   MACHINE_HAS_KEEPASSX: "true"
-  MACHINE_HAS_RESTIC_BACKUP: "true"
   MACHINE_RESOLUTION_X: "1920"
   MACHINE_RESOLUTION_Y: "1080"
