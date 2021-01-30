@@ -1,5 +1,5 @@
 [Service]
-Type=exec
+Type=simple
 ExecStart=/usr/bin/env i3 --config %h/.i3/config
 PassEnvironment=DISPLAY
 
