@@ -20,6 +20,7 @@ fi
 
 start_wm() {
     log "starting i3"
+    systemctl --user import-environment
     systemctl --user start windowmanager.target
     sleep 1
     systemctl --user start autostart.target
