@@ -10,4 +10,4 @@ Type=oneshot
 # > allowed.
 ExecStart=/usr/bin/env screencfg "%h/.screencfg/%H/default.yml"
 RemainAfterExit=true
-Environment=DISPLAY=:0
+PassEnvironment=DISPLAY

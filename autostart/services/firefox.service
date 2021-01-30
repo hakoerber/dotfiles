@@ -4,4 +4,4 @@ After=windowmanager.target
 
 [Service]
 ExecStart=/usr/bin/env firefox --setDefaultBrowser -P default
-Environment=DISPLAY=:0
+PassEnvironment=DISPLAY

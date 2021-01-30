@@ -7,4 +7,4 @@ ConditionPathExists=%h/.var/run/features/nextcloud
 
 [Service]
 ExecStart=/usr/bin/env nextcloud --background
-Environment=DISPLAY=:0
+PassEnvironment=DISPLAY

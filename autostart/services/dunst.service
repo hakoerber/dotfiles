@@ -4,4 +4,4 @@ After=windowmanager.target
 
 [Service]
 ExecStart=/usr/bin/env dunst -config %h/.config/dunstrc
-Environment=DISPLAY=:0
+PassEnvironment=DISPLAY

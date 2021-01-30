@@ -6,4 +6,4 @@ ConditionPathExists=%h/.var/run/features/discord
 
 [Service]
 ExecStart=/usr/bin/env discord
-Environment=DISPLAY=:0
+PassEnvironment=DISPLAY

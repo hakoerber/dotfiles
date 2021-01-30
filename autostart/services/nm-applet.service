@@ -4,4 +4,4 @@ After=windowmanager.target
 
 [Service]
 ExecStart=/usr/bin/env nm-applet
-Environment=DISPLAY=:0
+PassEnvironment=DISPLAY

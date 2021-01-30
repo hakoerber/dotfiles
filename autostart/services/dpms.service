@@ -6,4 +6,4 @@ After=windowmanager.target
 Type=oneshot
 ExecStart=/usr/bin/env xset s off
 ExecStart=/usr/bin/env xset dpms 0 0 300
-Environment=DISPLAY=:0
+PassEnvironment=DISPLAY

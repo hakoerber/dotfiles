@@ -15,4 +15,4 @@ ExecStart=/usr/bin/env synclient PalmDetect=1
 ExecStart=/usr/bin/env synclient PalmMinWidth=20
 ExecStart=/usr/bin/env synclient PalmMinZ=1
 RemainAfterExit=true
-Environment=DISPLAY=:0
+PassEnvironment=DISPLAY

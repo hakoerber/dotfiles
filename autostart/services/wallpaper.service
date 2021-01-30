@@ -2,4 +2,4 @@
 Type=oneshot
 ExecStart=/usr/bin/env setrandom --recursive --onlylarge --mode=stretch /usr/share/wallpapers
 RemainAfterExit=true
-Environment=DISPLAY=:0
+PassEnvironment=DISPLAY
