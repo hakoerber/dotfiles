@@ -63,6 +63,7 @@ mkdir -p "${FEATURE_DIR}"
 [[ $MACHINE_HAS_STEAM         == "true" ]] && touch "${FEATURE_DIR}"/steam
 [[ $MACHINE_HAS_DISCORD       == "true" ]] && touch "${FEATURE_DIR}"/discord
 [[ $MACHINE_HAS_RESTIC_BACKUP == "true" ]] && touch "${FEATURE_DIR}"/restic_backup
+[[ $MACHINE_HAS_ELEMENT       == "true" ]] && touch "${FEATURE_DIR}"/element
 
 [[ $MACHINE_TYPE == "laptop" ]] && touch "${FEATURE_DIR}"/matchine_is_laptop
 

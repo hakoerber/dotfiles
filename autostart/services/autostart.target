@@ -6,6 +6,7 @@ Wants=blueman.service
 Wants=discord.service
 Wants=dpms.service
 Wants=dunst.service
+Wants=element.service
 Wants=firefox.service
 Wants=gpg-agent.service
 Wants=gnome-keyring.service
