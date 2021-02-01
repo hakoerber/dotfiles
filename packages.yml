@@ -501,6 +501,10 @@ packages:
       fedora: []
       ubuntu: ["gnome-keyring"]
       archlinux: ["gnome-keyring"]
+    element:
+      fedora: []
+      ubuntu: []
+      archlinux: ["element-desktop"]
 
   remove:
     mousepad:

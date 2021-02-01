@@ -1,0 +1,10 @@
+[Unit]
+BindsTo=autostart.target
+After=windowmanager.target
+After=i3.service
+
+ConditionPathExists=%h/.var/run/features/element
+
+[Service]
+ExecStart=/usr/bin/env element-desktop
+PassEnvironment=DISPLAY
