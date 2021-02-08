@@ -141,7 +141,7 @@ man() {
 }
 
 embiggen() {
-    enscript --no-header --media=A4 --landscape --font="DejaVuSansMono30" -o - | ps2pdf - | zathura -
+    enscript --no-header --media=A4 --landscape --font="DejaVuSansMono30" -o - 2>/dev/null | ps2pdf - | zathura -
 }
 
 resolvecd() {
