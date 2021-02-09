@@ -4,7 +4,6 @@ set -o nounset
 set -o errexit
 
 tmpdir="$(mktemp -d)"
-tmpdir=/tmp/dotfiles
 
 git archive --format tar --output "${tmpdir}/dotfiles.tar" HEAD
 
@@ -17,24 +16,29 @@ git submodule foreach 'bash -x -c "
 
 gzip -k -f -v "${tmpdir}/dotfiles.tar"
 
-exit 1
+test_ares() {
+    docker pull docker.io/library/archlinux:base
+    docker run -ti --rm -v ${tmpdir}/dotfiles.tar.gz:/tmp/dotfiles.tar.gz:ro --hostname ares docker.io/library/archlinux:base sh -c '
+        set -o errexit
 
-docker pull docker.io/library/archlinux:base
-docker run -ti --rm -v ${tmpdir}/dotfiles.tar.gz:/tmp/dotfiles.tar.gz:ro --hostname ares docker.io/library/archlinux:base sh -c '"
-    set -o errexit
+        pacman -Syu --noconfirm python3
+        cd $(mktemp -d)
+        tar xf /tmp/dotfiles.tar.gz -C .
+        ANSIBLE_EXTRA_ARGS="-e manage_services=false" ./install.sh
+        read -p "Done, [return] to continue "
+    '
+}
 
-    pacman -Syu --noconfirm python3
-    cd $(mktemp -d)
-    tar xf /tmp/dotfiles.tar.gz -C .
-    ANSIBLE_EXTRA_ARGS="-e manage_services=false" ./install.sh
-    read -p "Done, [return] to continue "
-'
+test_tb_hak() {
+    docker pull docker.io/library/ubuntu:18.04
+    docker run -ti --rm -v ${tmpdir}/dotfiles.tar.gz:/tmp/dotfiles.tar.gz:ro --hostname tb-hak docker.io/library/ubuntu:18.04 sh -c '
+        set -o errexit
 
-docker pull docker.io/library/ubuntu:18.04
-docker run -ti --rm -v ${tmpdir}/dotfiles.tar.gz:/tmp/dotfiles.tar.gz:ro --hostname tb-hak docker.io/library/ubuntu:18.04 sh -c '
-    set -o errexit
+        cd $(mktemp -d)
+        tar xf /tmp/dotfiles.tar.gz -C .
+        ANSIBLE_EXTRA_ARGS="-e manage_services=false" ./install.sh
+    '
+}
 
-    cd $(mktemp -d)
-    tar xf /tmp/dotfiles.tar.gz -C .
-    ANSIBLE_EXTRA_ARGS="-e manage_services=false" ./install.sh
-'
+test_ares
+test_tb_hak
