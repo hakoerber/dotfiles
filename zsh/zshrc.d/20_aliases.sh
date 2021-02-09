@@ -68,7 +68,7 @@ alias twa="task add"
 alias twd="task done"
 alias inbox="task add +inbox"
 
-alias yaml2json="python -c 'import sys, yaml, json; json.dump(yaml.load(sys.stdin), sys.stdout, indent=4)'"
+alias yaml2json="python -c 'import sys, yaml, json; json.dump(yaml.safe_load(sys.stdin), sys.stdout, indent=4)'"
 alias json2yaml="python -c 'import sys, yaml, json; yaml.safe_dump(json.loads(sys.stdin.read()), stream=sys.stdout)'"
 
 alias currentbranch='git rev-parse --abbrev-ref HEAD'
