@@ -47,9 +47,7 @@ sudowrap() {
 
 _install() {
     _package="$1" ; shift
-    if [[ $NAME == "Fedora" ]] ; then
-        sudowrap dnf install --assumeyes "${_package}"
-    elif [[ $NAME == "Ubuntu" ]] ; then
+    if [[ $NAME == "Ubuntu" ]] ; then
         sudowrap apt-get install --assume-yes "${_package}"
     elif [[ $NAME == "Arch Linux" ]] ; then
         sudowrap pacman -S --noconfirm "${_package}"
