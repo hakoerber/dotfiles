@@ -36,6 +36,7 @@
       - docker
       - sudonopw
       - games
+      - kvm
   when: distro == 'archlinux'
   tags: [always]
 
