@@ -5,6 +5,8 @@ set -o errexit
 
 tmpdir="$(mktemp -d)"
 
+trap "rm -rf ${tmpdir}" EXIT
+
 git archive --format tar --output "${tmpdir}/dotfiles.tar" HEAD
 
 git submodule foreach 'bash -x -c "
