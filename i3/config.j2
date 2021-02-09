@@ -93,6 +93,8 @@
 
     set $kill Shift+Q
 
+    set $screenshot p
+
 
 ################################################################################
 ### WORKSPACE ASSIGNMENTS ######################################################
@@ -219,6 +221,9 @@ assign [class="^Wine$"] $workspace10
     {% endfor -%}
     bindsym $mod+F4 exec --no-startup-id ~/.i3/scripts/i3exit suspend
     bindsym $mod+Home exec --no-startup-id ~/.i3/scripts/shutdown-menu
+
+    bindsym $mod+$screenshot exec --no-startup-id sh -c 'maim | xclip -selection clipboard -t image/png'
+    bindsym $mod+Shift+$screenshot exec --no-startup-id sh -c 'maim --select | xclip -selection clipboard -t image/png'
 
     bindsym $mod+Shift+v exec --no-startup-id redshift-toggle
 
