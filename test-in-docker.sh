@@ -19,16 +19,33 @@ git submodule foreach 'bash -x -c "
 gzip -k -f -v "${tmpdir}/dotfiles.tar"
 
 test_ares() {
+    if [[ -d "/var/cache/pacman/pkg/" ]] ; then
+        dockeropts=(-v "/var/cache/pacman/pkg/:/var/cache/pacman/pkg_host/")
+    fi
     docker pull docker.io/library/archlinux:base
-    docker run -ti --rm -v ${tmpdir}/dotfiles.tar.gz:/tmp/dotfiles.tar.gz:ro --hostname ares docker.io/library/archlinux:base sh -c '
-        set -o errexit
+    docker run \
+        -ti \
+        --rm \
+        -v ${tmpdir}/dotfiles.tar.gz:/tmp/dotfiles.tar.gz:ro \
+        --mount type=tmpfs,destination=/var/cache/pacman/pkg/ \
+        "${dockeropts[@]}" \
+        --hostname ares \
+        docker.io/library/archlinux:base \
+        sh -c '
+            set -o errexit
 
-        pacman -Syu --noconfirm python3
-        cd $(mktemp -d)
-        tar xf /tmp/dotfiles.tar.gz -C .
-        ANSIBLE_EXTRA_ARGS="-e manage_services=false" ./install.sh
-        read -p "Done, [return] to continue "
-    '
+            # Uncomment CacheDir and append the host pacman cache as cachedir
+            # At worst, the cache directory will be ignored if it does not exist
+            # Pacman will always prefer the first cache directory, so newly downloaded
+            # packages will stay in the container
+            sed -i '"'"'s/^#\?\(CacheDir.*\)/\1\nCacheDir = \/var\/cache\/pacman\/pkg_host\//'"'"' /etc/pacman.conf
+
+            pacman -Syu --noconfirm python3
+            cd $(mktemp -d)
+            tar xf /tmp/dotfiles.tar.gz -C .
+            ANSIBLE_EXTRA_ARGS="-e manage_services=false" ./install.sh
+            read -p "Done, [return] to continue "
+        '
 }
 
 test_tb_hak() {
