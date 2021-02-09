@@ -344,9 +344,6 @@ bindsym XF86AudioPrev exec $scriptdir/spotify-control previous
 bindsym XF86MonBrightnessUp   exec --no-startup-id xbacklight -inc 8 ; exec --no-startup-id $scriptdir/update-status
 bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -dec 8 ; exec --no-startup-id $scriptdir/update-status
 
-bindsym $mod+o exec --no-startup-id xautorandr ; exec --no-startup-id kill -SIGUSR2 $(cat $RUNDIR/wallchanger.$XDG_SESSION_ID.pid)'"
-bindsym $mod+p exec --no-startup-id kill -SIGUSR1 $(cat $RUNDIR/wallchanger.$XDG_SESSION_ID.pid)
-
 bindsym $mod+m exec --no-startup-id $scriptdir/pa-volume mute-toggle-mic
 
 ##############################################################################
