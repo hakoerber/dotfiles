@@ -34,16 +34,6 @@
       - vboxusers
       - wireshark
       - docker
-  when: distro == 'fedora'
-  tags: [always]
-
-- set_fact:
-    user_groups:
-      - libvirt
-      - wheel
-      - vboxusers
-      - wireshark
-      - docker
       - sudonopw
       - games
   when: distro == 'archlinux'

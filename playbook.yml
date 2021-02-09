@@ -17,7 +17,7 @@
 
     - name: Check for valid distro
       assert:
-        that: distro in ('fedora', 'ubuntu', 'archlinux')
+        that: distro in ('ubuntu', 'archlinux')
 
     - block:
       - block:
@@ -42,26 +42,6 @@
             autoclean: true
           become: true
         when: distro == 'ubuntu'
-
-      - block:
-        - name: Update dnf cache
-          dnf:
-            update_cache: true
-          become: true
-
-        - name: Upgrade system
-          dnf:
-            name: '*'
-            state: latest
-            update_cache: false
-          become: true
-
-        - name: Remove unused packages
-          dnf:
-            autoremove: true
-            update_cache: false
-          become: true
-        when: distro == 'fedora'
 
       - block:
         - name: enable multilib repository
@@ -92,15 +72,6 @@
 
         when: distro == 'archlinux'
       tags: [update_system]
-
-    - name: install selinux specials on fedora
-      dnf:
-        state: installed
-        name:
-          - python3-libselinux
-          - policycoreutils-python-utils
-      become: true
-      when: distro == 'fedora'
 
     - block:
       - name: install sudo
@@ -261,11 +232,6 @@
 
     - set_fact:
         disable_services:
-          - sshd
-      when: distro == 'fedora'
-
-    - set_fact:
-        disable_services:
           - ssh
       when: distro == 'ubuntu'
 
@@ -282,16 +248,6 @@
       with_items: "{{ disable_services }}"
       become: true
       when: manage_services|default(true)|bool
-
-    - set_fact:
-        enable_services:
-          - NetworkManager
-          # does not work with fedora 31 due to the switch to cgroups v2:
-          # https://github.com/docker/cli/issues/2104
-          # https://bugzilla.redhat.com/show_bug.cgi?id=1746355#c1
-          # - docker
-          - libvirtd
-      when: distro == 'fedora'
 
     - set_fact:
         enable_services:
