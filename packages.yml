@@ -509,6 +509,10 @@ packages:
       fedora: []
       ubuntu: []
       archlinux: ["element-desktop"]
+    maim:
+      fedora: []
+      ubuntu: []
+      archlinux: ["maim"]
 
   remove:
     mousepad:
