@@ -379,6 +379,9 @@ packages:
     maim:
       ubuntu: []
       archlinux: ["maim"]
+    mkinitcpio:
+      ubuntu: []
+      archlinux: ["mkinitcpio"]
 
   remove:
     mousepad:
