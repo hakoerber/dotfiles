@@ -1,7 +1,7 @@
 ansible==2.10.4
 ansible-base==2.10.3
 cffi==1.14.4
-cryptography==3.2.1
+cryptography==3.3.2
 ipaddress==1.0.23
 Jinja2==2.11.3
 jmespath==0.10.0
