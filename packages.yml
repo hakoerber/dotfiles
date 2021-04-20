@@ -388,6 +388,9 @@ packages:
     mkinitcpio:
       ubuntu: []
       archlinux: ["mkinitcpio"]
+    terraform:
+      ubuntu: ["terraform"]
+      archlinux: ["terraform"]
 
   remove:
     mousepad:
