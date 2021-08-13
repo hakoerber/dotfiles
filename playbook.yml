@@ -50,6 +50,16 @@
             block: |
               [multilib]
               Include = /etc/pacman.d/mirrorlist
+            marker: "# {mark} ANSIBLE MANAGED multilib"
+          become: true
+
+        - name: enable parallel download
+          blockinfile:
+            path: /etc/pacman.conf
+            insertafter: '\[options\]'
+            block: |
+              ParallelDownloads = 5
+            marker: "# {mark} ANSIBLE MANAGED parallel_download"
           become: true
 
         - name: Upgrade system
