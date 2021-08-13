@@ -247,7 +247,7 @@ packages:
       archlinux: ["networkmanager"]
     pulseaudio:
       ubuntu: ["pulseaudio", "pulseaudio-utils"]
-      archlinux: ["pulseaudio", "pulseaudio-alsa"]
+      archlinux: ["pulseaudio", "pulseaudio-alsa", "lib32-libpulse"]
     iw:
       ubuntu: ["iw"]
       archlinux: ["iw"]
