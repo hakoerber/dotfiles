@@ -58,12 +58,24 @@
   become: true
   become_user: root
 
+- name: create systemd directory
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: "{{ user.name }}"
+    group: "{{ user_group_name }}"
+  loop:
+    - "/home/{{ user.name }}/.config/"
+    - "/home/{{ user.name }}/.config/systemd/"
+    - "/home/{{ user.name }}/.config/systemd/user/"
+
+# No way to use the `systemd` module here, as it needs a logind
+# session. So we have to handle the symlinks for masking ourselves.
 - name: disable and mask systemd user units
-  systemd:
-    name: "{{ item }}"
-    enabled: false
-    masked: true
-    scope: user
+  file:
+    state: link
+    dest: "/home/{{ user.name }}/.config/systemd/user/{{ item }}"
+    src: "/dev/null"
   with_items:
     - gpg-agent.service
     - gpg-agent.socket
