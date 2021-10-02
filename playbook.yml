@@ -355,6 +355,51 @@
         - distro == 'archlinux'
         - machine.gpu is defined and machine.gpu == 'amd'
 
+    - block:
+      - name: install alacritty build dependencies
+        package:
+          state: present
+          # https://github.com/alacritty/alacritty/blob/master/INSTALL.md#debianubuntu
+          name:
+            - cmake
+            - pkg-config
+            - libfreetype6-dev
+            - libfontconfig1-dev
+            - libxcb-xfixes0-dev
+            - libxkbcommon-dev
+            - python3
+        become: true
+
+      - name: stat alacritty binary
+        stat:
+          path: /usr/local/bin/alacritty
+        register: alacritty_binary
+
+      - name: create temporary directory for alacritty build
+        tempfile:
+          state: directory
+        register: alacritty_build_tempdir
+        when: not alacritty_binary.stat.exists
+
+      - name: build alacritty
+        command: cargo install alacritty --root ./out
+        args:
+          chdir: "{{ alacritty_build_tempdir.path }}"
+        when: not alacritty_binary.stat.exists
+
+      - name: install alacritty
+        command: mv "{{ alacritty_build_tempdir.path }}/out/bin/alacritty" /usr/local/bin/alacritty
+        become: true
+        when: not alacritty_binary.stat.exists
+
+      - name: clean up build directory
+        file:
+          path: "{{ alacritty_build_tempdir.path }}"
+          state: absent
+        when: not alacritty_binary.stat.exists
+
+      when: distro == 'ubuntu'
+      tags: [alacritty]
 
     - name: create dotfiles group
       group:
