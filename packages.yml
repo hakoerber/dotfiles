@@ -360,7 +360,7 @@ packages:
       ubuntu: ["pv"]
       archlinux: ["pv"]
     stress:
-      ubuntu: []
+      ubuntu: ["stress"]
       archlinux: ["stress"]
     mpris:
       ubuntu: ["stress"]
