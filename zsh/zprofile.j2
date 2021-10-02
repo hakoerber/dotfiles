@@ -62,7 +62,7 @@ mkdir -p "${FEATURE_DIR}"
 [[ $MACHINE_HAS_RESTIC_BACKUP == "true" ]] && touch "${FEATURE_DIR}"/restic_backup
 [[ $MACHINE_HAS_ELEMENT       == "true" ]] && touch "${FEATURE_DIR}"/element
 
-[[ $MACHINE_TYPE == "laptop" ]] && touch "${FEATURE_DIR}"/matchine_is_laptop
+[[ $MACHINE_TYPE == "laptop" ]] && touch "${FEATURE_DIR}"/machine_is_laptop
 
 {% if user.gpg_agent %}
 touch "${FEATURE_DIR}"/gpg_agent
