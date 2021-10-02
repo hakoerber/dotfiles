@@ -18,6 +18,7 @@ users:
     master_key: "0xB5C002530C6A2053"
   environment:
     MACHINE_HAS_NEXTCLOUD: "true"
+  has_yubikey: true
 
 screen:
   1: DisplayPort-0

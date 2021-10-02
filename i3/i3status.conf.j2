@@ -20,7 +20,9 @@ general {
 
 
 order += spotify
+{% if user.has_yubikey %}
 order += "yubikey"
+{% endif %}
 order += "volume_status output"
 order += "volume_status input"
 order += "wifi"
