@@ -363,7 +363,7 @@ packages:
       ubuntu: ["stress"]
       archlinux: ["stress"]
     mpris:
-      ubuntu: ["stress"]
+      ubuntu: ["playerctl"]
       archlinux: ["playerctl"]
     imagemagick:
       ubuntu: ["imagemagick"]
