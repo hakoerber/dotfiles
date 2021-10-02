@@ -194,9 +194,6 @@ packages:
     dia:
       ubuntu: ["dia"]
       archlinux: ["dia"]
-    shutter:
-      ubuntu: ["shutter"]
-      archlinux: []
     nmap:
       ubuntu: ["nmap"]
       archlinux: ["nmap"]
