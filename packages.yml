@@ -386,6 +386,9 @@ packages:
     terraform:
       ubuntu: []
       archlinux: ["terraform"]
+    synclient:
+      ubuntu: ["xserver-xorg-input-synaptics"]
+      archlinux: ["xf86-input-synaptics"]
 
   remove:
     mousepad:
