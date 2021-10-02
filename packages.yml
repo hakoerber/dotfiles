@@ -144,7 +144,7 @@ packages:
       ubuntu: ["zathura", "zathura-pdf-poppler"]
       archlinux: ["zathura", "zathura-pdf-poppler"]
     pdf:
-      ubuntu: []
+      ubuntu: ["ghostscript", "enscript"]
       archlinux: ["ghostscript", "enscript"]
     pandoc:
       ubuntu: ["pandoc"]
