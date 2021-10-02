@@ -77,10 +77,10 @@
     dest: "/home/{{ user.name }}/.config/systemd/user/{{ item }}"
     src: "/dev/null"
   with_items:
-    - gpg-agent.service
     - gpg-agent.socket
     - gpg-agent-browser.socket
     - gpg-agent-ssh.socket
+    - gpg-agent-extra.socket
 
 - name: create directory for getty autologin
   file:
