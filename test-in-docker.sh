@@ -70,6 +70,19 @@ test_neptune() {
     '
 }
 
-test_ares
-test_tb_hak
-test_neptune
+case "${1:-all}" in
+    ares)
+        test_ares
+        ;;
+    tb_hak)
+        test_tb_hak
+        ;;
+    neptune)
+        test_neptune
+        ;;
+    all)
+        test_ares
+        test_tb_hak
+        test_neptune
+        ;;
+esac
