@@ -48,17 +48,6 @@ test_ares() {
         '
 }
 
-test_tb_hak() {
-    docker pull docker.io/library/ubuntu:18.04
-    docker run -ti --rm -v ${tmpdir}/dotfiles.tar.gz:/tmp/dotfiles.tar.gz:ro --hostname tb-hak docker.io/library/ubuntu:18.04 sh -c '
-        set -o errexit
-
-        cd $(mktemp -d)
-        tar xf /tmp/dotfiles.tar.gz -C .
-        ANSIBLE_EXTRA_ARGS="-e manage_services=false" ./install.sh
-    '
-}
-
 test_neptune() {
     docker pull docker.io/library/ubuntu:20.04
     docker run -ti --rm -v ${tmpdir}/dotfiles.tar.gz:/tmp/dotfiles.tar.gz:ro --hostname neptune docker.io/library/ubuntu:20.04 sh -c '
@@ -74,15 +63,11 @@ case "${1:-all}" in
     ares)
         test_ares
         ;;
-    tb_hak)
-        test_tb_hak
-        ;;
     neptune)
         test_neptune
         ;;
     all)
         test_ares
-        test_tb_hak
         test_neptune
         ;;
 esac
