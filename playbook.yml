@@ -401,6 +401,41 @@
       when: distro == 'ubuntu'
       tags: [alacritty]
 
+    - block:
+      - name: stat yubikey-touch-detector binary
+        stat:
+          path: /usr/local/bin/yubikey-touch-detector
+        register: yubikey_touch_detector_binary
+
+      - name: create temporary directory for yubikey-touch-detector build
+        tempfile:
+          state: directory
+        register: yubikey_touch_detector_build_tempdir
+        when: not yubikey_touch_detector_binary.stat.exists
+
+      - name: build yubikey-touch-detector
+        shell: env GOPATH=$(pwd) go get -u github.com/maximbaz/yubikey-touch-detector
+        args:
+          chdir: "{{ yubikey_touch_detector_build_tempdir.path }}"
+        when: not yubikey_touch_detector_binary.stat.exists
+
+      - name: install yubikey-touch-detector
+        command: >
+          mv
+          "{{ yubikey_touch_detector_build_tempdir.path }}/bin/yubikey-touch-detector"
+          /usr/local/bin/yubikey-touch-detector
+        become: true
+        when: not yubikey_touch_detector_binary.stat.exists
+
+      - name: clean up build directory
+        file:
+          path: "{{ yubikey_touch_detector_build_tempdir.path }}"
+          state: absent
+        when: not yubikey_touch_detector_binary.stat.exists
+
+      when: distro == 'ubuntu'
+      tags: [yubikey-touch-detector]
+
     - name: create dotfiles group
       group:
         name: dotfiles
