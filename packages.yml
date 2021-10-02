@@ -150,7 +150,7 @@ packages:
       ubuntu: ["pandoc"]
       archlinux: ["pandoc", "texlive-core", "texlive-fontsextra", "texlive-latexextra"]
     libvirt:
-      ubuntu: ["virt-manager", "libvirt-bin"]
+      ubuntu: ["virt-manager", "libvirt-daemon"]
       archlinux: ["virt-manager", "libvirt", "dnsmasq", "ebtables"]
     firefox:
       ubuntu: ["firefox"]
