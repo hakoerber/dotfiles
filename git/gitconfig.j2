@@ -3,7 +3,7 @@
     email = {{ user.mail }}
     useConfigOnly = true
 {% if user.git_gpg_sign|bool %}
-    signingkey = {{ user.gpg_keys.master_key }}
+    signingkey = {{ user.gpg_key.id }}
 {% endif %}
 [github]
     user = hakoerber

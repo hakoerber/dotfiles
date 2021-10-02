@@ -568,3 +568,19 @@
 
   tags:
     - autostart
+
+- block:
+  - name: import gpg key
+    command: gpg --import ./gpgkeys/{{ user.gpg_key.email }}.gpg.asc
+    register: gpg_import_output
+    changed_when: not ("unchanged" in gpg_import_output.stderr)
+
+  - name: trust gpg key
+    shell: "gpg --import-ownertrust <<< {{ user.gpg_key.fingerprint }}:6"
+    args:
+      executable: /bin/bash # required for <<<
+    register: gpg_trust_output
+    changed_when: gpg_trust_output.stderr_lines|length > 0
+
+  when: user.gpg_key is defined
+  tags: [gpg]

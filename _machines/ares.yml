@@ -14,8 +14,10 @@ users:
   git_gpg_sign: false
   gpg_agent: true
   gpg_agent_for_ssh: true
-  gpg_keys:
-    master_key: "0xB5C002530C6A2053"
+  gpg_key:
+    email: hannes@hkoerber.de
+    id: "0xB5C002530C6A2053"
+    fingerprint: "973AE48D71B76735C4712B5BB5C002530C6A2053"
   environment:
     MACHINE_HAS_NEXTCLOUD: "true"
   has_yubikey: true
