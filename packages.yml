@@ -378,7 +378,7 @@ packages:
       ubuntu: []
       archlinux: ["element-desktop"]
     maim:
-      ubuntu: []
+      ubuntu: ["maim"]
       archlinux: ["maim"]
     mkinitcpio:
       ubuntu: []
