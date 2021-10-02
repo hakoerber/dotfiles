@@ -457,6 +457,27 @@
       when: distro == 'ubuntu'
       tags: [spotify]
 
+    - block:
+      - name: add signal apt key
+        apt_key:
+          url: "https://updates.signal.org/desktop/apt/keys.asc"
+          id: "D980A17457F6FB06"
+        become: true
+
+      - name: add signal repository
+        apt_repository:
+          repo: "deb https://updates.signal.org/desktop/apt xenial main"
+          filename: spotify
+        become: true
+
+      - name: install signal
+        apt:
+          name: signal-desktop
+          update_cache: true
+        become: true
+      when: distro == 'ubuntu'
+      tags: [signal]
+
     - name: create dotfiles group
       group:
         name: dotfiles
