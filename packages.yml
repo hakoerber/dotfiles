@@ -65,10 +65,10 @@ packages:
       ubuntu: ["fonts-inconsolata"]
       archlinux: ["ttf-inconsolata"]
     font-dejavu:
-      ubuntu: []
+      ubuntu: ["fonts-dejavu"]
       archlinux: ["ttf-dejavu"]
     font-libertine:
-      ubuntu: []
+      ubuntu: ["fonts-linuxlibertine"]
       archlinux: ["ttf-linux-libertine"]
     font-emoji:
       ubuntu: []
