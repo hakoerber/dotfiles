@@ -297,7 +297,7 @@ packages:
       ubuntu: ["virtualbox"]
       archlinux: ["virtualbox"]
     ssh:
-      ubuntu: []
+      ubuntu: ["ssh"]
       archlinux: ["openssh"]
     sshfs:
       ubuntu: ["sshfs"]
