@@ -339,7 +339,7 @@ packages:
       ubuntu: []
       archlinux: ["steam"]
     man:
-      ubuntu: []
+      ubuntu: ["man"]
       archlinux: ["man-db", "man-pages"]
     discord:
       ubuntu: []
