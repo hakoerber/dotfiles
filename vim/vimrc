@@ -47,7 +47,7 @@ Plug 'rodjek/vim-puppet'
 Plug 'suan/vim-instant-markdown'
 "Plug 'marshallward/vim-restructuredtext'
 "Plug 'vim-syntastic/syntastic'
-Plug 'ElmCast/elm-vim'
+"Plug 'ElmCast/elm-vim'
 Plug 'avh4/elm-format'
 
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
