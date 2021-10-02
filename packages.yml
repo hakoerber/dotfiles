@@ -295,7 +295,7 @@ packages:
       archlinux: ["bwm-ng"]
     virtualbox:
       ubuntu: ["virtualbox"]
-      archlinux: []
+      archlinux: ["virtualbox"]
     ssh:
       ubuntu: []
       archlinux: ["openssh"]
