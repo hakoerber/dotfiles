@@ -164,9 +164,6 @@ packages:
     unclutter:
       ubuntu: ["unclutter"]
       archlinux: ["unclutter"]
-    chromium:
-      ubuntu: ["chromium-browser"]
-      archlinux: ["chromium"]
     libreoffice:
       ubuntu: ["libreoffice"]
       archlinux: ["libreoffice-fresh", "libreoffice-fresh-de"]
@@ -397,3 +394,6 @@ packages:
     mousepad:
       ubuntu: ["mousepad"]
       archlinux: ["mousepad"]
+    chrome:
+      ubuntu: ["google-chrome-stable"]
+      archlinux: []
