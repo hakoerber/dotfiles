@@ -149,12 +149,6 @@
         include_vars:
           file: packages.yml
 
-      - name: enable neovim ppa
-        apt_repository:
-          repo: 'ppa:neovim-ppa/stable'
-          update_cache: true
-        become: true
-        when: distro == 'ubuntu'
       - name: force-update iptables to iptables-nft on arch
         shell: pacman -Q iptables-nft || yes | pacman -S iptables-nft
         changed_when: false
