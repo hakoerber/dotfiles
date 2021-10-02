@@ -6,7 +6,7 @@ ansible = venv/bin/ansible-playbook
 ansible_run = $(activate) && ansible-playbook --inventory localhost, --diff --verbose ./playbook.yml ${ANSIBLE_EXTRA_ARGS}
 
 .PHONY: all
-all: $(ansible)
+all: | venv $(ansible)
 	$(ansible_run)
 
 .PHONY: dryrun
