@@ -59,5 +59,17 @@ test_tb_hak() {
     '
 }
 
+test_neptune() {
+    docker pull docker.io/library/ubuntu:20.04
+    docker run -ti --rm -v ${tmpdir}/dotfiles.tar.gz:/tmp/dotfiles.tar.gz:ro --hostname neptune docker.io/library/ubuntu:20.04 sh -c '
+        set -o errexit
+
+        cd $(mktemp -d)
+        tar xf /tmp/dotfiles.tar.gz -C .
+        ANSIBLE_EXTRA_ARGS="-e manage_services=false" ./install.sh
+    '
+}
+
 test_ares
 test_tb_hak
+test_neptune
