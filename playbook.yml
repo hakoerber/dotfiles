@@ -485,11 +485,21 @@
       become: true
       become_user: root
 
+    - name: create dotfiles user
+      user:
+        name: dotfiles
+        home: /var/lib/dotfiles
+        create_home: false
+        shell: /bin/bash
+        system: true
+      become: true
+      become_user: root
+
     - name: create dotfiles directory
       file:
         state: directory
         path: /var/lib/dotfiles
-        owner: nobody
+        owner: dotfiles
         group: dotfiles
         mode: '0775' # group needs write access!
       become: true
