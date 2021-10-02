@@ -7,7 +7,9 @@ Wants=discord.service
 Wants=dpms.service
 Wants=dunst.service
 Wants=element.service
-Wants=firefox.service
+{% for profile in user.firefox_profiles|default([]) %}
+Wants=firefox@{{ profile.name }}.service
+{% endfor %}
 Wants=gpg-agent.service
 Wants=gnome-keyring.service
 Wants=keepassx.service

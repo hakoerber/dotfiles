@@ -478,5 +478,27 @@
       group: "{{ user_group_name }}"
     with_fileglob: /var/lib/dotfiles/autostart/services/*
 
+  - name: get state of autostart.target
+    stat:
+      path: "/home/{{ user.name }}/.config/systemd/user/autostart.target"
+    register: autostart_target_stat
+
+  - name: remove invalid autostart.target
+    file:
+      path: "/home/{{ user.name }}/.config/systemd/user/autostart.target"
+      state: absent
+    when:
+      - autostart_target_stat.stat.exists
+      - not autostart_target_stat.stat.isreg
+
+  - name: deploy autostart.target
+    template:
+      src: ./autostart/autostart.target.j2
+      dest: "/home/{{ user.name }}/.config/systemd/user/autostart.target"
+      owner: "{{ user.name }}"
+      group: "{{ user_group_name }}"
+      force: true
+      follow: false
+
   tags:
     - autostart
