@@ -246,7 +246,7 @@ packages:
       ubuntu: ["gnupg2", "pcscd", "scdaemon"]
       archlinux: ["gnupg", "paperkey", "yubikey-manager", "yubikey-touch-detector"]
     networkmanager:
-      ubuntu: ["network-manager", "network-manager-openvpn", "network-manager-openconnect"]
+      ubuntu: ["network-manager", "network-manager-openvpn", "network-manager-openconnect", "network-manager-openconnect-gnome"]
       archlinux: ["networkmanager"]
     pulseaudio:
       ubuntu: ["pulseaudio", "pulseaudio-utils"]
