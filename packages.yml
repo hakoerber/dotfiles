@@ -4,6 +4,7 @@ packages:
       ubuntu:
         - build-essential
         - exuberant-ctags
+        - cmake
       archlinux:
         - gcc
         - ctags
