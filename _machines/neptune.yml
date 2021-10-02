@@ -1,0 +1,72 @@
+font_size: 11
+letter_space: 0
+terminal_binary: alacritty
+
+users:
+- name: hannes-work
+  group: hannes-work
+  vt: 1
+  firefox_profiles:
+    - name: default
+      manage_css: true
+    - name: meet
+      manage_css: false
+  mail: hannes.koerber@tradebyte.com
+  git_gpg_sign: false
+  gpg_agent: false
+  gpg_agent_for_ssh: false
+  environment:
+    MACHINE_HAS_NEXTCLOUD: "false"
+    MACHINE_HAS_RESTIC_BACKUP: "true"
+    MACHINE_HAS_ELEMENT: "false"
+    MACHINE_HAS_KEEPASSX: "true"
+  has_yubikey: false
+- name: hannes-private
+  group: hannes-private
+  vt: 2
+  firefox_profiles:
+    - name: default
+      manage_css: true
+  mail: hannes@hkoerber.de
+  git_gpg_sign: false
+  gpg_agent: true
+  gpg_agent_for_ssh: true
+  gpg_keys:
+    master_key: "0xB5C002530C6A2053"
+  environment:
+    MACHINE_HAS_NEXTCLOUD: "true"
+    MACHINE_HAS_RESTIC_BACKUP: "false"
+    MACHINE_HAS_ELEMENT: "true"
+    MACHINE_HAS_KEEPASSX: "false"
+  has_yubikey: true
+
+screen:
+  1: DP-1-1
+  2: DP-1-1
+  3: DP-1-2
+  4: DP-1-2
+  5: DP-1-2
+  6: DP-1-2
+  7: eDP-1
+  8: eDP-1
+  9: eDP-1
+  0: eDP-1
+
+workspace:
+  1: www
+  2: www
+  3: term-local
+  4: term-remote
+  7: comm
+  8: pass
+  9: music
+  10: pim
+
+screencfgs:
+  - name: three-screens
+    key: F3
+
+environment:
+  MACHINE_TYPE: "laptop"
+  MACHINE_RESOLUTION_X: "1920"
+  MACHINE_RESOLUTION_Y: "1080"
