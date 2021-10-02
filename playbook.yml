@@ -62,7 +62,7 @@
         - name: install pacman-contrib for paccache
           package:
             name: pacman-contrib
-            state: installed
+            state: present
           become: true
 
         - name: Clean cache
@@ -76,12 +76,12 @@
     - block:
       - name: install sudo
         package:
-          state: installed
+          state: present
           name: sudo
 
       - name: install dependencies for paru
         package:
-          state: installed
+          state: present
           name:
             - base-devel
             - git
@@ -179,7 +179,7 @@
       - name: install packages
         package:
           name: "{{ packages|json_query(query) }}"
-          state: installed
+          state: present
         become: true
         vars:
           query: "{{ 'list.*.%s[]'|format(distro) }}"
@@ -217,7 +217,7 @@
       - name: install lz4
         package:
           name: lz4
-          state: installed
+          state: present
         become: true
 
       - name: use lz4 for mkinitcpio compression
@@ -333,7 +333,7 @@
             - lib32-libva-mesa-driver
             - mesa-vdpau
             - lib32-mesa-vdpau
-          state: installed
+          state: present
         become: true
 
       - name: set AMDGPU options
