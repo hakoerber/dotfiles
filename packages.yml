@@ -330,7 +330,7 @@ packages:
       ubuntu: ["anki"]
       archlinux: ["anki"]
     imv:
-      ubuntu: []
+      ubuntu: ["imv"]
       archlinux: ["imv"]
     pacman:
       ubuntu: []
