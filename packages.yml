@@ -56,7 +56,7 @@ packages:
       ubuntu: ["borgbackup"]
       archlinux: ["borgbackup"]
     docker:
-      ubuntu: ["docker.io"]
+      ubuntu: ["docker.io", "containerd", "docker-compose"]
       archlinux: ["docker", "docker-compose"]
     font-awesome:
       ubuntu: ["fonts-font-awesome"]
