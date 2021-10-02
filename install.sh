@@ -63,6 +63,7 @@ _install() {
 if ! command -v python3 >/dev/null ; then
     printf 'Python3 not installed, installing ...\n'
     _install "python3"
+    _install "python3-venv"
     printf 'Done\n'
 fi
 
