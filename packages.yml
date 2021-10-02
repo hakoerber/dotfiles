@@ -326,9 +326,6 @@ packages:
     rofi:
       ubuntu: ["rofi"]
       archlinux: ["rofi"]
-    anki:
-      ubuntu: ["anki"]
-      archlinux: ["anki"]
     imv:
       ubuntu: ["imv"]
       archlinux: ["imv"]
