@@ -238,7 +238,7 @@ packages:
       archlinux: ["lsof"]
     iptables:
       ubuntu: ["iptables"]
-      archlinux: ["iptables"]
+      archlinux: ["iptables-nft"]
     pwgen:
       ubuntu: ["pwgen"]
       archlinux: ["pwgen"]

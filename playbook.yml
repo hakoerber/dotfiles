@@ -155,6 +155,9 @@
           update_cache: true
         become: true
         when: distro == 'ubuntu'
+      - name: force-update iptables to iptables-nft on arch
+        shell: pacman -Q iptables-nft || yes | pacman -S iptables-nft
+        changed_when: false
 
       - set_fact:
           defined_packages: "{{ packages|json_query('keys(list)') }}"
