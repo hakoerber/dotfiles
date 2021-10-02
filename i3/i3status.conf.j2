@@ -59,7 +59,6 @@ systemd spotify {
     unit = "spotify.service"
     user = true
     format = "  "
-    on_click 1 = "exec $HOME/.i3/scripts/toggle-app spotify"
     color_bad = '#F4Bf75'
     color_degraded = '#F4Bf75'
 }
@@ -111,7 +110,6 @@ volume_status output {
     thresholds = []
     command = "pactl"
     color_muted = '#FFFFFF'
-    on_click 1 = "exec $HOME/.i3/scripts/pa-volume mute-toggle"
 }
 
 volume_status input {
@@ -122,5 +120,4 @@ volume_status input {
     command = "pactl"
     color_muted = '#FFFFFF'
     is_input = True
-    on_click 1 = "exec $HOME/.i3/scripts/pa-volume mute-toggle-mic"
 }
