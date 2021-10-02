@@ -20,7 +20,6 @@
       - sudo
       - dip
       - plugdev
-      - lpadmin
       - sambashare
       - docker
       - libvirt
