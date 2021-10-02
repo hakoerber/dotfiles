@@ -389,6 +389,9 @@ packages:
     synclient:
       ubuntu: ["xserver-xorg-input-synaptics"]
       archlinux: ["xf86-input-synaptics"]
+    ncdu:
+      ubuntu: ["ncdu"]
+      archlinux: ["ncdu"]
 
   remove:
     mousepad:
