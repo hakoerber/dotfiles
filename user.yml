@@ -388,7 +388,7 @@
 
     - name: clean up temp directory
       file:
-        path: "{{ tempdir.path }"
+        path: "{{ tempdir.path }}"
         state: absent
 
     - name: install portfolio performance
