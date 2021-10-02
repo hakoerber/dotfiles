@@ -584,3 +584,17 @@
 
   when: user.gpg_key is defined
   tags: [gpg]
+
+- block:
+  - name: stat passwordstore checkout
+    stat:
+      path: /home/{{ user.name }}/.password-store
+    register: passwordstore_checkout
+  - name: check out passwordstore repository
+    git:
+      dest: /home/{{ user.name }}/.password-store
+      repo: ssh://git@code.hkoerber.de:2222/hannes/passwordstore.git
+      accept_hostkey: true
+    when: not passwordstore_checkout.stat.exists
+  when: user.enable_passwordstore|default(false) is sameas true
+  tags: [passwordstore]

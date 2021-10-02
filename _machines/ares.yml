@@ -18,6 +18,7 @@ users:
     email: hannes@hkoerber.de
     id: "0xB5C002530C6A2053"
     fingerprint: "973AE48D71B76735C4712B5BB5C002530C6A2053"
+  enable_passwordstore: true
   environment:
     MACHINE_HAS_NEXTCLOUD: "true"
   has_yubikey: true
