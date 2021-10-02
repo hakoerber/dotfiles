@@ -318,7 +318,7 @@ packages:
       ubuntu: ["rustc", "cargo"]
       archlinux: ["rust"]
     musescore:
-      ubuntu: ["musescore"]
+      ubuntu: ["musescore3"]
       archlinux: ["musescore"]
     sipcalc:
       ubuntu: ["sipcalc"]
