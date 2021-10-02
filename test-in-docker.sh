@@ -45,7 +45,6 @@ test_ares() {
             cd $(mktemp -d)
             tar xf /tmp/dotfiles.tar.gz -C .
             ANSIBLE_EXTRA_ARGS="-e manage_services=false" ./install.sh
-            read -p "Done, [return] to continue "
         '
 }
 
