@@ -386,11 +386,6 @@
         dest: "{{ tempdir.path }}/PortfolioPerformance"
         remote_src: true
 
-    - name: clean up temp directory
-      file:
-        path: "{{ tempdir.path }}"
-        state: absent
-
     - name: install portfolio performance
       synchronize:
         src: "{{ tempdir.path }}/PortfolioPerformance"
@@ -398,6 +393,11 @@
         recursive: true
         checksum: true
         delete: true
+
+    - name: clean up temp directory
+      file:
+        path: "{{ tempdir.path }}"
+        state: absent
 
     when:
       - not stat_portfolio_performance_installation.stat.exists
