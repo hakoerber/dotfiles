@@ -11,7 +11,7 @@ set -o nounset
 DOTDIR="/var/lib/dotfiles"
 _SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-git submodule update --init
+[[ -e './.git' ]] && git submodule update --init
 
 if [[ "$(readlink "${_SCRIPT_DIR}")" != "${DOTDIR}" ]] && [[ "${_SCRIPT_DIR}" != "${DOTDIR}" ]] ; then
     if [[ -e "${DOTDIR}" ]] ; then
