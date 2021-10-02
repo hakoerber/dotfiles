@@ -1,6 +1,7 @@
 [Unit]
 BindsTo=autostart.target
 After=windowmanager.target
+ConditionPathExists=%h/.var/run/features/gpg_agent
 
 [Service]
 Type=forking

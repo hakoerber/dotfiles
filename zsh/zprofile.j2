@@ -64,6 +64,10 @@ mkdir -p "${FEATURE_DIR}"
 
 [[ $MACHINE_TYPE == "laptop" ]] && touch "${FEATURE_DIR}"/matchine_is_laptop
 
+{% if user.gpg_agent %}
+touch "${FEATURE_DIR}"/gpg_agent
+{% endif %}
+
 # Make all environment variables also usable in the systemd user instancee
 systemctl --user import-environment
 
