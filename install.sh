@@ -47,9 +47,14 @@ sudowrap() {
     fi
 }
 
+cache_updated=0
 _install() {
     _package="$1" ; shift
     if [[ $NAME == "Ubuntu" ]] ; then
+        if ! (( cache_updated )) ; then
+            apt-get update
+            cache_updated=1
+        fi
         sudowrap apt-get install --assume-yes "${_package}"
     elif [[ $NAME == "Arch Linux" ]] ; then
         sudowrap pacman -S --noconfirm "${_package}"
