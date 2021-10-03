@@ -316,7 +316,7 @@
       cd ~/.local/share/nvim/plugged/YouCompleteMe/
       python3 ./install.py --force-sudo
     args:
-      creates: "{{ lookup('fileglob', '~/.local/share/nvim/plugged/YouCompleteMe/third_party/ycmd/ycm_core.*so') }}"
+      creates: '~/.local/share/nvim/plugged/YouCompleteMe/third_party/ycmd/ycm_core.cpython-38-x86_64-linux-gnu.so'
 
 - block:
   - name: firefox - create chrome directory
