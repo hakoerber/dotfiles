@@ -596,7 +596,7 @@
 - block:
   - name: add passwordstore init script
     copy:
-      dest: /home/{{ user.name }}/bin/pass
+      dest: /home/{{ user.name }}/.optbin/pass
       owner: "{{ user.name }}"
       group: "{{ user_group_name }}"
       mode: '0755'
