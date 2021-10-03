@@ -272,9 +272,6 @@ packages:
     xdg:
       ubuntu: ["xdg-utils"]
       archlinux: ["xdg-utils"]
-    docs:
-      ubuntu: ["manpages"]
-      archlinux: ["man-pages"]
     compton:
       ubuntu: ["compton"]
       archlinux: []
@@ -336,7 +333,7 @@ packages:
       ubuntu: []
       archlinux: ["steam"]
     man:
-      ubuntu: ["man"]
+      ubuntu: ["man-db", "manpages"]
       archlinux: ["man-db", "man-pages"]
     discord:
       ubuntu: []
