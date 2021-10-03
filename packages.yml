@@ -389,6 +389,9 @@ packages:
     ncdu:
       ubuntu: ["ncdu"]
       archlinux: ["ncdu"]
+    signal:
+      ubuntu: []
+      archlinux: ["signal-desktop"]
 
   remove:
     mousepad:
