@@ -57,9 +57,16 @@ Plug 'editorconfig/editorconfig-vim'
 
 Plug 'leafgarland/typescript-vim'
 
-Plug 'prettier/vim-prettier', {
-  \ 'do': 'yarn install',
-  \ 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql', 'markdown', 'vue', 'yaml', 'html'] }
+Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
+
+Plug 'yuezk/vim-js'
+Plug 'maxmellon/vim-jsx-pretty'
+
+Plug 'evanleck/vim-svelte', {'branch': 'main'}
+
+"Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
+" Plug 'Chiel92/vim-autoformat'
 
 call plug#end()
 filetype plugin indent on
