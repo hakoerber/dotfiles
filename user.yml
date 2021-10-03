@@ -589,15 +589,23 @@
   tags: [gpg]
 
 - block:
-  - name: stat passwordstore checkout
-    stat:
-      path: /home/{{ user.name }}/.password-store
-    register: passwordstore_checkout
-  - name: check out passwordstore repository
-    git:
-      dest: /home/{{ user.name }}/.password-store
-      repo: ssh://git@code.hkoerber.de:2222/hannes/passwordstore.git
-      accept_hostkey: true
-    when: not passwordstore_checkout.stat.exists
+  - name: add passwordstore init script
+    copy:
+      dest: /home/{{ user.name }}/bin/pass
+      owner: "{{ user.name }}"
+      group: "{{ user_group_name }}"
+      mode: '0755'
+      content: |
+        #!/usr/bin/env bash
+
+        if [[ ! -e ~/.password-store ]] ; then
+          printf '%s\n' 'This is the first time running pass, initializting repository ...'
+
+          git clone ssh://git@code.hkoerber.de:2222/hannes/passwordstore.git ~/.password-store
+
+          printf '%s\n' 'Done'
+        fi
+
+        exec mypass "${@}"
   when: user.enable_passwordstore|default(false) is sameas true
   tags: [passwordstore]

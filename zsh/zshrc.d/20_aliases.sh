@@ -73,8 +73,6 @@ alias json2yaml="python3 -c 'import sys, yaml, json; yaml.safe_dump(json.loads(s
 
 alias currentbranch='git rev-parse --abbrev-ref HEAD'
 
-alias pass=mypass
-
 alias issh="ssh -o StrictHostKeyChecking=false -o UserKnownHostsFile=/dev/null"
 alias gfix='git commit --amend --no-edit'
 alias gfixa='git commit --amend --no-edit --all '
