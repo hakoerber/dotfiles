@@ -1,0 +1,14 @@
+reset: false
+outputs:
+  - name: eDP-1
+    primary: True
+    opts:
+      mode: 1920x1080
+      scale: 1x1
+      pos: "0x0" # beware of hex
+  - name: DP-1-1
+    disable: true
+  - name: DP-1-2
+    disable: true
+  - name: DP-1-3
+    disable: true
