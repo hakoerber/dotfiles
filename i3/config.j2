@@ -227,6 +227,17 @@ assign [class="^Wine$"] $workspace10
 
     bindsym $mod+Shift+v exec --no-startup-id redshift-toggle
 
+    # bindsym $mod+$pim_toggle \
+    #     mark --add _source; \
+    #     focus output eDP-1; \
+    #     mark --add _origin; \
+    #     workspace $workspace10; \
+    #     mark --add _destination; \
+    #     [con_mark="^_destination$"] swap container with mark "_source"; \
+    #     [con_mark="^_source$"]      focus; unmark _source; \
+    #     [con_mark="^_origin$"]      focus; unmark _origin; \
+    #     [con_mark="^_destination$"] focus; unmark _destination; \
+
     bindsym $mod+$pim_toggle \
         unmark _destination; \
         mark _source; \
