@@ -11,9 +11,6 @@ packages:
         - cmake
         - maven
         - base-devel
-    golang:
-      ubuntu: ["golang-go"]
-      archlinux: ["go"]
     make:
       ubuntu: ["make"]
       archlinux: ["make"]
@@ -400,3 +397,6 @@ packages:
     snap:
       ubuntu: ["snapd"]
       archlinux: []
+    golang:
+      ubuntu: ["golang-go"]
+      archlinux: ["go"]
