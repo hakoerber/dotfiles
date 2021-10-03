@@ -219,6 +219,8 @@ nmap <leader>w :Goyo<CR>:TogglePencil<CR>:Limelight!!<CR>
 nmap <leader>c :%w !xclip -selection clipboard<CR>
 nmap <leader>x :r !xclip -out -selection -clipboard<CR><CR>
 
+nmap <leader>f :Autoformat<CR>
+
 " no more ex mode
 nnoremap Q <nop>
 
