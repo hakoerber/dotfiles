@@ -453,24 +453,37 @@
       tags: [yubikey-touch-detector]
 
     - block:
-      - name: add spotify apt key
-        apt_key:
-          url: "https://download.spotify.com/debian/pubkey_0D811D58.gpg"
-          id: "D1742AD60D811D58"
-        become: true
+      - block:
+        - name: add spotify apt key
+          apt_key:
+            url: "https://download.spotify.com/debian/pubkey_0D811D58.gpg"
+            id: "D1742AD60D811D58"
+          become: true
 
-      - name: add spotify repository
-        apt_repository:
-          repo: "deb http://repository.spotify.com stable non-free"
-          filename: spotify
-        become: true
+        - name: add spotify repository
+          apt_repository:
+            repo: "deb http://repository.spotify.com stable non-free"
+            filename: spotify
+          become: true
 
-      - name: install spotify
-        apt:
-          name: spotify-client
-          update_cache: true
-        become: true
-      when: distro == 'ubuntu'
+        - name: install spotify
+          apt:
+            name: spotify-client
+            update_cache: true
+          become: true
+        when: distro == 'ubuntu'
+
+      - block:
+        - name: install spotify from AUR via paru
+          shell: |
+            curl -sS https://download.spotify.com/debian/pubkey_0D811D58.gpg | gpg --import
+            yes 1 | paru --skipreview --aur --batchinstall --noconfirm -S spotify
+          become: true
+          become_user: paru
+          args:
+            creates: /usr/bin/spotify
+        when: distro == 'archlinux'
+
       tags: [spotify]
 
     - block:
