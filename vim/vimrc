@@ -53,6 +53,8 @@ Plug 'avh4/elm-format'
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'hashivim/vim-terraform'
 
+Plug 'editorconfig/editorconfig-vim'
+
 Plug 'leafgarland/typescript-vim'
 
 Plug 'prettier/vim-prettier', {
