@@ -307,6 +307,11 @@
     check_mode: false
     changed_when: vim_plugins_stdout.stdout_lines|length != 0
 
+  - name: update vim plugins
+    command: /usr/bin/nvim -f -E -s -c "source ~/.vimrc" +PlugUpdate +qall
+    register: vim_plugin_update
+    changed_when: vim_plugin_update.stdout_lines|length != 0
+
   - name: compile youcompleteme
     # --force-sudo is required, as the script refuses to run
     # in a sudo environment (i.e. if the SUDO_USER env variable
