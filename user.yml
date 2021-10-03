@@ -315,16 +315,19 @@
     failed_when: ycm_before_update.rc not in (0, 200)
 
   - name: install vim plugins
-    command: /usr/bin/nvim --headless +PlugInstall +qall
-    changed_when: false
+    command: sh -c 'PATH=/usr/local/go/bin:$PATH GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +PlugInstall +qall'
+    register: vim_plugin_install
+    changed_when: vim_plugin_install.stderr != ""
 
   - name: install go binaries for vim
     command: sh -c 'PATH=/usr/local/go/bin:$PATH GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +GoInstallBinaries +qall'
     changed_when: false
 
   - name: update vim plugins
-    command: /usr/bin/nvim --headless +PlugUpdate +qall
+    command: sh -c 'PATH=/usr/local/go/bin:$PATH GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +PlugUpdate +qall'
     changed_when: false
+    register: vim_plugin_update
+    changed_when: vim_plugin_update.stderr != ""
 
   - name: update go binaries for vim
     command: sh -c 'PATH=/usr/local/go/bin:$PATH GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +GoUpdateBinaries +qall'
