@@ -50,7 +50,7 @@ Plug 'suan/vim-instant-markdown'
 "Plug 'ElmCast/elm-vim'
 Plug 'avh4/elm-format'
 
-Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+Plug 'fatih/vim-go'
 Plug 'hashivim/vim-terraform'
 
 Plug 'editorconfig/editorconfig-vim'
