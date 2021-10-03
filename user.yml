@@ -315,7 +315,7 @@
     failed_when: ycm_before_update.rc not in (0, 200)
 
   - name: install vim plugins
-    command: /usr/bin/nvim --headless +"PlugInstall --sync" +qall
+    command: /usr/bin/nvim --headless +PlugInstall +qall
     changed_when: false
 
   - name: install go binaries for vim
@@ -323,7 +323,7 @@
     changed_when: false
 
   - name: update vim plugins
-    command: /usr/bin/nvim --headless +"PlugUpdate --sync" +qall
+    command: /usr/bin/nvim --headless +PlugUpdate +qall
     changed_when: false
 
   - name: update go binaries for vim
