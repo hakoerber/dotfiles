@@ -341,12 +341,6 @@ packages:
     kwallet:
       ubuntu: []
       archlinux: ["kwallet", "kwalletmanager"]
-    wallpapers:
-      ubuntu: []
-      archlinux: ["elementary-wallpapers", "deepin-community-wallpapers"]
-    wallutils:
-      ubuntu: []
-      archlinux: ["wallutils"]
     pv:
       ubuntu: ["pv"]
       archlinux: ["pv"]
