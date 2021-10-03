@@ -57,7 +57,7 @@ Plug 'editorconfig/editorconfig-vim'
 
 Plug 'leafgarland/typescript-vim'
 
-Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
+Plug 'prettier/vim-prettier', { 'do': 'npm install' }
 
 Plug 'yuezk/vim-js'
 Plug 'maxmellon/vim-jsx-pretty'
