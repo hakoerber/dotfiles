@@ -319,7 +319,7 @@
     changed_when: false
 
   - name: install go binaries for vim
-    command: /usr/bin/nvim --headless +GoInstallBinaries +qall
+    command: sh -c 'PATH=/usr/local/go/bin:$PATH GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +GoInstallBinaries +qall'
     changed_when: false
 
   - name: update vim plugins
@@ -327,7 +327,7 @@
     changed_when: false
 
   - name: update go binaries for vim
-    command: /usr/bin/nvim --headless +GoUpdateBinaries +qall
+    command: sh -c 'PATH=/usr/local/go/bin:$PATH GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +GoUpdateBinaries +qall'
     changed_when: false
 
   - name: get ycm version after update
