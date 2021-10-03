@@ -559,6 +559,16 @@
           force: true
         become: true
 
+      - name: add go directory to PATH
+        copy:
+          dest: /etc/profile.d/go.sh
+          content: |
+            PATH=$PATH:/usr/local/go/bin
+          owner: root
+          group: root
+          mode: '0755'
+        become: true
+
       tags: [go]
 
     - name: create dotfiles group
