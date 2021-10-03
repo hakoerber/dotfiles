@@ -98,6 +98,24 @@
           shell: /bin/bash
           system: true
 
+      - name: create paru user on arch
+        user:
+          name: paru
+          home: /var/lib/paru
+          create_home: true
+          shell: /bin/bash
+          system: true
+
+      - name: configure passwordless sudo for paru user
+        copy:
+          owner: root
+          group: root
+          mode: "0600"
+          dest: /etc/sudoers.d/paru
+          content: |
+            paru ALL=(ALL) NOPASSWD: /usr/bin/pacman
+        become: true
+
       - name: check if paru is already installed
         shell: |
           set -o errexit
