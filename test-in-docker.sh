@@ -40,7 +40,7 @@ test_ares() {
             # packages will stay in the container
             sed -i '"'"'s/^#\?\(CacheDir.*\)/\1\nCacheDir = \/var\/cache\/pacman\/pkg_host\//'"'"' /etc/pacman.conf
 
-            pacman -Syu --noconfirm python3
+            pacman -Syu --noconfirm linux python3
             mkdir /var/cache/pacman/pkg_host/
             cd $(mktemp -d)
             tar xf /tmp/dotfiles.tar.gz -C .
