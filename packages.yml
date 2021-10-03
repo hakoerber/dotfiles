@@ -397,3 +397,6 @@ packages:
     chrome:
       ubuntu: ["google-chrome-stable"]
       archlinux: []
+    snap:
+      ubuntu: ["snapd"]
+      archlinux: []
