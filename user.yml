@@ -447,6 +447,11 @@
       group: "{{ user_group_name }}"
       mode: '0755'
 
+  - name: make kubectl executable
+    file:
+      path: /home/{{ user.name }}/.opt/kubectl-{{ kubectl_version }}
+      mode: '0755'
+
   - name: link kubectl
     file:
       src: /home/{{ user.name }}/.opt/kubectl-{{ kubectl_version }}
