@@ -523,3 +523,8 @@
     - name: rebuild initrd
       command: mkinitcpio -P
       become: true
+      register: mkinitcpio_cmd
+      failed_when: >
+        mkinitcpio_cmd.rc != 0
+        and
+        not (mkinitcpio_cmd.rc == 1 and "file not found: `fsck.overlay'" in mkinitcpio_cmd.stderr)
