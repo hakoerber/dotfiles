@@ -1,19 +1,13 @@
-_path=("$HOME/bin"
-       "$HOME/.optbin"
-       "/usr/local/go/bin"
-       "/usr/local/sbin"
-       "/usr/local/bin"
-       "/usr/sbin"
-       "/usr/bin"
-       "/sbin"
-       "/bin"
-       "/usr/games")
+source /etc/profile
 
-PATH=""
+_path=(
+    "$HOME/bin"
+    "$HOME/.optbin"
+)
+
 for part in ${_path[@]} ; do
     PATH="$PATH:${part}"
 done
-PATH="${PATH#:}"
 export PATH
 
 export EDITOR="nvim"
