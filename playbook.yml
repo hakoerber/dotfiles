@@ -372,6 +372,70 @@
         - machine.gpu is defined and machine.gpu == 'amd'
 
     - block:
+      - name: set go version
+        set_fact:
+          go_version: "1.17.1"
+
+      - name: stat go target directory
+        stat:
+          path: /usr/local/go-v{{ go_version }}
+        register: go_target_stat
+
+      - block:
+        - name: create temporary directory for go download
+          tempfile:
+            state: directory
+          register: go_download
+
+        - name: download go
+          get_url:
+            url: https://golang.org/dl/go{{ go_version }}.linux-amd64.tar.gz
+            dest: "{{ go_download.path }}/go{{ go_version }}.linux-amd64.tar.gz"
+
+        - name: unpack go
+          unarchive:
+            src: "{{ go_download.path }}/go{{ go_version }}.linux-amd64.tar.gz"
+            owner: root
+            group: root
+            mode: '0755'
+            dest: "{{ go_download.path }}"
+            remote_src: true
+          become: true
+
+        - name: install new go version
+          command: mv "{{ go_download.path }}/go/" /usr/local/go-v{{ go_version }}
+          become: true
+
+        - name: clean up go download directory
+          file:
+            path: "{{ go_download.path }}"
+            state: absent
+
+        when: not go_target_stat.stat.exists
+
+      - name: link to the current go version
+        file:
+          src: /usr/local/go-v{{ go_version }}
+          dest: /usr/local/go
+          owner: root
+          group: root
+          state: link
+          force: true
+        become: true
+
+      - name: add go directory to PATH
+        copy:
+          dest: /etc/profile.d/go.sh
+          content: |
+            PATH=$PATH:/usr/local/go/bin
+          owner: root
+          group: root
+          mode: '0644'
+        become: true
+
+      tags: [go]
+
+    - block:
       - name: install alacritty build dependencies
         package:
           state: present
@@ -506,70 +570,6 @@
         become: true
       when: distro == 'ubuntu'
       tags: [signal]
-
-    - block:
-      - name: set go version
-        set_fact:
-          go_version: "1.17.1"
-
-      - name: stat go target directory
-        stat:
-          path: /usr/local/go-v{{ go_version }}
-        register: go_target_stat
-
-      - block:
-        - name: create temporary directory for go download
-          tempfile:
-            state: directory
-          register: go_download
-
-        - name: download go
-          get_url:
-            url: https://golang.org/dl/go{{ go_version }}.linux-amd64.tar.gz
-            dest: "{{ go_download.path }}/go{{ go_version }}.linux-amd64.tar.gz"
-
-        - name: unpack go
-          unarchive:
-            src: "{{ go_download.path }}/go{{ go_version }}.linux-amd64.tar.gz"
-            owner: root
-            group: root
-            mode: '0755'
-            dest: "{{ go_download.path }}"
-            remote_src: true
-          become: true
-
-        - name: install new go version
-          command: mv "{{ go_download.path }}/go/" /usr/local/go-v{{ go_version }}
-          become: true
-
-        - name: clean up go download directory
-          file:
-            path: "{{ go_download.path }}"
-            state: absent
-
-        when: not go_target_stat.stat.exists
-
-      - name: link to the current go version
-        file:
-          src: /usr/local/go-v{{ go_version }}
-          dest: /usr/local/go
-          owner: root
-          group: root
-          state: link
-          force: true
-        become: true
-
-      - name: add go directory to PATH
-        copy:
-          dest: /etc/profile.d/go.sh
-          content: |
-            PATH=$PATH:/usr/local/go/bin
-          owner: root
-          group: root
-          mode: '0755'
-        become: true
-
-      tags: [go]
 
     - name: create dotfiles group
       group:
