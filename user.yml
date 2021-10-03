@@ -272,20 +272,20 @@
   tags:
     - dotfiles
 
-- name: create intermediate directories for vim-plug
-  file:
-    path: "{{ item }}"
-    state: directory
-  with_items:
-    - ~/.local/
-    - ~/.local/share/
-    - ~/.local/share/nvim/
-    - ~/.local/share/nvim/site/
-    - ~/.local/share/nvim/site/autoload/
-    - ~/.vim/
-    - ~/.vim/autoload
-
 - block:
+  - name: create intermediate directories for vim-plug
+    file:
+      path: "{{ item }}"
+      state: directory
+    with_items:
+      - ~/.local/
+      - ~/.local/share/
+      - ~/.local/share/nvim/
+      - ~/.local/share/nvim/site/
+      - ~/.local/share/nvim/site/autoload/
+      - ~/.vim/
+      - ~/.vim/autoload
+
   - name: install vim-plug
     copy:
       src: contrib/vim-plug/plug.vim
