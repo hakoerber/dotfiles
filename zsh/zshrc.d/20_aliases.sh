@@ -89,6 +89,9 @@ alias gpg=gpg2
 
 alias alacritty="alacritty --config-file $HOME/.config/alacritty.yml"
 
+alias d=docker
+alias dc=docker-compose
+
 gitmaster() {
     git stash push -m gitmaster-$(date -uIseconds) -u || return 1
     _branch=$(git rev-parse --abbrev-ref HEAD)
