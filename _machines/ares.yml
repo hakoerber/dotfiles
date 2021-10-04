@@ -1,6 +1,5 @@
 font_size: 12
 letter_space: 0
-terminal_binary: alacritty
 
 gpu: amd
 

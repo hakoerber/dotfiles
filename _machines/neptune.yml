@@ -1,6 +1,5 @@
 font_size: 11
 letter_space: 0
-terminal_binary: alacritty
 
 users:
 - name: hannes-work
