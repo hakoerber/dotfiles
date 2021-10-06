@@ -68,6 +68,8 @@ Plug 'evanleck/vim-svelte', {'branch': 'main'}
 
 " Plug 'Chiel92/vim-autoformat'
 
+Plug 'evanleck/vim-svelte', {'branch': 'main'}
+
 call plug#end()
 filetype plugin indent on
 
