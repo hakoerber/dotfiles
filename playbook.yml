@@ -15,29 +15,29 @@
       tags:
         - always
 
-    - name: Check for valid distro
+    - name: check for valid distro
       assert:
         that: distro in ('ubuntu', 'archlinux')
 
     - block:
       - block:
-        - name: Update apt cache
+        - name: update apt cache
           apt:
             update_cache: true
           become: true
           changed_when: false
 
-        - name: Upgrade system
+        - name: upgrade system
           apt:
             upgrade: dist
           become: true
 
-        - name: Remove unused packages
+        - name: remove unused packages
           apt:
             autoremove: true
           become: true
 
-        - name: Clean apt cache
+        - name: clean apt cache
           apt:
             autoclean: true
           become: true
@@ -62,7 +62,7 @@
             marker: "# {mark} ANSIBLE MANAGED parallel_download"
           become: true
 
-        - name: Upgrade system
+        - name: upgrade system
           pacman:
             upgrade: true
             update_cache: true
@@ -75,7 +75,7 @@
             state: present
           become: true
 
-        - name: Clean cache
+        - name: clean cache
           command: paccache -rk2 -ruk0
           become: true
           changed_when: false
