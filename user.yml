@@ -317,23 +317,23 @@
     tags: [update]
 
   - name: install vim plugins
-    command: sh -c 'PATH=/usr/local/go/bin:$PATH GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +PlugInstall +qall'
+    command: sh -c 'PATH=/usr/local/go/bin:$PATH GOROOT=/usr/local/go GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +PlugInstall +qall'
     register: vim_plugin_install
     changed_when: vim_plugin_install.stderr != ""
 
   - name: install go binaries for vim
-    command: sh -c 'PATH=/usr/local/go/bin:$PATH GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +GoInstallBinaries +qall'
+    command: sh -c 'PATH=/usr/local/go/bin:$PATH GOROOT=/usr/local/go GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +GoInstallBinaries +qall'
     changed_when: false
 
   - name: update vim plugins
-    command: sh -c 'PATH=/usr/local/go/bin:$PATH GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +PlugUpdate +qall'
+    command: sh -c 'PATH=/usr/local/go/bin:$PATH GOROOT=/usr/local/go GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +PlugUpdate +qall'
     changed_when: false
     register: vim_plugin_update
     changed_when: vim_plugin_update.stderr != ""
     tags: [update]
 
   - name: update go binaries for vim
-    command: sh -c 'PATH=/usr/local/go/bin:$PATH GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +GoUpdateBinaries +qall'
+    command: sh -c 'PATH=/usr/local/go/bin:$PATH GOROOT=/usr/local/go GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +GoUpdateBinaries +qall'
     changed_when: false
     tags: [update]
 

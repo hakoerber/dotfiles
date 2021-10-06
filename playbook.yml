@@ -436,11 +436,12 @@
           force: true
         become: true
 
-      - name: add go directory to PATH
+      - name: add go directory to PATH and set GOROOT
         copy:
           dest: /etc/profile.d/go.sh
           content: |
-            PATH=$PATH:/usr/local/go/bin
+            export PATH=$PATH:/usr/local/go/bin
+            export GOROOT=/usr/local/go
           owner: root
           group: root
           mode: '0644'
@@ -507,7 +508,7 @@
         when: not yubikey_touch_detector_binary.stat.exists
 
       - name: build yubikey-touch-detector
-        shell: sh -c 'env GOPATH=$(pwd) PATH=/usr/local/go/bin:$PATH go get -u github.com/maximbaz/yubikey-touch-detector'
+        shell: sh -c 'PATH=/usr/local/go/bin:$PATH env GOROOT=/usr/local/go GOPATH=$(pwd) go get -u github.com/maximbaz/yubikey-touch-detector'
         args:
           chdir: "{{ yubikey_touch_detector_build_tempdir.path }}"
         when: not yubikey_touch_detector_binary.stat.exists
