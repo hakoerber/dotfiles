@@ -145,7 +145,7 @@ packages:
       archlinux: ["pandoc", "texlive-core", "texlive-fontsextra", "texlive-latexextra"]
     libvirt:
       ubuntu: ["virt-manager", "libvirt-daemon"]
-      archlinux: ["virt-manager", "libvirt", "dnsmasq", "ebtables"]
+      archlinux: ["virt-manager", "libvirt", "dnsmasq", "ebtables", "dmidecode"]
     firefox:
       ubuntu: ["firefox"]
       archlinux: ["firefox"]
