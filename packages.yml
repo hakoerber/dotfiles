@@ -310,7 +310,7 @@ packages:
       archlinux: []
     rust:
       ubuntu: ["rustc", "cargo"]
-      archlinux: ["rust"]
+      archlinux: ["rustup"]
     musescore:
       ubuntu: ["musescore3"]
       archlinux: ["musescore"]
