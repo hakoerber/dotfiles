@@ -89,9 +89,6 @@ packages:
     pluma:
       ubuntu: ["pluma"]
       archlinux: ["pluma"]
-    vim:
-      ubuntu: ["vim"]
-      archlinux: ["gvim"]
     neovim:
       ubuntu: ["neovim"]
       archlinux: ["neovim", "python-pynvim"]
@@ -394,3 +391,6 @@ packages:
     signal:
       ubuntu: []
       archlinux: ["signal-desktop"]
+    vim:
+      ubuntu: ["vim"]
+      archlinux: ["gvim"]
