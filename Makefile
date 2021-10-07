@@ -11,7 +11,7 @@ all: | venv $(ansible)
 
 .PHONY: update
 update: $(ansible)
-	$(ansible_run) --tags update_system
+	$(ansible_run) --tags update
 
 .PHONY: reboot
 reboot:
