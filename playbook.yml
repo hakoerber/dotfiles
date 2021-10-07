@@ -591,6 +591,7 @@
     - name: create dotfiles user
       user:
         name: dotfiles
+        group: dotfiles
         home: /var/lib/dotfiles
         create_home: false
         shell: /bin/bash
