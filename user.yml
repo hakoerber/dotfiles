@@ -360,19 +360,90 @@
   tags: [vim-plugins]
 
 - block:
-  - name: firefox - create chrome directory
+  - name: create firefox directories
+    firefox_profile:
+      name: "{{ item.key }}"
+    loop: "{{ user.firefox_profiles | dict2items }}"
+    register: firefox_profile_names
+
+  - set_fact:
+      firefox_preferences:
+        browser.aboutConfig.showWarning: false
+        browser.download.useDownloadDir: false
+        extensions.pocket.enabled: false
+        toolkit.legacyUserProfileCustomizations.stylesheets: true
+        browser.contentblocking.category: "strict"
+        browser.newtabpage.enabled: false
+        browser.shell.checkDefaultBrowser: false
+        browser.startup.homepage: "about:blank"
+        privacy.trackingprotection.enabled: true
+        privacy.trackingprotection.socialtracking.enabled: true
+        general.smoothScroll: false
+
+        # Restore last session on startup
+        # https://support.mozilla.org/de/questions/1235263
+        browser.startup.page: 3
+        browser.sessionstore.resume_from_crash: true
+
+        # "Play DRM-controlled content"
+        media.eme.enabled: true
+
+        # "Recommend (extensions|features) as you browse"
+        browser.newtabpage.activity-stream.asrouter.userprefs.cfr.addons: false
+        browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features: false
+
+        # "Ask to save logins and passwords for websites"
+        signon.rememberSignons: false
+
+        # "Allow Firefox to make personalized extension recommendations"
+        browser.discovery.enabled: false
+
+        # "Allow Firefox to install and run studies"
+        app.shield.optoutstudies.enabled: false
+
+  - include_role:
+      name: firefox
+    vars:
+      firefox_profiles: "{{ {item.key: item.value} | combine({item.key: {'preferences': firefox_preferences}}, recursive=True) }}"
+    loop: "{{ user.firefox_profiles | dict2items }}"
+
+  - name: firefox - create target directory for passff
     file:
-      path: ~/.mozilla/firefox/{{ item.name }}/chrome/
+      path: ~/.mozilla/native-messaging-hosts
+      owner: "{{ user.name }}"
+      group: "{{ user_group_name }}"
       state: directory
       mode: '0755'
-    with_items: "{{ user.firefox_profiles }}"
-    when: user.firefox_profiles is defined
-    tags:
-      - firefox
+
+  - name: firefox - get passff host application
+    get_url:
+      url: https://github.com/passff/passff-host/releases/download/1.2.2/{{ item.name }}
+      dest: ~/.mozilla/native-messaging-hosts/{{ item.name }}
+      owner: "{{ user.name }}"
+      group: "{{ user_group_name }}"
+      mode: "{{ item.mode }}"
+    loop:
+      - name: passff.json
+        mode: '0644'
+      - name: passff.py
+        mode: '0755'
+
+  - name: firefox - configure path to passff
+    lineinfile:
+      path: ~/.mozilla/native-messaging-hosts/passff.json
+      search_string: '"path": "PLACEHOLDER"'
+      line: "  \"path\": \"/home/{{ user.name }}/.mozilla/native-messaging-hosts/passff.py\","
+
+  - name: firefox - create chrome directory
+    file:
+      path: "{{ item.profile_path }}/chrome/"
+      state: directory
+      mode: '0755'
+    with_items: "{{ firefox_profile_names.results }}"
 
   - name: firefox - configure firefox custom css
     copy:
-      dest: ~/.mozilla/firefox/{{ item.name }}/chrome/userChrome.css
+      dest: "{{ item.profile_path }}/chrome/userChrome.css"
       content: |
         #TabsToolbar {
           visibility: collapse !important;
@@ -386,10 +457,10 @@
         #sidebar {
           width: 400px !important;
         }
-    when: item.manage_css
-    with_items: "{{ user.firefox_profiles | default([]) }}"
-    tags:
-      - firefox
+    when: user.firefox_profiles[item.profile_name].manage_css is sameas True
+    with_items: "{{ firefox_profile_names.results }}"
+  tags:
+    - firefox
 
 - block:
   - name: set portfolio performance version

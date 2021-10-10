@@ -8,7 +8,13 @@ users:
 - name: hannes
   vt: 1
   firefox_profiles:
-    - name: 7kqv7aco.default-release
+    default:
+      extensions:
+        - ublock-origin
+        - passff
+        - privacy-badger17
+        - tree-style-tab
+        - i-dont-care-about-cookies
       manage_css: true
   mail: hannes@hkoerber.de
   git_gpg_sign: false
