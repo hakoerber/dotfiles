@@ -218,6 +218,7 @@
       state: directory
       path: "{{ item }}"
     with_items:
+      - ~/tmp
       - ~/.var/lib
       - ~/.var/log
       - ~/.var/run
