@@ -7,8 +7,8 @@ Wants=blueman.service
 Wants=dpms.service
 Wants=dunst.service
 Wants=element.service
-{% for profile in user.firefox_profiles|default([]) %}
-Wants=firefox@{{ profile.name }}.service
+{% for profile in (user.firefox_profiles|default({})).keys() %}
+Wants=firefox@{{ profile }}.service
 {% endfor %}
 Wants=gpg-agent.service
 Wants=gnome-keyring.service
