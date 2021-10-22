@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-set -o errexit
-cd $HOME/sync/projects/time-tracking
-source venv/bin/activate
-./call.py "${@}"
