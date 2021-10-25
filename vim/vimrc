@@ -349,3 +349,6 @@ endif
 " https://github.com/golang/tools/blob/master/gopls/doc/vim.md
 let g:go_def_mode='gopls'
 let g:go_info_mode='gopls'
+
+" https://stackoverflow.com/a/8585343
+map <leader>q :bp<bar>sp<bar>bn<bar>bd<CR>
