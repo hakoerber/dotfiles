@@ -377,9 +377,6 @@ packages:
     ncdu:
       ubuntu: ["ncdu"]
       archlinux: ["ncdu"]
-    signal:
-      ubuntu: []
-      archlinux: ["signal-desktop"]
 
   remove:
     mousepad:
@@ -394,3 +391,6 @@ packages:
     golang:
       ubuntu: ["golang-go"]
       archlinux: ["go"]
+    signal:
+      ubuntu: []
+      archlinux: ["signal-desktop"]
