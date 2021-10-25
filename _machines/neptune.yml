@@ -38,6 +38,7 @@ users:
         - privacy-badger17
         - tree-style-tab
         - i-dont-care-about-cookies
+        - floccus
       manage_css: true
   mail: hannes@hkoerber.de
   git_gpg_sign: false
