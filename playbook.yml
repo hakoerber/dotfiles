@@ -394,6 +394,16 @@
           system: true
         become: true
 
+      - name: add rustup stable toolchain
+        command: rustup default stable
+        become: true
+        become_user: rust_build
+
+      - name: update rustup stable toolchain
+        command: rustup update stable
+        become: true
+        become_user: rust_build
+
       - name: set crate list
         set_fact:
           cargo_crate_list:
