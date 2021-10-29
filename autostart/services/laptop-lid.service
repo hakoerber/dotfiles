@@ -4,5 +4,7 @@ After=windowmanager.target
 ConditionPathExists=%h/.var/run/features/machine_is_laptop
 
 [Service]
+Type=oneshot
 ExecStart=/usr/bin/env bash -c 'grep "^${ACPI_LID_NAME}.*enabled" /proc/acpi/wakeup && echo " ${ACPI_LID_NAME}" | sudo tee /proc/acpi/wakeup'
+RemainAfterExit=true
 PassEnvironment=DISPLAY
