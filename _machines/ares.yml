@@ -43,6 +43,9 @@ screen:
 screencfgs: []
 
 workspace:
+  1: www
+  9: comm
+  10: music
 
 environment:
   MACHINE_TYPE: "workstation"
