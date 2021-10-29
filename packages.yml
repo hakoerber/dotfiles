@@ -329,9 +329,6 @@ packages:
     man:
       ubuntu: ["man-db", "manpages"]
       archlinux: ["man-db", "man-pages"]
-    discord:
-      ubuntu: []
-      archlinux: ["discord"]
     nextcloud:
       ubuntu: ["nextcloud-desktop"]
       archlinux: ["nextcloud-client"]
@@ -394,3 +391,6 @@ packages:
     vim:
       ubuntu: ["vim"]
       archlinux: ["gvim"]
+    discord:
+      ubuntu: []
+      archlinux: ["discord"]

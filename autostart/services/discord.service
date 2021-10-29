@@ -1,9 +1,0 @@
-[Unit]
-BindsTo=autostart.target
-After=windowmanager.target
-
-ConditionPathExists=%h/.var/run/features/discord
-
-[Service]
-ExecStart=/usr/bin/env discord
-PassEnvironment=DISPLAY
