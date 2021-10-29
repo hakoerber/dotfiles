@@ -1,8 +1,9 @@
 alias vim="nvim"
 
-### COMMON OPERATIONS
-alias ll='ls -AlFh'
-alias la='ls -A'
+### BETTER COMMANDS
+alias ls="exa"
+alias ll='ls -alF'
+alias la='ls -a'
 
 alias spm="sudo pacman"
 
@@ -30,8 +31,6 @@ alias tmux="tmux -2"
 
 alias chmod="chmod -c"
 alias chown="chown -c"
-
-alias ls="ls --group-directories-first --classify --color=auto"
 
 alias diff="diff --color=auto"
 

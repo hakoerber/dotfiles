@@ -385,6 +385,60 @@
         - machine.gpu is defined and machine.gpu == 'amd'
 
     - block:
+      - name: create rust build user
+        user:
+          name: rust_build
+          home: /var/lib/rust_build
+          create_home: true
+          shell: /bin/bash
+          system: true
+        become: true
+
+      - name: set crate list
+        set_fact:
+          cargo_crate_list:
+            - crate: just
+              binary: just
+              version: 0.10.2
+            - crate: ripgrep
+              binary: rg
+              version: 13.0.0
+            - crate: fd-find
+              binary: fd
+              version: 8.2.1
+            - crate: bat
+              binary: bat
+              version: 0.18.3
+            - crate: exa
+              binary: exa
+              version: 0.10.1
+            - crate: watchexec-cli
+              binary: watchexec
+              version: 1.17.1
+      - name: build rust crates
+        shell: |
+          cargo install --version {{ item.version }} {{ item.crate }}
+          mv /var/lib/rust_build/.cargo/bin/{{ item. binary }} /var/lib/rust_build/.cargo/bin/{{ item.binary }}.{{ item.version }}
+        args:
+          creates: /var/lib/rust_build/.cargo/bin/{{ item.binary }}.{{ item.version }}
+        become: true # do not build as root!
+        become_user: rust_build
+        loop: "{{ cargo_crate_list }}"
+
+      - name: link binaries
+        file:
+          src: /var/lib/rust_build/.cargo/bin/{{ item.binary }}.{{ item.version }}
+          dest: /usr/local/bin/{{ item.binary }}
+          owner: root
+          group: root
+          state: link
+          force: true
+        become: true
+        loop: "{{ cargo_crate_list }}"
+      tags:
+        - rust_binaries
+
+    - block:
       - name: set go version
         set_fact:
           go_version: "1.17.1"
