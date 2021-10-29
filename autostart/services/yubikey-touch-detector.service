@@ -5,3 +5,4 @@ After=windowmanager.target
 [Service]
 ExecStart=/usr/bin/env yubikey-touch-detector -libnotify
 PassEnvironment=DISPLAY
+Restart=always

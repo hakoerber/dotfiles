@@ -8,6 +8,7 @@ ConditionPathExists=%h/.var/run/features/nextcloud
 [Service]
 ExecStart=/usr/bin/env nextcloud --background
 PassEnvironment=DISPLAY
+Restart=always
 
 MemoryHigh=20%
 MemoryMax=30%

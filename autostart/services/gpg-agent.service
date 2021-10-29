@@ -7,3 +7,4 @@ ConditionPathExists=%h/.var/run/features/gpg_agent
 Type=forking
 ExecStart=/usr/bin/env gpg-agent --homedir %h/.gnupg --no-detach --daemon
 PassEnvironment=DISPLAY
+Restart=always

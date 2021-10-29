@@ -8,3 +8,4 @@ ConditionPathExists=%h/.var/run/features/steam
 [Service]
 ExecStart=/usr/bin/env steam
 PassEnvironment=DISPLAY
+Restart=always

@@ -8,3 +8,4 @@ ConditionPathExists=%h/.var/run/features/element
 [Service]
 ExecStart=/usr/bin/env element-desktop
 PassEnvironment=DISPLAY
+Restart=always

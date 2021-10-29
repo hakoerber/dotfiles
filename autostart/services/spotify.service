@@ -5,3 +5,4 @@ After=windowmanager.target
 [Service]
 ExecStart=/usr/bin/env spotify
 PassEnvironment=DISPLAY
+Restart=always

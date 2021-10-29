@@ -7,3 +7,4 @@ Type=oneshot
 ExecStart=/usr/bin/env xset s off
 ExecStart=/usr/bin/env xset dpms 0 0 300
 PassEnvironment=DISPLAY
+Restart=always

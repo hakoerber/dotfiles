@@ -5,3 +5,4 @@ After=windowmanager.target
 [Service]
 ExecStart=/usr/bin/env redshift-gtk -c %h/.config/redshift.conf
 PassEnvironment=DISPLAY
+Restart=always
