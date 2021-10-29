@@ -1,9 +1,9 @@
 alias vim="nvim"
 
 ### BETTER COMMANDS
-alias ls="exa"
-alias ll='ls -alF'
-alias la='ls -a'
+alias ls="exa --oneline --icons --group-directories-first"
+alias ll='ls --all --long --classify --group --modified --time-style=long-iso --git'
+alias la='ls --all'
 
 alias spm="sudo pacman"
 
