@@ -425,6 +425,7 @@
             - crate: watchexec-cli
               binary: watchexec
               version: 1.17.1
+
       - name: build rust crates
         shell: |
           cargo install --version {{ item.version }} {{ item.crate }}
@@ -435,9 +436,27 @@
         become_user: rust_build
         loop: "{{ cargo_crate_list }}"
 
+      - name: create target directory
+        file:
+          state: directory
+          path: /usr/local/lib/binaries/
+          owner: root
+          group: root
+          mode: '0775'
+        become: true
+
+      - name: move binaries
+        shell: |
+          mv /var/lib/rust_build/.cargo/bin/{{ item.binary }}.{{ item.version }} /usr/local/lib/binaries/{{ item.binary }}.{{ item.version }}
+          ln -s /usr/local/lib/binaries/{{ item.binary }}.{{ item.version }} /var/lib/rust_build/.cargo/bin/{{ item.binary }}.{{ item.version }}
+        args:
+          creates: /usr/local/lib/binaries/{{ item.binary }}.{{ item.version }}
+        become: true
+        loop: "{{ cargo_crate_list }}"
+
       - name: link binaries
         file:
-          src: /var/lib/rust_build/.cargo/bin/{{ item.binary }}.{{ item.version }}
+          src: /usr/local/lib/binaries/{{ item.binary }}.{{ item.version }}
           dest: /usr/local/bin/{{ item.binary }}
           owner: root
           group: root
