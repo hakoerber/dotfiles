@@ -47,7 +47,7 @@ Plug 'vimwiki/vimwiki'
 Plug 'rodjek/vim-puppet'
 Plug 'suan/vim-instant-markdown'
 "Plug 'marshallward/vim-restructuredtext'
-"Plug 'vim-syntastic/syntastic'
+Plug 'vim-syntastic/syntastic'
 "Plug 'ElmCast/elm-vim'
 "Plug 'avh4/elm-format'
 
@@ -72,6 +72,9 @@ Plug 'evanleck/vim-svelte', {'branch': 'main'}
 Plug 'evanleck/vim-svelte', {'branch': 'main'}
 
 Plug 'cespare/vim-toml', { 'branch': 'main' }
+
+Plug 'rust-lang/rust.vim'
+
 
 call plug#end()
 filetype plugin indent on
@@ -355,3 +358,5 @@ let g:go_info_mode='gopls'
 
 " https://stackoverflow.com/a/8585343
 map <leader>q :bp<bar>sp<bar>bn<bar>bd<CR>
+
+let g:rustfmt_autosave = 1
