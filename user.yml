@@ -327,7 +327,6 @@
 
   - name: update vim plugins
     command: sh -c 'PATH=/usr/local/go/bin:$PATH GOROOT=/usr/local/go GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +PlugUpdate +qall'
-    changed_when: false
     register: vim_plugin_update
     changed_when: vim_plugin_update.stderr != ""
     tags: [update]
