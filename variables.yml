@@ -1,0 +1,23 @@
+terraform_version: 1.0.2
+kubectl_version: v1.22.2
+go_version: "1.17.1"
+portfolio_performace_version: "0.55.0"
+cargo_crate_list:
+  - crate: just
+    binary: just
+    version: 0.10.2
+  - crate: ripgrep
+    binary: rg
+    version: 13.0.0
+  - crate: fd-find
+    binary: fd
+    version: 8.2.1
+  - crate: bat
+    binary: bat
+    version: 0.18.3
+  - crate: exa
+    binary: exa
+    version: 0.10.1
+  - crate: watchexec-cli
+    binary: watchexec
+    version: 1.17.1

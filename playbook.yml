@@ -10,6 +10,12 @@
       tags:
         - always
 
+    - name: read variables
+      include_vars:
+        file: variables.yml
+      tags:
+        - always
+
     - set_fact:
         distro: "{{ ansible_distribution|lower }}"
       tags:
@@ -412,28 +418,6 @@
         become: true
         become_user: rust_build
 
-      - name: set crate list
-        set_fact:
-          cargo_crate_list:
-            - crate: just
-              binary: just
-              version: 0.10.2
-            - crate: ripgrep
-              binary: rg
-              version: 13.0.0
-            - crate: fd-find
-              binary: fd
-              version: 8.2.1
-            - crate: bat
-              binary: bat
-              version: 0.18.3
-            - crate: exa
-              binary: exa
-              version: 0.10.1
-            - crate: watchexec-cli
-              binary: watchexec
-              version: 1.17.1
-
       - name: build rust crates
         shell: |
           set -o errexit
@@ -478,10 +462,6 @@
         - rust_binaries
 
     - block:
-      - name: set go version
-        set_fact:
-          go_version: "1.17.1"
-
       - name: stat go target directory
         stat:
           path: /usr/local/go-v{{ go_version }}

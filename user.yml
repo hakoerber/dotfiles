@@ -477,10 +477,6 @@
     - firefox
 
 - block:
-  - name: set portfolio performance version
-    set_fact:
-      portfolio_performace_version: "0.55.0"
-
   - name: look of current installation
     stat:
       path: /home/{{ user.name }}/.opt/portfolio-performance-{{ portfolio_performace_version }}
@@ -542,10 +538,6 @@
     - portfolio-performance
 
 - block:
-  - name: set kubectl version
-    set_fact:
-      kubectl_version: v1.22.2
-
   - name: get current stable version
     uri:
       url: https://storage.googleapis.com/kubernetes-release/release/stable.txt
@@ -588,10 +580,6 @@
     - kubectl
 
 - block:
-  - name: set terraform version
-    set_fact:
-      terraform_version: 1.0.2
-
   - name: stat current terraform binary
     stat:
       path: "/home/{{ user.name }}/.opt/terraform-v{{ terraform_version }}"
