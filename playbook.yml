@@ -678,6 +678,7 @@
           become: true
           become_user: "{{ user.name }}"
       with_items: "{{ users }}"
+      no_log: True # less spam
       loop_control:
         loop_var: user
       tags:
