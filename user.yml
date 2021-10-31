@@ -623,6 +623,7 @@
   - name: get terraform version info
     command: /home/{{ user.name }}/.optbin/terraform version -json
     register: terraform_version_output
+    check_mode: false
     changed_when: false
 
   - name: parse terraform version output
