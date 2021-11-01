@@ -141,7 +141,7 @@ packages:
       ubuntu: ["ghostscript", "enscript"]
       archlinux: ["ghostscript", "enscript"]
     pandoc:
-      ubuntu: [
+      ubuntu:
         - pandoc
         - texlive
         - python3-sphinxcontrib.svg2pdfconverter # for html to pdf conversions
