@@ -309,7 +309,7 @@ packages:
     dnf:
       ubuntu: []
       archlinux: []
-    rust:
+    rustup:
       ubuntu: []
       archlinux: ["rustup"]
     musescore:
@@ -401,3 +401,6 @@ packages:
     discord:
       ubuntu: []
       archlinux: ["discord"]
+    rust:
+      ubuntu: ["rustc", "cargo"]
+      archlinux: ["rust"]
