@@ -141,7 +141,11 @@ packages:
       ubuntu: ["ghostscript", "enscript"]
       archlinux: ["ghostscript", "enscript"]
     pandoc:
-      ubuntu: ["pandoc"]
+      ubuntu: [
+        - pandoc
+        - texlive
+        - python3-sphinxcontrib.svg2pdfconverter # for html to pdf conversions
+        - texlive-latex-extra
       archlinux: ["pandoc", "texlive-core", "texlive-fontsextra", "texlive-latexextra"]
     libvirt:
       ubuntu: ["virt-manager", "libvirt-daemon"]
@@ -371,6 +375,9 @@ packages:
     ncdu:
       ubuntu: ["ncdu"]
       archlinux: ["ncdu"]
+    font-utils:
+      ubuntu: ["woff-tools", "woff2"]
+      archinux: ["woff2"]
 
   remove:
     mousepad:
