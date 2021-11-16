@@ -409,7 +409,7 @@
         when: distro == 'ubuntu'
 
       - name: add rustup stable toolchain
-        shell: . ~/.cargo/env && rustup default stable
+        shell: . ~/.cargo/env && rustup toolchain install stable && rustup default stable
         become: true
         become_user: rust_build
         changed_when: false
@@ -420,17 +420,43 @@
         become_user: rust_build
         changed_when: false
 
-      - name: build rust crates
+      - name: add rustup nightly toolchain
+        shell: . ~/.cargo/env && rustup toolchain install nightly
+        become: true
+        become_user: rust_build
+        changed_when: false
+
+      - name: update rustup nightly toolchain
+        shell: . ~/.cargo/env && rustup update nightly
+        become: true
+        become_user: rust_build
+        changed_when: false
+
+      - name: build rust crates from crates.io
         shell: |
           set -o errexit
           . ~/.cargo/env
-          cargo install --version {{ item.version }} {{ item.crate }}
-          mv /var/lib/rust_build/.cargo/bin/{{ item. binary }} /var/lib/rust_build/.cargo/bin/{{ item.binary }}.{{ item.version }}
+
+          rustup run {{ item.toolchain|default('stable') }} cargo install --version {{ item.version }} {{ item.crate }}
+          mv /var/lib/rust_build/.cargo/bin/{{ item.binary }} /var/lib/rust_build/.cargo/bin/{{ item.binary }}.{{ item.version }}
         args:
           creates: /var/lib/rust_build/.cargo/bin/{{ item.binary }}.{{ item.version }}
         become: true # do not build as root!
         become_user: rust_build
         loop: "{{ cargo_crate_list }}"
+        when: item.source|default('crates.io') == 'crates.io'
+
+      - name: build rust crates from git
+        shell: |
+          set -o errexit
+          . ~/.cargo/env
+          rustup run {{ item.toolchain|default('stable') }} cargo install --git {{ item.url }} --branch {{ item.branch }}
+        args:
+          creates: /var/lib/rust_build/.cargo/bin/{{ item.binary }}
+        become: true # do not build as root!
+        become_user: rust_build
+        loop: "{{ cargo_crate_list }}"
+        when: item.source|default('crates.io') == 'git'
 
       - name: create target directory
         file:
@@ -441,7 +467,7 @@
           mode: '0775'
         become: true
 
-      - name: move binaries
+      - name: move binaries for crates.io
         shell: |
           mv /var/lib/rust_build/.cargo/bin/{{ item.binary }}.{{ item.version }} /usr/local/lib/binaries/{{ item.binary }}.{{ item.version }}
           ln -s /usr/local/lib/binaries/{{ item.binary }}.{{ item.version }} /var/lib/rust_build/.cargo/bin/{{ item.binary }}.{{ item.version }}
@@ -449,8 +475,19 @@
           creates: /usr/local/lib/binaries/{{ item.binary }}.{{ item.version }}
         become: true
         loop: "{{ cargo_crate_list }}"
+        when: item.source|default('crates.io') == 'crates.io'
 
-      - name: link binaries
+      - name: move binaries for git
+        shell: |
+          mv /var/lib/rust_build/.cargo/bin/{{ item.binary }} /usr/local/lib/binaries/{{ item.binary }}
+          ln -s /usr/local/lib/binaries/{{ item.binary }} /var/lib/rust_build/.cargo/bin/{{ item.binary }}
+        args:
+          creates: /usr/local/lib/binaries/{{ item.binary }}
+        become: true
+        loop: "{{ cargo_crate_list }}"
+        when: item.source|default('crates.io') == 'git'
+
+      - name: link binaries for crates.io
         file:
           src: /usr/local/lib/binaries/{{ item.binary }}.{{ item.version }}
           dest: /usr/local/bin/{{ item.binary }}
@@ -460,6 +497,19 @@
           force: true
         become: true
         loop: "{{ cargo_crate_list }}"
+        when: item.source|default('crates.io') == 'crates.io'
+
+      - name: link binaries for git
+        file:
+          src: /usr/local/lib/binaries/{{ item.binary }}
+          dest: /usr/local/bin/{{ item.binary }}
+          owner: root
+          group: root
+          state: link
+          force: true
+        become: true
+        loop: "{{ cargo_crate_list }}"
+        when: item.source|default('crates.io') == 'git'
       tags:
         - rust_binaries
 
