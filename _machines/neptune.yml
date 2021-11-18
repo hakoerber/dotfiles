@@ -26,6 +26,7 @@ users:
     MACHINE_HAS_ELEMENT: "false"
     MACHINE_HAS_KEEPASSX: "true"
   has_yubikey: false
+  repositories: []
 - name: hannes-private
   group: hannes-private
   vt: 2
@@ -54,6 +55,8 @@ users:
     MACHINE_HAS_ELEMENT: "true"
     MACHINE_HAS_KEEPASSX: "false"
   has_yubikey: true
+  repositories:
+    - personal_projects
 
 screen:
   1: DP-1-1

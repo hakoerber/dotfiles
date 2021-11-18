@@ -1,0 +1,317 @@
+[[trees]]
+root = "~/projects"
+
+[[trees.repos]]
+name = "misc/rbackupd"
+
+[[trees.repos.remotes]]
+name = "github"
+url = "git@github.com:hakoerber/rbackupd.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "misc/cobbler-kickstart"
+
+[[trees.repos.remotes]]
+name = "github"
+url = "ssh://git@github.com/hakoerber/cobbler-kickstart.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "misc/postfix-grok-patterns"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@github.com/hakoerber/postfix-grok-patterns.git"
+type = "ssh"
+
+[[trees.repos.remotes]]
+name = "upstream"
+url = "https://github.com/whyscream/postfix-grok-patterns.git"
+type = "https"
+
+[[trees.repos]]
+name = "misc/syncrepo"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@github.com/hakoerber/syncrepo.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "misc/pkgbuilds"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@github.com/hakoerber/pkgbuilds.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "misc/openvpn-helper"
+
+[[trees.repos.remotes]]
+name = "github"
+url = "ssh://git@github.com/hakoerber/openvpn-helper.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "misc/wifiqr"
+
+[[trees.repos.remotes]]
+name = "github"
+url = "ssh://git@github.com/hakoerber/wifi-qr.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "misc/checkconn"
+
+[[trees.repos.remotes]]
+name = "github"
+url = "ssh://git@github.com/hakoerber/checkconn.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "misc/xftwidth"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@github.com/hakoerber/xftwidth.git"
+type = "ssh"
+
+[[trees.repos.remotes]]
+name = "upstream"
+url = "https://github.com/vixus0/xftwidth"
+type = "https"
+
+[[trees.repos]]
+name = "x-hidecursor"
+remotes = []
+
+[[trees.repos]]
+name = "git-repo-manager"
+
+[[trees.repos.remotes]]
+name = "github"
+url = "ssh://git@github.com/hakoerber/git-repo-manager.git"
+type = "ssh"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@code.hkoerber.de:2222/hannes/git-repo-manager.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "talks"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@github.com/hakoerber/talks.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "container/openresty-oidc"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@code.hkoerber.de:2222/container/openresty-oidc.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "container/acimaker"
+
+[[trees.repos.remotes]]
+name = "github"
+url = "ssh://git@github.com/hakoerber/acimaker.git"
+type = "ssh"
+
+[[trees.repos.remotes]]
+name = "private"
+url = "git@code.sys.haktec.de:container/acimaker.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "container/drone-kaniko"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@code.hkoerber.de:2222/container/drone-kaniko.git"
+type = "ssh"
+
+[[trees.repos.remotes]]
+name = "upstream"
+url = "https://github.com/banzaicloud/drone-kaniko"
+type = "https"
+
+[[trees.repos]]
+name = "container/roundcube"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@code.hkoerber.de:2222/container/roundcube.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "container/mycloud-homer"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@code.hkoerber.de:2222/container/mycloud-homer.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "projects/misc/cobbler-kickstart"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@github.com/hakoerber/cobbler-kickstart.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "finance-auto-import"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@code.hkoerber.de:2222/hannes/finance-auto-import.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "guitar_practice"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@github.com/hakoerber/guitar-practice.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "picture-cleaner"
+remotes = []
+
+[[trees.repos]]
+name = "mycloud"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@code.hkoerber.de:2222/hannes/mycloud.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "resume"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@code.hkoerber.de:2222/hannes/resume.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "lea-michael-hochzeit"
+remotes = []
+
+[[trees.repos]]
+name = "builddoc"
+
+[[trees.repos.remotes]]
+name = "github"
+url = "ssh://git@github.com/hakoerber/builddoc.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "blog"
+
+[[trees.repos.remotes]]
+name = "github"
+url = "ssh://git@github.com/hakoerber/blog.hkoerber.de.git"
+type = "ssh"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@code.hkoerber.de:2222/hannes/blog.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "fizzbuzz"
+
+[[trees.repos.remotes]]
+name = "github"
+url = "ssh://git@github.com/hakoerber/fizzbuzz.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "ggj/2018/the-lost-son"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@github.com:niklas-heer/the-lost-son.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "ggj/2019-claim-your-world"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@github.com:theintroverts/claim-your-world.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "prometheus-restic-backblaze"
+
+[[trees.repos.remotes]]
+name = "github"
+url = "ssh://git@github.com/hakoerber/prometheus-restic-backblaze.git"
+type = "ssh"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@code.hkoerber.de:2222/container/prometheus-restic-backblaze.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "dotfiles"
+
+[[trees.repos.remotes]]
+name = "github"
+url = "ssh://git@github.com/hakoerber/dotfiles.git"
+type = "ssh"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@code.hkoerber.de:2222/hannes/dotfiles.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "packager"
+
+[[trees.repos.remotes]]
+name = "github"
+url = "ssh://git@github.com/hakoerber/packager.git"
+type = "ssh"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@code.hkoerber.de:2222/hannes/packager.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "time-tracking"
+
+[[trees.repos.remotes]]
+name = "github"
+url = "ssh://git@github.com/hakoerber/time-tracking.git"
+type = "ssh"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@code.hkoerber.de:2222/hannes/time-tracking.git"
+type = "ssh"
+
+[[trees.repos]]
+name = "aws-glacier-backup"
+
+[[trees.repos.remotes]]
+name = "github"
+url = "ssh://git@github.com/hakoerber/aws-glacier-backup.git"
+type = "ssh"
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@code.hkoerber.de:2222/hakoerber/aws-glacier-backup.git"
+type = "ssh"

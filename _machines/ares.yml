@@ -27,6 +27,8 @@ users:
   environment:
     MACHINE_HAS_NEXTCLOUD: "true"
   has_yubikey: true
+  repositories:
+    - personal_projects
 
 screen:
   1: DisplayPort-0
