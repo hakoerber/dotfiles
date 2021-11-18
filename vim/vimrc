@@ -71,6 +71,8 @@ Plug 'evanleck/vim-svelte', {'branch': 'main'}
 
 Plug 'evanleck/vim-svelte', {'branch': 'main'}
 
+Plug 'cespare/vim-toml', { 'branch': 'main' }
+
 call plug#end()
 filetype plugin indent on
 
@@ -318,6 +320,7 @@ endfunction
 autocmd BufWritePre * :call DeleteTrailingWS()
 
 autocmd FileType yaml set shiftwidth=2
+autocmd FileType toml set shiftwidth=2
 set completeopt-=preview
 let g:ycm_add_preview_to_completeopt = 0
 
