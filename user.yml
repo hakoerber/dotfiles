@@ -423,6 +423,9 @@
         app.update.auto: false
         app.update.service.enabled: false
 
+        # remove this camera / microphone overlay when in calls or similar
+        privacy.webrtc.legacyGlobalIndicator: false
+
   - include_role:
       name: firefox
     vars:
