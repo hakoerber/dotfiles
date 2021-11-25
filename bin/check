@@ -2,7 +2,7 @@
 
 set -o errexit
 
-cd ~/projects/personal/time-tracking/
+cd ~/code/personal/time-tracking/
 source venv/bin/activate
 source ~/.attendance_env
 
