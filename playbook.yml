@@ -226,6 +226,17 @@
         become: true
         vars:
           query: "{{ 'remove.*.%s[]'|format(distro) }}"
+        when: distro != 'ubuntu'
+
+      - name: remove packages
+        apt:
+          name: "{{ packages|json_query(query) }}"
+          state: absent
+          purge: true
+        become: true
+        vars:
+          query: "{{ 'remove.*.%s[]'|format(distro) }}"
+        when: distro == 'ubuntu'
 
       - name: install machine-specific packages
         package:
