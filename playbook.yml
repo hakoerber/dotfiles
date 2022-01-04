@@ -667,6 +667,7 @@
         file:
           path: "{{ yubikey_touch_detector_build_tempdir.path }}"
           state: absent
+        become: true
         when: not yubikey_touch_detector_binary.stat.exists
 
       when: distro == 'ubuntu'
