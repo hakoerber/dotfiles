@@ -609,12 +609,16 @@
         tempfile:
           state: directory
         register: alacritty_build_tempdir
+        become: true
+        become_user: rust_build
         when: not alacritty_binary.stat.exists
 
       - name: build alacritty
-        command: cargo install alacritty --root ./out
+        shell: . ~/.cargo/env && rustup run stable cargo install alacritty --root ./out
         args:
           chdir: "{{ alacritty_build_tempdir.path }}"
+        become: true
+        become_user: rust_build
         when: not alacritty_binary.stat.exists
 
       - name: install alacritty
@@ -626,6 +630,8 @@
         file:
           path: "{{ alacritty_build_tempdir.path }}"
           state: absent
+        become: true
+        become_user: rust_build
         when: not alacritty_binary.stat.exists
 
       when: distro == 'ubuntu'
