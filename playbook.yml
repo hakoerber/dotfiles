@@ -677,8 +677,8 @@
       - block:
         - name: add spotify apt key
           apt_key:
-            url: "https://download.spotify.com/debian/pubkey_0D811D58.gpg"
-            id: "D1742AD60D811D58"
+            url: "https://download.spotify.com/debian/pubkey_5E3C45D7B312C643.gpg"
+            id: "5E3C45D7B312C643"
           become: true
 
         - name: add spotify repository
