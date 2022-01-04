@@ -7,7 +7,7 @@ _path=(
 )
 
 for part in ${_path[@]} ; do
-    PATH="$PATH:${part}"
+    PATH="${part}:$PATH"
 done
 export PATH
 

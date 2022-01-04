@@ -576,7 +576,7 @@
         copy:
           dest: /etc/profile.d/go.sh
           content: |
-            export PATH=$PATH:/usr/local/go/bin
+            export PATH=/usr/local/go/bin:$PATH
             export GOROOT=/usr/local/go
           owner: root
           group: root
