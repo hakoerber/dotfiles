@@ -59,7 +59,7 @@ name = "misc/wifiqr"
 
 [[trees.repos.remotes]]
 name = "github"
-url = "ssh://git@github.com/hakoerber/wifi-qr.git"
+url = "ssh://git@github.com/hakoerber/wifiqr.git"
 type = "ssh"
 
 [[trees.repos]]
@@ -74,7 +74,7 @@ type = "ssh"
 name = "misc/xftwidth"
 
 [[trees.repos.remotes]]
-name = "origin"
+name = "github"
 url = "ssh://git@github.com/hakoerber/xftwidth.git"
 type = "ssh"
 
@@ -82,10 +82,6 @@ type = "ssh"
 name = "upstream"
 url = "https://github.com/vixus0/xftwidth"
 type = "https"
-
-[[trees.repos]]
-name = "x-hidecursor"
-remotes = []
 
 [[trees.repos]]
 name = "git-repo-manager"
@@ -122,11 +118,6 @@ name = "container/acimaker"
 [[trees.repos.remotes]]
 name = "github"
 url = "ssh://git@github.com/hakoerber/acimaker.git"
-type = "ssh"
-
-[[trees.repos.remotes]]
-name = "private"
-url = "git@code.sys.haktec.de:container/acimaker.git"
 type = "ssh"
 
 [[trees.repos]]
@@ -204,7 +195,11 @@ type = "ssh"
 
 [[trees.repos]]
 name = "lea-michael-hochzeit"
-remotes = []
+
+[[trees.repos.remotes]]
+name = "origin"
+url = "ssh://git@code.hkoerber.de:2222/hannes/lea-michi-hochzeit.git"
+type = "ssh"
 
 [[trees.repos]]
 name = "builddoc"
@@ -236,11 +231,11 @@ url = "ssh://git@github.com/hakoerber/fizzbuzz.git"
 type = "ssh"
 
 [[trees.repos]]
-name = "ggj/2018/the-lost-son"
+name = "ggj/2018-the-lost-son"
 
 [[trees.repos.remotes]]
 name = "origin"
-url = "ssh://git@github.com:niklas-heer/the-lost-son.git"
+url = "ssh://git@github.com/niklas-heer/the-lost-son.git"
 type = "ssh"
 
 [[trees.repos]]
@@ -313,5 +308,18 @@ type = "ssh"
 
 [[trees.repos.remotes]]
 name = "origin"
-url = "ssh://git@code.hkoerber.de:2222/hakoerber/aws-glacier-backup.git"
+url = "ssh://git@code.hkoerber.de:2222/hannes/aws-glacier-backup.git"
 type = "ssh"
+
+[[trees.repos]]
+name = "unclutter-xfixes"
+
+[[trees.repos.remotes]]
+name = "github"
+url = "git@github.com:hakoerber/unclutter-xfixes.git"
+type = "ssh"
+
+[[trees.repos.remotes]]
+name = "upstream"
+url = "https://github.com/Airblader/unclutter-xfixes"
+type = "https"
