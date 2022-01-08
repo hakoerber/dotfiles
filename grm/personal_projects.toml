@@ -6,7 +6,7 @@ name = "misc/rbackupd"
 
 [[trees.repos.remotes]]
 name = "github"
-url = "git@github.com:hakoerber/rbackupd.git"
+url = "ssh://git@github.com/hakoerber/rbackupd.git"
 type = "ssh"
 
 [[trees.repos]]
@@ -243,7 +243,7 @@ name = "ggj/2019-claim-your-world"
 
 [[trees.repos.remotes]]
 name = "origin"
-url = "ssh://git@github.com:theintroverts/claim-your-world.git"
+url = "ssh://git@github.com/theintroverts/claim-your-world.git"
 type = "ssh"
 
 [[trees.repos]]
