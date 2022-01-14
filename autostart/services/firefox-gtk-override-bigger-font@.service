@@ -1,0 +1,9 @@
+[Unit]
+BindsTo=autostart.target
+After=windowmanager.target
+
+[Service]
+ExecStart=/usr/bin/env firefox --setDefaultBrowser -P %i
+PassEnvironment=DISPLAY
+Environment=XDG_CONFIG_HOME=%h/.config/gtk-3.0-overrides/bigger-font/
+Restart=always

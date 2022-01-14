@@ -5,6 +5,9 @@ empty_directories:
   - name: .config/nvim
   - name: .config/rofi
   - name: .config/gtk-3.0
+  - name: .config/gtk-3.0-overrides
+  - name: .config/gtk-3.0-overrides/bigger-font/
+  - name: .config/gtk-3.0-overrides/bigger-font/gtk-3.0
   - name: .config/qt5ct
 dotfiles:
   - from: git/gitconfig
@@ -61,6 +64,9 @@ dotfiles:
     to: .config/rofi/config
   - from: gtk/gtk-3.0.ini
     to: .config/gtk-3.0/settings.ini
+    template: true
+  - from: gtk/gtk-3.0-bigger-font.ini
+    to: .config/gtk-3.0-overrides/bigger-font/gtk-3.0/settings.ini
     template: true
   - from: gtk/gtkrc-2.0
     to: .gtkrc-2.0
