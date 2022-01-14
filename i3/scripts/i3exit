@@ -52,10 +52,10 @@ reset_screen() {
 lock_and_screen_off() {
     lock &
     _pid=$!
-    dunstctl disable
+    dunstctl set-paused true
     screen_off
     wait $_pid
-    dunstctl enable
+    dunstctl set-paused false
     reset_screen
 }
 

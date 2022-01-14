@@ -8,13 +8,13 @@ log() {
     printf '[%s] %s\n' "$(date -uIseconds)" "$*" >> "$_logfile"
 }
 
-case "$1" in
-    enable)
+case "$1 $2" in
+    "set-paused false")
         log "Enabling dunst"
         systemctl --user --no-block kill --signal SIGUSR2 dunst
 
         ;;
-    disable)
+    "set-paused true")
         log "Disabling dunst"
         systemctl --user --no-block kill --signal SIGUSR1 dunst
         ;;
