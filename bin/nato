@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import os.path
 
 hash = {
     'A': 'Alpha',
@@ -42,6 +43,45 @@ hash = {
     '-': 'Dash',
     '.': 'Stop',
 }
+
+de = {
+    'A': 'Anton',
+    'Ä': 'Ärger',
+    'B': 'Berta',
+    'C': 'Cäsar',
+    'D': 'Dora',
+    'E': 'Emil',
+    'F': 'Friedrich',
+    'G': 'Gustav',
+    'H': 'Heinrich',
+    'I': 'Ida',
+    'J': 'Julius',
+    'K': 'Kaufmann',
+    'L': 'Ludwig',
+    'M': 'Martha',
+    'N': 'Nordpol',
+    'O': 'Otto',
+    'Ö': 'Ökonom',
+    'P': 'Paula',
+    'Q': 'Quelle',
+    'R': 'Richard',
+    'S': 'Samuel',
+    'ß': 'Eszett',
+    'T': 'Theodor',
+    'U': 'Ulrich',
+    'Ü': 'Übermut',
+    'V': 'Viktor',
+    'W': 'Wilhelm',
+    'X': 'Xanthippe',
+    'Y': 'Ypsilon',
+    'Z': 'Zacharias',
+    '-': 'Strich',
+    '.': 'Punkt',
+}
+
+if os.path.basename(sys.argv[0]) == 'natode':
+    hash = de
+
 
 if len(sys.argv) < 2 or sys.argv[1] == '-':
     text = [line.strip() for line in sys.stdin.readlines()]
