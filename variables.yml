@@ -20,7 +20,7 @@ cargo_crate_list:
     version: 0.10.1
   - crate: watchexec-cli
     binary: watchexec
-    version: 1.17.1
+    version: 1.19.0
   - url: https://github.com/hakoerber/git-repo-manager
     binary: grm
     branch: develop
