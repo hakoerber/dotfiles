@@ -1,4 +1,4 @@
-terraform_version: 1.0.2
+terraform_version: 1.1.9
 kubectl_version: v1.22.3
 go_version: "1.17.1"
 portfolio_performace_version: "0.55.0"
