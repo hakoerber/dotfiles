@@ -1,7 +1,7 @@
 terraform_version: 1.1.9
 kubectl_version: v1.23.6
 go_version: "1.18.1"
-portfolio_performace_version: "0.55.0"
+portfolio_performace_version: "0.57.2"
 cargo_crate_list:
   - crate: just
     binary: just
