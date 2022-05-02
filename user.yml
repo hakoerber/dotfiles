@@ -382,7 +382,6 @@
   - set_fact:
       firefox_preferences:
         browser.aboutConfig.showWarning: false
-        browser.download.useDownloadDir: false
         extensions.pocket.enabled: false
         toolkit.legacyUserProfileCustomizations.stylesheets: true
         browser.contentblocking.category: "strict"
@@ -413,6 +412,16 @@
 
         # "Allow Firefox to install and run studies"
         app.shield.optoutstudies.enabled: false
+
+        # "Check spelling as you type"
+        layout.spellcheckDefault: 0
+
+        # Ask for download directory
+        browser.download.useDownloadDir: false
+
+        # (Try to) disable automatic update, as firefox is pulling a Windows
+        app.update.auto: false
+        app.update.service.enabled: false
 
   - include_role:
       name: firefox
