@@ -87,7 +87,7 @@
           changed_when: false
 
         when: distro == 'archlinux'
-      tags: [update]
+      tags: [update, never]
 
     - block:
       - name: install sudo
