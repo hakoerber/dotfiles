@@ -7,7 +7,7 @@ ansible_run = $(activate) && ansible-playbook -e ansible_python_interpreter=/usr
 
 .PHONY: config
 config: | venv $(ansible)
-	$(ansible_run)
+	$(ansible_run) --skip-tags system-update
 
 .PHONY: system-update
 system-update: $(ansible)
