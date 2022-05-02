@@ -735,6 +735,15 @@
       become: true
       become_user: root
 
+    - name: fix permissions for dotfiles directory
+      shell: |
+        chown --changes --recursive dotfiles:dotfiles /var/lib/dotfiles
+        chmod --changes --recursive g+wX /var/lib/dotfiles
+      register: dotfiles_permission_change
+      become: true
+      become_user: root
+      changed_when: dotfiles_permission_change.stdout_lines|length > 0
+
     - set_fact:
         users: "{{ machine.users }}"
       tags:
