@@ -9,9 +9,9 @@ ansible_run = $(activate) && ansible-playbook -e ansible_python_interpreter=/usr
 config: | venv $(ansible)
 	$(ansible_run)
 
-.PHONY: update
-update: $(ansible)
-	$(ansible_run) --tags update
+.PHONY: system-update
+system-update: $(ansible)
+	$(ansible_run) --tags system-update
 
 .PHONY: reboot
 reboot:

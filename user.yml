@@ -314,7 +314,7 @@
     register: ycm_before_update
     changed_when: false
     failed_when: ycm_before_update.rc not in (0, 200)
-    tags: [update]
+    tags: [user-update]
 
   - name: install vim plugins
     command: sh -c 'PATH=/usr/local/go/bin:$PATH GOROOT=/usr/local/go GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +PlugInstall +qall'
@@ -329,12 +329,12 @@
     command: sh -c 'PATH=/usr/local/go/bin:$PATH GOROOT=/usr/local/go GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +PlugUpdate +qall'
     register: vim_plugin_update
     changed_when: vim_plugin_update.stderr != ""
-    tags: [update]
+    tags: [user-update]
 
   - name: update go binaries for vim
     command: sh -c 'PATH=/usr/local/go/bin:$PATH GOROOT=/usr/local/go GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +GoUpdateBinaries +qall'
     changed_when: false
-    tags: [update]
+    tags: [user-update]
 
   - name: get ycm version after update
     shell: |
@@ -344,7 +344,7 @@
       executable: /bin/bash
     register: ycm_after_update
     changed_when: false
-    tags: [update]
+    tags: [user-update]
 
   - name: compile youcompleteme
     # --force-sudo is required, as the script refuses to run in a sudo
@@ -361,7 +361,7 @@
       (ycm_before_update.rc == 200)
       or
       (ycm_before_update.stdout != ycm_after_update.stdout)
-    tags: [update]
+    tags: [user-update]
   tags: [vim-plugins]
 
 - block:
