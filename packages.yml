@@ -410,3 +410,6 @@ packages:
     rust:
       ubuntu: ["rustc", "cargo"]
       archlinux: ["rust"]
+    kdeconnect:
+      ubuntu: ["kdeconnect"]
+      archlinux: ["kdeconnect"]

@@ -1,0 +1,8 @@
+[Unit]
+BindsTo=autostart.target
+After=windowmanager.target
+
+[Service]
+ExecStart=/usr/bin/env kdeconnect-indicator
+PassEnvironment=DISPLAY
+Restart=always
