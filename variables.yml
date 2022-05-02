@@ -14,7 +14,7 @@ cargo_crate_list:
     version: 8.3.2
   - crate: bat
     binary: bat
-    version: 0.18.3
+    version: 0.20.0
   - crate: exa
     binary: exa
     version: 0.10.1
