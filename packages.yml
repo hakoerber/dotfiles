@@ -183,6 +183,9 @@ packages:
         - python-ruamel-yaml
         - python-gitpython
         - python-semver
+    black:
+      ubuntu: ["black"]
+      archlinux: ["python-black"]
     xbacklight:
       ubuntu: ["xbacklight"]
       archlinux: ["xorg-xbacklight"]
