@@ -412,7 +412,7 @@
         become: true
 
       - name: install rustup on ubuntu
-        shell: curl https://sh.rustup.rs -sSf | sh -s -- -y
+        shell: curl https://sh.rustup.rs -sSf | sh -s -- -y --profile=minimal
         args:
           creates: /var/lib/rust_build/.cargo/bin/rustup
         become: true
@@ -443,15 +443,58 @@
         become_user: rust_build
         changed_when: false
 
+      - name: add rustup additional toolchains
+        shell: . ~/.cargo/env && rustup toolchain install {{ item }}
+        become: true
+        become_user: rust_build
+        changed_when: false
+        loop: "{{ cargo_crate_list|map(attribute='toolchain', default='none')|reject('in', ['none', 'stable', 'nightly']) }}"
+
+      - name: update rustup additional toolchains
+        shell: . ~/.cargo/env && rustup update {{ item }}
+        become: true
+        become_user: rust_build
+        changed_when: false
+        loop: "{{ cargo_crate_list|map(attribute='toolchain', default='none')|reject('in', ['none', 'stable', 'nightly']) }}"
+
+      - name: add additional targets
+        shell: . ~/.cargo/env && rustup +{{ item.toolchain|default('stable') }} target add {{ item.target }}
+        become: true
+        become_user: rust_build
+        changed_when: false
+        when:
+          - '"target" in item'
+        loop: "{{ cargo_crate_list }}"
+
+      - name: assert that nofeatures is not actually a flag
+        assert:
+          that: '"nofeatures" not in item.features|default([])'
+          msg: Wow, "nofeatures" is actually a feature. Update the playbook!
+        loop: "{{ cargo_crate_list }}"
+
+      - name: assert that only proper sources are defined
+        assert:
+          that: item.source|default("crates.io") in ("crates.io", "git")
+          msg: "Invalid source: {{ item.source|default('x') }}"
+        loop: "{{ cargo_crate_list }}"
+
+      - name: install required packages
+        package:
+          state: present
+          name: "{{ item.required_packages|map(attribute=distro) }}"
+        when: item.required_packages is defined
+        become: true
+        loop: "{{ cargo_crate_list }}"
+
       - name: build rust crates from crates.io
         shell: |
           set -o errexit
           . ~/.cargo/env
 
-          rustup run {{ item.toolchain|default('stable') }} cargo install --version {{ item.version }} {{ item.crate }}
-          mv /var/lib/rust_build/.cargo/bin/{{ item.binary }} /var/lib/rust_build/.cargo/bin/{{ item.binary }}.{{ item.version }}
+          rustup run {{ item.toolchain|default('stable') }} cargo install --features "{{ item.features|default([])|join(' ') }}" {{ "--target " ~ item.target if item.target is defined else '' }} --version {{ item.version }} {{ item.crate }}
+          mv /var/lib/rust_build/.cargo/bin/{{ item.binary }} /var/lib/rust_build/.cargo/bin/{{ binary_id_cratesio }}
         args:
-          creates: /var/lib/rust_build/.cargo/bin/{{ item.binary }}.{{ item.version }}
+          creates: /var/lib/rust_build/.cargo/bin/{{ binary_id_cratesio }}
         become: true # do not build as root!
         become_user: rust_build
         loop: "{{ cargo_crate_list }}"
@@ -461,9 +504,10 @@
         shell: |
           set -o errexit
           . ~/.cargo/env
-          rustup run {{ item.toolchain|default('stable') }} cargo install --git {{ item.url }} --branch {{ item.branch }}
+          rustup run {{ item.toolchain|default('stable') }} cargo install --features "{{ item.features|default([])|join(' ') }}" {{ "--target " ~ item.target if item.target is defined else '' }} --git {{ item.url }} --branch {{ item.branch }}
+          mv /var/lib/rust_build/.cargo/bin/{{ item.binary }} /var/lib/rust_build/.cargo/bin/{{ binary_id_git }}
         args:
-          creates: /var/lib/rust_build/.cargo/bin/{{ item.binary }}
+          creates: /var/lib/rust_build/.cargo/bin/{{ binary_id_git }}
         become: true # do not build as root!
         become_user: rust_build
         loop: "{{ cargo_crate_list }}"
@@ -480,27 +524,27 @@
 
       - name: move binaries for crates.io
         shell: |
-          mv /var/lib/rust_build/.cargo/bin/{{ item.binary }}.{{ item.version }} /usr/local/lib/binaries/{{ item.binary }}.{{ item.version }}
-          ln -s /usr/local/lib/binaries/{{ item.binary }}.{{ item.version }} /var/lib/rust_build/.cargo/bin/{{ item.binary }}.{{ item.version }}
+          mv /var/lib/rust_build/.cargo/bin/{{ binary_id_cratesio }} /usr/local/lib/binaries/{{ binary_id_cratesio }}
+          ln -s /usr/local/lib/binaries/{{ binary_id_cratesio }} /var/lib/rust_build/.cargo/bin/{{ binary_id_cratesio }}
         args:
-          creates: /usr/local/lib/binaries/{{ item.binary }}.{{ item.version }}
+          creates: /usr/local/lib/binaries/{{ binary_id_cratesio }}
         become: true
         loop: "{{ cargo_crate_list }}"
         when: item.source|default('crates.io') == 'crates.io'
 
       - name: move binaries for git
         shell: |
-          mv /var/lib/rust_build/.cargo/bin/{{ item.binary }} /usr/local/lib/binaries/{{ item.binary }}
-          ln -s /usr/local/lib/binaries/{{ item.binary }} /var/lib/rust_build/.cargo/bin/{{ item.binary }}
+          mv /var/lib/rust_build/.cargo/bin/{{ binary_id_git }} /usr/local/lib/binaries/{{ binary_id_git }}
+          ln -s /usr/local/lib/binaries/{{ binary_id_git }} /var/lib/rust_build/.cargo/bin/{{ binary_id_git }}
         args:
-          creates: /usr/local/lib/binaries/{{ item.binary }}
+          creates: /usr/local/lib/binaries/{{ binary_id_git }}
         become: true
         loop: "{{ cargo_crate_list }}"
         when: item.source|default('crates.io') == 'git'
 
       - name: link binaries for crates.io
         file:
-          src: /usr/local/lib/binaries/{{ item.binary }}.{{ item.version }}
+          src: /usr/local/lib/binaries/{{ binary_id_cratesio }}
           dest: /usr/local/bin/{{ item.binary }}
           owner: root
           group: root
@@ -512,7 +556,7 @@
 
       - name: link binaries for git
         file:
-          src: /usr/local/lib/binaries/{{ item.binary }}
+          src: /usr/local/lib/binaries/{{ binary_id_git }}
           dest: /usr/local/bin/{{ item.binary }}
           owner: root
           group: root
@@ -521,6 +565,57 @@
         become: true
         loop: "{{ cargo_crate_list }}"
         when: item.source|default('crates.io') == 'git'
+
+      # Important: clean up the symlinks BEFORE the binaries they point to.
+      # Otherwise, ansible will skip them because `ansible.builtin.fileglob`
+      # does not match broken symlinks for some reason.
+      - name: clean up old binaries for creates.io in /var/lib/rust_build
+        command: rm -- {{ binaries | join (" ") }}
+        vars:
+          binaries: "{{ lookup('ansible.builtin.fileglob', '/var/lib/rust_build/.cargo/bin/' ~ item.binary ~ '.*', wantlist=True) | reject('eq', '/var/lib/rust_build/.cargo/bin/' ~ binary_id_cratesio) }}"
+        changed_when: binaries | length > 0
+        loop: "{{ cargo_crate_list }}"
+        become: true
+        when:
+          - item.source|default('crates.io') == 'crates.io'
+          - binaries | length > 0
+
+      - name: clean up old binaries for creates.io in /usr/local/lib
+        command: rm -- {{ binaries | join (" ") }}
+        vars:
+          binaries: "{{ lookup('ansible.builtin.fileglob', '/usr/local/lib/binaries/' ~ item.binary ~ '.*', wantlist=True) | reject('eq', '/usr/local/lib/binaries/' ~ binary_id_cratesio) }}"
+        changed_when: binaries | length > 0
+        loop: "{{ cargo_crate_list }}"
+        become: true
+        when:
+          - item.source|default('crates.io') == 'crates.io'
+          - binaries | length > 0
+
+      - name: clean up old binaries for git in /var/lib/rust_build
+        command: rm -- {{ binaries | join (" ") }}
+        vars:
+          binaries: "{{ lookup('ansible.builtin.fileglob', '/var/lib/rust_build/.cargo/bin/' ~ item.binary ~ '.*', wantlist=True) | reject('eq', '/var/lib/rust_build/.cargo/bin/' ~ binary_id_git) }}"
+        changed_when: binaries | length > 0
+        loop: "{{ cargo_crate_list }}"
+        become: true
+        when:
+          - item.source|default('crates.io') == 'git'
+          - binaries | length > 0
+
+      - name: clean up old binaries for git in /usr/local/lib
+        command: rm -- {{ binaries | join (" ") }}
+        vars:
+          binaries: "{{ lookup('ansible.builtin.fileglob', '/usr/local/lib/binaries/' ~ item.binary ~ '.*', wantlist=True) | reject('eq', '/usr/local/lib/binaries/' ~ binary_id_git) }}"
+        changed_when: binaries | length > 0
+        loop: "{{ cargo_crate_list }}"
+        become: true
+        when:
+          - item.source|default('crates.io') == 'git'
+          - binaries | length > 0
+
+      vars:
+        binary_id_cratesio: "{{ item.binary }}.{{ item.toolchain|default('stable') }}.{{ item.features|default(['nofeatures'])|join('_') }}.{{ item.version }}"
+        binary_id_git: "{{ item.binary }}.{{ item.toolchain|default('stable') }}.{{ item.features|default(['nofeatures'])|join('_') }}.{{ item.branch }}"
       tags:
         - rust_binaries
 
