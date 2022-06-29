@@ -384,6 +384,9 @@ packages:
     jq:
       ubuntu: ["jq"]
       archlinux: ["jq"]
+    musl:
+      ubuntu: ["musl", "musl-tools"]
+      archlinux: ["musl"]
 
   remove:
     mousepad:
