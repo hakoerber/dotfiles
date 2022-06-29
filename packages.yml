@@ -380,7 +380,7 @@ packages:
       archlinux: ["ncdu"]
     font-utils:
       ubuntu: ["woff-tools", "woff2"]
-      archinux: ["woff2"]
+      archlinux: ["woff2"]
     jq:
       ubuntu: ["jq"]
       archlinux: ["jq"]
