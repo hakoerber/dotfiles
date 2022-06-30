@@ -432,33 +432,14 @@
         become_user: rust_build
         changed_when: false
 
-      - name: update rustup stable toolchain
-        shell: "{{ cargo_env }} && rustup update stable"
-        become: true
-        become_user: rust_build
-        changed_when: false
-
       - name: add rustup nightly toolchain
         shell: "{{ cargo_env }} && rustup toolchain install nightly"
         become: true
         become_user: rust_build
         changed_when: false
 
-      - name: update rustup nightly toolchain
-        shell: "{{ cargo_env }} && rustup update nightly"
-        become: true
-        become_user: rust_build
-        changed_when: false
-
       - name: add rustup additional toolchains
         shell: "{{ cargo_env }} && rustup toolchain install {{ item }}"
-        become: true
-        become_user: rust_build
-        changed_when: false
-        loop: "{{ cargo_crate_list|map(attribute='toolchain', default='none')|reject('in', ['none', 'stable', 'nightly']) }}"
-
-      - name: update rustup additional toolchains
-        shell: "{{ cargo_env }} && rustup update {{ item }}"
         become: true
         become_user: rust_build
         changed_when: false
