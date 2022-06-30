@@ -28,7 +28,7 @@ cargo_crate_list:
     toolchain: "1.60" # Fails with 1.61, see https://github.com/rust-lang/rust/issues/97255
   - crate: watchexec-cli
     binary: watchexec
-    version: 1.19.0
+    version: 1.20.2
   - url: https://github.com/hakoerber/git-repo-manager
     binary: grm
     branch: develop
