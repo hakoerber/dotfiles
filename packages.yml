@@ -387,6 +387,9 @@ packages:
     musl:
       ubuntu: ["musl", "musl-tools"]
       archlinux: ["musl"]
+    kdeconnect:
+      ubuntu: ["kdeconnect"]
+      archlinux: ["kdeconnect"]
 
   remove:
     mousepad:
@@ -413,6 +416,3 @@ packages:
     rust:
       ubuntu: ["rustc", "cargo"]
       archlinux: ["rust"]
-    kdeconnect:
-      ubuntu: ["kdeconnect"]
-      archlinux: ["kdeconnect"]
