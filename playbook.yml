@@ -208,14 +208,6 @@
         assert:
           that: "defined_packages_remove|length == distro_packages_remove|length"
 
-      - name: install packages
-        package:
-          name: "{{ packages|json_query(query) }}"
-          state: present
-        become: true
-        vars:
-          query: "{{ 'list.*.%s[]'|format(distro) }}"
-
       - name: remove packages
         package:
           name: "{{ packages|json_query(query) }}"
@@ -224,6 +216,14 @@
         vars:
           query: "{{ 'remove.*.%s[]'|format(distro) }}"
         when: distro != 'ubuntu'
+
+      - name: install packages
+        package:
+          name: "{{ packages|json_query(query) }}"
+          state: present
+        become: true
+        vars:
+          query: "{{ 'list.*.%s[]'|format(distro) }}"
 
       - name: remove packages
         apt:
