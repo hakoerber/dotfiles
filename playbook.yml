@@ -408,6 +408,16 @@
           system: true
         become: true
 
+      - set_fact:
+          cargo_env: . ~/.cargo/env
+        when: distro == 'ubuntu'
+
+      - set_fact:
+          # Do NOT just use `"true"`. Due to some YAML fuckery, it will be
+          # capitalized and the commands will fail.
+          cargo_env: "/bin/true"
+        when: distro == 'archlinux'
+
       - name: install rustup on ubuntu
         shell: curl https://sh.rustup.rs -sSf | sh -s -- -y --profile=minimal
         args:
@@ -417,45 +427,45 @@
         when: distro == 'ubuntu'
 
       - name: add rustup stable toolchain
-        shell: . ~/.cargo/env && rustup toolchain install stable && rustup default stable
+        shell: "{{ cargo_env }} && rustup toolchain install stable && rustup default stable"
         become: true
         become_user: rust_build
         changed_when: false
 
       - name: update rustup stable toolchain
-        shell: . ~/.cargo/env && rustup update stable
+        shell: "{{ cargo_env }} && rustup update stable"
         become: true
         become_user: rust_build
         changed_when: false
 
       - name: add rustup nightly toolchain
-        shell: . ~/.cargo/env && rustup toolchain install nightly
+        shell: "{{ cargo_env }} && rustup toolchain install nightly"
         become: true
         become_user: rust_build
         changed_when: false
 
       - name: update rustup nightly toolchain
-        shell: . ~/.cargo/env && rustup update nightly
+        shell: "{{ cargo_env }} && rustup update nightly"
         become: true
         become_user: rust_build
         changed_when: false
 
       - name: add rustup additional toolchains
-        shell: . ~/.cargo/env && rustup toolchain install {{ item }}
+        shell: "{{ cargo_env }} && rustup toolchain install {{ item }}"
         become: true
         become_user: rust_build
         changed_when: false
         loop: "{{ cargo_crate_list|map(attribute='toolchain', default='none')|reject('in', ['none', 'stable', 'nightly']) }}"
 
       - name: update rustup additional toolchains
-        shell: . ~/.cargo/env && rustup update {{ item }}
+        shell: "{{ cargo_env }} && rustup update {{ item }}"
         become: true
         become_user: rust_build
         changed_when: false
         loop: "{{ cargo_crate_list|map(attribute='toolchain', default='none')|reject('in', ['none', 'stable', 'nightly']) }}"
 
       - name: add additional targets
-        shell: . ~/.cargo/env && rustup +{{ item.toolchain|default('stable') }} target add {{ item.target }}
+        shell: "{{ cargo_env }} && rustup +{{ item.toolchain|default('stable') }} target add {{ item.target }}"
         become: true
         become_user: rust_build
         changed_when: false
@@ -486,7 +496,7 @@
       - name: build rust crates from crates.io
         shell: |
           set -o errexit
-          . ~/.cargo/env
+          {{ cargo_env }}
 
           rustup run {{ item.toolchain|default('stable') }} cargo install --features "{{ item.features|default([])|join(' ') }}" {{ "--target " ~ item.target if item.target is defined else '' }} --version {{ item.version }} {{ item.crate }}
           mv /var/lib/rust_build/.cargo/bin/{{ item.binary }} /var/lib/rust_build/.cargo/bin/{{ binary_id_cratesio }}
@@ -500,7 +510,7 @@
       - name: build rust crates from git
         shell: |
           set -o errexit
-          . ~/.cargo/env
+          {{ cargo_env }}
           rustup run {{ item.toolchain|default('stable') }} cargo install --features "{{ item.features|default([])|join(' ') }}" {{ "--target " ~ item.target if item.target is defined else '' }} --git {{ item.url }} --branch {{ item.branch }}
           mv /var/lib/rust_build/.cargo/bin/{{ item.binary }} /var/lib/rust_build/.cargo/bin/{{ binary_id_git }}
         args:
