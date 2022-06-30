@@ -40,7 +40,7 @@ test_ares() {
             # At worst, the cache directory will be ignored if it does not exist
             # Pacman will always prefer the first cache directory, so newly downloaded
             # packages will stay in the container
-            sed -i '"'"'s/^#\?\(CacheDir.*\)/\1\nCacheDir = \/var\/cache\/pacman\/pkg_host\//'"'"' /etc/pacman.conf
+            sed -i '"'"'s/^#\?\(CacheDir.*\)/CacheDir = \/var\/cache\/pacman\/pkg_host\/\n\1/'"'"' /etc/pacman.conf
 
             mkdir -p /var/cache/pacman/pkg_host/
             pacman -Syu --noconfirm linux
