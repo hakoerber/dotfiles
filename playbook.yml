@@ -101,9 +101,6 @@
           name:
             - base-devel
             - git
-            - cargo
-            - asp
-            - bat
         become: true
 
       - name: create build user on arch
@@ -138,7 +135,7 @@
         shell: |
           set -o errexit
 
-          if pacman -Qi paru >/dev/null 2>&1; then
+          if pacman -Qi paru-bin >/dev/null 2>&1; then
               exit 100
           fi
           exit 0
@@ -156,9 +153,9 @@
           mkdir -p /tmp/paru-build
           cd /tmp/paru-build
 
-          curl -L -O https://aur.archlinux.org/cgit/aur.git/snapshot/paru.tar.gz
-          tar xvf paru.tar.gz
-          cd paru
+          curl -L -O https://aur.archlinux.org/cgit/aur.git/snapshot/paru-bin.tar.gz
+          tar xvf paru-bin.tar.gz
+          cd paru-bin
           makepkg
         args:
           executable: /bin/bash
@@ -170,7 +167,7 @@
         shell: |
           set -o errexit
 
-          pacman --noconfirm -U /tmp/paru-build/paru/paru-*.pkg.tar.zst
+          pacman --noconfirm -U /tmp/paru-build/paru-bin/paru-bin-*.pkg.tar.zst
           rm -rf /tmp/paru-build
         args:
           executable: /bin/bash
