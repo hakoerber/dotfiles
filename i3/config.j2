@@ -319,10 +319,10 @@ assign [class="^Wine$"] $workspace10
 ################################################################################
 
 # class                 border  backgr. text    indicator
-client.focused          #ff964f #ff964f #000000 #FF0000
-client.focused_inactive #333333 #5f676a #ffffff #484e50
-client.unfocused        #333333 #202020 #cccccc #292d2e
-client.urgent           #2f343a #900000 #ffffff #900000
+client.focused          #2e2e2e #e5b567 #000000 #FF0000
+client.focused_inactive #2e2e2e #5f676a #ffffff #484e50
+client.unfocused        #2e2e2e #2e2e2e #cccccc #292d2e
+client.urgent           #2e2e2e #900000 #ffffff #900000
 
 ################################################################################
 ### APPLICATION SPECIFIC SETTINGS ##############################################
@@ -378,19 +378,19 @@ bar {
     font pango:Inconsolata, FontAwesome {{ machine.font_size }}
 
     colors {
-        background #272822
+        background #2e2e2e
         statusline #ffffff
-        separator #444444
-        # separator #ff964f
+        separator #555555
+        # separator #e5b567
 
         # focused_background #303030
         # focused_separator #272822
 
-        focused_workspace  #ff964f #272822 #ffffff
-        active_workspace   #272822 #5f676a #ffffff
-        inactive_workspace #272822 #272822 #dddddd
-        urgent_workspace   #D00000 #D00000 #272822
-        binding_mode       #272822 #ff964f #272822
+        focused_workspace  #e5b567 #2e2e2e #ffffff
+        active_workspace   #2e2e2e #5f676a #ffffff
+        inactive_workspace #2e2e2e #2e2e2e #dddddd
+        urgent_workspace   #D00000 #D00000 #2e2e2e
+        binding_mode       #2e2e2e #e5b567 #2e2e2e
     }
 
     i3bar_command i3bar
