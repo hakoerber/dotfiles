@@ -92,7 +92,6 @@ fi
 
 if [[ $NAME == "Arch Linux" ]] ; then
     _install "ansible"
-    _install "python-jmespath"
 fi
 
 cd "$DOTDIR" && make

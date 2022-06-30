@@ -50,6 +50,19 @@
         when: distro == 'ubuntu'
 
       - block:
+        - name: install ansible requirements
+          package:
+            name: "{{ packages[distro] }}"
+            state: present
+          become: true
+          vars:
+            packages:
+              archlinux:
+                - python-jmespath
+              ubuntu:
+                - python3-jmespath
+
+      - block:
         - name: enable multilib repository
           blockinfile:
             path: /etc/pacman.conf
