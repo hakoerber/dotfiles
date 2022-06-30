@@ -18,7 +18,7 @@ cargo_crate_list:
         archlinux: pcre2
   - crate: fd-find
     binary: fd
-    version: 8.3.1
+    version: 8.4.0
   - crate: bat
     binary: bat
     version: 0.20.0
