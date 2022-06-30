@@ -13,8 +13,8 @@ Plug 'majutsushi/tagbar'
 " Plug 'nblock/vim-dokuwiki'
 Plug 'reedes/vim-pencil'
 Plug 'saltstack/salt-vim'
-"Plug 'sickill/vim-monokai'
-Plug 'patstockwell/vim-monokai-tasty'
+Plug 'sickill/vim-monokai'
+" Plug 'patstockwell/vim-monokai-tasty'
 " Plug 'sjl/gundo.vim'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-fugitive'
@@ -257,7 +257,7 @@ nnoremap Q <nop>
 " let g:solarized_contrast="normal"
 " let g:solarized_visibility="normal"
 syntax enable
-silent! colorscheme vim-monokai-tasty
+silent! colorscheme monokai
 
 " == tagbar ==
 nnoremap <F10> :TagbarToggle<CR>
