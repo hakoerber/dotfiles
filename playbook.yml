@@ -419,7 +419,7 @@
         when: distro == 'archlinux'
 
       - name: install rustup on ubuntu
-        shell: curl https://sh.rustup.rs -sSf | sh -s -- -y --profile=minimal
+        shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile=minimal
         args:
           creates: /var/lib/rust_build/.cargo/bin/rustup
         become: true
