@@ -186,7 +186,7 @@
           file: packages.yml
 
       - name: force-update iptables to iptables-nft on arch
-        shell: pacman -Q iptables-nft || yes | pacman -S iptables-nft
+        shell: pacman -Q iptables && yes | pacman -S iptables-nft
         changed_when: false
         become: true
         when: distro == 'archlinux'
