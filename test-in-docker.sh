@@ -21,6 +21,8 @@ gzip -k -f -v "${tmpdir}/dotfiles.tar"
 test_ares() {
     if [[ -d "/var/cache/pacman/pkg/" ]] ; then
         dockeropts=(-v "/var/cache/pacman/pkg/:/var/cache/pacman/pkg_host/")
+    else
+        echo "Warning: /var/cache/pacman/pkg/ does not exist. Create it to speed up multiple runs" >&2
     fi
     docker pull docker.io/library/archlinux:base
     docker run \
