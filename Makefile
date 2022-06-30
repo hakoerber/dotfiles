@@ -1,20 +1,26 @@
+DISTRO := $(shell . /etc/os-release && echo $$NAME)
+
 venv = ./venv
 requirements = requirements.txt
 activate = . $(venv)/bin/activate
 pip = pip
-ansible = venv/bin/ansible-playbook
-ansible_run = $(activate) && ansible-playbook -e ansible_python_interpreter=/usr/bin/python3 --inventory localhost, --diff ./playbook.yml ${ANSIBLE_EXTRA_ARGS}
+
+ifeq ($(DISTRO),Ubuntu)
+	ansible_run = $(activate) && ansible-playbook -e ansible_python_interpreter=/usr/bin/python3 --inventory localhost, --diff ./playbook.yml ${ANSIBLE_EXTRA_ARGS}
+else
+	ansible_run =ansible-playbook -e ansible_python_interpreter=/usr/bin/python3 --inventory localhost, --diff ./playbook.yml ${ANSIBLE_EXTRA_ARGS}
+endif
 
 .PHONY: all
-all: | venv $(ansible)
+all: | venv
 	$(ansible_run)
 
 .PHONY: config
-config: | venv $(ansible)
+config: | venv
 	$(ansible_run) --skip-tags system-update
 
 .PHONY: system-update
-system-update: $(ansible)
+system-update: venv
 	$(ansible_run) --tags system-update
 
 .PHONY: reboot
@@ -29,11 +35,11 @@ poweroff:
 weekend: | update poweroff
 
 .PHONY: packages
-packages: $(ansible)
+packages: venv
 	$(ansible_run) --tags packages
 
 .PHONY: dotfiles
-dotfiles: $(ansible)
+dotfiles: venv
 	$(ansible_run) --tags dotfiles
 
 .PHONY: clean
@@ -44,11 +50,14 @@ clean:
 test:
 	./test-in-docker.sh
 
-$(ansible): venv
-
+ifeq ($(DISTRO), Ubuntux)
 venv:
-	python3 -m venv $(venv)
-	$(activate) && $(pip) install -r $(requirements)
+		python3 -m venv $(venv)
+		$(activate) && $(pip) install -r $(requirements)
+else
+venv:
+	true
+endif
 
 .PHONY: freeze
 freeze:

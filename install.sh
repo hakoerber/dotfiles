@@ -90,6 +90,11 @@ if ! python3 -c 'import venv' 2>/dev/null ; then
     printf 'Done\n'
 fi
 
+if [[ $NAME == "Arch Linux" ]] ; then
+    _install "ansible"
+    _install "python-jmespath"
+fi
+
 cd "$DOTDIR" && make
 
 # fix permissions of the directory
