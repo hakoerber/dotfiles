@@ -289,7 +289,7 @@ let g:tagbar_foldlevel = 99 " unfold all
 "let g:airline#extensions#whitespace#checks = ['trailing']
 
 let g:lightline = {
-      \ 'colorscheme': 'powerline',
+      \ 'colorscheme': 'wombat',
       \ 'active': {
       \   'left': [ [ 'mode', 'paste' ],
       \             [ 'readonly', 'filename', 'modified', 'helloworld' ] ],
