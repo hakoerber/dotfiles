@@ -347,12 +347,9 @@
     tags: [user-update]
 
   - name: compile youcompleteme
-    # --force-sudo is required, as the script refuses to run in a sudo
-    # environment (i.e. if the SUDO_USER env variable is set). But of course,
-    # ansible uses that to assume the other user. It's fine.
     shell: |
       cd ~/.local/share/nvim/plugged/YouCompleteMe
-      python3 ./install.py --force-sudo
+      python3 ./install.py
     args:
       executable: /bin/bash
     register: ycm_compile_output
