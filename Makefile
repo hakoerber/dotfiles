@@ -5,6 +5,10 @@ pip = pip
 ansible = venv/bin/ansible-playbook
 ansible_run = $(activate) && ansible-playbook -e ansible_python_interpreter=/usr/bin/python3 --inventory localhost, --diff ./playbook.yml ${ANSIBLE_EXTRA_ARGS}
 
+.PHONY: all
+all: | venv $(ansible)
+	$(ansible_run)
+
 .PHONY: config
 config: | venv $(ansible)
 	$(ansible_run) --skip-tags system-update
