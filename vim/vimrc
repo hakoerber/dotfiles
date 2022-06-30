@@ -187,6 +187,8 @@ set linebreak
 set wrap
 set wrapscan
 
+" == to use guicolors in terminal ==
+set termguicolors
 
 " === keybinds ===
 set pastetoggle=<F11>
