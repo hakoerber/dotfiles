@@ -41,7 +41,7 @@ test_ares() {
             sed -i '"'"'s/^#\?\(CacheDir.*\)/\1\nCacheDir = \/var\/cache\/pacman\/pkg_host\//'"'"' /etc/pacman.conf
 
             mkdir /var/cache/pacman/pkg_host/
-            pacman -Syu --noconfirm linux python3
+            pacman -Syu --noconfirm linux
             cd $(mktemp -d)
             tar xf /tmp/dotfiles.tar.gz -C .
             ANSIBLE_EXTRA_ARGS="-e manage_services=false" ./install.sh
