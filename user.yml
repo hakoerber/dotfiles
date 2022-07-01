@@ -456,8 +456,10 @@
   - name: firefox - configure path to passff
     lineinfile:
       path: ~/.mozilla/native-messaging-hosts/passff.json
-      search_string: '"path": "PLACEHOLDER"'
-      line: "  \"path\": \"/home/{{ user.name }}/.mozilla/native-messaging-hosts/passff.py\","
+      regexp: '"path": ".*"'
+      line: "  \"path\": \"{{ path }}\","
+    vars:
+      path: "/home/{{ user.name }}/.mozilla/native-messaging-hosts/passff.py"
 
   - name: firefox - create chrome directory
     file:
