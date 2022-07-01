@@ -605,9 +605,13 @@
     - kubectl
 
 - block:
+  - set_fact:
+      tf_version: "{{ user.overrides.terraform_version|default(terraform_version) }}"
+      tf_check_updates: "{{ user.overrides.terraform_check_updates|default(terraform_check_updates)|default(true) }}"
+
   - name: stat current terraform binary
     stat:
-      path: "/home/{{ user.name }}/.opt/terraform-v{{ terraform_version }}"
+      path: "/home/{{ user.name }}/.opt/terraform-v{{ tf_version }}"
     register: terraform_binary
 
   - name: create temporary download directory for terraform
@@ -618,7 +622,7 @@
 
   - name: get terraform
     get_url:
-      url: "https://releases.hashicorp.com/terraform/{{ terraform_version }}/terraform_{{ terraform_version }}_linux_amd64.zip"
+      url: "https://releases.hashicorp.com/terraform/{{ tf_version }}/terraform_{{ tf_version }}_linux_amd64.zip"
       dest: "{{ terraform_download_dir.path }}/terraform.zip"
       force: false
     when: not terraform_binary.stat.exists
@@ -631,7 +635,7 @@
     when: not terraform_binary.stat.exists
 
   - name: install terraform
-    command: mv "{{ terraform_download_dir.path }}/terraform" /home/{{ user.name }}/.opt/terraform-v{{ terraform_version }}
+    command: mv "{{ terraform_download_dir.path }}/terraform" /home/{{ user.name }}/.opt/terraform-v{{ tf_version }}
     when: not terraform_binary.stat.exists
 
   - name: clean up download directory
@@ -642,7 +646,7 @@
 
   - name: link terraform
     file:
-      src: /home/{{ user.name }}/.opt/terraform-v{{ terraform_version }}
+      src: /home/{{ user.name }}/.opt/terraform-v{{ tf_version }}
       dest: /home/{{ user.name }}/.optbin/terraform
       state: link
 
@@ -660,10 +664,10 @@
 
     - name: warn if terraform is outdated
       fail:
-        msg: "current terraform v{{ terraform_version }} is out of date"
+        msg: "current terraform v{{ tf_version }} is out of date"
       when: terraform_outdated is sameas true
       ignore_errors: True
-    when: terraform_check_updates
+    when: tf_check_updates
 
   tags:
     - terraform
