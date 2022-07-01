@@ -84,14 +84,12 @@ if ! command -v gcc >/dev/null ; then
     printf 'Done\n'
 fi
 
-if ! python3 -c 'import venv' 2>/dev/null ; then
-    printf 'Python3 venv module not installed, installing ...\n'
-    _install python3-venv
-    printf 'Done\n'
-fi
-
 if [[ $NAME == "Arch Linux" ]] ; then
     _install "ansible"
+fi
+
+if [[ $NAME == "Ubuntu" ]] ; then
+    _install "python3-venv"
 fi
 
 cd "$DOTDIR" && make
