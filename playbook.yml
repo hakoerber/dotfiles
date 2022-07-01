@@ -636,6 +636,7 @@
           get_url:
             url: https://golang.org/dl/go{{ go_version }}.linux-amd64.tar.gz
             dest: "{{ go_download.path }}/go{{ go_version }}.linux-amd64.tar.gz"
+            force: false
 
         - name: unpack go
           unarchive:

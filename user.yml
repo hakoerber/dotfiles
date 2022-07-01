@@ -447,6 +447,7 @@
       owner: "{{ user.name }}"
       group: "{{ user_group_name }}"
       mode: "{{ item.mode }}"
+      force: false
     loop:
       - name: passff.json
         mode: '0644'
@@ -505,6 +506,7 @@
       get_url:
         url: https://github.com/buchen/portfolio/releases/download/{{ portfolio_performace_version }}/PortfolioPerformance-{{ portfolio_performace_version }}-linux.gtk.x86_64.tar.gz
         dest: "{{ tempdir.path }}/PortfolioPerformance.{{ portfolio_performace_version }}.tar.gz"
+        force: false
 
     - name: create destination directory
       file:
@@ -577,6 +579,7 @@
       owner: "{{ user.name }}"
       group: "{{ user_group_name }}"
       mode: '0755'
+      force: false
 
   - name: make kubectl executable
     file:
@@ -608,6 +611,7 @@
     get_url:
       url: "https://releases.hashicorp.com/terraform/{{ terraform_version }}/terraform_{{ terraform_version }}_linux_amd64.zip"
       dest: "{{ terraform_download_dir.path }}/terraform.zip"
+      force: false
     when: not terraform_binary.stat.exists
 
   - name: unpack terraform zip
