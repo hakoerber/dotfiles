@@ -456,7 +456,7 @@
         become: true
         become_user: rust_build
         changed_when: false
-        loop: "{{ cargo_crate_list|map(attribute='toolchain', default='none')|reject('in', ['none', 'stable', 'nightly']) }}"
+        loop: "{{ cargo_crate_list|selectattr('toolchain', 'defined')|map(attribute='toolchain')|reject('in', ['none', 'stable', 'nightly'])|list }}"
 
       - name: add additional targets
         shell: "{{ cargo_env }} && rustup +{{ item.toolchain|default('stable') }} target add {{ item.target }}"
@@ -482,7 +482,7 @@
       - name: install required packages
         package:
           state: present
-          name: "{{ item.required_packages|map(attribute=distro) }}"
+          name: "{{ item.required_packages|map(attribute=distro)|list }}"
         when: item.required_packages is defined
         become: true
         loop: "{{ cargo_crate_list }}"
@@ -573,7 +573,7 @@
       - name: clean up old binaries for creates.io in /var/lib/rust_build
         command: rm -- {{ binaries | join (" ") }}
         vars:
-          binaries: "{{ lookup('ansible.builtin.fileglob', '/var/lib/rust_build/.cargo/bin/' ~ item.binary ~ '.*', wantlist=True) | reject('eq', '/var/lib/rust_build/.cargo/bin/' ~ binary_id_cratesio) }}"
+          binaries: "{{ lookup('ansible.builtin.fileglob', '/var/lib/rust_build/.cargo/bin/' ~ item.binary ~ '.*', wantlist=True) | reject('eq', '/var/lib/rust_build/.cargo/bin/' ~ binary_id_cratesio) | list }}"
         changed_when: binaries | length > 0
         loop: "{{ cargo_crate_list }}"
         become: true
@@ -584,7 +584,7 @@
       - name: clean up old binaries for creates.io in /usr/local/lib
         command: rm -- {{ binaries | join (" ") }}
         vars:
-          binaries: "{{ lookup('ansible.builtin.fileglob', '/usr/local/lib/binaries/' ~ item.binary ~ '.*', wantlist=True) | reject('eq', '/usr/local/lib/binaries/' ~ binary_id_cratesio) }}"
+          binaries: "{{ lookup('ansible.builtin.fileglob', '/usr/local/lib/binaries/' ~ item.binary ~ '.*', wantlist=True) | reject('eq', '/usr/local/lib/binaries/' ~ binary_id_cratesio) | list }}"
         changed_when: binaries | length > 0
         loop: "{{ cargo_crate_list }}"
         become: true
@@ -595,7 +595,7 @@
       - name: clean up old binaries for git in /var/lib/rust_build
         command: rm -- {{ binaries | join (" ") }}
         vars:
-          binaries: "{{ lookup('ansible.builtin.fileglob', '/var/lib/rust_build/.cargo/bin/' ~ item.binary ~ '.*', wantlist=True) | reject('eq', '/var/lib/rust_build/.cargo/bin/' ~ binary_id_git) }}"
+          binaries: "{{ lookup('ansible.builtin.fileglob', '/var/lib/rust_build/.cargo/bin/' ~ item.binary ~ '.*', wantlist=True) | reject('eq', '/var/lib/rust_build/.cargo/bin/' ~ binary_id_git) | list }}"
         changed_when: binaries | length > 0
         loop: "{{ cargo_crate_list }}"
         become: true
@@ -606,7 +606,7 @@
       - name: clean up old binaries for git in /usr/local/lib
         command: rm -- {{ binaries | join (" ") }}
         vars:
-          binaries: "{{ lookup('ansible.builtin.fileglob', '/usr/local/lib/binaries/' ~ item.binary ~ '.*', wantlist=True) | reject('eq', '/usr/local/lib/binaries/' ~ binary_id_git) }}"
+          binaries: "{{ lookup('ansible.builtin.fileglob', '/usr/local/lib/binaries/' ~ item.binary ~ '.*', wantlist=True) | reject('eq', '/usr/local/lib/binaries/' ~ binary_id_git) | list }}"
         changed_when: binaries | length > 0
         loop: "{{ cargo_crate_list }}"
         become: true
