@@ -77,19 +77,13 @@ if ! command -v make >/dev/null ; then
     printf 'Done\n'
 fi
 
-# Required for compiling modules in venv.
-if ! command -v gcc >/dev/null ; then
-    printf 'gcc not installed, installing ...\n'
-    _install "gcc"
-    printf 'Done\n'
-fi
-
 if [[ $NAME == "Arch Linux" ]] ; then
     _install "ansible"
 fi
 
 if [[ $NAME == "Ubuntu" ]] ; then
-    _install "python3-venv"
+    _install "ansible"
+    _install "python3-jmespath"
 fi
 
 cd "$DOTDIR" && make
