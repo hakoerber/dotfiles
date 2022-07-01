@@ -440,6 +440,14 @@
       state: directory
       mode: '0755'
 
+  - name: check if host application file already exists
+    stat:
+      path: ~/.mozilla/native-messaging-hosts/{{ item.name }}
+    register: passff_file
+    loop:
+      - name: passff.json
+      - name: passff.py
+
   - name: firefox - get passff host application
     get_url:
       url: https://github.com/passff/passff-host/releases/download/1.2.2/{{ item.name }}
@@ -448,6 +456,7 @@
       group: "{{ user_group_name }}"
       mode: "{{ item.mode }}"
       force: false
+    when: not (passff_file.results | selectattr('item.name', 'eq', item.name) | list)[0].stat.exists
     loop:
       - name: passff.json
         mode: '0644'
