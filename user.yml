@@ -637,22 +637,24 @@
       dest: /home/{{ user.name }}/.optbin/terraform
       state: link
 
-  - name: get terraform version info
-    command: /home/{{ user.name }}/.optbin/terraform version -json
-    register: terraform_version_output
-    check_mode: false
-    changed_when: false
+  - block:
+    - name: get terraform version info
+      command: /home/{{ user.name }}/.optbin/terraform version -json
+      register: terraform_version_output
+      check_mode: false
+      changed_when: false
 
-  - name: parse terraform version output
-    set_fact:
-      terraform_outdated: "{{ (terraform_version_output.stdout | from_json()).terraform_outdated }}"
-    changed_when: false
+    - name: parse terraform version output
+      set_fact:
+        terraform_outdated: "{{ (terraform_version_output.stdout | from_json()).terraform_outdated }}"
+      changed_when: false
 
-  - name: warn if terraform is outdated
-    fail:
-      msg: "current terraform v{{ terraform_version }} is out of date"
-    when: terraform_outdated is sameas true
-    ignore_errors: True
+    - name: warn if terraform is outdated
+      fail:
+        msg: "current terraform v{{ terraform_version }} is out of date"
+      when: terraform_outdated is sameas true
+      ignore_errors: True
+    when: terraform_check_updates
 
   tags:
     - terraform
