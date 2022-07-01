@@ -746,7 +746,7 @@
         when: not yubikey_touch_detector_binary.stat.exists
 
       - name: build yubikey-touch-detector
-        shell: sh -c 'PATH=/usr/local/go/bin:$PATH env GOROOT=/usr/local/go GOPATH=$(pwd) go get -u github.com/maximbaz/yubikey-touch-detector'
+        shell: sh -c 'PATH=/usr/local/go/bin:$PATH env GOROOT=/usr/local/go GOPATH=$(pwd) go install github.com/maximbaz/yubikey-touch-detector@main'
         args:
           chdir: "{{ yubikey_touch_detector_build_tempdir.path }}"
         when: not yubikey_touch_detector_binary.stat.exists
