@@ -302,20 +302,6 @@
       src: ~/.vim/autoload/plug.vim
       force: true
 
-  - name: get ycm version before update
-    shell: |
-      if ! [[ -d ~/.local/share/nvim/plugged/YouCompleteMe ]] ; then
-          exit 200
-      fi
-      cd ~/.local/share/nvim/plugged/YouCompleteMe
-      git rev-parse HEAD
-    args:
-      executable: /bin/bash
-    register: ycm_before_update
-    changed_when: false
-    failed_when: ycm_before_update.rc not in (0, 200)
-    tags: [user-update]
-
   - name: install vim plugins
     command: sh -c 'PATH=/usr/local/go/bin:$PATH GOROOT=/usr/local/go GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +PlugInstall +qall'
     register: vim_plugin_install
@@ -334,30 +320,6 @@
   - name: update go binaries for vim
     command: sh -c 'PATH=/usr/local/go/bin:$PATH GOROOT=/usr/local/go GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +GoUpdateBinaries +qall'
     changed_when: false
-    tags: [user-update]
-
-  - name: get ycm version after update
-    shell: |
-      cd ~/.local/share/nvim/plugged/YouCompleteMe
-      git rev-parse HEAD
-    args:
-      executable: /bin/bash
-    register: ycm_after_update
-    changed_when: false
-    tags: [user-update]
-
-  - name: compile youcompleteme
-    shell: |
-      cd ~/.local/share/nvim/plugged/YouCompleteMe
-      python3 ./install.py
-    args:
-      executable: /bin/bash
-    register: ycm_compile_output
-    failed_when: ycm_compile_output.rc not in (0, 200)
-    when: >
-      (ycm_before_update.rc == 200)
-      or
-      (ycm_before_update.stdout != ycm_after_update.stdout)
     tags: [user-update]
   tags: [vim-plugins]
 
