@@ -214,3 +214,33 @@ kubectl_pod() {
 kubectl_deployment() {
     kubectl-env mycloud get -n "${1}" deployment --selector=${2} -o jsonpath='{.items[*].metadata.name}'
 }
+
+# The semver_ checks are inspired by
+# https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
+semver_lte() {
+    v1="${1}"
+    v2="${2}"
+
+    printf '%s\n%s' "${v1}" "${v2}" | sort --version-sort --check=silent
+}
+
+semver_lt() {
+    v1="${1}"
+    v2="${2}"
+
+    semver_lte "${v1}" "${v2}" && [[ ! "${v1}" == "${v2}" ]]
+}
+
+semver_gte() {
+    v1="${1}"
+    v2="${2}"
+
+    ! semver_lt "${v1}" "${v2}"
+}
+
+semver_gt() {
+    v1="${1}"
+    v2="${2}"
+
+    ! semver_lte "${v1}" "${v2}"
+}
