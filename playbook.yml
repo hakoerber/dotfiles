@@ -103,6 +103,54 @@
       tags: [system-update]
 
     - block:
+      - name: create dotfiles group
+        group:
+          name: dotfiles
+          state: present
+        become: true
+        become_user: root
+
+      - name: create dotfiles user
+        user:
+          name: dotfiles
+          group: dotfiles
+          home: /var/lib/dotfiles
+          create_home: false
+          shell: /bin/bash
+          system: true
+        become: true
+        become_user: root
+
+      - name: create dotfiles directory
+        file:
+          state: directory
+          path: /var/lib/dotfiles
+          owner: dotfiles
+          group: dotfiles
+          mode: '0775' # group needs write access!
+        become: true
+        become_user: root
+
+      - name: fix permissions for dotfiles directory
+        shell: |
+          # There is no sane way to specify the global .gitconfig to use, so we
+          # actually have to override HOME so git looks into ~/.gitconfig
+          export HOME="$(mktemp -d)"
+          set -o pipefail
+          set -o errexit
+          cd /var/lib/dotfiles
+          git config --global --add safe.directory /var/lib/dotfiles
+          git ls-tree -z --name-only HEAD | xargs --null chown --changes --recursive dotfiles:dotfiles
+          git ls-tree -z --name-only HEAD | xargs --null chmod --changes --recursive g+wX /var/lib/dotfiles
+        args:
+          executable: /bin/bash
+        register: dotfiles_permission_change
+        become: true
+        become_user: root
+        changed_when: dotfiles_permission_change.stdout_lines|length > 0
+      tags: [dotfiles-directory]
+
+    - block:
       - name: install sudo
         package:
           state: present
@@ -803,52 +851,6 @@
         when: distro == 'archlinux'
 
       tags: [spotify]
-
-    - name: create dotfiles group
-      group:
-        name: dotfiles
-        state: present
-      become: true
-      become_user: root
-
-    - name: create dotfiles user
-      user:
-        name: dotfiles
-        group: dotfiles
-        home: /var/lib/dotfiles
-        create_home: false
-        shell: /bin/bash
-        system: true
-      become: true
-      become_user: root
-
-    - name: create dotfiles directory
-      file:
-        state: directory
-        path: /var/lib/dotfiles
-        owner: dotfiles
-        group: dotfiles
-        mode: '0775' # group needs write access!
-      become: true
-      become_user: root
-
-    - name: fix permissions for dotfiles directory
-      shell: |
-        # There is no sane way to specify the global .gitconfig to use, so we
-        # actually have to override HOME so git looks into ~/.gitconfig
-        export HOME="$(mktemp -d)"
-        set -o pipefail
-        set -o errexit
-        cd /var/lib/dotfiles
-        git config --global --add safe.directory /var/lib/dotfiles
-        git ls-tree -z --name-only HEAD | xargs --null chown --changes --recursive dotfiles:dotfiles
-        git ls-tree -z --name-only HEAD | xargs --null chmod --changes --recursive g+wX /var/lib/dotfiles
-      args:
-        executable: /bin/bash
-      register: dotfiles_permission_change
-      become: true
-      become_user: root
-      changed_when: dotfiles_permission_change.stdout_lines|length > 0
 
     - set_fact:
         users: "{{ machine.users }}"
