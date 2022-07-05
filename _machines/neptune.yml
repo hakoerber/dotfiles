@@ -75,14 +75,14 @@ screen:
   0: eDP-1
 
 workspace:
-  1: www
-  2: www
-  3: term-local
-  4: term-remote
-  7: comm
-  8: pass
-  9: music
-  10: pim
+  1: ""
+  2: ""
+  3: " local"
+  4: " remote"
+  7: ""
+  8: ""
+  9: ""
+  10: ""
 
 screencfgs:
   - name: three-screens

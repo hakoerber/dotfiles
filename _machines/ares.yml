@@ -54,9 +54,9 @@ screen:
 screencfgs: []
 
 workspace:
-  1: www
-  9: comm
-  10: music
+  1: ""
+  9: ""
+  10: ""
 
 environment:
   MACHINE_TYPE: "workstation"
