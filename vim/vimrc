@@ -104,7 +104,7 @@ set noerrorbells
 set noshowmode
 set numberwidth=2
 set relativenumber
-set shortmess=rti
+set shortmess=rtiF
 set ruler
 set scrolloff=7
 set title
