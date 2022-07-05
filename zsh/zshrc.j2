@@ -19,6 +19,15 @@ elif [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlightin
     source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
 
+{% if user.ssh_agent %}
+if ! pgrep -u "$USER" ssh-agent > /dev/null ; then
+    ssh-agent > "$XDG_RUNTIME_DIR/ssh-agent.env"
+fi
+if [[ ! "$SSH_AUTH_SOCK" ]]; then
+    source "$XDG_RUNTIME_DIR/ssh-agent.env" >/dev/null
+fi
+{% endif %}
+
 {% if distro == 'ubuntu' %}
 alias imv=imv-x11
 {% endif %}

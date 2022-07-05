@@ -26,6 +26,7 @@ users:
       bigger_font: true
   mail: hannes@hkoerber.de
   git_gpg_sign: false
+  ssh_agent: false
   gpg_agent: true
   gpg_agent_for_ssh: true
   gpg_key:

@@ -18,6 +18,7 @@ users:
       manage_css: false
   mail: hannes.koerber@tradebyte.com
   git_gpg_sign: false
+  ssh_agent: true
   gpg_agent: false
   gpg_agent_for_ssh: false
   environment:
@@ -42,6 +43,7 @@ users:
       manage_css: true
   mail: hannes@hkoerber.de
   git_gpg_sign: false
+  ssh_agent: false
   gpg_agent: true
   gpg_agent_for_ssh: true
   gpg_key:
