@@ -68,5 +68,6 @@
     "puppet.editorService.formatOnType.enable": true,
     "puppet.installType": "agent",
     "puppet.installDirectory": "/usr/bin/puppet",
-    "window.zoomLevel": 0.1
+    "window.zoomLevel": 0.1,
+    "workbench.activityBar.visible": false
 }
