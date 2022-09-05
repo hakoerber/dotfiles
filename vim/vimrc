@@ -4,73 +4,38 @@ call plug#begin('~/.local/share/nvim/plugged')
 
 " === plugins ===
 
-"Plug 'vim-airline/vim-airline'
-"Plug 'vim-airline/vim-airline-themes'
-Plug 'itchyny/lightline.vim'
-Plug 'godlygeek/tabular'
-Plug 'lepture/vim-jinja'
-Plug 'majutsushi/tagbar'
-" Plug 'nblock/vim-dokuwiki'
-Plug 'reedes/vim-pencil'
-Plug 'saltstack/salt-vim'
-Plug 'sickill/vim-monokai'
-" Plug 'patstockwell/vim-monokai-tasty'
-" Plug 'sjl/gundo.vim'
-Plug 'tpope/vim-commentary'
-Plug 'tpope/vim-fugitive'
-" Plug 'tpope/vim-speeddating'
-" Plug 'tpope/vim-surround'
-Plug 'airblade/vim-gitgutter'
-Plug 'junegunn/goyo.vim'
-Plug 'junegunn/limelight.vim'
-" Plug 'sheerun/vim-polyglot'
-" Plug 'freitass/todo.txt-vim'
-Plug 'nathanaelkane/vim-indent-guides'
+function! Cond(Cond, ...)
+  let opts = get(a:000, 0, {})
+  return a:Cond ? opts : extend(opts, { 'on': [], 'for': [] })
+endfunction
 
-"Plugin 'Lokaltog/vim-easymotion'
-"Plugin 'PeterRincker/vim-argumentative'
-"Plugin 'flazz/vim-colorschemes'
-"Plugin 'jmcantrell/vim-virtualenv'
-"Plugin 'kien/ctrlp.vim'
-"Plugin 'klen/python-mode'
-"Plugin 'mbbill/undotree'
-Plug 'scrooloose/nerdtree'
-"Plugin 'sjl/gundo.vim'
-"Plugin 'terryma/vim-expand-region'
-"Plugin 'terryma/vim-multiple-cursors'
-"Plugin 'wellle/targets.vim'
-"Plugin 'wincent/Command-T'
-Plug 'vimwiki/vimwiki'
-"Plug 'blindFS/vim-taskwarrior'
-" Plug 'tbabej/taskwiki'
-Plug 'rodjek/vim-puppet'
-Plug 'suan/vim-instant-markdown'
-"Plug 'marshallward/vim-restructuredtext'
-Plug 'vim-syntastic/syntastic'
-"Plug 'ElmCast/elm-vim'
-"Plug 'avh4/elm-format'
+" editing plugins
+Plug 'godlygeek/tabular', Cond(!exists('g:vscode'))
+Plug 'nathanaelkane/vim-indent-guides', Cond(!exists('g:vscode'))
+Plug 'tpope/vim-commentary', Cond(!exists('g:vscode'))
+Plug 'airblade/vim-gitgutter', Cond(!exists('g:vscode'))
 
-Plug 'fatih/vim-go'
-Plug 'hashivim/vim-terraform'
+" ui
+Plug 'sickill/vim-monokai', Cond(!exists('g:vscode'))
+Plug 'itchyny/lightline.vim', Cond(!exists('g:vscode'))
 
-Plug 'editorconfig/editorconfig-vim'
+" lang integrations
+Plug 'lepture/vim-jinja', Cond(!exists('g:vscode'))
+Plug 'fatih/vim-go', Cond(!exists('g:vscode'))
+Plug 'hashivim/vim-terraform', Cond(!exists('g:vscode'))
+Plug 'editorconfig/editorconfig-vim', Cond(!exists('g:vscode'))
+Plug 'rust-lang/rust.vim', Cond(!exists('g:vscode'))
+Plug 'rodjek/vim-puppet', Cond(!exists('g:vscode'))
 
-Plug 'leafgarland/typescript-vim'
+" helpers
+"" distraction free writing
+Plug 'junegunn/limelight.vim', Cond(!exists('g:vscode'))
+Plug 'junegunn/goyo.vim', Cond(!exists('g:vscode'))
+Plug 'reedes/vim-pencil', Cond(!exists('g:vscode'))
 
-Plug 'prettier/vim-prettier', { 'do': 'npm install' }
+"" markdown
+Plug 'suan/vim-instant-markdown', Cond(!exists('g:vscode'))
 
-Plug 'yuezk/vim-js'
-Plug 'maxmellon/vim-jsx-pretty'
-
-Plug 'evanleck/vim-svelte', {'branch': 'main'}
-
-"Plug 'neoclide/coc.nvim', {'branch': 'release'}
-
-" Plug 'Chiel92/vim-autoformat'
-
-Plug 'evanleck/vim-svelte', {'branch': 'main'}
-
-Plug 'cespare/vim-toml', { 'branch': 'main' }
 
 call plug#end()
 filetype plugin indent on
@@ -199,82 +164,52 @@ map Y y$
 map j gj
 map k gk
 
-nnoremap <C-h> <C-w>h
-nnoremap <C-j> <C-w>j
-nnoremap <C-k> <C-w>k
-nnoremap <C-l> <C-w>l
-
-nmap <C-n> :bnext<CR>
-nmap <C-p> :bprev<CR>
 
 map N Nzz
 map n nzz
 
 inoremap jj <ESC>
 
-nnoremap <leader>v <C-w>v<C-w>l
-
-nnoremap <leader>m :InstantMarkdownPreview<CR>
-
-nnoremap <leader>u :GundoToggle<CR>
-nnoremap <leader>d :diffupdate<CR>
-
-nmap <F9> :Goyo<CR>:TogglePencil<CR>:Limelight!!<CR>
-nmap <leader>w :Goyo<CR>:TogglePencil<CR>:Limelight!!<CR>
-
-nmap <leader>c :%w !xclip -selection clipboard<CR>
-nmap <leader>x :r !xclip -out -selection -clipboard<CR><CR>
-
-nmap <leader>f :Autoformat<CR>
-
 " no more ex mode
 nnoremap Q <nop>
 
-" === autocommands ===
+" Use // in visual mode to search for selection
+" https://vim.fandom.com/wiki/Search_for_visually_selected_text
+vnoremap // y/\V<C-R>=escape(@",'/\')<CR><CR>
 
-"" autosave views when closing and restoring when opening again.
-"autocmd BufWinLeave *.* mkview
-"autocmd BufWinEnter *.* silent loadview
+if exists('g:vscode')
+    xmap gc  <Plug>VSCodeCommentary
+    nmap gc  <Plug>VSCodeCommentary
+    omap gc  <Plug>VSCodeCommentary
+    nmap gcc <Plug>VSCodeCommentaryLine
+else
+    nnoremap <C-h> <C-w>h
+    nnoremap <C-j> <C-w>j
+    nnoremap <C-k> <C-w>k
+    nnoremap <C-l> <C-w>l
 
-" === plugin setup ===
+    nmap <C-n> :bnext<CR>
+    nmap <C-p> :bprev<CR>
 
-" == colorscheme ==
-" set background=light
-" let g:solarized_termcolors=16
-" let g:solarized_termtrans=1
-" let g:solarized_contrast="normal"
-" let g:solarized_visibility="normal"
-syntax enable
-silent! colorscheme monokai
+    nnoremap <leader>m :InstantMarkdownPreview<CR>
 
-" == tagbar ==
-nnoremap <F10> :TagbarToggle<CR>
-let g:tagbar_map_jump = "i"
-let g:tagbar_left = 0
-let g:tagbar_vertical = 0
-let g:tagbar_width = 50
-let g:tagbar_autoclose = 1
-let g:tagbar_autofocus = 1
-let g:tagbar_sort = 0 " 1: sort by name, 0: sort by position
-let g:tagbar_compact = 1
-let g:tagbar_indent = 2
-let g:tagbar_show_linenumbers = 0
-let g:tagbar_foldlevel = 99 " unfold all
+    nnoremap <leader>u :GundoToggle<CR>
+    nnoremap <leader>d :diffupdate<CR>
 
-" == airline ==
-"let g:airline_right_sep = ''
-"let g:airline_left_sep = ''
-"let g:airline#extensions#disable_rtp_load = 1
-"let g:airline_extensions = ['whitespace']
-"let g:airline_theme='powerlineish'
-"let g:airline_powerline_fonts = 1
-"let g:airline_section_x = airline#section#create(['%{tagbar#currenttag("%s", "", "f")}','' , ' %{PencilMode()}', ' [', 'filetype', ']'])
-"let g:pencil#mode_indicators = {'hard': 'H', 'auto': 'A', 'soft': 'S', 'off': '',}
-"let g:airline#extensions#whitespace#enabled = 1
-"let g:airline#extensions#whitespace#symbol = ''
-"let g:airline#extensions#whitespace#checks = ['trailing']
+    nmap <F9> :Goyo<CR>:TogglePencil<CR>:Limelight!!<CR>
+    nmap <leader>w :Goyo<CR>:TogglePencil<CR>:Limelight!!<CR>
 
-let g:lightline = {
+    nmap <leader>c :%w !xclip -selection clipboard<CR>
+    nmap <leader>x :r !xclip -out -selection -clipboard<CR><CR>
+
+    nmap <leader>f :Autoformat<CR>
+
+    nnoremap <leader>v <C-w>v<C-w>l
+
+    syntax enable
+    silent! colorscheme monokai
+
+    let g:lightline = {
       \ 'colorscheme': 'wombat',
       \ 'active': {
       \   'left': [ [ 'mode', 'paste' ],
@@ -293,68 +228,44 @@ let g:lightline = {
       \ },
       \ }
 
-function! LightLineFilename()
-    return fnamemodify(expand('%F'), ":~:h")
-endfunction
+    function! LightLineFilename()
+        return fnamemodify(expand('%F'), ":~:h")
+    endfunction
 
-" == pencil ==
-let g:pencil#textwidth = 80
-let g:pencil#autoformat = 1
-let g:pencil#cursorwrap = 1
-let g:pencil#wrapModeDefault = 'soft'
-let g:pencil#cursorwrap = 0
+    " == pencil ==
+    let g:pencil#textwidth = 80
+    let g:pencil#autoformat = 1
+    let g:pencil#cursorwrap = 1
+    let g:pencil#wrapModeDefault = 'soft'
+    let g:pencil#cursorwrap = 0
 
-" == goyo ==
-let g:goyo_width = 100
-let g:goyo_height = "90%"
-let g:goyo_linenr = 0
+    " == goyo ==
+    let g:goyo_width = 100
+    let g:goyo_height = "90%"
+    let g:goyo_linenr = 0
 
-" == limelight ==
-let g:limelight_default_coefficient = 0.5
+    " == limelight ==
+    let g:limelight_default_coefficient = 0.5
 
-" === functions ===
-function! DeleteTrailingWS()
-     exe "normal mz"
-     %s/\s\+$//e
-     exe "normal `z"
-endfunction
-autocmd BufWritePre * :call DeleteTrailingWS()
+    " === functions ===
+    function! DeleteTrailingWS()
+        exe "normal mz"
+        %s/\s\+$//e
+        exe "normal `z"
+    endfunction
+    autocmd BufWritePre * :call DeleteTrailingWS()
 
-autocmd FileType yaml set shiftwidth=2
-autocmd FileType toml set shiftwidth=2
-set completeopt-=preview
-let g:ycm_add_preview_to_completeopt = 0
+    autocmd FileType yaml set shiftwidth=2
+    autocmd FileType toml set shiftwidth=2
+    autocmd FileType html setl shiftwidth=2
 
-set completeopt-=preview
-let g:ycm_add_preview_to_completeopt = 0
+    let g:instant_markdown_autostart = 0
 
-let g:instant_markdown_autostart = 0
+    let g:terraform_align = 1
+    let g:terraform_fmt_on_save=1
 
-let g:terraform_align = 1
-let g:terraform_fmt_on_save=1
+    let g:rustfmt_autosave = 1
 
-if has("autocmd")
-  au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+    " https://stackoverflow.com/a/8585343
+    map <leader>q :bp<bar>sp<bar>bn<bar>bd<CR>
 endif
-
-let g:ycm_server_python_interpreter = "python3"
-
-au FileType html setl shiftwidth=2
-
-" Use // in visual mode to search for selection
-" https://vim.fandom.com/wiki/Search_for_visually_selected_text
-vnoremap // y/\V<C-R>=escape(@",'/\')<CR><CR>
-
-if v:version >= 700
-  au BufLeave * let b:winview = winsaveview()
-  au BufEnter * if(exists('b:winview')) | call winrestview(b:winview) | endif
-endif
-
-" https://github.com/golang/tools/blob/master/gopls/doc/vim.md
-let g:go_def_mode='gopls'
-let g:go_info_mode='gopls'
-
-" https://stackoverflow.com/a/8585343
-map <leader>q :bp<bar>sp<bar>bn<bar>bd<CR>
-
-let g:rustfmt_autosave = 1
