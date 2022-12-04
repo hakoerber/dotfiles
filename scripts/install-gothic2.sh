@@ -1,14 +1,22 @@
 #!/usr/bin/env bash
 
+# Steam setting: Proton 4.11-13
+#
+# * It *must not* have any symlinks for the directmusic dlls like:
+# pfx/dosdevices/c:/windows/syswow64/dmusic.dll
+
 set -o nounset
 set -o xtrace
 set -o errexit
 
-BASEDIR=/var/games/gothic2
+
+STEAMAPPS=/var/games/steamapps/
+
+BASEDIR="${STEAMAPPS}/common/Gothic II"
 
 export GAMEDATA=${BASEDIR}/data/
 export ARCHIVE=${BASEDIR}/gothic2.data.tar.zstd
-export WINEPREFIX=${BASEDIR}/wineprefix
+export WINEPREFIX="${STEAMAPPS}/compatdata/39510/pfx/"
 export WINEARCH=win64
 
 export WINEVERSION=6.3
@@ -17,17 +25,17 @@ DOWNLOADDIR=~/download/gothic2
 
 mkdir -p "${WINEPREFIX}"
 
-if [[ "$(wine --version)" != "wine-${WINEVERSION}" ]] ; then
-    printf '%s\n' "Wine version ${WINEVERSION} required" >&2
-    exit 1
-fi
+# if [[ "$(wine --version)" != "wine-${WINEVERSION}" ]] ; then
+#     printf '%s\n' "Wine version ${WINEVERSION} required" >&2
+#     exit 1
+# fi
 
 archive() {
     origin="$1"
     if [[ -e "${ARCHIVE}" ]] ; then
         return
     fi
-    tar -cv --zstd -p -f "${ARCHIVE}" -C "$1" .
+    tar -cv --zstd -p -f "${ARCHIVE}" -C "${GAMEDATA}" .
 }
 
 extract() {
@@ -118,15 +126,11 @@ case $1 in
 
         curl -C - -L -O "https://github.com/Kirides/GD3D11/releases/download/v17.7-dev20/Gothic2-GD3D11-v17.7-dev20.zip"
 
-        curl -C - -L -o Normalmaps_LHiver.zip "http://www.gothic-dx11.de/download/Normalmaps_LHiver.zip"
+        curl -C - -L -o Normalmaps_LHiver.zip "https://www.worldofgothic.de/download.php?id=1530"
 
         curl -C - -L -O https://github.com/Kirides/ninja-quickloot/releases/download/v1.9.5/Quickloot.vdf
 
         curl -C - -L -O https://github.com/szapp/Ninja/releases/download/v2.7.12/Ninja-2.7.12.exe
-
-        laatmp=$(mktemp -d)
-
-        unzip -o LaaHack.zip -d "${laatmp}"
 
         # winetricks -q dxvk
         winetricks -q directmusic
@@ -137,7 +141,7 @@ case $1 in
             winetricks dxvk
         fi
 
-        read -p 'During installation, use "Z:\var\games\gothic2\data" as the install directory! <Enter> to continue, <CTRL+C> to abort '
+        read -p 'During installation, use "${GAMEDATA//\//\\}" as the install directory! <Enter> to continue, <CTRL+C> to abort '
 
         wine "${DOWNLOADDIR}"/g2addon-2_6.exe
         wine "${DOWNLOADDIR}"/gothic2_fix-2.6.0.0-rev2.exe
@@ -150,12 +154,25 @@ case $1 in
 
         unzip -o "${DOWNLOADDIR}"/Gothic2-GD3D11-v17.7-dev20.zip -d ./system/
 
+        ln Data/ModVDF/LHE204_DE.mod Data/LHE204_DE.mod
+
         cp "${DOWNLOADDIR}"/Quickloot.vdf ./Data
 
         t="./system/GD3D11/Textures/replacements/Normalmaps_xxx"
         mkdir -p "${t}"
+        set +o errexit
         unzip -o "${DOWNLOADDIR}"/Normalmaps_LHiver.zip -d "${t}"
+        zip_exit="$?"
+        set -o errexit
+        if (( $zip_exit != 0 )) && (( $zip_exit != 2 )) ; then
+            echo zip failed
+            exit 1
+        fi
         unset t
+
+        laatmp=$(mktemp -d)
+
+        unzip -o "${DOWNLOADDIR}"/LaaHack.zip -d "${laatmp}"
 
         read -p "For the LAA Hack, select only ${GAMEDATA}/system/Gothic2.exe [<Enter> to continue] "
         wine "${laatmp}"/LaaHack.exe
@@ -165,7 +182,6 @@ case $1 in
         read -p "Now run the game once and exit! [<Enter> to continue] "
 
         ini
-        ln Data/ModVDF/LHE204_DE.mod Data/LHE204_DE.mod
         ;;
     ini)
         ini
