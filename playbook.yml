@@ -94,10 +94,39 @@
             state: present
           become: true
 
-        - name: clean cache
-          command: paccache -rk2 -ruk0
-          become: true
-          changed_when: false
+        - block:
+          - name: install pacman cache clean service
+            copy:
+              dest: /etc/systemd/system/pacman-cache-cleanup.service
+              owner: root
+              group: root
+              mode: '0644'
+              content: |
+                [Service]
+                Type=oneshot
+                ExecStart=/bin/sh -c '/usr/bin/paccache -rk1 && /usr/bin/paccache -ruk0'
+                RemainAfterExit=true
+            become: true
+
+          - name: install pacman cache clean timer
+            copy:
+              dest: /etc/systemd/system/pacman-cache-cleanup.timer
+              owner: root
+              group: root
+              mode: '0644'
+              content: |
+                [Timer]
+                OnCalendar=daily
+            become: true
+
+          - name: enable pacman cache clean timer
+            systemd:
+              name: pacman-cache-cleanup.timer
+              enabled: true
+              state: started
+              daemon_reload: true
+            become: true
+          tags: [pacman_cache_cleanup]
 
         when: distro == 'archlinux'
       tags: [system-update]
