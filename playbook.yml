@@ -739,7 +739,7 @@
             path: "{{ go_download.path }}"
             state: absent
 
-        when: not go_target_stat.stat.exists
+        when: not go_target_stat.stat.exists and not ansible_check_mode
 
       - name: link to the current go version
         file:
