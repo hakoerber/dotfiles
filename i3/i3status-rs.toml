@@ -1,0 +1,87 @@
+icons_format = "  {icon}  "
+
+[icons]
+name = "awesome6"
+
+[icons.overrides]
+
+[theme]
+name = "native"
+
+[theme.overrides]
+warning_fg = "#000000"
+warning_bg = "#F4Bf75"
+critical_fg = "#000000"
+critical_bg = "#F92672"
+
+[[block]]
+block = "music"
+player = "spotify"
+buttons = ["prev", "play", "next"]
+on_click = "exec $HOME/.i3/scripts/spotify-control toggle"
+separator = " — "
+dynamic_width = true
+max_width = 1024
+
+[[block]]
+block = "sound"
+driver = "pulseaudio"
+max_vol = 100
+
+[[block]]
+block = "sound"
+driver = "pulseaudio"
+device_kind = "source"
+
+[[block]]
+block = "networkmanager"
+primary_only = true
+ap_format = "{strength} {ssid}"
+device_format = "{icon}{ap}"
+
+[[block]]
+block = "load"
+format = "{1m}"
+warning = 8
+critical = 1000
+interval = 1
+
+[[block]]
+block = "toggle"
+text = "   "
+command_on = "$HOME/.i3/scripts/presentation-mode toggle ; pkill -SIGRTMIN+0 i3status-rs"
+command_off = "$HOME/.i3/scripts/presentation-mode toggle ; pkill -SIGRTMIN+0 i3status-rs"
+command_state = "[[ $($HOME/.i3/scripts/presentation-mode status) == off ]] || echo active"
+
+[[block]]
+block = "battery"
+interval = 10
+format = "{percentage} {time}"
+hide_missing = true
+if_command = "test -e /sys/class/power_supply/BAT0"
+
+[[block]]
+block = "toggle"
+text = "   "
+command_on = "systemctl --user start redshift"
+command_off = "systemctl --user stop redshift"
+command_state = "[[ $(systemctl --user is-active redshift) == active ]] && echo active"
+signal = 0
+
+[[block]]
+block = "toggle"
+text = "   "
+command_on = "systemctl --user start spotify"
+command_off = "systemctl --user stop spotify"
+command_state = "[[ $(systemctl --user is-active spotify) == active ]] && echo active"
+signal = 0
+
+[[block]]
+block = "custom"
+command = "ping -c 1 8.8.8.8 >/dev/null 2>/dev/null && echo || echo "
+
+[[block]]
+block = "time"
+interval = 1
+locale = "de_DE"
+format = "[CW %V] %a %d.%m.%Y %H:%M:%S"

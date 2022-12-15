@@ -337,13 +337,11 @@ bindsym $mod+space exec --no-startup-id $scriptdir/pa-volume mute-toggle-mic
 ##############################################################################
 ### BARS #######################################################################
 ################################################################################
-#
+
 bar {
     mode dock
     position bottom
 
-
-#tray_output HDMI3
     tray_output primary
     tray_padding 2
 
@@ -373,6 +371,5 @@ bar {
         binding_mode       #272822 #e5b567 #272822
     }
 
-    i3bar_command i3bar
-    status_command py3status --standalone --dbus-notify -c ~/.i3/i3status.conf
+    status_command i3status-rs ~/.i3/i3status-rs.toml
 }
