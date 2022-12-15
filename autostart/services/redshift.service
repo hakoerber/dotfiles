@@ -3,6 +3,7 @@ BindsTo=autostart.target
 After=windowmanager.target
 
 [Service]
+ExecStartPre=/usr/bin/env redshift-gtk -x
 ExecStart=/usr/bin/env redshift-gtk -c %h/.config/redshift.conf
 PassEnvironment=DISPLAY
 Restart=always
