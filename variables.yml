@@ -1,11 +1,11 @@
-terraform_version: 1.2.4
-kubectl_version: v1.24.2
-go_version: "1.18.3"
+terraform_version: 1.3.6
+kubectl_version: v1.26.0
+go_version: "1.19.4"
 portfolio_performace_version: "0.57.2"
 cargo_crate_list:
   - crate: just
     binary: just
-    version: 1.2.0
+    version: 1.9.0
   - crate: ripgrep
     binary: rg
     version: 13.0.0
@@ -18,20 +18,19 @@ cargo_crate_list:
         archlinux: pcre2
   - crate: fd-find
     binary: fd
-    version: 8.4.0
+    version: 8.6.0
   - crate: bat
     binary: bat
-    version: 0.21.0
+    version: 0.22.1
   - crate: exa
     binary: exa
     version: 0.10.1
-    toolchain: "1.60" # Fails with 1.61, see https://github.com/rust-lang/rust/issues/97255
   - crate: watchexec-cli
     binary: watchexec
-    version: 1.20.2
+    version: 1.20.6
   - crate: mdbook
     binary: mdbook
-    version: 0.4.18
+    version: 0.4.24
   - url: https://github.com/hakoerber/git-repo-manager
     binary: grm
     branch: develop
