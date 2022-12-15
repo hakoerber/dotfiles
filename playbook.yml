@@ -569,6 +569,27 @@
         become: true
         loop: "{{ cargo_crate_list }}"
 
+      - name: check if binary already exists for crates.io
+        stat:
+          path: /usr/local/lib/binaries/{{ binary_id_cratesio }}
+        register: rust_binary_cratesio
+        loop: "{{ cargo_crate_list }}"
+        loop_control:
+          label: "{{ item.binary }}"
+        when: item.source|default('crates.io') == 'crates.io'
+
+      - name: check if binary already exists for git
+        stat:
+          path: /usr/local/lib/binaries/{{ binary_id_git }}
+        register: rust_binary_git
+        loop: "{{ cargo_crate_list }}"
+        loop_control:
+          label: "{{ item.binary }}"
+        when: item.source|default('crates.io') == 'git'
+
+      - debug:
+          var: rust_binary_cratesio
+
       - name: build rust crates from crates.io
         shell: |
           set -o errexit
@@ -581,7 +602,9 @@
         become: true # do not build as root!
         become_user: rust_build
         loop: "{{ cargo_crate_list }}"
-        when: item.source|default('crates.io') == 'crates.io'
+        when:
+          - item.source|default('crates.io') == 'crates.io'
+          - not (rust_binary_cratesio.results | selectattr("item.binary", "match", item.binary))[0].stat.exists
 
       - name: build rust crates from git
         shell: |
@@ -594,7 +617,9 @@
         become: true # do not build as root!
         become_user: rust_build
         loop: "{{ cargo_crate_list }}"
-        when: item.source|default('crates.io') == 'git'
+        when:
+          - item.source|default('crates.io') == 'git'
+          - not (rust_binary_git.results | selectattr("item.binary", "match", item.binary))[0].stat.exists
 
       - name: create target directory
         file:
@@ -608,22 +633,24 @@
       - name: move binaries for crates.io
         shell: |
           mv /var/lib/rust_build/.cargo/bin/{{ binary_id_cratesio }} /usr/local/lib/binaries/{{ binary_id_cratesio }}
-          ln -s /usr/local/lib/binaries/{{ binary_id_cratesio }} /var/lib/rust_build/.cargo/bin/{{ binary_id_cratesio }}
         args:
           creates: /usr/local/lib/binaries/{{ binary_id_cratesio }}
         become: true
         loop: "{{ cargo_crate_list }}"
-        when: item.source|default('crates.io') == 'crates.io'
+        when:
+          - item.source|default('crates.io') == 'crates.io'
+          - not (rust_binary_cratesio.results | selectattr("item.binary", "match", item.binary))[0].stat.exists
 
       - name: move binaries for git
         shell: |
           mv /var/lib/rust_build/.cargo/bin/{{ binary_id_git }} /usr/local/lib/binaries/{{ binary_id_git }}
-          ln -s /usr/local/lib/binaries/{{ binary_id_git }} /var/lib/rust_build/.cargo/bin/{{ binary_id_git }}
         args:
           creates: /usr/local/lib/binaries/{{ binary_id_git }}
         become: true
         loop: "{{ cargo_crate_list }}"
-        when: item.source|default('crates.io') == 'git'
+        when:
+          - item.source|default('crates.io') == 'git'
+          - not (rust_binary_git.results | selectattr("item.binary", "match", item.binary))[0].stat.exists
 
       - name: link binaries for crates.io
         file:
