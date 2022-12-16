@@ -267,9 +267,9 @@ packages:
     acpi:
       ubuntu: ["acpid"]
       archlinux: ["acpi", "acpid"]
-    npm:
-      ubuntu: ["npm"]
-      archlinux: ["npm"]
+    nodejs:
+      ubuntu: ["nodejs"]
+      archlinux: ["nodejs", "npm"]
     xdg:
       ubuntu: ["xdg-utils"]
       archlinux: ["xdg-utils"]
