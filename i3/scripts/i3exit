@@ -18,13 +18,7 @@ log()
 lock()
 {
     set -x
-    playing=0
-    if [[ "$(playerctl -p spotify status)" == "Playing" ]] ; then
-        playing=1
-    fi
-    if (( $playing )) ; then
-        playerctl -p spotify pause
-    fi
+    playerctl -p spotify pause
 
     if [[ -f "$LOCKSCREEN" ]] ; then
         resized_lockscreen=$(mktemp)
@@ -35,9 +29,6 @@ lock()
     else
         i3lock --nofork --show-failed-attempts --ignore-empty-password \
             --color "$_fallback_color"
-    fi
-    if (( $playing )) ; then
-        playerctl -p spotify play
     fi
 }
 
