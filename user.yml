@@ -393,6 +393,7 @@
     vars:
       firefox_profiles: "{{ {item.key: item.value} | combine({item.key: {'preferences': firefox_preferences}}, recursive=True) }}"
     loop: "{{ user.firefox_profiles | dict2items }}"
+    when: not ansible_check_mode
 
   - name: firefox - create target directory for passff
     file:
@@ -439,6 +440,7 @@
       state: directory
       mode: '0755'
     with_items: "{{ firefox_profile_names.results }}"
+    when: not ansible_check_mode
 
   - name: firefox - configure firefox custom css
     copy:
@@ -456,7 +458,9 @@
         #sidebar {
           width: 400px !important;
         }
-    when: user.firefox_profiles[item.profile_name].manage_css is sameas True
+    when:
+      - not ansible_check_mode
+      - user.firefox_profiles[item.profile_name].manage_css is sameas True
     with_items: "{{ firefox_profile_names.results }}"
   tags:
     - firefox
@@ -556,12 +560,14 @@
     file:
       path: /home/{{ user.name }}/.opt/kubectl-{{ kubectl_version }}
       mode: '0755'
+    when: not ansible_check_mode
 
   - name: link kubectl
     file:
       src: /home/{{ user.name }}/.opt/kubectl-{{ kubectl_version }}
       dest: /home/{{ user.name }}/.optbin/kubectl
       state: link
+    when: not ansible_check_mode
 
   tags:
     - kubectl
@@ -575,42 +581,54 @@
     stat:
       path: "/home/{{ user.name }}/.opt/terraform-v{{ tf_version }}"
     register: terraform_binary
+    check_mode: false
 
   - name: create temporary download directory for terraform
     tempfile:
       state: directory
     register: terraform_download_dir
-    when: not terraform_binary.stat.exists
+    when:
+      - not ansible_check_mode
+      - not terraform_binary.stat.exists
 
   - name: get terraform
     get_url:
       url: "https://releases.hashicorp.com/terraform/{{ tf_version }}/terraform_{{ tf_version }}_linux_amd64.zip"
       dest: "{{ terraform_download_dir.path }}/terraform.zip"
       force: false
-    when: not terraform_binary.stat.exists
+    when:
+      - not ansible_check_mode
+      - not terraform_binary.stat.exists
 
   - name: unpack terraform zip
     unarchive:
       src: "{{ terraform_download_dir.path }}/terraform.zip"
       dest: "{{ terraform_download_dir.path }}/"
       remote_src: true
-    when: not terraform_binary.stat.exists
+    when:
+      - not ansible_check_mode
+      - not terraform_binary.stat.exists
 
   - name: install terraform
     command: mv "{{ terraform_download_dir.path }}/terraform" /home/{{ user.name }}/.opt/terraform-v{{ tf_version }}
-    when: not terraform_binary.stat.exists
+    when:
+      - not ansible_check_mode
+      - not terraform_binary.stat.exists
 
   - name: clean up download directory
     file:
       path: "{{ terraform_download_dir.path }}"
       state: absent
-    when: not terraform_binary.stat.exists
+    when:
+      - not ansible_check_mode
+      - not terraform_binary.stat.exists
 
   - name: link terraform
     file:
       src: /home/{{ user.name }}/.opt/terraform-v{{ tf_version }}
       dest: /home/{{ user.name }}/.optbin/terraform
       state: link
+    when: not ansible_check_mode
 
   - block:
     - name: get terraform version info
