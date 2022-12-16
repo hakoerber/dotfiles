@@ -1,0 +1,5 @@
+[Service]
+Type=simple
+ExecStart=%h/bin/mousespam
+RemainAfterExit=True
+PassEnvironment=DISPLAY

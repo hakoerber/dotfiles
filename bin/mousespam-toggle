@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+systemctl --no-pager --user status mousespam && systemctl --no-pager --user stop mousespam || systemctl --no-pager --user start mousespam
