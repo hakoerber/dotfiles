@@ -27,7 +27,6 @@ users:
     MACHINE_HAS_RESTIC_BACKUP: "true"
     MACHINE_HAS_ELEMENT: "false"
     MACHINE_HAS_KEEPASSX: "true"
-  has_yubikey: false
   repositories: []
 - name: hannes-private
   group: hannes-private

@@ -37,7 +37,6 @@ users:
   enable_passwordstore: true
   environment:
     MACHINE_HAS_NEXTCLOUD: "true"
-  has_yubikey: true
   repositories:
     - personal_projects
 
