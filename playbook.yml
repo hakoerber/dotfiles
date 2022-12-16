@@ -589,9 +589,6 @@
         when: item.source|default('crates.io') == 'git'
         check_mode: false
 
-      - debug:
-          var: rust_binary_cratesio
-
       - name: build rust crates from crates.io
         shell: |
           set -o errexit
