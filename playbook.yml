@@ -577,6 +577,7 @@
         loop_control:
           label: "{{ item.binary }}"
         when: item.source|default('crates.io') == 'crates.io'
+        check_mode: false
 
       - name: check if binary already exists for git
         stat:
@@ -586,6 +587,7 @@
         loop_control:
           label: "{{ item.binary }}"
         when: item.source|default('crates.io') == 'git'
+        check_mode: false
 
       - debug:
           var: rust_binary_cratesio
