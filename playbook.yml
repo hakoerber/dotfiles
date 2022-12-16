@@ -609,7 +609,7 @@
         shell: |
           set -o errexit
           {{ cargo_env }}
-          rustup run {{ item.toolchain|default('stable') }} cargo install --features "{{ item.features|default([])|join(' ') }}" {{ "--target " ~ item.target if item.target is defined else '' }} --git {{ item.url }} --branch {{ item.branch }}
+          rustup run {{ item.toolchain|default('stable') }} cargo install --features "{{ item.features|default([])|join(' ') }}" {{ "--target " ~ item.target if item.target is defined else '' }} --git {{ item.url }} --branch {{ item.branch }} {{ item.package|default("") }}
           mv /var/lib/rust_build/.cargo/bin/{{ item.binary }} /var/lib/rust_build/.cargo/bin/{{ binary_id_git }}
         args:
           creates: /var/lib/rust_build/.cargo/bin/{{ binary_id_git }}
