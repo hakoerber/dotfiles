@@ -196,8 +196,8 @@ else
     nnoremap <leader>u :GundoToggle<CR>
     nnoremap <leader>d :diffupdate<CR>
 
-    nmap <F9> :Goyo<CR>:TogglePencil<CR>:Limelight!!<CR>
-    nmap <leader>w :Goyo<CR>:TogglePencil<CR>:Limelight!!<CR>
+    nmap <F9> :Goyo<CR>:TogglePencil<CR>
+    nmap <leader>w :Goyo<CR>:TogglePencil<CR>:set colorcolumn=<CR>
 
     nmap <leader>c :%w !xclip -selection clipboard<CR>
     nmap <leader>x :r !xclip -out -selection -clipboard<CR><CR>
@@ -228,6 +228,7 @@ else
       \ },
       \ }
 
+
     function! LightLineFilename()
         return fnamemodify(expand('%F'), ":~:h")
     endfunction
@@ -235,14 +236,16 @@ else
     " == pencil ==
     let g:pencil#textwidth = 80
     let g:pencil#autoformat = 1
-    let g:pencil#cursorwrap = 1
-    let g:pencil#wrapModeDefault = 'soft'
-    let g:pencil#cursorwrap = 0
+    let g:pencil#wrapModeDefault = 'hard'
+    let g:pencil#map#suspend_af = 'K'
 
     " == goyo ==
     let g:goyo_width = 100
     let g:goyo_height = "90%"
     let g:goyo_linenr = 0
+
+    autocmd! User GoyoEnter Limelight
+    autocmd! User GoyoLeave Limelight!
 
     " == limelight ==
     let g:limelight_default_coefficient = 0.5
