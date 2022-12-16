@@ -13,6 +13,7 @@ warning_fg = "#000000"
 warning_bg = "#F4Bf75"
 critical_fg = "#000000"
 critical_bg = "#F92672"
+end_separator = ""
 
 [[block]]
 block = "music"
