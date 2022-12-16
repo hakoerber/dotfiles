@@ -26,12 +26,22 @@ driver = "pulseaudio"
 max_vol = 100
 format = " $icon{ $volume.eng(2)|} "
 
+[[block.click]]
+button = "left"
+cmd = "pactl set-sink-mute '@DEFAULT_SINK@' toggle"
+update = true
+
 [[block]]
 block = "sound"
 driver = "pulseaudio"
 device_kind = "source"
 format = " $icon "
 reverse_levels = true
+
+[[block.click]]
+button = "left"
+cmd = "pactl set-source-mute '@DEFAULT_SOURCE@' toggle"
+update = true
 
 [[block]]
 block = "net"
