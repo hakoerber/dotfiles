@@ -81,6 +81,11 @@ block = "custom"
 command = "ping -n -q -w 2 -c 1 8.8.8.8 >/dev/null 2>/dev/null && echo || echo "
 
 [[block]]
+block = "custom"
+command = "curl -s 'https://wttr.in/Ansbach?m&T&format=%c%t' | sed 's/  / /g'"
+interval = 1800
+
+[[block]]
 block = "time"
 interval = 1
 locale = "de_DE"
