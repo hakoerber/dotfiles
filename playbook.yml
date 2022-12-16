@@ -603,7 +603,7 @@
         loop: "{{ cargo_crate_list }}"
         when:
           - item.source|default('crates.io') == 'crates.io'
-          - not (rust_binary_cratesio.results | selectattr("item.binary", "match", item.binary))[0].stat.exists
+          - not ((rust_binary_cratesio.results | selectattr("item.binary", "match", item.binary)) | list) [0].stat.exists
 
       - name: build rust crates from git
         shell: |
@@ -618,7 +618,7 @@
         loop: "{{ cargo_crate_list }}"
         when:
           - item.source|default('crates.io') == 'git'
-          - not (rust_binary_git.results | selectattr("item.binary", "match", item.binary))[0].stat.exists
+          - not ((rust_binary_git.results | selectattr("item.binary", "match", item.binary)) | list)[0].stat.exists
 
       - name: create target directory
         file:
@@ -638,7 +638,7 @@
         loop: "{{ cargo_crate_list }}"
         when:
           - item.source|default('crates.io') == 'crates.io'
-          - not (rust_binary_cratesio.results | selectattr("item.binary", "match", item.binary))[0].stat.exists
+          - not ((rust_binary_cratesio.results | selectattr("item.binary", "match", item.binary)) | list)[0].stat.exists
 
       - name: move binaries for git
         shell: |
@@ -649,7 +649,7 @@
         loop: "{{ cargo_crate_list }}"
         when:
           - item.source|default('crates.io') == 'git'
-          - not (rust_binary_git.results | selectattr("item.binary", "match", item.binary))[0].stat.exists
+          - not ((rust_binary_git.results | selectattr("item.binary", "match", item.binary)) | list)[0].stat.exists
 
       - name: link binaries for crates.io
         file:
