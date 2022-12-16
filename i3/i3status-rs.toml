@@ -78,7 +78,7 @@ signal = 0
 
 [[block]]
 block = "custom"
-command = "ping -c 1 8.8.8.8 >/dev/null 2>/dev/null && echo || echo "
+command = "ping -n -q -w 2 -c 1 8.8.8.8 >/dev/null 2>/dev/null && echo || echo "
 
 [[block]]
 block = "time"
