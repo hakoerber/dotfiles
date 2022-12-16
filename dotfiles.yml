@@ -29,6 +29,7 @@ dotfiles:
     template: true
   - from: i3/i3status-rust/config.toml
     to: .config/i3status-rust/config.toml
+    template: true
   - from: i3/i3status-rust/themes/native.toml
     to: .config/i3status-rust/themes/native.toml
   - from: i3/i3status-rust/icons/awesome.toml
