@@ -1,4 +1,4 @@
-icons_format = "{icon}"
+icons_format = " {icon} "
 
 [icons]
 icons = "awesome"
@@ -24,7 +24,7 @@ format = " $icon $combo $prev $play $next "
 block = "sound"
 driver = "pulseaudio"
 max_vol = 100
-format = " $icon {$volume.eng(2) |}"
+format = " $icon{ $volume.eng(2)|} "
 
 [[block]]
 block = "sound"
@@ -35,7 +35,7 @@ reverse_levels = true
 
 [[block]]
 block = "net"
-format = " $signal_strength $ssid "
+format = " $icon{ $signal_strength|}{ $ssid | }"
 
 [[block]]
 block = "load"
@@ -53,14 +53,14 @@ if_command = "test -e /sys/class/power_supply/BAT0"
 
 [[block]]
 block = "toggle"
-format = "  $icon "
+format = "   $icon "
 command_on = "$HOME/.i3/scripts/presentation-mode toggle ; pkill -SIGRTMIN+0 i3status-rs"
 command_off = "$HOME/.i3/scripts/presentation-mode toggle ; pkill -SIGRTMIN+0 i3status-rs"
 command_state = "[[ $($HOME/.i3/scripts/presentation-mode status) == on ]] && echo active"
 
 [[block]]
 block = "toggle"
-format = "  $icon "
+format = "   $icon "
 command_on = "systemctl --user start redshift"
 command_off = "systemctl --user stop redshift"
 command_state = "[[ $(systemctl --user is-active redshift) == active ]] && echo active"
@@ -68,7 +68,7 @@ signal = 0
 
 [[block]]
 block = "toggle"
-format = "  $icon "
+format = "   $icon "
 command_on = "systemctl --user start spotify"
 command_off = "systemctl --user stop spotify"
 command_state = "[[ $(systemctl --user is-active spotify) == active ]] && echo active"
