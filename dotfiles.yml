@@ -27,9 +27,6 @@ dotfiles:
   - from: i3/config
     to: .i3/config
     template: true
-  - from: i3/i3status.conf
-    to: .i3/i3status.conf
-    template: true
   - from: i3/i3status-rust/config.toml
     to: .config/i3status-rust/config.toml
   - from: i3/i3status-rust/themes/native.toml
