@@ -36,3 +36,8 @@ cargo_crate_list:
     features:
       - static-build
     target: x86_64-unknown-linux-musl
+  - url: https://github.com/hakoerber/i3status-rust
+    binary: i3status-rs
+    branch: develop
+    source: git
+    package: i3status-rs
