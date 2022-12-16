@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 _status_file="${XDG_RUNTIME_DIR}/presentation-mode-on"
-_autostart="$HOME/.autostart.sh"
 
 is_on() {
     [[ -e "${_status_file}" ]]
@@ -12,9 +11,6 @@ switch_on() {
     dunstctl set-paused true &
     systemctl --user --no-block stop redshift.service
     systemctl --user --no-block stop spotify.service
-    ~/.i3/scripts/bar-update "external_script presentation_mode"
-    ~/.i3/scripts/bar-update "systemd redshift"
-    ~/.i3/scripts/bar-update "systemd spotify"
 }
 
 switch_off() {
@@ -22,9 +18,6 @@ switch_off() {
     dunstctl set-paused false &
     systemctl --user --no-block start redshift.service
     systemctl --user --no-block start spotify.service
-    ~/.i3/scripts/bar-update "external_script presentation_mode"
-    ~/.i3/scripts/bar-update "systemd redshift"
-    ~/.i3/scripts/bar-update "systemd spotify"
 }
 
 
@@ -32,10 +25,8 @@ case "$1" in
     status)
         if is_on ; then
             printf "on\n"
-            printf '#F4BF75'
         else
             printf "off\n"
-            # printf '#F4BF75'
         fi
         ;;
     toggle)

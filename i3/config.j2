@@ -226,7 +226,7 @@ assign [class="^Wine$"] $workspace10
 
     bindsym $mod+Shift+v exec --no-startup-id redshift-toggle
 
-    bindsym $mod+$pim_toggle exec --no-startup-id ~/.i3/scripts/swap-from-workspace.sh $workspace10
+    bindsym $mod+$pim_toggle exec --no-startup-id ~/.i3/scripts/swap-from-workspace $workspace10
 
 ################################################################################
 ### MODES ######################################################################
@@ -319,20 +319,20 @@ bindsym $mod+F9 exec --no-startup-id evolution
 ################################################################################
 
 bindsym XF86Sleep exec --no-startup-id $scriptdir/i3exit suspend
-bindsym XF86AudioMute exec --no-startup-id $scriptdir/pa-volume mute-toggle
-bindsym XF86AudioRaiseVolume exec --no-startup-id $scriptdir/pa-volume set-vol +3
-bindsym XF86AudioLowerVolume exec --no-startup-id $scriptdir/pa-volume set-vol -3
+bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute '@DEFAULT_SINK@' toggle
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume '@DEFAULT_SINK@' +5%
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume '@DEFAULT_SINK@' -5%
 
-bindsym XF86AudioPlay exec $scriptdir/spotify-control toggle
-bindsym XF86AudioNext exec $scriptdir/spotify-control next
-bindsym XF86AudioPrev exec $scriptdir/spotify-control previous
+bindsym XF86AudioPlay exec --no-startup-id playerctl -p spotify play-pause
+bindsym XF86AudioNext exec --no-startup-id playerctl -p spotify next
+bindsym XF86AudioPrev exec --no-startup-id playerctl -p spotify previous
 
 # keys seemingly switched
 bindsym XF86MonBrightnessUp   exec --no-startup-id xbacklight -inc 8 ; exec --no-startup-id $scriptdir/update-status
 bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -dec 8 ; exec --no-startup-id $scriptdir/update-status
 
-bindsym $mod+m exec --no-startup-id $scriptdir/pa-volume mute-toggle-mic
-bindsym $mod+space exec --no-startup-id $scriptdir/pa-volume mute-toggle-mic
+bindsym $mod+m exec --no-startup-id pactl set-source-mute '@DEFAULT_SOURCE@' toggle
+bindsym $mod+space exec --no-startup-id pactl set-source-mute '@DEFAULT_SOURCE@' toggle
 
 ##############################################################################
 ### BARS #######################################################################
