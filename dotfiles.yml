@@ -9,6 +9,9 @@ empty_directories:
   - name: .config/gtk-3.0-overrides/bigger-font/
   - name: .config/gtk-3.0-overrides/bigger-font/gtk-3.0
   - name: .config/qt5ct
+  - name: .config/i3status-rust
+  - name: .config/i3status-rust/icons
+  - name: .config/i3status-rust/themes
 dotfiles:
   - from: git/gitconfig
     to: .gitconfig
@@ -27,8 +30,12 @@ dotfiles:
   - from: i3/i3status.conf
     to: .i3/i3status.conf
     template: true
-  - from: i3/i3status-rs.toml
-    to: .i3/i3status-rs.toml
+  - from: i3/i3status-rust/config.toml
+    to: .config/i3status-rust/config.toml
+  - from: i3/i3status-rust/themes/native.toml
+    to: .config/i3status-rust/themes/native.toml
+  - from: i3/i3status-rust/icons/awesome.toml
+    to: .config/i3status-rust/icons/awesome.toml
   - from: i3/scripts
     to: .i3/scripts
   - from: tmux/tmux.conf

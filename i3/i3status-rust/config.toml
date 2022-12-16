@@ -1,12 +1,12 @@
-icons_format = "  {icon}  "
+icons_format = "{icon}"
 
 [icons]
-name = "awesome6"
+icons = "awesome"
 
 [icons.overrides]
 
 [theme]
-name = "native"
+theme = "native"
 
 [theme.overrides]
 warning_fg = "#000000"
@@ -17,52 +17,50 @@ critical_bg = "#F92672"
 [[block]]
 block = "music"
 player = "spotify"
-buttons = ["prev", "play", "next"]
-on_click = "exec $HOME/.i3/scripts/spotify-control toggle"
 separator = " — "
-dynamic_width = true
-max_width = 1024
+format = " $icon $combo $prev $play $next "
 
 [[block]]
 block = "sound"
 driver = "pulseaudio"
 max_vol = 100
+format = " $icon {$volume.eng(2) |}"
 
 [[block]]
 block = "sound"
 driver = "pulseaudio"
 device_kind = "source"
+format = " $icon "
+reverse_levels = true
 
 [[block]]
-block = "networkmanager"
-primary_only = true
-ap_format = "{strength} {ssid}"
-device_format = "{icon}{ap}"
+block = "net"
+format = " $signal_strength $ssid "
 
 [[block]]
 block = "load"
-format = "{1m}"
-warning = 8
+format = " $icon $1m.eng(4) "
+warning = 4
 critical = 1000
 interval = 1
 
 [[block]]
+block = "battery"
+interval = 10
+format = " $percentage $time "
+missing_format = ""
+if_command = "test -e /sys/class/power_supply/BAT0"
+
+[[block]]
 block = "toggle"
-text = "   "
+format = "  $icon "
 command_on = "$HOME/.i3/scripts/presentation-mode toggle ; pkill -SIGRTMIN+0 i3status-rs"
 command_off = "$HOME/.i3/scripts/presentation-mode toggle ; pkill -SIGRTMIN+0 i3status-rs"
 command_state = "[[ $($HOME/.i3/scripts/presentation-mode status) == off ]] || echo active"
 
 [[block]]
-block = "battery"
-interval = 10
-format = "{percentage} {time}"
-hide_missing = true
-if_command = "test -e /sys/class/power_supply/BAT0"
-
-[[block]]
 block = "toggle"
-text = "   "
+format = "  $icon "
 command_on = "systemctl --user start redshift"
 command_off = "systemctl --user stop redshift"
 command_state = "[[ $(systemctl --user is-active redshift) == active ]] && echo active"
@@ -70,7 +68,7 @@ signal = 0
 
 [[block]]
 block = "toggle"
-text = "   "
+format = "  $icon "
 command_on = "systemctl --user start spotify"
 command_off = "systemctl --user stop spotify"
 command_state = "[[ $(systemctl --user is-active spotify) == active ]] && echo active"
@@ -78,7 +76,8 @@ signal = 0
 
 [[block]]
 block = "custom"
-command = "ping -n -q -w 2 -c 1 8.8.8.8 >/dev/null 2>/dev/null && echo || echo "
+json = true
+command = "ping -n -q -w 2 -c 1 8.8.8.8 >/dev/null 2>/dev/null && printf '{\"text\":\"\",\"state\":\"Info\"}' || printf '{\"text\":\"\",\"state\":\"Critical\"}'"
 
 [[block]]
 block = "custom"
@@ -89,4 +88,4 @@ interval = 1800
 block = "time"
 interval = 1
 locale = "de_DE"
-format = "[CW %V] %a %d.%m.%Y %H:%M:%S"
+format = " [CW %V] %a %d.%m.%Y %H:%M:%S "
