@@ -37,7 +37,12 @@ block = "sound"
 driver = "pulseaudio"
 device_kind = "source"
 format = " $icon "
-reverse_levels = true
+
+[block.theme_overrides]
+warning_fg = { link = "idle_fg" }
+warning_bg = { link = "idle_bg" }
+idle_fg = { link = "warning_fg" }
+idle_bg = { link = "warning_bg" }
 
 [[block.click]]
 button = "left"
