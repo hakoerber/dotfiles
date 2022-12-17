@@ -390,6 +390,9 @@ packages:
     kdeconnect:
       ubuntu: ["kdeconnect"]
       archlinux: ["kdeconnect"]
+    restic:
+      ubuntu: ["restic"]
+      archlinux: ["restic"]
 
   remove:
     mousepad:
