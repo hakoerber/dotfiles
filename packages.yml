@@ -393,6 +393,9 @@ packages:
     restic:
       ubuntu: ["restic"]
       archlinux: ["restic"]
+    discord:
+      ubuntu: []
+      archlinux: ["discord"]
 
   remove:
     mousepad:
@@ -413,9 +416,6 @@ packages:
     vim:
       ubuntu: ["vim"]
       archlinux: ["gvim"]
-    discord:
-      ubuntu: []
-      archlinux: ["discord"]
     rust:
       ubuntu: ["rustc", "cargo"]
       archlinux: ["rust"]
