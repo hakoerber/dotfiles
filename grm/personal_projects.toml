@@ -85,6 +85,7 @@ type = "https"
 
 [[trees.repos]]
 name = "git-repo-manager"
+worktree_setup = true
 
 [[trees.repos.remotes]]
 name = "github"

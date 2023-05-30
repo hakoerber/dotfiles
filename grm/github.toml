@@ -1,0 +1,9 @@
+provider = "github"
+token_command = "pass show github | pf '.personal_access_token.grm.value'"
+root = "~/projects/github"
+force_ssh = true
+worktree = true
+
+[filters]
+# owner = true
+# groups = ["hi"]
