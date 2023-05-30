@@ -1,0 +1,35 @@
+theme = "monokai"
+
+[editor]
+idle-timeout = 0
+completion-trigger-len = 1
+
+[editor.statusline]
+left = [
+  "mode",
+  "separator",
+  "file-name",
+  "file-modification-indicator",
+]
+
+right = [
+  "spinner",
+  "spacer",
+  "diagnostics",
+  "separator",
+  "selections",
+  "separator",
+  "position",
+  "position-percentage",
+  "file-type",
+]
+
+mode.normal = "N"
+mode.insert = "I"
+mode.select = "S"
+
+[editor.lsp]
+display-inlay-hints = true
+
+[editor.cursor-shape]
+insert = "bar"

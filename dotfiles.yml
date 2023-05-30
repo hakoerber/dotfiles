@@ -12,6 +12,7 @@ empty_directories:
   - name: .config/i3status-rust
   - name: .config/i3status-rust/icons
   - name: .config/i3status-rust/themes
+  - name: .config/helix
 dotfiles:
   - from: git/gitconfig
     to: .gitconfig
@@ -86,3 +87,5 @@ dotfiles:
     to: .screencfg
   - from: scripts
     to: scripts
+  - from: helix/config.toml
+    to: .config/helix/config.toml
