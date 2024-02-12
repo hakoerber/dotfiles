@@ -86,7 +86,7 @@ alias sysu="systemctl --user"
 
 alias gpg=gpg2
 
-alias alacritty="alacritty --config-file $HOME/.config/alacritty.yml"
+alias alacritty="alacritty --config-file $HOME/.config/alacritty.toml"
 
 alias d=docker
 alias dc=docker-compose
