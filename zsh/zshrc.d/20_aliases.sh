@@ -91,6 +91,9 @@ alias alacritty="alacritty --config-file $HOME/.config/alacritty.toml"
 alias d=docker
 alias dc=docker-compose
 
+alias hx=helix
+alias h=helix
+
 gitmaster() {
     git stash push -m gitmaster-$(date -uIseconds) -u || return 1
     _branch=$(git rev-parse --abbrev-ref HEAD)
