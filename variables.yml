@@ -11,8 +11,6 @@ cargo_crate_list:
     version: 13.0.0
     features:
       - pcre2
-      - simd-accel
-    toolchain: nightly # necessary for SIMD
     required_packages:
       - ubuntu: libpcre2-dev
         archlinux: pcre2
