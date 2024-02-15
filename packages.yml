@@ -458,3 +458,6 @@ tokei:
 whois:
   archlinux:
     - whois # also contains mkpasswd
+xxd:
+  archlinux:
+    - tinyxxd
