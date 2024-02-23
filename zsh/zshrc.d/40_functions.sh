@@ -188,7 +188,7 @@ journal() {
     if [[ ! -e $file ]] ; then
         cp $journaldir/template.md $file || return
     fi
-    vim +Goyo +PencilSoft $file
+    $EDITOR $file
 }
 
 syncfolder() {
