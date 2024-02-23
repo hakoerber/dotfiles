@@ -183,8 +183,8 @@ sb() {
 }
 
 journal() {
-    journaldir=~/journal/
-    file=~/journal/$(date +%Y-%m-%d).md
+    journaldir=~/sync/journal/
+    file="$journaldir/$(date +%Y-%m-%d).md"
     if [[ ! -e $file ]] ; then
         cp $journaldir/template.md $file || return
     fi
