@@ -30,7 +30,9 @@ packages:
     dmenu:
       archlinux: ["dmenu"]
     ansible:
-      archlinux: ["ansible"]
+      archlinux:
+        - ansible
+        - ansible-language-server
     xdotool:
       archlinux: ["xdotool"]
     arandr:
@@ -57,7 +59,9 @@ packages:
     feh:
       archlinux: ["feh"]
     i3:
-      archlinux: ["i3-wm"]
+      archlinux:
+        - i3-wm
+        - i3status-rust
     i3lock:
       archlinux: ["i3lock"]
     pluma:
@@ -76,8 +80,6 @@ packages:
       archlinux: ["pinentry"]
     pinta:
       archlinux: ["pinta"]
-    py3status:
-      archlinux: ["py3status", "python-pytz", "python-tzlocal", "python-dbus", "python-pydbus"]
     pass:
       archlinux: ["pass", "passff-host"]
     urxvt:
@@ -115,7 +117,9 @@ packages:
     xcompmgr:
       archlinux: ["xcompmgr"]
     python:
-      archlinux: ["python3"]
+      archlinux:
+        - python3
+        - python-lsp-server
     python-modules:
       archlinux:
         - python-ruamel-yaml
@@ -164,7 +168,14 @@ packages:
     networkmanager:
       archlinux: ["networkmanager"]
     pulseaudio:
-      archlinux: ["pulseaudio", "pulseaudio-alsa", "lib32-libpulse"]
+      archlinux:
+        - pulseaudio
+        - pulseaudio-alsa
+        - lib32-libpulse
+        - alsa-utils
+        - alsa-firmware
+        - sof-firmware
+        - alsa-ucm-conf
     iw:
       archlinux: ["iw"]
     cowsay:
@@ -277,6 +288,70 @@ packages:
       archlinux: ["helix"]
     keepassxc:
       archlinux: ["keepassxc"]
+    awscli:
+      archlinux: ["aws-cli"]
+    mariadb-client:
+      archlinux: ["mariadb-clients"]
+    php:
+      archlinux: ["php"]
+    exa:
+      archlinux: ["exa"]
+    just:
+      archlinux: ["just"]
+    ripgrep:
+      archlinux: ["ripgrep"]
+    fd:
+      archlinux: ["fd"]
+    bat:
+      archlinux: ["bat"]
+    mdbook:
+      archlinux: ["mdbook"]
+    bash:
+      archlinux:
+        - bash
+        - bash-language-server
+    packer:
+      archlinux: ["packer"]
+    c:
+      archlinux:
+        - gcc
+        - clang
+    sed:
+      archlinux:
+        - sed
+    findutils:
+      archlinux:
+        - findutils
+    html:
+      archlinux:
+        - vscode-html-languageserver
+    typescript:
+      archlinux:
+        - typescript
+        - typescript-language-server
+    json:
+      archlinux:
+        - vscode-json-languageserver
+    markdown:
+      archlinux:
+        - marksman
+    lldb:
+      archlinux:
+        - lldb
+    yaml:
+      archlinux:
+        - yaml-language-server
+    qemu:
+      archlinux:
+        - qemu-full
+        - tigervnc
+    cloud-init:
+      archlinux:
+        - cloud-init
+        - cloud-utils
+    netcat:
+      archlinux:
+        - openbsd-netcat
 
   remove:
     mousepad:
