@@ -26,16 +26,6 @@
         that: distro in ('archlinux')
 
     - block:
-      - name: upgrade system
-        pacman:
-          upgrade: true
-          update_cache: true
-        become: true
-        changed_when: false
-
-      tags: [system-update]
-
-    - block:
       - name: install ansible requirements
         package:
           name: "{{ packages[distro] }}"
@@ -64,6 +54,16 @@
             ParallelDownloads = 5
           marker: "# {mark} ANSIBLE MANAGED parallel_download"
         become: true
+
+      - block:
+        - name: upgrade system
+          pacman:
+            upgrade: true
+            update_cache: true
+          become: true
+          changed_when: false
+
+        tags: [system-update]
 
       - name: install pacman-contrib for paccache
         package:
