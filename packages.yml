@@ -399,6 +399,9 @@ packages:
     bind:
       ubuntu: []
       archlinux: ["bind"]
+    fzf:
+      ubuntu: []
+      archlinux: ["fzf"]
 
   remove:
     mousepad:
