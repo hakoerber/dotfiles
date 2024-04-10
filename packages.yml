@@ -396,6 +396,9 @@ packages:
     kubectl:
       ubuntu: []
       archlinux: ["kubectl"]
+    bind:
+      ubuntu: []
+      archlinux: ["bind"]
 
   remove:
     mousepad:
