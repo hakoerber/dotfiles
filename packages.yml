@@ -192,9 +192,6 @@ packages:
     wireshark:
       ubuntu: ["wireshark", "wireshark-qt"]
       archlinux: ["wireshark-cli", "wireshark-qt"]
-    dia:
-      ubuntu: ["dia"]
-      archlinux: ["dia"]
     nmap:
       ubuntu: ["nmap"]
       archlinux: ["nmap"]
