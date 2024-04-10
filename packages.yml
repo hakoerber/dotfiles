@@ -402,6 +402,9 @@ packages:
     fzf:
       ubuntu: []
       archlinux: ["fzf"]
+    chromium:
+      ubuntu: []
+      archlinux: ["chromium"]
 
   remove:
     mousepad:
