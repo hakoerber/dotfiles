@@ -393,6 +393,9 @@ packages:
     discord:
       ubuntu: []
       archlinux: ["discord"]
+    kubectl:
+      ubuntu: []
+      archlinux: ["kubectl"]
 
   remove:
     mousepad:
