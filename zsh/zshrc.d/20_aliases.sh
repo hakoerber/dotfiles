@@ -38,6 +38,8 @@ alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
+alias rg='rg --hidden'
+
 alias rm='rm -v'
 alias cp='cp -vi'
 alias mv='mv -vi'
