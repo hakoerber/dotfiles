@@ -2,7 +2,7 @@ theme = "monokai"
 
 [editor]
 idle-timeout = 0
-completion-trigger-len = 1
+completion-trigger-len = 2
 
 [editor.statusline]
 left = [
@@ -33,3 +33,12 @@ display-inlay-hints = true
 
 [editor.cursor-shape]
 insert = "bar"
+
+[editor.file-picker]
+hidden = false
+
+[editor.indent-guides]
+render = true
+
+[editor.soft-wrap]
+enable = true
