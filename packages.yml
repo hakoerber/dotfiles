@@ -275,6 +275,8 @@ packages:
       archlinux: ["signal-desktop"]
     go:
       archlinux: ["go", "gopls"]
+    helix:
+      archlinux: ["helix"]
 
   remove:
     mousepad:
