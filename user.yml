@@ -190,7 +190,7 @@
 
   - name: deploy dotfiles templates
     template:
-      src: /home/{{ user.name }}/.dotfiles/{{ item.from }}.j2
+      src: /var/lib/dotfiles/{{ item.from }}.j2
       dest: "/home/{{ user.name }}/{{ item.to }}"
       owner: "{{ user.name }}"
       group: "{{ user_group_name }}"
