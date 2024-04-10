@@ -15,18 +15,6 @@
 
 - set_fact:
     user_groups:
-      - adm
-      - cdrom
-      - sudo
-      - dip
-      - plugdev
-      - docker
-      - libvirt
-  when: distro == 'ubuntu'
-  tags: [always]
-
-- set_fact:
-    user_groups:
       - libvirt
       - wheel
       - vboxusers
@@ -35,7 +23,6 @@
       - sudonopw
       - games
       - kvm
-  when: distro == 'archlinux'
   tags: [always]
 
 - set_fact:
@@ -324,14 +311,6 @@
   tags: [vim-plugins]
 
 - block:
-  - name: install rustup on ubuntu
-    shell: curl https://sh.rustup.rs -sSf | sh -s -- -y --no-modify-path
-    args:
-      creates: ~/.cargo/bin/rustup
-  when: distro == 'ubuntu'
-  tags: [rust]
-
-- block:
   - name: create firefox directories
     firefox_profile:
       name: "{{ item.key }}"
@@ -523,134 +502,8 @@
       group: "{{ user_group_name }}"
       state: link
       force: true
-
   tags:
     - portfolio-performance
-
-- block:
-  - name: get current stable version
-    uri:
-      url: https://storage.googleapis.com/kubernetes-release/release/stable.txt
-      return_content: true
-    register: kubectl_stable_version_api
-    check_mode: false
-
-  - set_fact:
-      kubectl_stable_version: "{{ kubectl_stable_version_api.content|trim }}"
-
-  - set_fact:
-      kubectl_outdated: "{{ kubectl_version != kubectl_stable_version }}"
-
-  - name: warn if not on stable version
-    fail:
-      msg: "installing kubectl {{ kubectl_version }}, stable version would be {{ kubectl_stable_version }}"
-    when: kubectl_outdated is sameas true
-    ignore_errors: True
-
-  - name: get kubectl
-    get_url:
-      url: https://storage.googleapis.com/kubernetes-release/release/{{ kubectl_version }}/bin/linux/amd64/kubectl
-      dest: /home/{{ user.name }}/.opt/kubectl-{{ kubectl_version }}
-      owner: "{{ user.name }}"
-      group: "{{ user_group_name }}"
-      mode: '0755'
-      force: false
-
-  - name: make kubectl executable
-    file:
-      path: /home/{{ user.name }}/.opt/kubectl-{{ kubectl_version }}
-      mode: '0755'
-    when: not ansible_check_mode
-
-  - name: link kubectl
-    file:
-      src: /home/{{ user.name }}/.opt/kubectl-{{ kubectl_version }}
-      dest: /home/{{ user.name }}/.optbin/kubectl
-      state: link
-    when: not ansible_check_mode
-
-  tags:
-    - kubectl
-
-- block:
-  - set_fact:
-      tf_version: "{{ user.overrides.terraform_version|default(terraform_version) }}"
-      tf_check_updates: "{{ user.overrides.terraform_check_updates|default(terraform_check_updates)|default(true) }}"
-
-  - name: stat current terraform binary
-    stat:
-      path: "/home/{{ user.name }}/.opt/terraform-v{{ tf_version }}"
-    register: terraform_binary
-    check_mode: false
-
-  - name: create temporary download directory for terraform
-    tempfile:
-      state: directory
-    register: terraform_download_dir
-    when:
-      - not ansible_check_mode
-      - not terraform_binary.stat.exists
-
-  - name: get terraform
-    get_url:
-      url: "https://releases.hashicorp.com/terraform/{{ tf_version }}/terraform_{{ tf_version }}_linux_amd64.zip"
-      dest: "{{ terraform_download_dir.path }}/terraform.zip"
-      force: false
-    when:
-      - not ansible_check_mode
-      - not terraform_binary.stat.exists
-
-  - name: unpack terraform zip
-    unarchive:
-      src: "{{ terraform_download_dir.path }}/terraform.zip"
-      dest: "{{ terraform_download_dir.path }}/"
-      remote_src: true
-    when:
-      - not ansible_check_mode
-      - not terraform_binary.stat.exists
-
-  - name: install terraform
-    command: mv "{{ terraform_download_dir.path }}/terraform" /home/{{ user.name }}/.opt/terraform-v{{ tf_version }}
-    when:
-      - not ansible_check_mode
-      - not terraform_binary.stat.exists
-
-  - name: clean up download directory
-    file:
-      path: "{{ terraform_download_dir.path }}"
-      state: absent
-    when:
-      - not ansible_check_mode
-      - not terraform_binary.stat.exists
-
-  - name: link terraform
-    file:
-      src: /home/{{ user.name }}/.opt/terraform-v{{ tf_version }}
-      dest: /home/{{ user.name }}/.optbin/terraform
-      state: link
-    when: not ansible_check_mode
-
-  - block:
-    - name: get terraform version info
-      command: /home/{{ user.name }}/.optbin/terraform version -json
-      register: terraform_version_output
-      check_mode: false
-      changed_when: false
-
-    - name: parse terraform version output
-      set_fact:
-        terraform_outdated: "{{ (terraform_version_output.stdout | from_json()).terraform_outdated }}"
-      changed_when: false
-
-    - name: warn if terraform is outdated
-      fail:
-        msg: "current terraform v{{ tf_version }} is out of date"
-      when: terraform_outdated is sameas true
-      ignore_errors: True
-    when: tf_check_updates
-
-  tags:
-    - terraform
 
 - name: handle autostart units
   block:

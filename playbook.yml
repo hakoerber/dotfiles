@@ -23,113 +23,89 @@
 
     - name: check for valid distro
       assert:
-        that: distro in ('ubuntu', 'archlinux')
+        that: distro in ('archlinux')
 
     - block:
-      - block:
-        - name: update apt cache
-          apt:
-            update_cache: true
-          become: true
-          changed_when: false
+      - name: upgrade system
+        pacman:
+          upgrade: true
+          update_cache: true
+        become: true
+        changed_when: false
 
-        - name: upgrade system
-          apt:
-            upgrade: dist
-          become: true
-
-        - name: remove unused packages
-          apt:
-            autoremove: true
-          become: true
-
-        - name: clean apt cache
-          apt:
-            autoclean: true
-          become: true
-        when: distro == 'ubuntu'
-
-      - block:
-        - name: install ansible requirements
-          package:
-            name: "{{ packages[distro] }}"
-            state: present
-          become: true
-          vars:
-            packages:
-              archlinux:
-                - python-jmespath
-              ubuntu:
-                - python3-jmespath
-
-      - block:
-        - name: enable multilib repository
-          blockinfile:
-            path: /etc/pacman.conf
-            block: |
-              [multilib]
-              Include = /etc/pacman.d/mirrorlist
-            marker: "# {mark} ANSIBLE MANAGED multilib"
-          become: true
-
-        - name: enable parallel download
-          blockinfile:
-            path: /etc/pacman.conf
-            insertafter: '\[options\]'
-            block: |
-              ParallelDownloads = 5
-            marker: "# {mark} ANSIBLE MANAGED parallel_download"
-          become: true
-
-        - name: upgrade system
-          pacman:
-            upgrade: true
-            update_cache: true
-          become: true
-          changed_when: false
-
-        - name: install pacman-contrib for paccache
-          package:
-            name: pacman-contrib
-            state: present
-          become: true
-
-        - block:
-          - name: install pacman cache clean service
-            copy:
-              dest: /etc/systemd/system/pacman-cache-cleanup.service
-              owner: root
-              group: root
-              mode: '0644'
-              content: |
-                [Service]
-                Type=oneshot
-                ExecStart=/bin/sh -c '/usr/bin/paccache -rk1 && /usr/bin/paccache -ruk0'
-                RemainAfterExit=true
-            become: true
-
-          - name: install pacman cache clean timer
-            copy:
-              dest: /etc/systemd/system/pacman-cache-cleanup.timer
-              owner: root
-              group: root
-              mode: '0644'
-              content: |
-                [Timer]
-                OnCalendar=daily
-            become: true
-
-          - name: enable pacman cache clean timer
-            systemd:
-              name: pacman-cache-cleanup.timer
-              enabled: true
-              state: started
-              daemon_reload: true
-            become: true
-          tags: [pacman_cache_cleanup]
-
-        when: distro == 'archlinux'
       tags: [system-update]
+
+    - block:
+      - name: install ansible requirements
+        package:
+          name: "{{ packages[distro] }}"
+          state: present
+        become: true
+        vars:
+          packages:
+            archlinux:
+              - python-jmespath
+
+    - block:
+      - name: enable multilib repository
+        blockinfile:
+          path: /etc/pacman.conf
+          block: |
+            [multilib]
+            Include = /etc/pacman.d/mirrorlist
+          marker: "# {mark} ANSIBLE MANAGED multilib"
+        become: true
+
+      - name: enable parallel download
+        blockinfile:
+          path: /etc/pacman.conf
+          insertafter: '\[options\]'
+          block: |
+            ParallelDownloads = 5
+          marker: "# {mark} ANSIBLE MANAGED parallel_download"
+        become: true
+
+      - name: install pacman-contrib for paccache
+        package:
+          name: pacman-contrib
+          state: present
+        become: true
+
+      - block:
+        - name: install pacman cache clean service
+          copy:
+            dest: /etc/systemd/system/pacman-cache-cleanup.service
+            owner: root
+            group: root
+            mode: '0644'
+            content: |
+              [Service]
+              Type=oneshot
+              ExecStart=/bin/sh -c '/usr/bin/paccache -rk1 && /usr/bin/paccache -ruk0'
+              RemainAfterExit=true
+          become: true
+
+        - name: install pacman cache clean timer
+          copy:
+            dest: /etc/systemd/system/pacman-cache-cleanup.timer
+            owner: root
+            group: root
+            mode: '0644'
+            content: |
+              [Timer]
+              OnCalendar=daily
+          become: true
+
+        - name: enable pacman cache clean timer
+          systemd:
+            name: pacman-cache-cleanup.timer
+            enabled: true
+            state: started
+            daemon_reload: true
+          become: true
+        tags: [pacman_cache_cleanup]
+
+      when: distro == 'archlinux'
 
     - block:
       - name: create dotfiles group
@@ -310,7 +286,6 @@
         become: true
         vars:
           query: "{{ 'remove.*.%s[]'|format(distro) }}"
-        when: distro != 'ubuntu'
 
       - name: install packages
         package:
@@ -319,16 +294,6 @@
         become: true
         vars:
           query: "{{ 'list.*.%s[]'|format(distro) }}"
-
-      - name: remove packages
-        apt:
-          name: "{{ packages|json_query(query) }}"
-          state: absent
-          purge: true
-        become: true
-        vars:
-          query: "{{ 'remove.*.%s[]'|format(distro) }}"
-        when: distro == 'ubuntu'
 
       - name: install machine-specific packages
         package:
@@ -370,11 +335,6 @@
 
     - set_fact:
         disable_services:
-          - ssh
-      when: distro == 'ubuntu'
-
-    - set_fact:
-        disable_services:
           - sshd
       when: distro == 'archlinux'
 
@@ -392,16 +352,8 @@
           - NetworkManager
           - docker
           - libvirtd
-      when: distro == 'ubuntu'
-
-    - set_fact:
-        enable_services:
-          - NetworkManager
-          - docker
-          - libvirtd
           - systemd-timesyncd
           - pcscd
-      when: distro == 'archlinux'
 
     - name: enable services
       service:
@@ -440,23 +392,20 @@
         line: 'HandlePowerKey=suspend'
       become: true
 
-    - block:
-      - name: create sudonopw group
-        group:
-          name: sudonopw
-          system: true
+    - name: create sudonopw group
+      group:
+        name: sudonopw
+        system: true
 
-      - name: configure passwordless sudo
-        copy:
-          owner: root
-          group: root
-          mode: "0600"
-          dest: /etc/sudoers.d/sudonopw
-          content: |
-            %sudonopw ALL=(ALL) NOPASSWD: ALL
-        become: true
-
-      when: distro == 'archlinux'
+    - name: configure passwordless sudo
+      copy:
+        owner: root
+        group: root
+        mode: "0600"
+        dest: /etc/sudoers.d/sudonopw
+        content: |
+          %sudonopw ALL=(ALL) NOPASSWD: ALL
+      become: true
 
     - block:
       - name: install AMDGPU packages
@@ -494,411 +443,6 @@
         - machine.gpu is defined and machine.gpu == 'amd'
 
     - block:
-      - name: create rust build user
-        user:
-          name: rust_build
-          home: /var/lib/rust_build
-          create_home: true
-          shell: /bin/bash
-          system: true
-        become: true
-
-      - set_fact:
-          cargo_env: . ~/.cargo/env
-        when: distro == 'ubuntu'
-
-      - set_fact:
-          # Do NOT just use `"true"`. Due to some YAML fuckery, it will be
-          # capitalized and the commands will fail.
-          cargo_env: "/bin/true"
-        when: distro == 'archlinux'
-
-      - name: install rustup on ubuntu
-        shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile=minimal
-        args:
-          creates: /var/lib/rust_build/.cargo/bin/rustup
-        become: true
-        become_user: rust_build
-        when: distro == 'ubuntu'
-
-      - name: add rustup stable toolchain
-        shell: "{{ cargo_env }} && rustup toolchain install stable && rustup default stable"
-        become: true
-        become_user: rust_build
-        changed_when: false
-
-      - name: add rustup nightly toolchain
-        shell: "{{ cargo_env }} && rustup toolchain install nightly"
-        become: true
-        become_user: rust_build
-        changed_when: false
-
-      - name: add rustup additional toolchains
-        shell: "{{ cargo_env }} && rustup toolchain install {{ item }}"
-        become: true
-        become_user: rust_build
-        changed_when: false
-        loop: "{{ cargo_crate_list|selectattr('toolchain', 'defined')|map(attribute='toolchain')|reject('in', ['none', 'stable', 'nightly'])|list }}"
-
-      - name: add additional targets
-        shell: "{{ cargo_env }} && rustup +{{ item.toolchain|default('stable') }} target add {{ item.target }}"
-        become: true
-        become_user: rust_build
-        changed_when: false
-        when:
-          - '"target" in item'
-        loop: "{{ cargo_crate_list }}"
-
-      - name: assert that nofeatures is not actually a flag
-        assert:
-          that: '"nofeatures" not in item.features|default([])'
-          msg: Wow, "nofeatures" is actually a feature. Update the playbook!
-        loop: "{{ cargo_crate_list }}"
-
-      - name: assert that only proper sources are defined
-        assert:
-          that: item.source|default("crates.io") in ("crates.io", "git")
-          msg: "Invalid source: {{ item.source|default('x') }}"
-        loop: "{{ cargo_crate_list }}"
-
-      - name: install required packages
-        package:
-          state: present
-          name: "{{ item.required_packages|map(attribute=distro)|list }}"
-        when: item.required_packages is defined
-        become: true
-        loop: "{{ cargo_crate_list }}"
-
-      - name: check if binary already exists for crates.io
-        stat:
-          path: /usr/local/lib/binaries/{{ binary_id_cratesio }}
-        register: rust_binary_cratesio
-        loop: "{{ cargo_crate_list }}"
-        loop_control:
-          label: "{{ item.binary }}"
-        when: item.source|default('crates.io') == 'crates.io'
-        check_mode: false
-
-      - name: check if binary already exists for git
-        stat:
-          path: /usr/local/lib/binaries/{{ binary_id_git }}
-        register: rust_binary_git
-        loop: "{{ cargo_crate_list }}"
-        loop_control:
-          label: "{{ item.binary }}"
-        when: item.source|default('crates.io') == 'git'
-        check_mode: false
-
-      - name: build rust crates from crates.io
-        shell: |
-          set -o errexit
-          {{ cargo_env }}
-
-          rustup run {{ item.toolchain|default('stable') }} cargo install --features "{{ item.features|default([])|join(' ') }}" {{ "--target " ~ item.target if item.target is defined else '' }} --version {{ item.version }} {{ item.crate }}
-          mv /var/lib/rust_build/.cargo/bin/{{ item.binary }} /var/lib/rust_build/.cargo/bin/{{ binary_id_cratesio }}
-        args:
-          creates: /var/lib/rust_build/.cargo/bin/{{ binary_id_cratesio }}
-        become: true # do not build as root!
-        become_user: rust_build
-        loop: "{{ cargo_crate_list }}"
-        when:
-          - item.source|default('crates.io') == 'crates.io'
-          - not ((rust_binary_cratesio.results | selectattr("item.binary", "match", item.binary)) | list) [0].stat.exists
-
-      - name: build rust crates from git
-        shell: |
-          set -o errexit
-          {{ cargo_env }}
-          rustup run {{ item.toolchain|default('stable') }} cargo install --features "{{ item.features|default([])|join(' ') }}" {{ "--target " ~ item.target if item.target is defined else '' }} --git {{ item.url }} --branch {{ item.branch }} {{ item.package|default("") }}
-          mv /var/lib/rust_build/.cargo/bin/{{ item.binary }} /var/lib/rust_build/.cargo/bin/{{ binary_id_git }}
-        args:
-          creates: /var/lib/rust_build/.cargo/bin/{{ binary_id_git }}
-        become: true # do not build as root!
-        become_user: rust_build
-        loop: "{{ cargo_crate_list }}"
-        when:
-          - item.source|default('crates.io') == 'git'
-          - not ((rust_binary_git.results | selectattr("item.binary", "match", item.binary)) | list)[0].stat.exists
-
-      - name: create target directory
-        file:
-          state: directory
-          path: /usr/local/lib/binaries/
-          owner: root
-          group: root
-          mode: '0775'
-        become: true
-
-      - name: move binaries for crates.io
-        shell: |
-          mv /var/lib/rust_build/.cargo/bin/{{ binary_id_cratesio }} /usr/local/lib/binaries/{{ binary_id_cratesio }}
-        args:
-          creates: /usr/local/lib/binaries/{{ binary_id_cratesio }}
-        become: true
-        loop: "{{ cargo_crate_list }}"
-        when:
-          - item.source|default('crates.io') == 'crates.io'
-          - not ((rust_binary_cratesio.results | selectattr("item.binary", "match", item.binary)) | list)[0].stat.exists
-
-      - name: move binaries for git
-        shell: |
-          mv /var/lib/rust_build/.cargo/bin/{{ binary_id_git }} /usr/local/lib/binaries/{{ binary_id_git }}
-        args:
-          creates: /usr/local/lib/binaries/{{ binary_id_git }}
-        become: true
-        loop: "{{ cargo_crate_list }}"
-        when:
-          - item.source|default('crates.io') == 'git'
-          - not ((rust_binary_git.results | selectattr("item.binary", "match", item.binary)) | list)[0].stat.exists
-
-      - name: link binaries for crates.io
-        file:
-          src: /usr/local/lib/binaries/{{ binary_id_cratesio }}
-          dest: /usr/local/bin/{{ item.binary }}
-          owner: root
-          group: root
-          state: link
-          force: true
-        become: true
-        loop: "{{ cargo_crate_list }}"
-        when: item.source|default('crates.io') == 'crates.io'
-
-      - name: link binaries for git
-        file:
-          src: /usr/local/lib/binaries/{{ binary_id_git }}
-          dest: /usr/local/bin/{{ item.binary }}
-          owner: root
-          group: root
-          state: link
-          force: true
-        become: true
-        loop: "{{ cargo_crate_list }}"
-        when: item.source|default('crates.io') == 'git'
-
-      # Important: clean up the symlinks BEFORE the binaries they point to.
-      # Otherwise, ansible will skip them because `ansible.builtin.fileglob`
-      # does not match broken symlinks for some reason.
-      - name: clean up old binaries for creates.io in /var/lib/rust_build
-        command: rm -- {{ binaries | join (" ") }}
-        vars:
-          binaries: "{{ lookup('ansible.builtin.fileglob', '/var/lib/rust_build/.cargo/bin/' ~ item.binary ~ '.*', wantlist=True) | reject('eq', '/var/lib/rust_build/.cargo/bin/' ~ binary_id_cratesio) | list }}"
-        changed_when: binaries | length > 0
-        loop: "{{ cargo_crate_list }}"
-        become: true
-        when:
-          - item.source|default('crates.io') == 'crates.io'
-          - binaries | length > 0
-
-      - name: clean up old binaries for creates.io in /usr/local/lib
-        command: rm -- {{ binaries | join (" ") }}
-        vars:
-          binaries: "{{ lookup('ansible.builtin.fileglob', '/usr/local/lib/binaries/' ~ item.binary ~ '.*', wantlist=True) | reject('eq', '/usr/local/lib/binaries/' ~ binary_id_cratesio) | list }}"
-        changed_when: binaries | length > 0
-        loop: "{{ cargo_crate_list }}"
-        become: true
-        when:
-          - item.source|default('crates.io') == 'crates.io'
-          - binaries | length > 0
-
-      - name: clean up old binaries for git in /var/lib/rust_build
-        command: rm -- {{ binaries | join (" ") }}
-        vars:
-          binaries: "{{ lookup('ansible.builtin.fileglob', '/var/lib/rust_build/.cargo/bin/' ~ item.binary ~ '.*', wantlist=True) | reject('eq', '/var/lib/rust_build/.cargo/bin/' ~ binary_id_git) | list }}"
-        changed_when: binaries | length > 0
-        loop: "{{ cargo_crate_list }}"
-        become: true
-        when:
-          - item.source|default('crates.io') == 'git'
-          - binaries | length > 0
-
-      - name: clean up old binaries for git in /usr/local/lib
-        command: rm -- {{ binaries | join (" ") }}
-        vars:
-          binaries: "{{ lookup('ansible.builtin.fileglob', '/usr/local/lib/binaries/' ~ item.binary ~ '.*', wantlist=True) | reject('eq', '/usr/local/lib/binaries/' ~ binary_id_git) | list }}"
-        changed_when: binaries | length > 0
-        loop: "{{ cargo_crate_list }}"
-        become: true
-        when:
-          - item.source|default('crates.io') == 'git'
-          - binaries | length > 0
-
-      vars:
-        binary_id_cratesio: "{{ item.binary }}.{{ item.toolchain|default('stable') }}.{{ item.features|default(['nofeatures'])|join('_') }}.{{ item.version }}"
-        binary_id_git: "{{ item.binary }}.{{ item.toolchain|default('stable') }}.{{ item.features|default(['nofeatures'])|join('_') }}.{{ item.branch }}"
-      tags:
-        - rust_binaries
-
-    - block:
-      - name: stat go target directory
-        stat:
-          path: /usr/local/go-v{{ go_version }}
-        register: go_target_stat
-
-      - block:
-        - name: create temporary directory for go download
-          tempfile:
-            state: directory
-          register: go_download
-
-        - name: download go
-          get_url:
-            url: https://golang.org/dl/go{{ go_version }}.linux-amd64.tar.gz
-            dest: "{{ go_download.path }}/go{{ go_version }}.linux-amd64.tar.gz"
-            force: false
-
-        - name: unpack go
-          unarchive:
-            src: "{{ go_download.path }}/go{{ go_version }}.linux-amd64.tar.gz"
-            owner: root
-            group: root
-            mode: '0755'
-            dest: "{{ go_download.path }}"
-            remote_src: true
-          become: true
-
-        - name: install new go version
-          command: mv "{{ go_download.path }}/go/" /usr/local/go-v{{ go_version }}
-          become: true
-
-        - name: clean up go download directory
-          file:
-            path: "{{ go_download.path }}"
-            state: absent
-
-        when: not go_target_stat.stat.exists and not ansible_check_mode
-
-      - name: link to the current go version
-        file:
-          src: /usr/local/go-v{{ go_version }}
-          dest: /usr/local/go
-          owner: root
-          group: root
-          state: link
-          force: true
-        become: true
-
-      - name: add go directory to PATH and set GOROOT
-        copy:
-          dest: /etc/profile.d/go.sh
-          content: |
-            export PATH=/usr/local/go/bin:$PATH
-            export GOROOT=/usr/local/go
-          owner: root
-          group: root
-          mode: '0644'
-        become: true
-
-      tags: [go]
-
-    - block:
-      - name: install alacritty build dependencies
-        package:
-          state: present
-          # https://github.com/alacritty/alacritty/blob/master/INSTALL.md#debianubuntu
-          name:
-            - cmake
-            - pkg-config
-            - libfreetype6-dev
-            - libfontconfig1-dev
-            - libxcb-xfixes0-dev
-            - libxkbcommon-dev
-            - python3
-        become: true
-
-      - name: stat alacritty binary
-        stat:
-          path: /usr/local/bin/alacritty
-        register: alacritty_binary
-
-      - name: create temporary directory for alacritty build
-        tempfile:
-          state: directory
-        register: alacritty_build_tempdir
-        become: true
-        become_user: rust_build
-        when: not alacritty_binary.stat.exists
-
-      - name: build alacritty
-        shell: . ~/.cargo/env && rustup run stable cargo install alacritty --root ./out
-        args:
-          chdir: "{{ alacritty_build_tempdir.path }}"
-        become: true
-        become_user: rust_build
-        when: not alacritty_binary.stat.exists
-
-      - name: install alacritty
-        command: mv "{{ alacritty_build_tempdir.path }}/out/bin/alacritty" /usr/local/bin/alacritty
-        become: true
-        when: not alacritty_binary.stat.exists
-
-      - name: clean up build directory
-        file:
-          path: "{{ alacritty_build_tempdir.path }}"
-          state: absent
-        become: true
-        become_user: rust_build
-        when: not alacritty_binary.stat.exists
-
-      when: distro == 'ubuntu'
-      tags: [alacritty]
-
-    - block:
-      - name: stat yubikey-touch-detector binary
-        stat:
-          path: /usr/local/bin/yubikey-touch-detector
-        register: yubikey_touch_detector_binary
-
-      - name: create temporary directory for yubikey-touch-detector build
-        tempfile:
-          state: directory
-        register: yubikey_touch_detector_build_tempdir
-        when: not yubikey_touch_detector_binary.stat.exists
-
-      - name: build yubikey-touch-detector
-        shell: sh -c 'PATH=/usr/local/go/bin:$PATH env GOROOT=/usr/local/go GOPATH=$(pwd) go install github.com/maximbaz/yubikey-touch-detector@main'
-        args:
-          chdir: "{{ yubikey_touch_detector_build_tempdir.path }}"
-        when: not yubikey_touch_detector_binary.stat.exists
-
-      - name: install yubikey-touch-detector
-        command: >
-          mv
-          "{{ yubikey_touch_detector_build_tempdir.path }}/bin/yubikey-touch-detector"
-          /usr/local/bin/yubikey-touch-detector
-        become: true
-        when: not yubikey_touch_detector_binary.stat.exists
-
-      - name: clean up build directory
-        file:
-          path: "{{ yubikey_touch_detector_build_tempdir.path }}"
-          state: absent
-        become: true
-        when: not yubikey_touch_detector_binary.stat.exists
-
-      when: distro == 'ubuntu'
-      tags: [yubikey-touch-detector]
-
-    - block:
-      - block:
-        - name: add spotify apt key
-          apt_key:
-            url: "https://download.spotify.com/debian/pubkey_5E3C45D7B312C643.gpg"
-            id: "5E3C45D7B312C643"
-          become: true
-
-        - name: add spotify repository
-          apt_repository:
-            repo: "deb http://repository.spotify.com stable non-free"
-            filename: spotify
-          become: true
-
-        - name: install spotify
-          apt:
-            name: spotify-client
-            update_cache: true
-          become: true
-        when: distro == 'ubuntu'
-
       - block:
         - name: install spotify from AUR via paru
           shell: |
@@ -908,7 +452,6 @@
           become_user: paru
           args:
             creates: /usr/bin/spotify
-        when: distro == 'archlinux'
 
       tags: [spotify]
 

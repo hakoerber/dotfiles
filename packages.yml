@@ -1,10 +1,6 @@
 packages:
   list:
     build-essentials:
-      ubuntu:
-        - build-essential
-        - exuberant-ctags
-        - cmake
       archlinux:
         - gcc
         - ctags
@@ -12,22 +8,16 @@ packages:
         - maven
         - base-devel
     make:
-      ubuntu: ["make"]
       archlinux: ["make"]
     gdb:
-      ubuntu: ["gdb"]
       archlinux: ["gdb"]
     strace:
-      ubuntu: ["strace"]
       archlinux: ["strace"]
     sudo:
-      ubuntu: ["sudo"]
       archlinux: ["sudo"]
     apt:
-      ubuntu: ["apt-file"]
       archlinux: [""]
     xorg:
-      ubuntu: []
       archlinux:
         - xorg-server
         - xorg-xrandr
@@ -38,393 +28,258 @@ packages:
         - xorg-xset
         - xorg-xinit
     dmenu:
-      ubuntu: ["dmenu"]
       archlinux: ["dmenu"]
     ansible:
-      ubuntu: ["ansible"]
       archlinux: ["ansible"]
     xdotool:
-      ubuntu: ["xdotool"]
       archlinux: ["xdotool"]
     arandr:
-      ubuntu: ["arandr"]
       archlinux: ["arandr"]
     borgbackup:
-      ubuntu: ["borgbackup"]
       archlinux: ["borgbackup"]
     docker:
-      ubuntu: ["docker.io", "containerd", "docker-compose"]
       archlinux: ["docker", "docker-compose"]
     font-awesome:
-      ubuntu: ["fonts-font-awesome"]
       archlinux: ["ttf-font-awesome"]
     font-inconsolata:
-      ubuntu: ["fonts-inconsolata"]
       archlinux: ["ttf-inconsolata"]
     font-dejavu:
-      ubuntu: ["fonts-dejavu"]
       archlinux: ["ttf-dejavu"]
     font-libertine:
-      ubuntu: ["fonts-linuxlibertine"]
       archlinux: ["ttf-linux-libertine"]
     font-emoji:
-      ubuntu: []
       archlinux: ["noto-fonts-emoji"]
     git:
-      ubuntu: ["git", "git-extras", "gitk", "git-email"]
       # tk required for gitk
       archlinux: ["git", "tk"]
     htop:
-      ubuntu: ["htop"]
       archlinux: ["htop"]
     feh:
-      ubuntu: ["feh"]
       archlinux: ["feh"]
     i3:
-      ubuntu: ["i3"]
       archlinux: ["i3-wm"]
     i3lock:
-      ubuntu: ["i3lock"]
       archlinux: ["i3lock"]
     pluma:
-      ubuntu: ["pluma"]
       archlinux: ["pluma"]
     neovim:
-      ubuntu: ["neovim"]
       archlinux: ["neovim", "python-pynvim"]
     network-manager-applet:
-      ubuntu: []
       archlinux: ["network-manager-applet"]
     pasystray:
-      ubuntu: ["pasystray"]
       archlinux: ["pasystray"]
     redshift:
-      ubuntu: ["redshift-gtk"]
       archlinux: ["redshift"]
     pavucontrol:
-      ubuntu: ["pavucontrol"]
       archlinux: ["pavucontrol-qt"]
     pinentry-qt:
-      ubuntu: ["pinentry-curses", "pinentry-qt"]
       archlinux: ["pinentry"]
     pinta:
-      ubuntu: ["pinta"]
       archlinux: ["pinta"]
     py3status:
-      ubuntu: ["py3status", "python3-arrow", "python3-tzlocal", "python3-pydbus"]
       archlinux: ["py3status", "python-pytz", "python-tzlocal", "python-dbus", "python-pydbus"]
     pass:
-      ubuntu: ["pass"]
       archlinux: ["pass", "passff-host"]
     keepassx:
-      ubuntu: ["keepassx"]
       archlinux: []
     urxvt:
-      ubuntu: ["rxvt-unicode-256color"]
       archlinux: ["rxvt-unicode"]
     alacritty:
-      ubuntu: []
       archlinux: ["alacritty"]
     tmux:
-      ubuntu: ["tmux"]
       archlinux: ["tmux"]
     screen:
-      ubuntu: ["screen"]
       archlinux: ["screen"]
     zsh:
-      ubuntu: ["zsh", "zsh-syntax-highlighting"]
       archlinux: ["zsh", "zsh-syntax-highlighting", "zsh-autosuggestions", "zsh-completions"]
     zathura:
-      ubuntu: ["zathura", "zathura-pdf-poppler"]
       archlinux: ["zathura", "zathura-pdf-poppler"]
     pdf:
-      ubuntu: ["ghostscript", "enscript"]
       archlinux: ["ghostscript", "enscript"]
     pandoc:
-      ubuntu:
-        - pandoc
-        - texlive
-        - python3-sphinxcontrib.svg2pdfconverter # for html to pdf conversions
-        - texlive-latex-extra
       archlinux: ["pandoc", "texlive-core", "texlive-fontsextra", "texlive-latexextra"]
     libvirt:
-      ubuntu: ["virt-manager", "libvirt-daemon"]
       archlinux: ["virt-manager", "libvirt", "dnsmasq", "ebtables", "dmidecode"]
     firefox:
-      ubuntu: ["firefox"]
       archlinux: ["firefox"]
     ranger:
-      ubuntu: ["ranger"]
       archlinux: ["ranger"]
     thunar:
-      ubuntu: ["thunar"]
       archlinux: ["thunar"]
     unclutter:
-      ubuntu: ["unclutter"]
       archlinux: ["unclutter"]
     libreoffice:
-      ubuntu: ["libreoffice"]
       archlinux: ["libreoffice-fresh", "libreoffice-fresh-de"]
     qt-theming:
-      ubuntu: ["breeze-cursor-theme", "breeze-icon-theme", "breeze", "qt5ct"]
       archlinux: ["breeze", "breeze-icons", "breeze-grub", "qt5ct"]
     gtk-theming:
-      ubuntu: ["gtk3-engines-breeze", "lxappearance"]
       archlinux: ["breeze-gtk", "lxappearance"]
     xcompmgr:
-      ubuntu: ["xcompmgr"]
       archlinux: ["xcompmgr"]
     python:
-      ubuntu: ["python3", "python3-pip", "python3-venv", "virtualenv", "pylint3"]
       archlinux: ["python3"]
     python-modules:
-      ubuntu: []
       archlinux:
         - python-ruamel-yaml
         - python-gitpython
         - python-semver
     black:
-      ubuntu: ["black"]
       archlinux: ["python-black"]
     xbacklight:
-      ubuntu: ["xbacklight"]
       archlinux: ["xorg-xbacklight"]
     wireshark:
-      ubuntu: ["wireshark", "wireshark-qt"]
       archlinux: ["wireshark-cli", "wireshark-qt"]
     nmap:
-      ubuntu: ["nmap"]
       archlinux: ["nmap"]
     openvpn:
-      ubuntu: ["openvpn"]
       archlinux: ["openvpn"]
     curl:
-      ubuntu: ["curl"]
       archlinux: ["curl"]
     wget:
-      ubuntu: ["wget"]
       archlinux: ["wget"]
     tree:
-      ubuntu: ["tree"]
       archlinux: ["tree"]
     which:
-      ubuntu: []
       archlinux: ["which"]
     zip:
-      ubuntu: ["zip", "unzip"]
       archlinux: ["zip", "unzip"]
     traceroute:
-      ubuntu: ["traceroute"]
       archlinux: ["traceroute"]
     tcpdump:
-      ubuntu: ["tcpdump"]
       archlinux: ["tcpdump"]
     tar:
-      ubuntu: ["tar"]
       archlinux: ["tar"]
     rsync:
-      ubuntu: ["rsync"]
       archlinux: ["rsync"]
     net-tools:
-      ubuntu: ["net-tools"]
       archlinux: ["net-tools"]
     ntfs:
-      ubuntu: ["ntfs-3g"]
       archlinux: ["ntfs-3g"]
     lsof:
-      ubuntu: ["lsof"]
       archlinux: ["lsof"]
     iptables:
-      ubuntu: ["iptables"]
       archlinux: ["iptables-nft"]
     pwgen:
-      ubuntu: ["pwgen"]
       archlinux: ["pwgen"]
     gpg:
-      ubuntu: ["gnupg2", "pcscd", "scdaemon"]
       archlinux: ["gnupg", "paperkey", "yubikey-manager", "yubikey-touch-detector"]
     networkmanager:
-      ubuntu: ["network-manager", "network-manager-openvpn", "network-manager-openconnect", "network-manager-openconnect-gnome"]
       archlinux: ["networkmanager"]
     pulseaudio:
-      ubuntu: ["pulseaudio", "pulseaudio-utils"]
       archlinux: ["pulseaudio", "pulseaudio-alsa", "lib32-libpulse"]
     iw:
-      ubuntu: ["iw"]
       archlinux: ["iw"]
     cowsay:
-      ubuntu: ["cowsay"]
       archlinux: ["cowsay"]
     ruby:
-      ubuntu: ["ruby", "ruby-dev", "ruby-bundler"]
       archlinux: ["ruby"]
     lxc:
-      ubuntu: ["lxc"]
       archlinux: ["lxc"]
     acpi:
-      ubuntu: ["acpid"]
       archlinux: ["acpi", "acpid"]
     nodejs:
-      ubuntu: ["nodejs"]
       archlinux: ["nodejs", "npm"]
     xdg:
-      ubuntu: ["xdg-utils"]
       archlinux: ["xdg-utils"]
     compton:
-      ubuntu: ["compton"]
       archlinux: []
     dunst:
-      ubuntu: ["dunst"]
       archlinux: ["dunst"]
     cloc:
-      ubuntu: ["cloc"]
       archlinux: ["cloc"]
     bluetooth:
-      ubuntu: ["blueman"]
       archlinux: ["bluez", "bluez-tools", "blueman"]
     autorandr:
-      ubuntu: ["autorandr"]
       archlinux: ["autorandr"]
     bwm-ng:
-      ubuntu: ["bwm-ng"]
       archlinux: ["bwm-ng"]
     virtualbox:
-      ubuntu: ["virtualbox"]
       archlinux: ["virtualbox"]
     ssh:
-      ubuntu: ["ssh"]
       archlinux: ["openssh"]
     sshfs:
-      ubuntu: ["sshfs"]
       archlinux: ["sshfs"]
     expect:
-      ubuntu: ["expect"]
       archlinux: ["expect"]
     inotify:
-      ubuntu: ["inotify-tools"]
       archlinux: ["inotify-tools"]
     rclone:
-      ubuntu: ["rclone"]
       archlinux: ["rclone"]
     dnf:
-      ubuntu: []
       archlinux: []
     rustup:
-      ubuntu: []
       archlinux: ["rustup"]
     musescore:
-      ubuntu: ["musescore3"]
       archlinux: ["musescore"]
     sipcalc:
-      ubuntu: ["sipcalc"]
       archlinux: ["sipcalc"]
     rofi:
-      ubuntu: ["rofi"]
       archlinux: ["rofi"]
     imv:
-      ubuntu: ["imv"]
       archlinux: ["imv"]
     pacman:
-      ubuntu: []
       archlinux: ["pacman", "pacman-contrib"]
     steam:
-      ubuntu: []
       archlinux: ["steam"]
     man:
-      ubuntu: ["man-db", "manpages"]
       archlinux: ["man-db", "man-pages"]
     nextcloud:
-      ubuntu: ["nextcloud-desktop"]
       archlinux: ["nextcloud-client"]
     kwallet:
-      ubuntu: []
       archlinux: ["kwallet", "kwalletmanager"]
     pv:
-      ubuntu: ["pv"]
       archlinux: ["pv"]
     stress:
-      ubuntu: ["stress"]
       archlinux: ["stress"]
     mpris:
-      ubuntu: ["playerctl"]
       archlinux: ["playerctl"]
     imagemagick:
-      ubuntu: ["imagemagick"]
       archlinux: ["imagemagick"]
     mpv:
-      ubuntu: ["mpv"]
       archlinux: ["mpv"]
     gnome-keyring:
-      ubuntu: ["gnome-keyring"]
       archlinux: ["gnome-keyring"]
     element:
-      ubuntu: []
       archlinux: ["element-desktop"]
     maim:
-      ubuntu: ["maim"]
       archlinux: ["maim"]
     mkinitcpio:
-      ubuntu: []
       archlinux: ["mkinitcpio"]
     terraform:
-      ubuntu: []
       archlinux: ["terraform"]
     synclient:
-      ubuntu: ["xserver-xorg-input-synaptics"]
       archlinux: ["xf86-input-synaptics"]
     ncdu:
-      ubuntu: ["ncdu"]
       archlinux: ["ncdu"]
     font-utils:
-      ubuntu: ["woff-tools", "woff2"]
       archlinux: ["woff2"]
     jq:
-      ubuntu: ["jq"]
       archlinux: ["jq"]
     musl:
-      ubuntu: ["musl", "musl-tools"]
       archlinux: ["musl"]
     kdeconnect:
-      ubuntu: ["kdeconnect"]
       archlinux: ["kdeconnect"]
     restic:
-      ubuntu: ["restic"]
       archlinux: ["restic"]
     discord:
-      ubuntu: []
       archlinux: ["discord"]
     kubectl:
-      ubuntu: []
       archlinux: ["kubectl"]
     bind:
-      ubuntu: []
       archlinux: ["bind"]
     fzf:
-      ubuntu: []
       archlinux: ["fzf"]
     chromium:
-      ubuntu: []
       archlinux: ["chromium"]
+    signal:
+      archlinux: ["signal-desktop"]
+    go:
+      archlinux: ["go", "gopls"]
 
   remove:
     mousepad:
-      ubuntu: ["mousepad"]
       archlinux: ["mousepad"]
-    chrome:
-      ubuntu: ["google-chrome-stable"]
-      archlinux: []
-    snap:
-      ubuntu: ["snapd"]
-      archlinux: []
-    golang:
-      ubuntu: ["golang-go"]
-      archlinux: ["go"]
-    signal:
-      ubuntu: []
-      archlinux: ["signal-desktop"]
     vim:
-      ubuntu: ["vim"]
       archlinux: ["gvim"]
     rust:
-      ubuntu: ["rustc", "cargo"]
       archlinux: ["rust"]

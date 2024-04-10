@@ -50,13 +50,7 @@ sudowrap() {
 cache_updated=0
 _install() {
     _package="$1" ; shift
-    if [[ $NAME == "Ubuntu" ]] ; then
-        if ! (( cache_updated )) ; then
-            sudowrap apt-get update
-            cache_updated=1
-        fi
-        sudowrap apt-get install --assume-yes "${_package}"
-    elif [[ $NAME == "Arch Linux" ]] ; then
+    if [[ $NAME == "Arch Linux" ]] ; then
         sudowrap pacman -S --noconfirm "${_package}"
     else
         2>&1 printf "Unsupported distro $NAME, exiting"
@@ -79,11 +73,6 @@ fi
 
 if [[ $NAME == "Arch Linux" ]] ; then
     _install "ansible"
-fi
-
-if [[ $NAME == "Ubuntu" ]] ; then
-    _install "ansible"
-    _install "python3-jmespath"
 fi
 
 cd "$DOTDIR" && make
