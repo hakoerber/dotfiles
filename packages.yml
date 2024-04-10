@@ -80,8 +80,6 @@ packages:
       archlinux: ["py3status", "python-pytz", "python-tzlocal", "python-dbus", "python-pydbus"]
     pass:
       archlinux: ["pass", "passff-host"]
-    keepassx:
-      archlinux: []
     urxvt:
       archlinux: ["rxvt-unicode"]
     alacritty:
@@ -277,6 +275,8 @@ packages:
       archlinux: ["go", "gopls"]
     helix:
       archlinux: ["helix"]
+    keepassxc:
+      archlinux: ["keepassxc"]
 
   remove:
     mousepad:
