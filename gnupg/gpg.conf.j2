@@ -34,12 +34,7 @@ fixed-list-mode
 no-mangle-dos-filenames
 require-cross-certification
 
-{% if not (distro == 'ubuntu' and ansible_distribution_version == '18.04') -%}
-{# looks like the gpg version in that ubuntu release it too old and does not
-{# contain the setting #}
 # do not cache keys for symmetric encryption
 no-symkey-cache
-
-{% endif -%}
 
 keyserver-options no-honor-keyserver-url no-auto-key-retrieve include-revoked
