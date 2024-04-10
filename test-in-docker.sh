@@ -51,17 +51,29 @@ test_ares() {
 }
 
 test_neptune() {
-    docker pull docker.io/library/ubuntu:20.04
-    docker run -ti --rm -v ${tmpdir}/dotfiles.tar.gz:/tmp/dotfiles.tar.gz:ro --hostname neptune docker.io/library/ubuntu:20.04 sh -c '
-        set -o errexit
+    docker run \
+        -ti \
+        --rm \
+        -v ${tmpdir}/dotfiles.tar.gz:/tmp/dotfiles.tar.gz:ro \
+        --mount type=tmpfs,destination=/var/cache/pacman/pkg/ \
+        "${dockeropts[@]}" \
+        --hostname neptune \
+        docker.io/library/archlinux:base \
+        sh -c '
+            set -o errexit
 
-        cd $(mktemp -d)
-        tar xf /tmp/dotfiles.tar.gz -C .
-        ANSIBLE_EXTRA_ARGS="-e manage_services=false" ./install.sh
-    '
-}
+            # Uncomment CacheDir and append the host pacman cache as cachedir
+            # At worst, the cache directory will be ignored if it does not exist
+            # Pacman will always prefer the first cache directory, so newly downloaded
+            # packages will stay in the container
+            sed -i '"'"'s/^#\?\(CacheDir.*\)/CacheDir = \/var\/cache\/pacman\/pkg_host\/\n\1/'"'"' /etc/pacman.conf
 
-
+            mkdir -p /var/cache/pacman/pkg_host/
+            pacman -Syu --noconfirm linux
+            cd $(mktemp -d)
+            tar xf /tmp/dotfiles.tar.gz -C .
+            ANSIBLE_EXTRA_ARGS="-e manage_services=false" ./install.sh
+        '
 }
 
 case "${1:-all}" in
