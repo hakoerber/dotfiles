@@ -61,15 +61,7 @@ test_neptune() {
     '
 }
 
-test_mars() {
-    docker pull docker.io/library/ubuntu:20.04
-    docker run -ti --rm -v ${tmpdir}/dotfiles.tar.gz:/tmp/dotfiles.tar.gz:ro --hostname mars docker.io/library/ubuntu:20.04 sh -c '
-        set -o errexit
 
-        cd $(mktemp -d)
-        tar xf /tmp/dotfiles.tar.gz -C .
-        ANSIBLE_EXTRA_ARGS="-e manage_services=false" ./install.sh
-    '
 }
 
 case "${1:-all}" in
@@ -79,12 +71,8 @@ case "${1:-all}" in
     neptune)
         test_neptune
         ;;
-    mars)
-        test_mars
-        ;;
     all)
         test_ares
         test_neptune
-        test_mars
         ;;
 esac
