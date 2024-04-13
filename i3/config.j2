@@ -20,7 +20,7 @@
     set $terminal "alacritty --config-file ~/.config/alacritty.toml"
     set $calc "alacritty --config-file ~/.config/alacritty.toml -e $SHELL -i -c calc"
 
-    set $scriptdir ~/.i3/scripts
+    set $scriptdir ~/.config/i3/scripts
 
     # Keys for the exit mode
     set $key_lock      l
@@ -206,27 +206,27 @@ assign [class="^Wine$"] $workspace10
 
     ### START APPLICATIONS #####################################################
 
-    bindsym $mod+d exec --no-startup-id ~/.i3/scripts/appmenu
+    bindsym $mod+d exec --no-startup-id $scriptdir/appmenu
     bindsym $mod+Return exec $terminal
     bindsym $mod+Shift+Return exec $calc
 
-    bindsym F1 exec --no-startup-id ~/.i3/scripts/shutdown-menu
-    bindsym F2 exec --no-startup-id ~/.i3/scripts/screenmenu
+    bindsym F1 exec --no-startup-id $scriptdir/shutdown-menu
+    bindsym F2 exec --no-startup-id $scriptdir/screenmenu
 
-    bindsym $mod+F1 exec --no-startup-id ~/.i3/scripts/i3exit lock
+    bindsym $mod+F1 exec --no-startup-id $scriptdir/i3exit lock
     bindsym $mod+F2 exec --no-startup-id screencfg ~/.screencfg/{{ ansible_hostname }}/default.yml ; exec systemctl --user restart keyboard.service
     {% for screencfg in machine.screencfgs -%}
     bindsym $mod+{{ screencfg.key }} exec --no-startup-id screencfg ~/.screencfg/{{ ansible_hostname }}/{{ screencfg.name }}.yml ; exec systemctl --user restart keyboard.service
     {% endfor -%}
-    bindsym $mod+F4 exec --no-startup-id ~/.i3/scripts/i3exit suspend
-    bindsym $mod+Home exec --no-startup-id ~/.i3/scripts/shutdown-menu
+    bindsym $mod+F4 exec --no-startup-id $scriptdir/i3exit suspend
+    bindsym $mod+Home exec --no-startup-id $scriptdir/shutdown-menu
 
     bindsym $mod+$screenshot exec --no-startup-id sh -c 'maim | xclip -selection clipboard -t image/png'
     bindsym $mod+Shift+$screenshot exec --no-startup-id sh -c 'maim --select | xclip -selection clipboard -t image/png'
 
     bindsym $mod+Shift+v exec --no-startup-id redshift-toggle
 
-    bindsym $mod+$pim_toggle exec --no-startup-id ~/.i3/scripts/swap-from-workspace $workspace10
+    bindsym $mod+$pim_toggle exec --no-startup-id $scriptdir/swap-from-workspace $workspace10
 
 ################################################################################
 ### MODES ######################################################################

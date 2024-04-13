@@ -1,5 +1,4 @@
 empty_directories:
-  - name: .i3
   - name: .gnupg
     mode: '0700'
   - name: .config/nvim
@@ -15,6 +14,7 @@ empty_directories:
   - name: .config/helix
   - name: .config/git
   - name: .config/tmux
+  - name: .config/i3
 dotfiles:
   - from: git/gitconfig
     to: .config/git/config
@@ -28,7 +28,7 @@ dotfiles:
     to: .gnupg/gpg.conf
     template: true
   - from: i3/config
-    to: .i3/config
+    to: .config/i3/config
     template: true
   - from: i3/i3status-rust/config.toml
     to: .config/i3status-rust/config.toml
@@ -38,7 +38,7 @@ dotfiles:
   - from: i3/i3status-rust/icons/awesome.toml
     to: .config/i3status-rust/icons/awesome.toml
   - from: i3/scripts
-    to: .i3/scripts
+    to: .config/i3/scripts
   - from: tmux/tmux.conf
     to: .config/tmux/tmux.conf
   - from: vim/vimrc
@@ -93,3 +93,4 @@ dotfiles_remove:
   - .gitconfig
   - .vimrc
   - .tmux.conf
+  - .i3
