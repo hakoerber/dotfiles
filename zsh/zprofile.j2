@@ -44,6 +44,8 @@ export XDG_STATE_HOME="$HOME/.local/state"
 
 export GNUPGHOME="$HOME/.gnupg"
 
+export PASSWORD_STORE_DIR="$HOME/.password-store"
+
 umask 0022
 
 {% set env = machine.environment | combine(user.environment) %}
