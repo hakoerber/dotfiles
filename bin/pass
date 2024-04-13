@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -o nounset
+set -o errexit
+
+if [[ ! -e ~/.password-store ]] ; then
+  printf '%s\n' 'This is the first time running pass, initializting repository ...'
+
+  git clone ssh://git@code.hkoerber.de:2222/hannes/passwordstore.git ~/.password-store
+
+  printf '%s\n' 'Done'
+fi
+
+command -p pass "${@}"
