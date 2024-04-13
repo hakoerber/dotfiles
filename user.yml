@@ -101,13 +101,17 @@
     register: empty_dir_stat
     with_items: "{{ empty_directories }}"
     check_mode: false
+    loop_control:
+      label: "{{ item.name }}"
 
-  - name: remove sysmlinks
+  - name: remove symlinks
     file:
       path: "{{ item.stat.path }}"
       state: absent
     when: item.stat.exists and item.stat.islnk
     with_items: "{{ empty_dir_stat.results }}"
+    loop_control:
+      label: "{{ item.item.name }}"
 
   - name: create empty directories for dotfiles
     file:
@@ -115,6 +119,8 @@
       path: ~/{{ item.name }}
       mode: "{{ item.mode | default('0755') }}"
     with_items: "{{ empty_directories }}"
+    loop_control:
+      label: "{{ item.name }}"
 
   - name: link this folder to ~/.dotfiles
     file:
@@ -135,6 +141,8 @@
     when: not item.template|default(false)
     with_items: "{{ dotfiles }}"
     check_mode: false
+    loop_control:
+      label: "{{ item.to }}"
 
   - name: remove invalid copy target (directories)
     file:
@@ -145,6 +153,8 @@
       - item.stat.exists
       - item.stat.isdir
     with_items: "{{ copy_stat.results }}"
+    loop_control:
+      label: "{{ item.item.from }}"
 
   - name: make sure target directories exist
     file:
@@ -155,6 +165,8 @@
     with_items: "{{ dotfiles }}"
     become: true
     become_user: root
+    loop_control:
+      label: "{{ item.to }}"
 
   - name: link dotfiles
     file:
@@ -169,6 +181,8 @@
     with_items: "{{ dotfiles }}"
     become: true
     become_user: root
+    loop_control:
+      label: "{{ item.to }}"
 
   - name: get state of template targets
     stat:
@@ -177,6 +191,8 @@
     when: item.template|default(false)
     with_items: "{{ dotfiles }}"
     check_mode: false
+    loop_control:
+      label: "{{ item.to }}"
 
   - name: remove invalid template target (directory or symlink)
     file:
@@ -187,6 +203,8 @@
       - item.stat.exists
       - not item.stat.isreg
     with_items: "{{ template_stat.results }}"
+    loop_control:
+      label: "{{ item.item.to }}"
 
   - name: deploy dotfiles templates
     template:
@@ -199,6 +217,8 @@
     become_user: root
     when: item.template|default(false)
     with_items: "{{ dotfiles }}"
+    loop_control:
+      label: "{{ item.to }}"
 
   - name: create directories
     file:
@@ -337,6 +357,8 @@
       mode: '0755'
     with_items: "{{ firefox_profile_names.results }}"
     when: not ansible_check_mode
+    loop_control:
+      label: "{{ item.profile_path }}"
 
   - name: firefox - configure firefox custom css
     copy:
@@ -355,6 +377,8 @@
       - not ansible_check_mode
       - user.firefox_profiles[item.profile_name].manage_css is sameas True
     with_items: "{{ firefox_profile_names.results }}"
+    loop_control:
+      label: "{{ item.profile_path }}"
   tags:
     - firefox
 

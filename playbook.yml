@@ -304,7 +304,7 @@
             - build
             - src
         loop_control:
-          label: "{{ item.name }}"
+          label: "{{ item[0].name }}/{{ item[1] }}"
 
       - name: install AUR packages
         pacman:
