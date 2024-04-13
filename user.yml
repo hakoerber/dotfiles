@@ -271,23 +271,14 @@
       - ~/.local/share/nvim/
       - ~/.local/share/nvim/site/
       - ~/.local/share/nvim/site/autoload/
-      - ~/.vim/
-      - ~/.vim/autoload
 
   - name: install vim-plug
     copy:
       src: contrib/vim-plug/plug.vim
-      dest: ~/.vim/autoload/plug.vim
+      dest: ~/.local/share/nvim/site/autoload/plug.vim
       owner: "{{ user.name }}"
       group: "{{ user_group_name }}"
       mode: "0644"
-
-  - name: symlink vim-plug for neovim
-    file:
-      state: link
-      path: ~/.local/share/nvim/site/autoload/plug.vim
-      src: ~/.vim/autoload/plug.vim
-      force: true
 
   - name: install vim plugins
     command: nvim --headless +PlugInstall +qall
