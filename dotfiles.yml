@@ -14,6 +14,7 @@ empty_directories:
   - name: .config/i3status-rust/themes
   - name: .config/helix
   - name: .config/git
+  - name: .config/tmux
 dotfiles:
   - from: git/gitconfig
     to: .config/git/config
@@ -39,7 +40,7 @@ dotfiles:
   - from: i3/scripts
     to: .i3/scripts
   - from: tmux/tmux.conf
-    to: .tmux.conf
+    to: .config/tmux/tmux.conf
   - from: vim/vimrc
     to: .config/nvim/init.vim
   - from: x/Xresources
@@ -91,3 +92,4 @@ dotfiles:
 dotfiles_remove:
   - .gitconfig
   - .vimrc
+  - .tmux.conf
