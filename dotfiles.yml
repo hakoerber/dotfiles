@@ -42,8 +42,6 @@ dotfiles:
     to: .tmux.conf
   - from: vim/vimrc
     to: .config/nvim/init.vim
-  - from: vim/vimrc
-    to: .vimrc
   - from: x/Xresources
     to: .Xresources
     template: true
@@ -92,3 +90,4 @@ dotfiles:
     to: .config/helix/config.toml
 dotfiles_remove:
   - .gitconfig
+  - .vimrc
