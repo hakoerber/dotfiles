@@ -323,9 +323,6 @@
         # remove this camera / microphone overlay when in calls or similar
         privacy.webrtc.legacyGlobalIndicator: false
 
-        # use distro updates instead
-        app.update.auto: false
-
   - include_role:
       name: firefox
     vars:
