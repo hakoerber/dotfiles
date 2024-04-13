@@ -54,6 +54,17 @@
     - "/home/{{ user.name }}/.config/systemd/"
     - "/home/{{ user.name }}/.config/systemd/user/"
 
+- name: stop xdg-user-dirs service
+  systemd_service:
+    name: xdg-user-dirs-update.service
+    scope: user
+    state: stopped
+
+- name: remove xdg user directory configuration
+  file:
+    path: "/home/{{ user.name }}/.config/user-dirs.dirs"
+    state: absent
+
 # No way to use the `systemd` module here, as it needs a logind
 # session. So we have to handle the symlinks for masking ourselves.
 - name: disable and mask systemd user units
@@ -66,6 +77,7 @@
     - gpg-agent-browser.socket
     - gpg-agent-ssh.socket
     - gpg-agent-extra.socket
+    - xdg-user-dirs-update.service
 
 - name: create directory for getty autologin
   file:
