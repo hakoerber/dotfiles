@@ -161,19 +161,6 @@
       tags: [dotfiles-directory]
 
     - block:
-      - name: install sudo
-        package:
-          state: present
-          name: sudo
-
-      - name: install dependencies for paru
-        package:
-          state: present
-          name:
-            - base-devel
-            - git
-        become: true
-
       - name: create build user on arch
         user:
           name: makepkg
@@ -183,70 +170,152 @@
           system: true
         become: true
 
-      - name: create paru user on arch
-        user:
-          name: paru
-          home: /var/lib/paru
-          create_home: true
-          shell: /bin/bash
-          system: true
+      - set_fact:
+          aur_packages:
+            # dependency of portfolio
+            - name: archlinux-java-run
+              dependencies:
+                - 'bash'
+                - 'java-runtime-common'
+              version: 10-1
+              arch: any
+
+            - name: portfolio
+              dependencies:
+                - 'maven'
+                - 'java-environment=17'
+                - 'gendesk'
+                - 'webkit2gtk'
+              version: 0.68.3-1
+              arch: x86_64
+
+            - name: spotify
+              dependencies:
+                - 'alsa-lib>=1.0.14'
+                - 'gtk3'
+                - 'libxss'
+                - 'desktop-file-utils'
+                - 'openssl'
+                - 'nss'
+                - 'at-spi2-atk'
+                - 'libcurl-gnutls'
+                - 'libsm'
+                - 'libayatana-appindicator'
+              version: 1:1.2.31.1205-2
+              arch: x86_64
+              preexec: |
+                #!/usr/bin/env bash
+                curl -sS https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg | gpg --import -
+
+      - name: install dependencies
+        package:
+          name: "{{ aur_packages | map(attribute='dependencies') | flatten }}"
+          state: present
         become: true
 
-      - name: configure passwordless sudo for paru user
-        copy:
-          owner: root
-          group: root
-          mode: "0600"
-          dest: /etc/sudoers.d/paru
-          content: |
-            paru ALL=(ALL) NOPASSWD: /usr/bin/pacman
-        become: true
-
-      - name: check if paru is already installed
-        shell: |
-          set -o errexit
-
-          if pacman -Qi paru-bin >/dev/null 2>&1; then
-              exit 100
-          fi
-          exit 0
-        args:
-          executable: /bin/bash
-        changed_when: false
-        check_mode: false
-        failed_when: result.rc not in (0, 100)
-        register: result
-
-      - name: build paru on arch
-        shell: |
-          set -o errexit
-
-          mkdir -p /tmp/paru-build
-          cd /tmp/paru-build
-
-          curl -L -O https://aur.archlinux.org/cgit/aur.git/snapshot/paru-bin.tar.gz
-          tar xvf paru-bin.tar.gz
-          cd paru-bin
-          makepkg
-        args:
-          executable: /bin/bash
-        become: true # do not build as root!
+      - name: check preexec script
+        stat:
+          path: /var/lib/makepkg/{{ item.name }}/preexec
         become_user: makepkg
-        when: result.rc != 100
-
-      - name: install paru
-        shell: |
-          set -o errexit
-
-          pacman --noconfirm -U /tmp/paru-build/paru-bin/paru-bin-*.pkg.tar.zst
-          rm -rf /tmp/paru-build
-        args:
-          executable: /bin/bash
         become: true
-        when: result.rc != 100
+        when: item.preexec is defined
+        loop: "{{ aur_packages }}"
+        register: preexec_before
+        loop_control:
+          label: "{{ item.name }}"
 
+      - name: create build root directory
+        file:
+          path: "/var/lib/makepkg/{{ item.name }}/"
+          state: directory
+          mode: '0700'
+          owner: makepkg
+          group: makepkg
+        become_user: makepkg
+        become: true
+        loop: "{{ aur_packages }}"
+        loop_control:
+          label: "{{ item.name }}"
+
+      - name: install preexec script
+        copy:
+          dest: /var/lib/makepkg/{{ item.name }}/preexec
+          owner: makepkg
+          group: makepkg
+          mode: "0700"
+          content: "{{ item.preexec }}"
+        become_user: makepkg
+        become: true
+        when: item.preexec is defined
+        loop: "{{ aur_packages }}"
+        loop_control:
+          label: "{{ item.name }}"
+
+      - name: check preexec script
+        stat:
+          path: /var/lib/makepkg/{{ item.name }}/preexec
+        become_user: makepkg
+        become: true
+        when: item.preexec is defined
+        loop: "{{ aur_packages }}"
+        register: preexec_after
+        loop_control:
+          label: "{{ item.name }}"
+
+      - name: run preexec script
+        command: "{{ item.1.stat.path }}"
+        become_user: makepkg
+        become: true
+        when:
+          - not item[0].stat.exists
+          - item[0].stat.checksum|default('') != item[1].stat.checksum
+        loop: "{{ preexec_before.results| reject('skipped')|zip(preexec_after.results| reject('skipped')) }}"
+        loop_control:
+          label: "{{ item.1.stat.path }}"
+
+      - name: build AUR packages
+        command:
+          cmd: >
+            env
+              PKGEXT='.pkg.tar.zst'
+              BUILDDIR=/var/lib/makepkg/{{ item.name }}/build/
+              SRCDEST=/var/lib/makepkg/{{ item.name }}/src/
+              PKGDEST=/var/lib/makepkg/{{ item.name }}/
+            makepkg
+              --clean
+              --nosign
+          creates: /var/lib/makepkg/{{ item.name }}/{{ item.name }}-{{ item.version}}-{{ item.arch }}.pkg.tar.zst
+          chdir: "pkgbuilds/{{ item.name }}"
+        become_user: makepkg
+        become: true
+        loop: "{{ aur_packages }}"
+        loop_control:
+          label: "{{ item.name }}"
+
+      - name: clean up build leftovers
+        file:
+          path: /var/lib/makepkg/{{ item[0].name }}/{{ item[1] }}/
+          state: absent
+        become_user: makepkg
+        become: true
+        with_nested:
+          - "{{ aur_packages }}"
+          -
+            - build
+            - src
+        loop_control:
+          label: "{{ item.name }}"
+
+      - name: install AUR packages
+        pacman:
+          state: installed
+          name: /var/lib/makepkg/{{ item.name }}/{{ item.name }}-{{ item.version }}-{{ item.arch }}.pkg.tar.zst
+        become: true
+        loop: "{{ aur_packages }}"
+        loop_control:
+          label: "{{ item.name }}"
+      tags: ["aur"]
       when: distro == 'archlinux'
-
 
     - block:
       - name: load package list
@@ -441,19 +510,6 @@
       when:
         - distro == 'archlinux'
         - machine.gpu is defined and machine.gpu == 'amd'
-
-    - block:
-      - block:
-        - name: install spotify from AUR via paru
-          shell: |
-            curl -sS https://download.spotify.com/debian/pubkey_5E3C45D7B312C643.gpg | gpg --import
-            yes 1 | paru --skipreview --aur --batchinstall --noconfirm -S spotify
-          become: true
-          become_user: paru
-          args:
-            creates: /usr/bin/spotify
-
-      tags: [spotify]
 
     - set_fact:
         users: "{{ machine.users }}"
