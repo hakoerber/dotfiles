@@ -578,6 +578,9 @@
       content: |
         #!/usr/bin/env bash
 
+        set -o nounset
+        set -o errexit
+
         if [[ ! -e ~/.password-store ]] ; then
           printf '%s\n' 'This is the first time running pass, initializting repository ...'
 
