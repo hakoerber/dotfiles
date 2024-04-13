@@ -589,6 +589,6 @@
           printf '%s\n' 'Done'
         fi
 
-        exec mypass "${@}"
+        command -p pass "${@}"
   when: user.enable_passwordstore|default(false) is sameas true
   tags: [passwordstore]
