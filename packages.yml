@@ -81,7 +81,7 @@ packages:
     pinta:
       archlinux: ["pinta"]
     pass:
-      archlinux: ["pass", "passff-host"]
+      archlinux: ["pass", "passff-host", "xclip"]
     urxvt:
       archlinux: ["rxvt-unicode"]
     alacritty:
