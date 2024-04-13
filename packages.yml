@@ -190,8 +190,6 @@ packages:
       archlinux: ["nodejs", "npm"]
     xdg:
       archlinux: ["xdg-utils"]
-    compton:
-      archlinux: []
     dunst:
       archlinux: ["dunst"]
     cloc:
@@ -215,7 +213,7 @@ packages:
     rclone:
       archlinux: ["rclone"]
     dnf:
-      archlinux: []
+      archlinux: ["dnf"]
     rustup:
       archlinux: ["rustup"]
     musescore:
