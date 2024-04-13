@@ -374,45 +374,6 @@
     loop: "{{ user.firefox_profiles | dict2items }}"
     when: not ansible_check_mode
 
-  - name: firefox - create target directory for passff
-    file:
-      path: ~/.mozilla/native-messaging-hosts
-      owner: "{{ user.name }}"
-      group: "{{ user_group_name }}"
-      state: directory
-      mode: '0755'
-
-  - name: check if host application file already exists
-    stat:
-      path: ~/.mozilla/native-messaging-hosts/{{ item.name }}
-    register: passff_file
-    loop:
-      - name: passff.json
-      - name: passff.py
-
-  - name: firefox - get passff host application
-    get_url:
-      url: https://github.com/passff/passff-host/releases/download/1.2.2/{{ item.name }}
-      dest: ~/.mozilla/native-messaging-hosts/{{ item.name }}
-      owner: "{{ user.name }}"
-      group: "{{ user_group_name }}"
-      mode: "{{ item.mode }}"
-      force: false
-    when: not (passff_file.results | selectattr('item.name', 'eq', item.name) | list)[0].stat.exists
-    loop:
-      - name: passff.json
-        mode: '0644'
-      - name: passff.py
-        mode: '0755'
-
-  - name: firefox - configure path to passff
-    lineinfile:
-      path: ~/.mozilla/native-messaging-hosts/passff.json
-      regexp: '"path": ".*"'
-      line: "  \"path\": \"{{ path }}\","
-    vars:
-      path: "/home/{{ user.name }}/.mozilla/native-messaging-hosts/passff.py"
-
   - name: firefox - create chrome directory
     file:
       path: "{{ item.profile_path }}/chrome/"
