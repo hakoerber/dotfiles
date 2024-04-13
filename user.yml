@@ -395,9 +395,6 @@
         #sidebar-header {
           visibility: collapse !important;
         }
-        #sidebar {
-          width: 400px !important;
-        }
     when:
       - not ansible_check_mode
       - user.firefox_profiles[item.profile_name].manage_css is sameas True
