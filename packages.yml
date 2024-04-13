@@ -247,7 +247,7 @@ packages:
     mpv:
       archlinux: ["mpv"]
     gnome-keyring:
-      archlinux: ["gnome-keyring"]
+      archlinux: ["gnome-keyring", "seahorse"]
     element:
       archlinux: ["element-desktop"]
     maim:
