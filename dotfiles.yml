@@ -13,9 +13,10 @@ empty_directories:
   - name: .config/i3status-rust/icons
   - name: .config/i3status-rust/themes
   - name: .config/helix
+  - name: .config/git
 dotfiles:
   - from: git/gitconfig
-    to: .gitconfig
+    to: .config/git/config
     template: true
   - from: gnupg/dirmngr.conf
     to: .gnupg/dirmngr.conf
@@ -89,4 +90,5 @@ dotfiles:
     to: scripts
   - from: helix/config.toml
     to: .config/helix/config.toml
-dotfiles_remove: []
+dotfiles_remove:
+  - .gitconfig
