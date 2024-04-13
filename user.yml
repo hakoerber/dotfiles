@@ -290,24 +290,15 @@
       force: true
 
   - name: install vim plugins
-    command: sh -c 'PATH=/usr/local/go/bin:$PATH GOROOT=/usr/local/go GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +PlugInstall +qall'
+    command: nvim --headless +PlugInstall +qall
     register: vim_plugin_install
     changed_when: vim_plugin_install.stderr != ""
 
-  - name: install go binaries for vim
-    command: sh -c 'PATH=/usr/local/go/bin:$PATH GOROOT=/usr/local/go GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +GoInstallBinaries +qall'
-    changed_when: false
-
   - name: update vim plugins
-    command: sh -c 'PATH=/usr/local/go/bin:$PATH GOROOT=/usr/local/go GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +PlugUpdate +qall'
+    command: nvim --headless +PlugUpdate +qall
     register: vim_plugin_update
     changed_when: vim_plugin_update.stderr != ""
-    tags: [user-update]
 
-  - name: update go binaries for vim
-    command: sh -c 'PATH=/usr/local/go/bin:$PATH GOROOT=/usr/local/go GOPATH=/home/{{ user.name }}/.go /usr/bin/nvim --headless +GoUpdateBinaries +qall'
-    changed_when: false
-    tags: [user-update]
   tags: [vim-plugins]
 
 - block:
