@@ -38,7 +38,7 @@ alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
-alias rg='rg --hidden'
+alias rg='rg --hidden --glob "!.git/**"'
 
 alias rm='rm -v'
 alias cp='cp -vi'
