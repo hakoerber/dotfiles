@@ -461,6 +461,15 @@
         line: 'HandlePowerKey=suspend'
       become: true
 
+    - name: limit journald size
+      lineinfile:
+        path: /etc/systemd/journald.conf
+        regexp: '^#?SystemMaxUse=.*$'
+        line: 'SystemMaxUse=50M'
+      become: true
+      notify:
+        - restart journald
+
     - name: create sudonopw group
       group:
         name: sudonopw
@@ -537,3 +546,9 @@
         mkinitcpio_cmd.rc != 0
         and
         not (mkinitcpio_cmd.rc == 1 and "file not found: `fsck.overlay'" in mkinitcpio_cmd.stderr)
+
+    - name: restart journald
+      service:
+        name: systemd-journald
+        state: restarted
+      become: true
