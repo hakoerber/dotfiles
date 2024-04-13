@@ -225,29 +225,6 @@
       - bin_stat.stat.exists
       - not bin_stat.stat.islnk
 
-  - name: create ~/.opt and ~/.optbin
-    file:
-      path: "{{ item }}"
-      state: directory
-    with_items:
-      - ~/.opt/
-      - ~/.optbin/
-
-  - name: symlink opt programs
-    file:
-      state: link
-      force: true
-      follow: false
-      path: "/home/{{ user.name }}/.optbin/{{ item.name }}"
-      src: "/home/{{ user.name }}/.opt/{{ item.optpath }}"
-      owner: "{{ user.name }}"
-      group: "{{ user_group_name }}"
-    with_items:
-      - name: hugo
-        optpath: hugo
-      - name: drone
-        optpath: drone
-
   - name: link bin directory
     file:
       state: link
@@ -511,7 +488,7 @@
 - block:
   - name: add passwordstore init script
     copy:
-      dest: /home/{{ user.name }}/.optbin/pass
+      dest: /home/{{ user.name }}/bin
       owner: "{{ user.name }}"
       group: "{{ user_group_name }}"
       mode: '0755'
