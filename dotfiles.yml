@@ -89,3 +89,4 @@ dotfiles:
     to: scripts
   - from: helix/config.toml
     to: .config/helix/config.toml
+dotfiles_remove: []

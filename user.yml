@@ -220,6 +220,12 @@
     loop_control:
       label: "{{ item.to }}"
 
+  - name: remove dotfiles
+    file:
+      state: absent
+      path: "/home/{{ user.name }}/{{ item }}"
+    loop: "{{ dotfiles_remove }}"
+
   - name: create directories
     file:
       state: directory
