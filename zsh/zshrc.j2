@@ -158,6 +158,8 @@ alias dc=docker-compose
 alias hx=helix
 alias h=helix
 
+alias wget="wget --hsts-file ${XDG_STATE_HOME}/wget-hsts"
+
 gitmaster() {
     git stash push -m gitmaster-$(date -uIseconds) -u || return 1
     _branch=$(git rev-parse --abbrev-ref HEAD)
