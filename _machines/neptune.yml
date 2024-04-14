@@ -80,10 +80,6 @@ workspace:
   9: ""
   10: ""
 
-screencfgs:
-  - name: three-screens
-    key: F3
-
 environment:
   MACHINE_TYPE: "laptop"
   MACHINE_RESOLUTION_X: "1920"

@@ -1,8 +1,0 @@
-reset: true
-outputs:
-  - name: DisplayPort-0
-    opts:
-      mode: 2560x1440
-      rate: "144.00"
-    set:
-      TearFree: "on"
