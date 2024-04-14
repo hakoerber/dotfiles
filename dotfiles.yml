@@ -91,4 +91,9 @@ dotfiles_remove:
   - .tmux.conf
   - .i3
   - .gtkrc-2.0
-  - .screencfg
+  - .opt
+  - .optbin
+  - .usr
+  - .var
+  - .screenrc
+  - .zshrc.d
