@@ -79,7 +79,7 @@ dotfiles:
     to: .config/gtk-3.0-overrides/bigger-font/gtk-3.0/settings.ini
     template: true
   - from: gtk/gtkrc-2.0
-    to: .gtkrc-2.0
+    to: .config/gtkrc-2.0
     template: true
   - from: qt/qt5ct.conf
     to: .config/qt5ct/qt5ct.conf
@@ -94,3 +94,4 @@ dotfiles_remove:
   - .vimrc
   - .tmux.conf
   - .i3
+  - .gtkrc-2.0

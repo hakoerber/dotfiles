@@ -43,6 +43,8 @@ export GNUPGHOME="$HOME/.gnupg"
 
 export PASSWORD_STORE_DIR="$HOME/.password-store"
 
+export GTK2_RC_FILES=${XDG_CONFIG_HOME}/gtkrc-2.0
+
 umask 0022
 
 {% set env = machine.environment | combine(user.environment) %}
