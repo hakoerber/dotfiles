@@ -348,6 +348,9 @@ packages:
     netcat:
       archlinux:
         - openbsd-netcat
+    telnet:
+      archlinux:
+        - inetutils
 
   remove:
     mousepad:
