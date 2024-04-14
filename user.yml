@@ -1,18 +1,3 @@
-- name: configure sudoers
-  lineinfile:
-    path: /etc/sudoers
-    line: "{{ user.name }} ALL=(ALL) NOPASSWD:ALL"
-    regexp: "^{{ user.name }}\\s+"
-  become: true
-  become_user: root
-
-- name: set shell
-  user:
-    name: "{{ user.name }}"
-    shell: /usr/bin/zsh
-  become: true
-  become_user: root
-
 - set_fact:
     user_groups:
       - libvirt
@@ -25,21 +10,30 @@
       - kvm
   tags: [always]
 
-- set_fact:
-    user_group_name: "{{ user.group|default(user.name) }}"
-  tags: [always]
-
 - name: create user group
   group:
-    name: "{{ user_group_name }}"
+    name: "{{ user.name }}"
     state: present
   become: true
   become_user: root
 
-- name: set groups
+- name: create user
   user:
     name: "{{ user.name }}"
-    groups: "{{ [user_group_name, 'dotfiles'] + user_groups }}"
+    state: present
+    home: "/home/{{ user.name }}"
+    create_home: true
+    groups: "{{ [user.name, 'dotfiles'] + user_groups }}"
+    shell: /usr/bin/zsh
+
+  become: true
+  become_user: root
+
+- name: configure sudoers
+  lineinfile:
+    path: /etc/sudoers
+    line: "{{ user.name }} ALL=(ALL) NOPASSWD:ALL"
+    regexp: "^{{ user.name }}\\s+"
   become: true
   become_user: root
 
@@ -48,7 +42,7 @@
     state: directory
     path: "{{ item }}"
     owner: "{{ user.name }}"
-    group: "{{ user_group_name }}"
+    group: "{{ user.name }}"
   loop:
     - "/home/{{ user.name }}/.config/"
     - "/home/{{ user.name }}/.config/systemd/"
@@ -140,7 +134,7 @@
       force: true
       follow: false
       owner: "{{ user.name }}"
-      group: "{{ user_group_name }}"
+      group: "{{ user.name }}"
       path: "/home/{{ user.name }}/.dotfiles"
       src: "{{ playbook_dir }}"
     become: true
@@ -173,7 +167,7 @@
       state: directory
       path: "{{ (['/home', user.name, item.to]|join('/')) | dirname }}"
       owner: "{{ user.name }}"
-      group: "{{ user_group_name }}"
+      group: "{{ user.name }}"
     with_items: "{{ dotfiles }}"
     become: true
     become_user: root
@@ -188,7 +182,7 @@
       path: "/home/{{ user.name }}/{{ item.to }}"
       src: /var/lib/dotfiles/{{ item.from }}
       owner: "{{ user.name }}"
-      group: "{{ user_group_name }}"
+      group: "{{ user.name }}"
     when: not item.template|default(false)
     with_items: "{{ dotfiles }}"
     become: true
@@ -223,7 +217,7 @@
       src: /var/lib/dotfiles/{{ item.from }}.j2
       dest: "/home/{{ user.name }}/{{ item.to }}"
       owner: "{{ user.name }}"
-      group: "{{ user_group_name }}"
+      group: "{{ user.name }}"
       force: true
     become: true
     become_user: root
@@ -267,7 +261,7 @@
       path: "/home/{{ user.name }}/bin"
       src: /var/lib/dotfiles/bin
       owner: "{{ user.name }}"
-      group: "{{ user_group_name }}"
+      group: "{{ user.name }}"
   tags:
     - dotfiles
 
@@ -288,7 +282,7 @@
       src: contrib/vim-plug/plug.vim
       dest: ~/.local/share/nvim/site/autoload/plug.vim
       owner: "{{ user.name }}"
-      group: "{{ user_group_name }}"
+      group: "{{ user.name }}"
       mode: "0644"
 
   - name: install vim plugins
@@ -415,7 +409,7 @@
       path: "/home/{{ user.name }}/.config/systemd/user/{{ item | basename }}"
       src: "{{ item }}"
       owner: "{{ user.name }}"
-      group: "{{ user_group_name }}"
+      group: "{{ user.name }}"
     with_fileglob: /var/lib/dotfiles/autostart/services/*
 
   - name: get state of autostart.target
@@ -436,7 +430,7 @@
       src: ./autostart/autostart.target.j2
       dest: "/home/{{ user.name }}/.config/systemd/user/autostart.target"
       owner: "{{ user.name }}"
-      group: "{{ user_group_name }}"
+      group: "{{ user.name }}"
       force: true
       follow: false
 

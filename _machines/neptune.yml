@@ -5,7 +5,6 @@ i3bar_icon_padding: ""
 
 users:
 - name: hannes-work
-  group: hannes-work
   vt: 1
   firefox_profiles:
     default:
@@ -31,7 +30,6 @@ users:
   repositories: []
 
 - name: hannes-private
-  group: hannes-private
   vt: 2
   firefox_profiles:
     default:
