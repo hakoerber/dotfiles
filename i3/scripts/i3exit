@@ -3,9 +3,6 @@
 ### From http://www.archlinux.org/index.php/i3
 
 _logfile="$LOGDIR/i3/i3exit.log"
-LOCKSCREEN="$LIBDIR/lockscreen"
-
-_fallback_color="000000"
 
 touch "$_logfile"
 
@@ -20,16 +17,8 @@ lock()
     set -x
     playerctl -p spotify pause
 
-    if [[ -f "$LOCKSCREEN" ]] ; then
-        resized_lockscreen=$(mktemp)
-        convert "${LOCKSCREEN}" -resize "${MACHINE_RESOLUTION_X}x${MACHINE_RESOLUTION_Y}" "${resized_lockscreen}"
-        i3lock --nofork --show-failed-attempts --ignore-empty-password \
-            --image "${resized_lockscreen}"
-        rm "${resized_lockscreen}"
-    else
-        i3lock --nofork --show-failed-attempts --ignore-empty-password \
-            --color "$_fallback_color"
-    fi
+    i3lock --nofork --show-failed-attempts --ignore-empty-password \
+        --color "000000"
 }
 
 screen_off() {
