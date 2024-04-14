@@ -246,7 +246,6 @@
       - ~/tmp
       - ~/.var/lib
       - ~/.var/log
-      - ~/.var/run
       - ~/.usr/lib
 
   - name: stat ~/bin

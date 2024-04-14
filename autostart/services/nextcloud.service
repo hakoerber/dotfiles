@@ -3,7 +3,7 @@ BindsTo=autostart.target
 After=windowmanager.target
 After=gnome-keyring.service
 
-ConditionPathExists=%h/.var/run/features/nextcloud
+ConditionPathExists=%t/features/nextcloud
 
 [Service]
 ExecStart=/usr/bin/env nextcloud --background

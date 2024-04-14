@@ -1,7 +1,7 @@
 [Unit]
 BindsTo=autostart.target
 After=windowmanager.target
-ConditionPathExists=%h/.var/run/features/keepassx
+ConditionPathExists=%t/features/keepassx
 
 [Service]
 ExecStart=/usr/bin/env keepassx --keyfile %h/.secret/main.key %h/.secret/main.kdbx

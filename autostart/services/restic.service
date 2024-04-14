@@ -1,5 +1,5 @@
 [Unit]
-ConditionPathExists=%h/.var/run/features/restic_backup
+ConditionPathExists=%t/features/restic_backup
 
 [Service]
 Type=oneshot

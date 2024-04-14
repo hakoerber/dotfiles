@@ -20,7 +20,6 @@ export LESS="FRX"
 export WINEPATH="$HOME/games/wine"
 
 export LOGDIR="$HOME/.var/log"
-export RUNDIR="$HOME/.var/run"
 export LIBDIR="$HOME/.var/lib"
 export BINDIR="$HOME/bin"
 
@@ -53,7 +52,7 @@ umask 0022
 export {{ k }}="{{ v }}"
 {% endfor %}
 
-export FEATURE_DIR="${RUNDIR}/features/"
+export FEATURE_DIR="${XDG_RUNTIME_DIR}/features/"
 rm -rf "${FEATURE_DIR}"/
 mkdir -p "${FEATURE_DIR}"
 
