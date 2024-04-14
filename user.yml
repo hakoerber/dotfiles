@@ -54,16 +54,21 @@
     - "/home/{{ user.name }}/.config/systemd/"
     - "/home/{{ user.name }}/.config/systemd/user/"
 
-- name: stop xdg-user-dirs service
+- set_fact:
+    undesired_user_services:
+      - gpg-agent.socket
+      - gpg-agent-browser.socket
+      - gpg-agent-ssh.socket
+      - gpg-agent-extra.socket
+      - xdg-user-dirs-update.service
+      - gnome-keyring-daemon.service
+
+- name: stop undesired service
   systemd_service:
-    name: xdg-user-dirs-update.service
+    name: "{{ item }}"
     scope: user
     state: stopped
-
-- name: remove xdg user directory configuration
-  file:
-    path: "/home/{{ user.name }}/.config/user-dirs.dirs"
-    state: absent
+  loop: "{{ undesired_user_services }}"
 
 # No way to use the `systemd` module here, as it needs a logind
 # session. So we have to handle the symlinks for masking ourselves.
@@ -72,12 +77,7 @@
     state: link
     dest: "/home/{{ user.name }}/.config/systemd/user/{{ item }}"
     src: "/dev/null"
-  with_items:
-    - gpg-agent.socket
-    - gpg-agent-browser.socket
-    - gpg-agent-ssh.socket
-    - gpg-agent-extra.socket
-    - xdg-user-dirs-update.service
+  loop: "{{ undesired_user_services }}"
 
 - name: create directory for getty autologin
   file:
