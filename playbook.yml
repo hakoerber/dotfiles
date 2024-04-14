@@ -172,46 +172,60 @@
 
       - set_fact:
           aur_packages:
-            # dependency of portfolio
-            - name: archlinux-java-run
-              dependencies:
-                - 'bash'
-                - 'java-runtime-common'
-              version: 10-1
-              arch: any
-
             - name: portfolio
               dependencies:
-                - 'maven'
-                - 'java-environment=17'
-                - 'gendesk'
-                - 'webkit2gtk'
-              version: 0.68.3-1
-              arch: x86_64
+                - name: archlinux-java-run
 
             - name: spotify
-              dependencies:
-                - 'alsa-lib>=1.0.14'
-                - 'gtk3'
-                - 'libxss'
-                - 'desktop-file-utils'
-                - 'openssl'
-                - 'nss'
-                - 'at-spi2-atk'
-                - 'libcurl-gnutls'
-                - 'libsm'
-                - 'libayatana-appindicator'
-              version: 1:1.2.31.1205-2
-              arch: x86_64
               preexec: |
                 #!/usr/bin/env bash
                 curl -sS https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg | gpg --import -
 
+      - set_fact:
+          aur_packages: "{{ aur_packages + aur_packages|map(attribute='dependencies', default=[]) | flatten }}"
+
       - name: install dependencies
-        package:
-          name: "{{ aur_packages | map(attribute='dependencies') | flatten }}"
-          state: present
+        shell: |
+          aur_packages=({{ aur_packages | map(attribute='name') | join(' ') }})
+
+          source pkgbuilds/{{ item.name }}/PKGBUILD
+
+          installed=0
+
+          dependencies=(${depends[@]} ${makedepends[@]})
+          for dep in "${dependencies[@]}" ; do
+            aur=0
+            for aur_pkg in "${aur_packages[@]}" ; do
+              if [[ "${aur_pkg}" == "${dep}" ]] ; then
+                aur=1
+                break
+              fi
+            done
+
+            if (( aur )) ; then
+              continue
+            fi
+
+            if ! pacman -Qq "${dep}" >/dev/null 2>&1 ; then
+              installed=1
+              sudo pacman -S --noconfirm --needed "${dep}"
+            fi
+          done
+
+          if (( installed )) ; then
+            exit 1
+          else
+            exit 0
+          fi
+        args:
+          executable: /bin/bash
+        register: install_deps
+        failed_when: install_deps.rc > 1
+        changed_when: install_deps.rc == 1
         become: true
+        loop: "{{ aur_packages }}"
+        loop_control:
+          label: "{{ item.name }}"
 
       - name: check preexec script
         stat:
@@ -274,18 +288,60 @@
           label: "{{ item.1.stat.path }}"
 
       - name: build AUR packages
-        command:
-          cmd: >
-            env
-              PKGEXT='.pkg.tar.zst'
-              BUILDDIR=/var/lib/makepkg/{{ item.name }}/build/
-              SRCDEST=/var/lib/makepkg/{{ item.name }}/src/
-              PKGDEST=/var/lib/makepkg/{{ item.name }}/
-            makepkg
-              --clean
-              --nosign
-          creates: /var/lib/makepkg/{{ item.name }}/{{ item.name }}-{{ item.version}}-{{ item.arch }}.pkg.tar.zst
+        shell:
+          cmd: |
+            export PKGEXT='.pkg.tar.zst'
+            export BUILDDIR=/var/lib/makepkg/{{ item.name }}/build/
+            export SRCDEST=/var/lib/makepkg/{{ item.name }}/src/
+            export PKGDEST=/var/lib/makepkg/{{ item.name }}/
+
+            source ./PKGBUILD
+
+            for arch in "${arch[@]}" ; do
+              if [[ "${arch}" == "any" ]] ; then
+                arch="any"
+                break
+              fi
+              if [[ "${arch}" == "x86_64" ]] ; then
+                arch="x86_64"
+              fi
+            done
+
+            if [[ ! "${arch}" ]] ; then
+              printf 'unsupported arch' >&2
+              exit 1
+            fi
+
+            if [[ "${epoch}" ]] ; then
+              version="${epoch}:${pkgver}-${pkgrel}"
+            else
+              version="${pkgver}-${pkgrel}"
+            fi
+
+            filename="${PKGDEST%/}/${pkgname}-${version}-${arch}${PKGEXT}"
+
+            needs_build=0
+            if [[ ! -e "${filename}" ]] ; then
+              needs_build=1
+              makepkg \
+                --clean \
+                --nodeps \
+                --nosign || exit 2
+            fi
+
+            printf '%s\n' "${filename}"
+
+            if (( needs_build )) ; then
+              exit 1
+            else
+              exit 0
+            fi
+        args:
+          executable: /bin/bash
           chdir: "pkgbuilds/{{ item.name }}"
+        register: aur_build
+        failed_when: aur_build.rc > 1
+        changed_when: aur_build.rc == 1
         become_user: makepkg
         become: true
         loop: "{{ aur_packages }}"
@@ -307,13 +363,27 @@
           label: "{{ item[0].name }}/{{ item[1] }}"
 
       - name: install AUR packages
-        pacman:
-          state: installed
-          name: /var/lib/makepkg/{{ item.name }}/{{ item.name }}-{{ item.version }}-{{ item.arch }}.pkg.tar.zst
+        shell:
+          cmd: |
+            set -x
+            filename="{{ item }}"
+
+            name=$(pacman -Qi --file "${filename}"  | grep '^Name' | awk '{print $3}')
+            version=$(pacman -Qi --file "${filename}"  | grep '^Version' | awk '{print $3}')
+
+            if [[ "$(pacman -Q "${name}")" == "${name} ${version}" ]] ; then
+              exit 0
+            else
+              pacman --upgrade --needed --noconfirm "$filename"
+              exit 1
+            fi
+        args:
+          executable: /bin/bash
         become: true
-        loop: "{{ aur_packages }}"
-        loop_control:
-          label: "{{ item.name }}"
+        register: aur_install
+        changed_when: aur_install.rc == 1
+        failed_when: aur_install.rc > 1
+        loop: "{{ aur_build.results|map(attribute='stdout') }}"
       tags: ["aur"]
       when: distro == 'archlinux'
 
