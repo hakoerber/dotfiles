@@ -1,8 +1,6 @@
 #!/bin/bash
 
-export LOGFILE="$LOGDIR/xinitrc.log"
-
-mkdir -p "${LOGDIR}/i3"
+export LOGFILE="$XDG_RUNTIME_DIR/xinitrc.log"
 
 log() {
     echo "[$(date +%FT%T)] $*" >> "$LOGFILE"

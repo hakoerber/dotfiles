@@ -2,7 +2,7 @@
 
 ### From http://www.archlinux.org/index.php/i3
 
-_logfile="$LOGDIR/i3/i3exit.log"
+_logfile="$XDG_RUNTIME_DIR/i3exit.log"
 
 touch "$_logfile"
 

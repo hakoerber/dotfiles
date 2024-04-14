@@ -2,7 +2,7 @@
 
 set -o nounset
 
-_logfile="$LOGDIR/dunstctl.log"
+_logfile="$XDG_RUNTIME_DIR/dunstctl.log"
 
 log() {
     printf '[%s] %s\n' "$(date -uIseconds)" "$*" >> "$_logfile"
