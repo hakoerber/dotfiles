@@ -97,7 +97,7 @@ packages:
     pandoc:
       archlinux: ["pandoc", "texlive-core", "texlive-fontsextra", "texlive-latexextra"]
     libvirt:
-      archlinux: ["virt-manager", "libvirt", "dnsmasq", "ebtables", "dmidecode"]
+      archlinux: ["virt-manager", "libvirt", "dnsmasq", "ebtables", "dmidecode", "virt-install", "virt-viewer"]
     firefox:
       archlinux: ["firefox"]
     ranger:
