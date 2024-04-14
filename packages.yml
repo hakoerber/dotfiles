@@ -88,8 +88,6 @@ packages:
       archlinux: ["alacritty"]
     tmux:
       archlinux: ["tmux"]
-    screen:
-      archlinux: ["screen"]
     zsh:
       archlinux: ["zsh", "zsh-syntax-highlighting", "zsh-autosuggestions", "zsh-completions"]
     zathura:
@@ -358,3 +356,5 @@ packages:
       archlinux: ["gvim"]
     rust:
       archlinux: ["rust"]
+    screen:
+      archlinux: ["screen"]
