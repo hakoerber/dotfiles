@@ -25,15 +25,6 @@
     create_home: true
     groups: "{{ [user.name, 'dotfiles'] + user_groups }}"
     shell: /usr/bin/zsh
-
-  become: true
-  become_user: root
-
-- name: configure sudoers
-  lineinfile:
-    path: /etc/sudoers
-    line: "{{ user.name }} ALL=(ALL) NOPASSWD:ALL"
-    regexp: "^{{ user.name }}\\s+"
   become: true
   become_user: root
 
