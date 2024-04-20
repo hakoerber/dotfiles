@@ -7,6 +7,9 @@ packages:
         - cmake
         - maven
         - base-devel
+    posix:
+      archlinux:
+        - posix
     make:
       archlinux: ["make"]
     gdb:
@@ -55,7 +58,7 @@ packages:
       archlinux: ["noto-fonts-emoji"]
     git:
       # tk required for gitk
-      archlinux: ["git", "tk"]
+      archlinux: ["git", "tk", "git-delta"]
     htop:
       archlinux: ["htop"]
     feh:
@@ -258,6 +261,8 @@ packages:
       archlinux: ["xf86-input-synaptics"]
     ncdu:
       archlinux: ["ncdu"]
+    dust:
+      archlinux: ["dust"]
     font-utils:
       archlinux: ["woff2"]
     jq:
@@ -330,6 +335,7 @@ packages:
     json:
       archlinux:
         - vscode-json-languageserver
+        - gron
     markdown:
       archlinux:
         - marksman
@@ -356,6 +362,47 @@ packages:
     cloudformation-tools:
       archlinux:
         - python-cfn-lint
+    johntheripper:
+      archlinux:
+        - john
+    age:
+      archlinux:
+        - age
+    httpie:
+      archlinux:
+        - httpie
+    yt-dlp:
+      archlinux:
+        - yt-dlp
+    ytfzf:
+      archlinux:
+        - ytfzf
+        - ueberzug
+    ffmpeg:
+      archlinux:
+        - ffmpeg
+    zeal:
+      archlinux:
+        - zeal
+    kcharselect:
+      archlinux:
+        - kcharselect
+    bottom:
+      archlinux:
+        - bottom
+    # for iotop
+    sysstat:
+      archlinux:
+        - sysstat
+    qrencode:
+      archlinux:
+        - qrencode
+    iotop:
+      archlinux:
+        - iotop
+    w3m:
+      archlinux:
+        - w3m
 
   remove:
     mousepad:
