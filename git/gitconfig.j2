@@ -71,6 +71,9 @@
     fileMode = true
     whitespace = "blank-at-eol,space-before-tab,blank-at-eof"
     abbrev = 8
+    pager = delta
+[interactive]
+    diffFilter = delta --color-only
 [color]
     ui = true
 [column]
@@ -78,7 +81,7 @@
 [push]
     default = simple
 [merge]
-    tool = vimdiff
+    conflictstyle = diff3
 [gc]
     auto = 0
 [advice]
@@ -105,7 +108,6 @@
     autoStash = true
 [diff]
     submodule = log
-    mnemonicPrefix = true
     renameLimit = 1199
 [branch]
     autoSetupMerge = true
@@ -124,3 +126,9 @@
 	directory = /var/lib/dotfiles
 [includeIf "gitdir:/var/lib/dotfiles"]
     path = /var/lib/dotfiles/gitcfg
+[delta]
+    navigate = true    # use n and N to move between diff sections
+
+    # delta detects terminal colors automatically; set one of these to disable auto-detection
+    # dark = true
+    # light = true
