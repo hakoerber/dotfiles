@@ -176,6 +176,8 @@
               dependencies:
                 - name: archlinux-java-run
 
+            - name: nodejs-intelephense
+
             - name: spotify
               preexec: |
                 #!/usr/bin/env bash

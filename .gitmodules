@@ -13,3 +13,6 @@
 [submodule "pkgbuilds/portfolio"]
 	path = pkgbuilds/portfolio
 	url = https://aur.archlinux.org/portfolio.git
+[submodule "pkgbuilds/nodejs-intelephense"]
+	path = pkgbuilds/nodejs-intelephense
+	url = https://aur.archlinux.org/nodejs-intelephense.git
