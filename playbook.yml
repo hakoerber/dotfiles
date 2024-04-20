@@ -161,6 +161,62 @@
       tags: [dotfiles-directory]
 
     - block:
+      - name: load package list
+        include_vars:
+          file: packages.yml
+
+      - name: force-update iptables to iptables-nft on arch
+        shell: pacman -Q iptables && yes | pacman -S iptables-nft
+        changed_when: false
+        become: true
+        when: distro == 'archlinux'
+
+      - set_fact:
+          defined_packages: "{{ packages|json_query('keys(list)') }}"
+
+      - set_fact:
+          distro_packages: "{{ packages|json_query('list.*.%s'|format(distro)) }}"
+
+      - name: check list
+        assert:
+          that: "defined_packages|length == distro_packages|length"
+
+      - set_fact:
+          defined_packages_remove: "{{ packages|json_query('keys(remove)') }}"
+
+      - set_fact:
+          distro_packages_remove: "{{ packages|json_query('remove.*.%s'|format(distro)) }}"
+
+      - name: check list
+        assert:
+          that: "defined_packages_remove|length == distro_packages_remove|length"
+
+      - name: remove packages
+        package:
+          name: "{{ packages|json_query(query) }}"
+          state: absent
+        become: true
+        vars:
+          query: "{{ 'remove.*.%s[]'|format(distro) }}"
+
+      - name: install packages
+        package:
+          name: "{{ packages|json_query(query) }}"
+          state: present
+        become: true
+        vars:
+          query: "{{ 'list.*.%s[]'|format(distro) }}"
+
+      - name: install machine-specific packages
+        package:
+          name: "{{ machine.packages }}"
+          state: present
+        when: machine.packages is defined
+        become: true
+
+      tags: [packages]
+
+    - block:
       - name: create build user on arch
         user:
           name: makepkg
@@ -388,62 +444,6 @@
         loop: "{{ aur_build.results|map(attribute='stdout') }}"
       tags: ["aur"]
       when: distro == 'archlinux'
-
-    - block:
-      - name: load package list
-        include_vars:
-          file: packages.yml
-
-      - name: force-update iptables to iptables-nft on arch
-        shell: pacman -Q iptables && yes | pacman -S iptables-nft
-        changed_when: false
-        become: true
-        when: distro == 'archlinux'
-
-      - set_fact:
-          defined_packages: "{{ packages|json_query('keys(list)') }}"
-
-      - set_fact:
-          distro_packages: "{{ packages|json_query('list.*.%s'|format(distro)) }}"
-
-      - name: check list
-        assert:
-          that: "defined_packages|length == distro_packages|length"
-
-      - set_fact:
-          defined_packages_remove: "{{ packages|json_query('keys(remove)') }}"
-
-      - set_fact:
-          distro_packages_remove: "{{ packages|json_query('remove.*.%s'|format(distro)) }}"
-
-      - name: check list
-        assert:
-          that: "defined_packages_remove|length == distro_packages_remove|length"
-
-      - name: remove packages
-        package:
-          name: "{{ packages|json_query(query) }}"
-          state: absent
-        become: true
-        vars:
-          query: "{{ 'remove.*.%s[]'|format(distro) }}"
-
-      - name: install packages
-        package:
-          name: "{{ packages|json_query(query) }}"
-          state: present
-        become: true
-        vars:
-          query: "{{ 'list.*.%s[]'|format(distro) }}"
-
-      - name: install machine-specific packages
-        package:
-          name: "{{ machine.packages }}"
-          state: present
-        when: machine.packages is defined
-        become: true
-
-      tags: [packages]
 
     - block:
       - name: configure timesyncd on arch
