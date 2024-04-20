@@ -353,6 +353,9 @@ packages:
     telnet:
       archlinux:
         - inetutils
+    cloudformation-tools:
+      archlinux:
+        - python-cfn-lint
 
   remove:
     mousepad:
