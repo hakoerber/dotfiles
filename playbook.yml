@@ -555,6 +555,16 @@
           %sudonopw ALL=(ALL) NOPASSWD: ALL
       become: true
 
+    - name: configure passwordless doas
+      copy:
+        owner: root
+        group: root
+        mode: "0400"
+        dest: /etc/doas.conf
+        content: |
+          permit nopass nolog setenv {PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin} :sudonopw
+      become: true
+
     - block:
       - name: install AMDGPU packages
         package:
