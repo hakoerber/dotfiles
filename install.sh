@@ -42,18 +42,6 @@ install() {
     fi
 }
 
-if ! command -v git >/dev/null ; then
-    printf 'Git not installed, installing ...\n'
-    install "git"
-    printf 'Done\n'
-fi
-
-if ! command -v python3 >/dev/null ; then
-    printf 'Python3 not installed, installing ...\n'
-    install "python3"
-    printf 'Done\n'
-fi
-
 if ! command -v make >/dev/null ; then
     printf 'Make not installed, installing ...\n'
     install "make"
