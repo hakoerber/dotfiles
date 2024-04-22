@@ -377,7 +377,7 @@
 
             source /var/lib/makepkg/{{ item.name }}/env
 
-            export PKGEXT='.pkg.tar.zst'
+            export PKGEXT='.pkg.tar'
             export BUILDDIR=/var/lib/makepkg/{{ item.name }}/build/
             export SRCDEST=/var/lib/makepkg/{{ item.name }}/src/
             export PKGDEST=/var/lib/makepkg/{{ item.name }}/
