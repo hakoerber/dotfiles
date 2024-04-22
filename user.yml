@@ -25,6 +25,7 @@
     create_home: true
     groups: "{{ [user.name, 'dotfiles'] + user_groups }}"
     shell: /usr/bin/zsh
+    skeleton: /dev/null
   become: true
   become_user: root
 
