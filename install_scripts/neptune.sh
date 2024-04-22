@@ -125,7 +125,6 @@ if /var/lib/dotfiles/install.sh ; then
     reboot
 fi
 EOF
-
 CHROOTSCRIPT
 
 chmod +x /mnt/chroot-script.sh
