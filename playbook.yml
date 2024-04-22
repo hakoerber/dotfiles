@@ -217,9 +217,11 @@
 
       - set_fact:
           aur_packages:
-            - name: portfolio
-              dependencies:
-                - name: archlinux-java-run
+            - name: portfolio-performance-bin
+              preexec: |
+                #!/usr/bin/env bash
+                source ./env
+                curl -sSf --proto '=https' https://keys.openpgp.org/vks/v1/by-fingerprint/E46E6F8FF02E4C83569084589239277F560C95AC | gpg --import -
 
             - name: nodejs-intelephense
 
