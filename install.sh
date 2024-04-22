@@ -66,6 +66,4 @@ if ! command -v ansible >/dev/null ; then
     printf 'Done\n'
 fi
 
-[[ -e './.git' ]] && git submodule update --init
-
 cd "${DOTDIR}" && make
