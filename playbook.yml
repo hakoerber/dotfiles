@@ -240,7 +240,7 @@
                 curl -sS https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg | gpg --import -
 
       - set_fact:
-          aur_packages: "{{ aur_packages + aur_packages|map(attribute='dependencies', default=[]) | flatten }}"
+          aur_packages: "{{ aur_packages|map(attribute='dependencies', default=[]) | flatten + aur_packages }}"
 
       - name: install dependencies
         shell: |
