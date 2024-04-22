@@ -17,10 +17,10 @@ if [[ ! -e "${os_release_file}" ]] ; then
     exit 1
 fi
 
-source /etc/os-release
+source "${os_release_file}"
 
 sudowrap() {
-    if (( $(id -u ) != 0 )) ; then
+    if (( $(id -u) != 0 )) ; then
         sudo "${@}"
     else
         "${@}"
@@ -28,14 +28,15 @@ sudowrap() {
 }
 
 cache_updated=0
-_install() {
-    _package="$1" ; shift
+install() {
+    local package="$1" ; shift
+
     if [[ $NAME == "Arch Linux" ]] ; then
         if (( ! cache_updated )) ; then
             sudowrap pacman -Sy
             cache_updated=1
         fi
-        sudowrap pacman -S --needed --noconfirm "${_package}"
+        sudowrap pacman -S --needed --noconfirm "${package}"
     else
         2>&1 printf "Unsupported distro $NAME, exiting"
         exit 1
@@ -44,24 +45,26 @@ _install() {
 
 if ! command -v git >/dev/null ; then
     printf 'Git not installed, installing ...\n'
-    _install "git"
+    install "git"
     printf 'Done\n'
 fi
 
 if ! command -v python3 >/dev/null ; then
     printf 'Python3 not installed, installing ...\n'
-    _install "python3"
+    install "python3"
     printf 'Done\n'
 fi
 
 if ! command -v make >/dev/null ; then
     printf 'Make not installed, installing ...\n'
-    _install "make"
+    install "make"
     printf 'Done\n'
 fi
 
-if [[ $NAME == "Arch Linux" ]] ; then
-    _install "ansible"
+if ! command -v ansible >/dev/null ; then
+    printf 'Ansible not installed, installing ...\n'
+    install "ansible"
+    printf 'Done\n'
 fi
 
 [[ -e './.git' ]] && git submodule update --init
@@ -84,4 +87,4 @@ fi
 
 cd "${DOTDIR}"
 
-cd "$DOTDIR" && make
+cd "${DOTDIR}" && make
