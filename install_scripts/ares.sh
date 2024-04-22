@@ -1,14 +1,10 @@
 #!/usr/bin/env bash
 
-# Parameters:
-#
-# $1: Device
-
 set -o xtrace
 set -o nounset
 set -o errexit
 
-DEVICE="${1:?}"
+DEVICE="/dev/sda"
 
 if [[ ! -b "${DEVICE}" ]] ; then
     printf '%s does not look like a device' "${DEVICE}"
@@ -106,6 +102,28 @@ grub-mkconfig -o /boot/grub/grub.cfg
 systemctl enable NetworkManager
 
 passwd
+
+# enable root autologin on first boot
+
+mkdir /etc/systemd/system/getty@tty1.service.d/
+cat << EOF > /etc/systemd/system/getty@tty1.service.d/autologin.conf
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty -o '-p -f -- \\u' --noclear --autologin root %I $TERM
+EOF
+# ExecStartPost=/bin/rm /etc/systemd/system/getty@tty1.service.d/autologin.conf
+# ExecStartPost=/bin/rmdir /etc/systemd/system/getty@tty1.service.d/
+
+# Run
+cat << 'EOF' > /root/.bash_profile
+    if [[ "\$(tty)" == "/dev/tty1" ]] ; then
+        rm -rf /etc/systemd/system/getty@tty1.service.d/
+        if /var/lib/dotfiles/install.sh ; then
+            rm -f /root/.bash_profile
+            reboot
+        fi
+    fi
+EOF
 CHROOTSCRIPT
 
 chmod +x /mnt/chroot-script.sh
