@@ -263,15 +263,15 @@
           done
 
           if (( installed )) ; then
-            exit 1
+            exit 123
           else
             exit 0
           fi
         args:
           executable: /bin/bash
         register: install_deps
-        failed_when: install_deps.rc > 1
-        changed_when: install_deps.rc == 1
+        failed_when: install_deps.rc not in (0, 123)
+        changed_when: install_deps.rc == 123
         become: true
         loop: "{{ aur_packages }}"
         loop_control:
@@ -444,8 +444,8 @@
             if [[ "$(pacman -Q "${name}")" == "${name} ${version}" ]] ; then
               exit 0
             else
-              pacman --upgrade --needed --noconfirm "$filename"
-              exit 1
+              pacman --upgrade --needed --noconfirm "$filename" || exit 1
+              exit 123
             fi
         become: true
         loop: "{{ aur_packages }}"
@@ -455,8 +455,8 @@
       - name: build and install aur package
         command: /var/lib/makepkg/{{ item.name }}/install.sh
         register: aur_install
-        changed_when: aur_install.rc == 1
-        failed_when: aur_install.rc > 1
+        changed_when: aur_install.rc == 123
+        failed_when: aur_install.rc not in (0, 123)
         become: true
         loop: "{{ aur_packages }}"
         loop_control:
