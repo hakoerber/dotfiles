@@ -138,22 +138,11 @@
 
       - name: fix permissions for dotfiles directory
         shell: |
-          cd /var/lib/dotfiles
-          if [[ -e .git ]] ; then
-              # There is no sane way to specify the global .gitconfig to use, so we
-              # actually have to override HOME so git looks into ~/.gitconfig
-              export HOME="$(mktemp -d)"
-              set -o pipefail
-              set -o errexit
-              git config --global --add safe.directory /var/lib/dotfiles
-              git ls-tree -z --name-only HEAD | xargs --null chown --changes --recursive dotfiles:dotfiles
-              git ls-tree -z --name-only HEAD | xargs --null chmod --changes --recursive g+wX
-          else
-              chown --changes --recursive dotfiles:dotfiles .
-              chmod --changes --recursive g+wX .
-          fi
+          chown --changes --recursive dotfiles:dotfiles .
+          chmod --changes --recursive g+rwX .
         args:
           executable: /bin/bash
+          chdir: /var/lib/dotfiles
         register: dotfiles_permission_change
         become: true
         become_user: root
