@@ -115,11 +115,14 @@ EOF
 # ExecStartPost=/bin/rmdir /etc/systemd/system/getty@tty1.service.d/
 
 # Run
-cat << EOF > /root/.bash_profile
-if /var/lib/dotfiles/install.sh ; then
-    rm -f /root/.bash_profile
-    reboot
-fi
+cat << 'EOF' > /root/.bash_profile
+    if [[ "\$(tty)" == "/dev/tty1" ]] ; then
+        rm -rf /etc/systemd/system/getty@tty1.service.d/
+        if /var/lib/dotfiles/install.sh ; then
+            rm -f /root/.bash_profile
+            reboot
+        fi
+    fi
 EOF
 CHROOTSCRIPT
 
