@@ -607,6 +607,23 @@
       tags:
         - always
 
+    # See https://bbs.archlinux.org/viewtopic.php?id=259764
+    - block:
+      - name: configure pacman to skip installing nextcloud dbus file
+        blockinfile:
+          path: /etc/pacman.conf
+          insertafter: '^#NoExtract'
+          block: |
+            NoExtract = usr/share/dbus-1/services/com.nextcloudgmbh.Nextcloud.service
+          marker: "# {mark} ANSIBLE MANAGED noextract nextcloud"
+        become: true
+
+      - name: remove nextcloud dbus file
+        file:
+          path: /usr/share/dbus-1/services/com.nextcloudgmbh.Nextcloud.service
+          state: absent
+        become: true
+
     - include_tasks: user.yml
       args:
         apply:
