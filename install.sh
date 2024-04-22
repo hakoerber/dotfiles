@@ -42,16 +42,7 @@ install() {
     fi
 }
 
-if ! command -v make >/dev/null ; then
-    printf 'Make not installed, installing ...\n'
-    install "make"
-    printf 'Done\n'
-fi
-
-if ! command -v ansible >/dev/null ; then
-    printf 'Ansible not installed, installing ...\n'
-    install "ansible"
-    printf 'Done\n'
-fi
+command -v make    >/dev/null || install "make"
+command -v ansible >/dev/null || install "ansible"
 
 cd "${DOTDIR}" && make
