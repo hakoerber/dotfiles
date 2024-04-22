@@ -412,7 +412,6 @@
             needed_build=0
             if [[ ! -e "${filename}" ]] ; then
               needed_build=1
-              set +x
               makepkg \
                 --clean \
                 --nosign || exit 1
