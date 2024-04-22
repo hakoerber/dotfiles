@@ -1,5 +1,9 @@
 source /etc/profile
 
+if [[ "$(passwd --status $USER | awk '{print $2}')" =~ ^(NP|L)$ ]] ; then
+    sudo passwd $USER
+fi
+
 _path=(
     "$HOME/bin"
     "$HOME/.cargo/bin"
