@@ -345,13 +345,21 @@
         loop_control:
           label: "{{ item.1.stat.path }}"
 
-      - name: build AUR packages
-        shell:
-          cmd: |
+      - name: create build script
+        copy:
+          owner: makepkg
+          group: makepkg
+          mode: "0700"
+          dest: /var/lib/makepkg/{{ item.name }}/build.sh
+          content: |
+            #!/usr/bin/env bash
+
             export PKGEXT='.pkg.tar.zst'
             export BUILDDIR=/var/lib/makepkg/{{ item.name }}/build/
             export SRCDEST=/var/lib/makepkg/{{ item.name }}/src/
             export PKGDEST=/var/lib/makepkg/{{ item.name }}/
+
+            cd /var/lib/dotfiles/pkgbuilds/{{ item.name }}/
 
             source ./PKGBUILD
 
@@ -378,29 +386,54 @@
 
             filename="${PKGDEST%/}/${pkgname}-${version}-${arch}${PKGEXT}"
 
-            needs_build=0
+            needed_build=0
             if [[ ! -e "${filename}" ]] ; then
-              needs_build=1
+              needed_build=1
+              set +x
               makepkg \
                 --clean \
-                --nodeps \
-                --nosign || exit 2
+                --nosign || exit 1
             fi
 
-            printf '%s\n' "${filename}"
-
-            if (( needs_build )) ; then
-              exit 1
-            else
-              exit 0
-            fi
-        args:
-          executable: /bin/bash
-          chdir: "pkgbuilds/{{ item.name }}"
-        register: aur_build
-        failed_when: aur_build.rc > 1
-        changed_when: aur_build.rc == 1
+            printf '%s' "${filename}" > /var/lib/makepkg/{{ item.name }}/pkgname
+        become: true
         become_user: makepkg
+        loop: "{{ aur_packages }}"
+        loop_control:
+          label: "{{ item.name }}"
+
+      - name: create install script
+        copy:
+          owner: root
+          group: root
+          mode: "0700"
+          dest: /var/lib/makepkg/{{ item.name }}/install.sh
+          content: |
+            #!/usr/bin/env bash
+
+            sudo -u makepkg -g makepkg /var/lib/makepkg/{{ item.name }}/build.sh || exit 1
+
+            filename="$(</var/lib/makepkg/{{ item.name }}/pkgname)"
+
+            name=$(pacman -Qi --file "${filename}"  | grep '^Name' | awk '{print $3}')
+            version=$(pacman -Qi --file "${filename}"  | grep '^Version' | awk '{print $3}')
+
+            if [[ "$(pacman -Q "${name}")" == "${name} ${version}" ]] ; then
+              exit 0
+            else
+              pacman --upgrade --needed --noconfirm "$filename"
+              exit 1
+            fi
+        become: true
+        loop: "{{ aur_packages }}"
+        loop_control:
+          label: "{{ item.name }}"
+
+      - name: build and install aur package
+        command: /var/lib/makepkg/{{ item.name }}/install.sh
+        register: aur_install
+        changed_when: aur_install.rc == 1
+        failed_when: aur_install.rc > 1
         become: true
         loop: "{{ aur_packages }}"
         loop_control:
@@ -420,28 +453,6 @@
         loop_control:
           label: "{{ item[0].name }}/{{ item[1] }}"
 
-      - name: install AUR packages
-        shell:
-          cmd: |
-            set -x
-            filename="{{ item }}"
-
-            name=$(pacman -Qi --file "${filename}"  | grep '^Name' | awk '{print $3}')
-            version=$(pacman -Qi --file "${filename}"  | grep '^Version' | awk '{print $3}')
-
-            if [[ "$(pacman -Q "${name}")" == "${name} ${version}" ]] ; then
-              exit 0
-            else
-              pacman --upgrade --needed --noconfirm "$filename"
-              exit 1
-            fi
-        args:
-          executable: /bin/bash
-        become: true
-        register: aur_install
-        changed_when: aur_install.rc == 1
-        failed_when: aur_install.rc > 1
-        loop: "{{ aur_build.results|map(attribute='stdout') }}"
       tags: ["aur"]
       when: distro == 'archlinux'
 
