@@ -226,6 +226,8 @@
             - name: spotify
               preexec: |
                 #!/usr/bin/env bash
+                source ./env
+
                 curl -sS https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg | gpg --import -
 
       - set_fact:
@@ -274,17 +276,6 @@
         loop_control:
           label: "{{ item.name }}"
 
-      - name: check preexec script
-        stat:
-          path: /var/lib/makepkg/{{ item.name }}/preexec
-        become_user: makepkg
-        become: true
-        when: item.preexec is defined
-        loop: "{{ aur_packages }}"
-        register: preexec_before
-        loop_control:
-          label: "{{ item.name }}"
-
       - name: create build root directory
         file:
           path: "/var/lib/makepkg/{{ item.name }}/"
@@ -295,6 +286,44 @@
         become_user: makepkg
         become: true
         loop: "{{ aur_packages }}"
+        loop_control:
+          label: "{{ item.name }}"
+
+      - name: create build gpg directory
+        file:
+          path: "/var/lib/makepkg/{{ item.name }}/gnupg"
+          state: directory
+          mode: '0700'
+          owner: makepkg
+          group: makepkg
+        become_user: makepkg
+        become: true
+        loop: "{{ aur_packages }}"
+        loop_control:
+          label: "{{ item.name }}"
+
+      - name: create env file
+        copy:
+          dest: /var/lib/makepkg/{{ item.name }}/env
+          owner: makepkg
+          group: makepkg
+          mode: "0600"
+          content: |
+            export GNUPGHOME="/var/lib/makepkg/{{ item.name }}/gnupg"
+        become_user: makepkg
+        become: true
+        loop: "{{ aur_packages }}"
+        loop_control:
+          label: "{{ item.name }}"
+
+      - name: check preexec script
+        stat:
+          path: /var/lib/makepkg/{{ item.name }}/preexec
+        become_user: makepkg
+        become: true
+        when: item.preexec is defined
+        loop: "{{ aur_packages }}"
+        register: preexec_before
         loop_control:
           label: "{{ item.name }}"
 
@@ -324,7 +353,9 @@
           label: "{{ item.name }}"
 
       - name: run preexec script
-        command: "{{ item.1.stat.path }}"
+        command: 
+          cmd: "{{ item.1.stat.path }}"
+          chdir: "{{ item.1.stat.path | dirname }}"
         become_user: makepkg
         become: true
         when:
@@ -342,6 +373,8 @@
           dest: /var/lib/makepkg/{{ item.name }}/build.sh
           content: |
             #!/usr/bin/env bash
+
+            source /var/lib/makepkg/{{ item.name }}/env
 
             export PKGEXT='.pkg.tar.zst'
             export BUILDDIR=/var/lib/makepkg/{{ item.name }}/build/
