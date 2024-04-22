@@ -1,5 +1,9 @@
 packages:
   list:
+    kernel:
+      archlinux:
+        - linux-zen-headers
+        - linux-zen-docs
     build-essentials:
       archlinux:
         - gcc
