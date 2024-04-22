@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-# Parameters:
-#
-# $1: Device
-
 set -o xtrace
 set -o nounset
 set -o errexit
