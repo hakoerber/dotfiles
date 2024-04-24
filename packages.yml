@@ -221,8 +221,14 @@ packages:
       archlinux: ["rclone"]
     dnf:
       archlinux: ["dnf"]
-    rustup:
-      archlinux: ["rustup"]
+    rust:
+      archlinux:
+        - rustup
+        - cargo-edit
+        - cargo-msrv
+        - cargo-watch
+        - cargo-release
+        - cargo-sort
     musescore:
       archlinux: ["musescore"]
     sipcalc:
@@ -407,6 +413,12 @@ packages:
     w3m:
       archlinux:
         - w3m
+    ruff:
+      archlinux:
+        - ruff
+    shellcheck:
+      archlinux:
+        - shellcheck
 
   remove:
     mousepad:
