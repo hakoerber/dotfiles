@@ -419,6 +419,9 @@ packages:
     shellcheck:
       archlinux:
         - shellcheck
+    mold:
+      archlinux:
+        - mold
 
   remove:
     mousepad:
