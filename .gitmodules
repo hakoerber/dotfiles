@@ -7,9 +7,6 @@
 [submodule "pkgbuilds/spotify"]
 	path = pkgbuilds/spotify
 	url = https://aur.archlinux.org/spotify.git
-[submodule "pkgbuilds/archlinux-java-run"]
-	path = pkgbuilds/archlinux-java-run
-	url = https://aur.archlinux.org/archlinux-java-run.git
 [submodule "pkgbuilds/nodejs-intelephense"]
 	path = pkgbuilds/nodejs-intelephense
 	url = https://aur.archlinux.org/nodejs-intelephense.git
