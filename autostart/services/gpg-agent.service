@@ -5,7 +5,7 @@ ConditionPathExists=%t/features/gpg_agent
 
 [Service]
 Type=forking
-ExecStart=/usr/bin/env gpg-agent --no-detach --daemon
+ExecStart=/usr/bin/env gpg-agent --daemon
 PassEnvironment=DISPLAY GNUPGHOME
 
 Restart=always
