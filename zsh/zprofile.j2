@@ -65,8 +65,14 @@ mkdir -p "${feature_dir}"
 touch "${feature_dir}"/gpg_agent
 {% endif %}
 
-# Make all environment variables also usable in the systemd user instancee
-systemctl --user import-environment
+# Make important environment variables also usable in the systemd user instance
+systemd_envs=(
+    DISPLAY
+    GNUPGHOME
+    PATH
+    ACPI_LID_NAME
+)
+systemctl --user import-environment "${systemd_envs[@]}"
 
 # exec startx breaks some logind fuckery, without exec it works
 if [[ -z $DISPLAY ]] ; then
