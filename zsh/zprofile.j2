@@ -50,19 +50,19 @@ umask 0022
 export {{ k }}="{{ v }}"
 {% endfor %}
 
-export FEATURE_DIR="${XDG_RUNTIME_DIR}/features/"
-rm -rf "${FEATURE_DIR}"/
-mkdir -p "${FEATURE_DIR}"
+feature_dir="${XDG_RUNTIME_DIR}/features/"
+rm -rf "${feature_dir}"/
+mkdir -p "${feature_dir}"
 
-[[ $MACHINE_HAS_NEXTCLOUD     == "true" ]] && touch "${FEATURE_DIR}"/nextcloud
-[[ $MACHINE_HAS_KEEPASSX      == "true" ]] && touch "${FEATURE_DIR}"/keepassx
-[[ $MACHINE_HAS_STEAM         == "true" ]] && touch "${FEATURE_DIR}"/steam
-[[ $MACHINE_HAS_RESTIC_BACKUP == "true" ]] && touch "${FEATURE_DIR}"/restic_backup
+[[ $MACHINE_HAS_NEXTCLOUD     == "true" ]] && touch "${feature_dir}"/nextcloud
+[[ $MACHINE_HAS_KEEPASSX      == "true" ]] && touch "${feature_dir}"/keepassx
+[[ $MACHINE_HAS_STEAM         == "true" ]] && touch "${feature_dir}"/steam
+[[ $MACHINE_HAS_RESTIC_BACKUP == "true" ]] && touch "${feature_dir}"/restic_backup
 
-[[ $MACHINE_TYPE == "laptop" ]] && touch "${FEATURE_DIR}"/machine_is_laptop
+[[ $MACHINE_TYPE == "laptop" ]] && touch "${feature_dir}"/machine_is_laptop
 
 {% if user.gpg_agent %}
-touch "${FEATURE_DIR}"/gpg_agent
+touch "${feature_dir}"/gpg_agent
 {% endif %}
 
 # Make all environment variables also usable in the systemd user instancee
