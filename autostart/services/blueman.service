@@ -1,8 +1,0 @@
-[Unit]
-BindsTo=autostart.target
-After=windowmanager.target
-
-[Service]
-ExecStart=/usr/bin/env blueman-applet
-PassEnvironment=DISPLAY
-Restart=always

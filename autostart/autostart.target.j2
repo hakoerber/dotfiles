@@ -2,7 +2,6 @@
 BindsTo=windowmanager.target
 After=windowmanager.target
 
-Wants=blueman.service
 Wants=dpms.service
 Wants=dunst.service
 {% for profile, config in (user.firefox_profiles|default({})).items() %}

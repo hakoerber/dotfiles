@@ -197,8 +197,6 @@ packages:
       archlinux: ["dunst"]
     cloc:
       archlinux: ["cloc"]
-    bluetooth:
-      archlinux: ["bluez", "bluez-tools", "blueman"]
     bwm-ng:
       archlinux: ["bwm-ng"]
     virtualbox:
@@ -435,3 +433,5 @@ packages:
       archlinux: ["autorandr"]
     openvpn:
       archlinux: ["openvpn"]
+    bluetooth:
+      archlinux: ["bluez", "bluez-tools", "blueman"]
