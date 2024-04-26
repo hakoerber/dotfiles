@@ -140,8 +140,6 @@ packages:
       archlinux: ["wireshark-cli", "wireshark-qt"]
     nmap:
       archlinux: ["nmap"]
-    openvpn:
-      archlinux: ["openvpn"]
     curl:
       archlinux: ["curl"]
     wget:
@@ -189,8 +187,6 @@ packages:
       archlinux: ["cowsay"]
     ruby:
       archlinux: ["ruby"]
-    lxc:
-      archlinux: ["lxc"]
     acpi:
       archlinux: ["acpi", "acpid"]
     nodejs:
@@ -203,8 +199,6 @@ packages:
       archlinux: ["cloc"]
     bluetooth:
       archlinux: ["bluez", "bluez-tools", "blueman"]
-    autorandr:
-      archlinux: ["autorandr"]
     bwm-ng:
       archlinux: ["bwm-ng"]
     virtualbox:
@@ -435,3 +429,9 @@ packages:
       archlinux: ["rust"]
     screen:
       archlinux: ["screen"]
+    lxc:
+      archlinux: ["lxc"]
+    autorandr:
+      archlinux: ["autorandr"]
+    openvpn:
+      archlinux: ["openvpn"]
