@@ -8,7 +8,6 @@
       - sudonopw
       - games
       - kvm
-  tags: [always]
 
 - name: create user group
   group:
@@ -81,340 +80,345 @@
   become: true
   become_user: root
 
-- block:
-  - name: load dotfile list
-    include_vars:
-      file: dotfiles.yml
-
-  - name: get state of empty directories
-    stat:
-      path: ~/{{ item.name }}
-    register: empty_dir_stat
-    with_items: "{{ empty_directories }}"
-    check_mode: false
-    loop_control:
-      label: "{{ item.name }}"
-
-  - name: remove symlinks
-    file:
-      path: "{{ item.stat.path }}"
-      state: absent
-    when: item.stat.exists and item.stat.islnk
-    with_items: "{{ empty_dir_stat.results }}"
-    loop_control:
-      label: "{{ item.item.name }}"
-
-  - name: create empty directories for dotfiles
-    file:
-      state: directory
-      path: ~/{{ item.name }}
-      mode: "{{ item.mode | default('0755') }}"
-    with_items: "{{ empty_directories }}"
-    loop_control:
-      label: "{{ item.name }}"
-
-  - name: link this folder to ~/.dotfiles
-    file:
-      state: link
-      force: true
-      follow: false
-      owner: "{{ user.name }}"
-      group: "{{ user.name }}"
-      path: "/home/{{ user.name }}/.dotfiles"
-      src: "{{ playbook_dir }}"
-    become: true
-    become_user: root
-
-  - name: get state of copy targets
-    stat:
-      path: ~/{{ item.to }}
-    register: copy_stat
-    when: not item.template|default(false)
-    with_items: "{{ dotfiles }}"
-    check_mode: false
-    loop_control:
-      label: "{{ item.to }}"
-
-  - name: remove invalid copy target (directories)
-    file:
-      path: "{{ item.stat.path }}"
-      state: absent
-    when:
-      - not item.skipped is defined or not item.skipped
-      - item.stat.exists
-      - item.stat.isdir
-    with_items: "{{ copy_stat.results }}"
-    loop_control:
-      label: "{{ item.item.from }}"
-
-  - name: make sure target directories exist
-    file:
-      state: directory
-      path: "{{ (['/home', user.name, item.to]|join('/')) | dirname }}"
-      owner: "{{ user.name }}"
-      group: "{{ user.name }}"
-    with_items: "{{ dotfiles }}"
-    become: true
-    become_user: root
-    loop_control:
-      label: "{{ item.to }}"
-
-  - name: link dotfiles
-    file:
-      state: link
-      force: true
-      follow: false
-      path: "/home/{{ user.name }}/{{ item.to }}"
-      src: /var/lib/dotfiles/{{ item.from }}
-      owner: "{{ user.name }}"
-      group: "{{ user.name }}"
-    when: not item.template|default(false)
-    with_items: "{{ dotfiles }}"
-    become: true
-    become_user: root
-    loop_control:
-      label: "{{ item.to }}"
-
-  - name: get state of template targets
-    stat:
-      path: ~/{{ item.to }}
-    register: template_stat
-    when: item.template|default(false)
-    with_items: "{{ dotfiles }}"
-    check_mode: false
-    loop_control:
-      label: "{{ item.to }}"
-
-  - name: remove invalid template target (directory or symlink)
-    file:
-      path: "{{ item.stat.path }}"
-      state: absent
-    when:
-      - not item.skipped is defined or not item.skipped
-      - item.stat.exists
-      - not item.stat.isreg
-    with_items: "{{ template_stat.results }}"
-    loop_control:
-      label: "{{ item.item.to }}"
-
-  - name: deploy dotfiles templates
-    template:
-      src: /var/lib/dotfiles/{{ item.from }}.j2
-      dest: "/home/{{ user.name }}/{{ item.to }}"
-      owner: "{{ user.name }}"
-      group: "{{ user.name }}"
-      force: true
-    become: true
-    become_user: root
-    when: item.template|default(false)
-    with_items: "{{ dotfiles }}"
-    loop_control:
-      label: "{{ item.to }}"
-
-  - name: remove dotfiles
-    file:
-      state: absent
-      path: "/home/{{ user.name }}/{{ item }}"
-    loop: "{{ dotfiles_remove }}"
-
-  - name: create directories
-    file:
-      state: directory
-      path: "{{ item }}"
-    with_items:
-      - ~/tmp
-
-  - name: stat ~/bin
-    stat:
-      path: "/home/{{ user.name }}/bin"
-    register: bin_stat
-    check_mode: false
-
-  - name: remove ~/bin if not a link
-    file:
-      state: absent
-      path: "/home/{{ user.name }}/bin"
-    when:
-      - bin_stat.stat.exists
-      - not bin_stat.stat.islnk
-
-  - name: link bin directory
-    file:
-      state: link
-      force: true
-      follow: false
-      path: "/home/{{ user.name }}/bin"
-      src: /var/lib/dotfiles/bin
-      owner: "{{ user.name }}"
-      group: "{{ user.name }}"
+- name: configure dotfiles
   tags:
     - dotfiles
+  block:
+    - name: load dotfile list
+      include_vars:
+        file: dotfiles.yml
 
-- block:
-  - name: install vim plugins
-    command: nvim --headless +PlugInstall +qall
-    register: vim_plugin_install
-    changed_when: vim_plugin_install.stderr != ""
+    - name: get state of empty directories
+      stat:
+        path: ~/{{ item.name }}
+      register: empty_dir_stat
+      with_items: "{{ empty_directories }}"
+      check_mode: false
+      loop_control:
+        label: "{{ item.name }}"
 
-  - name: update vim plugins
-    command: nvim --headless +PlugUpdate +qall
-    register: vim_plugin_update
-    changed_when: vim_plugin_update.stderr != ""
+    - name: remove symlinks
+      file:
+        path: "{{ item.stat.path }}"
+        state: absent
+      when: item.stat.exists and item.stat.islnk
+      with_items: "{{ empty_dir_stat.results }}"
+      loop_control:
+        label: "{{ item.item.name }}"
 
-  tags: [vim-plugins]
+    - name: create empty directories for dotfiles
+      file:
+        state: directory
+        path: ~/{{ item.name }}
+        mode: "{{ item.mode | default('0755') }}"
+      with_items: "{{ empty_directories }}"
+      loop_control:
+        label: "{{ item.name }}"
 
-- block:
-  - name: create firefox directories
-    firefox_profile:
-      name: "{{ item.key }}"
-    loop: "{{ user.firefox_profiles | dict2items }}"
-    register: firefox_profile_names
+    - name: link this folder to ~/.dotfiles
+      file:
+        state: link
+        force: true
+        follow: false
+        owner: "{{ user.name }}"
+        group: "{{ user.name }}"
+        path: "/home/{{ user.name }}/.dotfiles"
+        src: "{{ playbook_dir }}"
+      become: true
+      become_user: root
 
-  - set_fact:
-      firefox_preferences:
-        browser.aboutConfig.showWarning: false
-        extensions.pocket.enabled: false
-        toolkit.legacyUserProfileCustomizations.stylesheets: true
-        browser.contentblocking.category: "strict"
-        browser.newtabpage.enabled: false
-        browser.shell.checkDefaultBrowser: false
-        browser.startup.homepage: "about:blank"
-        privacy.trackingprotection.enabled: true
-        privacy.trackingprotection.socialtracking.enabled: true
-        general.smoothScroll: false
+    - name: get state of copy targets
+      stat:
+        path: ~/{{ item.to }}
+      register: copy_stat
+      when: not item.template|default(false)
+      with_items: "{{ dotfiles }}"
+      check_mode: false
+      loop_control:
+        label: "{{ item.to }}"
 
-        # Restore last session on startup
-        # https://support.mozilla.org/de/questions/1235263
-        browser.startup.page: 3
-        browser.sessionstore.resume_from_crash: true
+    - name: remove invalid copy target (directories)
+      file:
+        path: "{{ item.stat.path }}"
+        state: absent
+      when:
+        - not item.skipped is defined or not item.skipped
+        - item.stat.exists
+        - item.stat.isdir
+      with_items: "{{ copy_stat.results }}"
+      loop_control:
+        label: "{{ item.item.from }}"
 
-        # "Play DRM-controlled content"
-        media.eme.enabled: true
+    - name: make sure target directories exist
+      file:
+        state: directory
+        path: "{{ (['/home', user.name, item.to]|join('/')) | dirname }}"
+        owner: "{{ user.name }}"
+        group: "{{ user.name }}"
+      with_items: "{{ dotfiles }}"
+      become: true
+      become_user: root
+      loop_control:
+        label: "{{ item.to }}"
 
-        # "Recommend (extensions|features) as you browse"
-        browser.newtabpage.activity-stream.asrouter.userprefs.cfr.addons: false
-        browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features: false
+    - name: link dotfiles
+      file:
+        state: link
+        force: true
+        follow: false
+        path: "/home/{{ user.name }}/{{ item.to }}"
+        src: /var/lib/dotfiles/{{ item.from }}
+        owner: "{{ user.name }}"
+        group: "{{ user.name }}"
+      when: not item.template|default(false)
+      with_items: "{{ dotfiles }}"
+      become: true
+      become_user: root
+      loop_control:
+        label: "{{ item.to }}"
 
-        # "Ask to save logins and passwords for websites"
-        signon.rememberSignons: false
+    - name: get state of template targets
+      stat:
+        path: ~/{{ item.to }}
+      register: template_stat
+      when: item.template|default(false)
+      with_items: "{{ dotfiles }}"
+      check_mode: false
+      loop_control:
+        label: "{{ item.to }}"
 
-        # "Allow Firefox to make personalized extension recommendations"
-        browser.discovery.enabled: false
+    - name: remove invalid template target (directory or symlink)
+      file:
+        path: "{{ item.stat.path }}"
+        state: absent
+      when:
+        - not item.skipped is defined or not item.skipped
+        - item.stat.exists
+        - not item.stat.isreg
+      with_items: "{{ template_stat.results }}"
+      loop_control:
+        label: "{{ item.item.to }}"
 
-        # "Allow Firefox to install and run studies"
-        app.shield.optoutstudies.enabled: false
+    - name: deploy dotfiles templates
+      template:
+        src: /var/lib/dotfiles/{{ item.from }}.j2
+        dest: "/home/{{ user.name }}/{{ item.to }}"
+        owner: "{{ user.name }}"
+        group: "{{ user.name }}"
+        force: true
+      become: true
+      become_user: root
+      when: item.template|default(false)
+      with_items: "{{ dotfiles }}"
+      loop_control:
+        label: "{{ item.to }}"
 
-        # "Check spelling as you type"
-        layout.spellcheckDefault: 0
+    - name: remove dotfiles
+      file:
+        state: absent
+        path: "/home/{{ user.name }}/{{ item }}"
+      loop: "{{ dotfiles_remove }}"
 
-        # Ask for download directory
-        browser.download.useDownloadDir: false
+    - name: create directories
+      file:
+        state: directory
+        path: "{{ item }}"
+      with_items:
+        - ~/tmp
 
-        # (Try to) disable automatic update, as firefox is pulling a Windows
-        app.update.auto: false
-        app.update.service.enabled: false
+    - name: stat ~/bin
+      stat:
+        path: "/home/{{ user.name }}/bin"
+      register: bin_stat
+      check_mode: false
 
-        # remove this camera / microphone overlay when in calls or similar
-        privacy.webrtc.legacyGlobalIndicator: false
+    - name: remove ~/bin if not a link
+      file:
+        state: absent
+        path: "/home/{{ user.name }}/bin"
+      when:
+        - bin_stat.stat.exists
+        - not bin_stat.stat.islnk
 
-  - include_role:
-      name: firefox
-    vars:
-      firefox_profiles: "{{ {item.key: item.value} | combine({item.key: {'preferences': firefox_preferences}}, recursive=True) }}"
-    loop: "{{ user.firefox_profiles | dict2items }}"
-    when: not ansible_check_mode
+    - name: link bin directory
+      file:
+        state: link
+        force: true
+        follow: false
+        path: "/home/{{ user.name }}/bin"
+        src: /var/lib/dotfiles/bin
+        owner: "{{ user.name }}"
+        group: "{{ user.name }}"
 
-  - name: firefox - create chrome directory
-    file:
-      path: "{{ item.profile_path }}/chrome/"
-      state: directory
-      mode: '0755'
-    with_items: "{{ firefox_profile_names.results }}"
-    when: not ansible_check_mode
-    loop_control:
-      label: "{{ item.profile_path }}"
+- name: vim
+  tags:
+    - vim
+  block:
+    - name: install vim plugins
+      command: nvim --headless +PlugInstall +qall
+      register: vim_plugin_install
+      changed_when: vim_plugin_install.stderr != ""
 
-  - name: firefox - configure firefox custom css
-    copy:
-      dest: "{{ item.profile_path }}/chrome/userChrome.css"
-      content: |
-        #TabsToolbar {
-          visibility: collapse !important;
-        }
-        #titlebar {
-          visibility: collapse !important;
-        }
-        #sidebar-header {
-          visibility: collapse !important;
-        }
-    when:
-      - not ansible_check_mode
-      - user.firefox_profiles[item.profile_name].manage_css is sameas True
-    with_items: "{{ firefox_profile_names.results }}"
-    loop_control:
-      label: "{{ item.profile_path }}"
+    - name: update vim plugins
+      command: nvim --headless +PlugUpdate +qall
+      register: vim_plugin_update
+      changed_when: vim_plugin_update.stderr != ""
+
+- name: firefox
   tags:
     - firefox
+  block:
+    - name: create firefox directories
+      firefox_profile:
+        name: "{{ item.key }}"
+      loop: "{{ user.firefox_profiles | dict2items }}"
+      check_mode: false
+      register: firefox_profile_names
+
+    - set_fact:
+        firefox_preferences:
+          browser.aboutConfig.showWarning: false
+          extensions.pocket.enabled: false
+          toolkit.legacyUserProfileCustomizations.stylesheets: true
+          browser.contentblocking.category: "strict"
+          browser.newtabpage.enabled: false
+          browser.shell.checkDefaultBrowser: false
+          browser.startup.homepage: "about:blank"
+          privacy.trackingprotection.enabled: true
+          privacy.trackingprotection.socialtracking.enabled: true
+          general.smoothScroll: false
+
+          # Restore last session on startup
+          # https://support.mozilla.org/de/questions/1235263
+          browser.startup.page: 3
+          browser.sessionstore.resume_from_crash: true
+
+          # "Play DRM-controlled content"
+          media.eme.enabled: true
+
+          # "Recommend (extensions|features) as you browse"
+          browser.newtabpage.activity-stream.asrouter.userprefs.cfr.addons: false
+          browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features: false
+
+          # "Ask to save logins and passwords for websites"
+          signon.rememberSignons: false
+
+          # "Allow Firefox to make personalized extension recommendations"
+          browser.discovery.enabled: false
+
+          # "Allow Firefox to install and run studies"
+          app.shield.optoutstudies.enabled: false
+
+          # "Check spelling as you type"
+          layout.spellcheckDefault: 0
+
+          # Ask for download directory
+          browser.download.useDownloadDir: false
+
+          # (Try to) disable automatic update, as firefox is pulling a Windows
+          app.update.auto: false
+          app.update.service.enabled: false
+
+          # remove this camera / microphone overlay when in calls or similar
+          privacy.webrtc.legacyGlobalIndicator: false
+
+    - include_role:
+        name: firefox
+      vars:
+        firefox_profiles: "{{ {item.key: item.value} | combine({item.key: {'preferences': firefox_preferences}}, recursive=True) }}"
+      loop: "{{ user.firefox_profiles | dict2items }}"
+      when: not ansible_check_mode
+
+    - name: firefox - create chrome directory
+      file:
+        path: "{{ item.profile_path }}/chrome/"
+        state: directory
+        mode: '0755'
+      with_items: "{{ firefox_profile_names.results }}"
+      when: not ansible_check_mode
+      loop_control:
+        label: "{{ item.profile_path }}"
+
+    - name: firefox - configure firefox custom css
+      copy:
+        dest: "{{ item.profile_path }}/chrome/userChrome.css"
+        content: |
+          #TabsToolbar {
+            visibility: collapse !important;
+          }
+          #titlebar {
+            visibility: collapse !important;
+          }
+          #sidebar-header {
+            visibility: collapse !important;
+          }
+      when:
+        - not ansible_check_mode
+        - user.firefox_profiles[item.profile_name].manage_css is sameas True
+      with_items: "{{ firefox_profile_names.results }}"
+      loop_control:
+        label: "{{ item.profile_path }}"
 
 - name: handle autostart units
-  block:
-  - name: create systemd user directory
-    file:
-      state: directory
-      path: ~/{{ item }}
-    loop:
-      - .config/
-      - .config/systemd/
-      - .config/systemd/user/
-
-  - name: link autostart service files
-    file:
-      state: link
-      force: true
-      follow: false
-      path: "/home/{{ user.name }}/.config/systemd/user/{{ item | basename }}"
-      src: "{{ item }}"
-      owner: "{{ user.name }}"
-      group: "{{ user.name }}"
-    with_fileglob: /var/lib/dotfiles/autostart/services/*
-
-  - name: get state of autostart.target
-    stat:
-      path: "/home/{{ user.name }}/.config/systemd/user/autostart.target"
-    register: autostart_target_stat
-
-  - name: remove invalid autostart.target
-    file:
-      path: "/home/{{ user.name }}/.config/systemd/user/autostart.target"
-      state: absent
-    when:
-      - autostart_target_stat.stat.exists
-      - not autostart_target_stat.stat.isreg
-
-  - name: deploy autostart.target
-    template:
-      src: ./autostart/autostart.target.j2
-      dest: "/home/{{ user.name }}/.config/systemd/user/autostart.target"
-      owner: "{{ user.name }}"
-      group: "{{ user.name }}"
-      force: true
-      follow: false
-
   tags:
     - autostart
+  block:
+    - name: create systemd user directory
+      file:
+        state: directory
+        path: ~/{{ item }}
+      loop:
+        - .config/
+        - .config/systemd/
+        - .config/systemd/user/
 
-- block:
-  - name: import gpg key
-    command: gpg --import ./gpgkeys/{{ user.gpg_key.email }}.gpg.asc
-    register: gpg_import_output
-    changed_when: not ("unchanged" in gpg_import_output.stderr)
+    - name: link autostart service files
+      file:
+        state: link
+        force: true
+        follow: false
+        path: "/home/{{ user.name }}/.config/systemd/user/{{ item | basename }}"
+        src: "{{ item }}"
+        owner: "{{ user.name }}"
+        group: "{{ user.name }}"
+      with_fileglob: /var/lib/dotfiles/autostart/services/*
 
-  - name: trust gpg key
-    shell: "gpg --import-ownertrust <<< {{ user.gpg_key.fingerprint }}:6"
-    args:
-      executable: /bin/bash # required for <<<
-    register: gpg_trust_output
-    changed_when: gpg_trust_output.stderr_lines|length > 0
+    - name: get state of autostart.target
+      stat:
+        path: "/home/{{ user.name }}/.config/systemd/user/autostart.target"
+      register: autostart_target_stat
+
+    - name: remove invalid autostart.target
+      file:
+        path: "/home/{{ user.name }}/.config/systemd/user/autostart.target"
+        state: absent
+      when:
+        - autostart_target_stat.stat.exists
+        - not autostart_target_stat.stat.isreg
+
+    - name: deploy autostart.target
+      template:
+        src: ./autostart/autostart.target.j2
+        dest: "/home/{{ user.name }}/.config/systemd/user/autostart.target"
+        owner: "{{ user.name }}"
+        group: "{{ user.name }}"
+        force: true
+        follow: false
+
+- name: gpg
+  tags:
+    - gpg
+  block:
+    - name: import gpg key
+      command: gpg --import ./gpgkeys/{{ user.gpg_key.email }}.gpg.asc
+      register: gpg_import_output
+      changed_when: not ("unchanged" in gpg_import_output.stderr)
+
+    - name: trust gpg key
+      shell: "gpg --import-ownertrust <<< {{ user.gpg_key.fingerprint }}:6"
+      args:
+        executable: /bin/bash # required for <<<
+      register: gpg_trust_output
+      changed_when: gpg_trust_output.stderr_lines|length > 0
 
   when: user.gpg_key is defined
-  tags: [gpg]

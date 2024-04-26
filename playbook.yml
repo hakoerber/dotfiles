@@ -36,509 +36,512 @@
             archlinux:
               - python-jmespath
 
-    - block:
-      - name: enable multilib repository
-        blockinfile:
-          path: /etc/pacman.conf
-          block: |
-            [multilib]
-            Include = /etc/pacman.d/mirrorlist
-          marker: "# {mark} ANSIBLE MANAGED multilib"
-        become: true
-
-      - name: enable parallel download
-        blockinfile:
-          path: /etc/pacman.conf
-          insertafter: '\[options\]'
-          block: |
-            ParallelDownloads = 5
-          marker: "# {mark} ANSIBLE MANAGED parallel_download"
-        become: true
-
-      - block:
-        - name: upgrade system
-          pacman:
-            upgrade: true
-            update_cache: true
+    - name: pacman
+      tags:
+        - pacman
+      block:
+        - name: enable multilib repository
+          blockinfile:
+            path: /etc/pacman.conf
+            block: |
+              [multilib]
+              Include = /etc/pacman.d/mirrorlist
+            marker: "# {mark} ANSIBLE MANAGED multilib"
           become: true
+
+        - name: enable parallel download
+          blockinfile:
+            path: /etc/pacman.conf
+            insertafter: '\[options\]'
+            block: |
+              ParallelDownloads = 5
+            marker: "# {mark} ANSIBLE MANAGED parallel_download"
+          become: true
+
+        - block:
+          - name: upgrade system
+            pacman:
+              upgrade: true
+              update_cache: true
+            become: true
+            changed_when: false
+
+          tags: [system-update]
+
+        - name: install pacman-contrib for paccache
+          package:
+            name: pacman-contrib
+            state: present
+          become: true
+
+        - block:
+          - name: install pacman cache clean service
+            copy:
+              dest: /etc/systemd/system/pacman-cache-cleanup.service
+              owner: root
+              group: root
+              mode: '0644'
+              content: |
+                [Service]
+                Type=oneshot
+                ExecStart=/bin/sh -c '/usr/bin/paccache -rk1 && /usr/bin/paccache -ruk0'
+                RemainAfterExit=true
+            become: true
+
+          - name: install pacman cache clean timer
+            copy:
+              dest: /etc/systemd/system/pacman-cache-cleanup.timer
+              owner: root
+              group: root
+              mode: '0644'
+              content: |
+                [Timer]
+                OnCalendar=daily
+            become: true
+
+          - name: enable pacman cache clean timer
+            systemd:
+              name: pacman-cache-cleanup.timer
+              enabled: true
+              state: started
+              daemon_reload: true
+            become: true
+
+    - name: dotfiles directory
+      tags:
+        - dotfiles-directory
+      block:
+        - name: create dotfiles group
+          group:
+            name: dotfiles
+            state: present
+          become: true
+          become_user: root
+
+        - name: create dotfiles user
+          user:
+            name: dotfiles
+            group: dotfiles
+            home: /var/lib/dotfiles
+            create_home: false
+            shell: /bin/bash
+            system: true
+          become: true
+          become_user: root
+
+        - name: create dotfiles directory
+          file:
+            state: directory
+            path: /var/lib/dotfiles
+            owner: dotfiles
+            group: dotfiles
+            mode: '0775' # group needs write access!
+          become: true
+          become_user: root
+
+        - name: fix permissions for dotfiles directory
+          shell: |
+            chown --changes --recursive dotfiles:dotfiles .
+            chmod --changes --recursive g+rwX .
+          args:
+            executable: /bin/bash
+            chdir: /var/lib/dotfiles
+          register: dotfiles_permission_change
+          become: true
+          become_user: root
+          changed_when: dotfiles_permission_change.stdout_lines|length > 0
+
+    - name: packages
+      tags:
+        - packages
+      block:
+        - name: load package list
+          include_vars:
+            file: packages.yml
+
+        - name: force-update iptables to iptables-nft on arch
+          shell: pacman -Q iptables && yes | pacman -S iptables-nft
           changed_when: false
-
-        tags: [system-update]
-
-      - name: install pacman-contrib for paccache
-        package:
-          name: pacman-contrib
-          state: present
-        become: true
-
-      - block:
-        - name: install pacman cache clean service
-          copy:
-            dest: /etc/systemd/system/pacman-cache-cleanup.service
-            owner: root
-            group: root
-            mode: '0644'
-            content: |
-              [Service]
-              Type=oneshot
-              ExecStart=/bin/sh -c '/usr/bin/paccache -rk1 && /usr/bin/paccache -ruk0'
-              RemainAfterExit=true
           become: true
 
-        - name: install pacman cache clean timer
-          copy:
-            dest: /etc/systemd/system/pacman-cache-cleanup.timer
-            owner: root
-            group: root
-            mode: '0644'
-            content: |
-              [Timer]
-              OnCalendar=daily
+        - set_fact:
+            defined_packages: "{{ packages|json_query('keys(list)') }}"
+
+        - set_fact:
+            distro_packages: "{{ packages|json_query('list.*.%s'|format(distro)) }}"
+
+        - name: check list
+          assert:
+            that: "defined_packages|length == distro_packages|length"
+
+        - set_fact:
+            defined_packages_remove: "{{ packages|json_query('keys(remove)') }}"
+
+        - set_fact:
+            distro_packages_remove: "{{ packages|json_query('remove.*.%s'|format(distro)) }}"
+
+        - name: check list
+          assert:
+            that: "defined_packages_remove|length == distro_packages_remove|length"
+
+        - name: remove packages
+          package:
+            name: "{{ packages|json_query(query) }}"
+            state: absent
+          become: true
+          vars:
+            query: "{{ 'remove.*.%s[]'|format(distro) }}"
+
+        - name: install packages
+          package:
+            name: "{{ packages|json_query(query) }}"
+            state: present
+          become: true
+          vars:
+            query: "{{ 'list.*.%s[]'|format(distro) }}"
+
+        - name: install machine-specific packages
+          package:
+            name: "{{ machine.packages }}"
+            state: present
+          when: machine.packages is defined
           become: true
 
-        - name: enable pacman cache clean timer
-          systemd:
-            name: pacman-cache-cleanup.timer
-            enabled: true
-            state: started
-            daemon_reload: true
+    - name: aur
+      tags:
+        - aur
+      block:
+        - name: create build user on arch
+          user:
+            name: makepkg
+            home: /var/lib/makepkg
+            create_home: true
+            shell: /bin/bash
+            system: true
           become: true
-        tags: [pacman_cache_cleanup]
 
-      when: distro == 'archlinux'
+        - set_fact:
+            aur_packages:
+              - name: portfolio-performance-bin
+                preexec: |
+                  #!/usr/bin/env bash
+                  source ./env
+                  curl -sSf --proto '=https' https://keys.openpgp.org/vks/v1/by-fingerprint/E46E6F8FF02E4C83569084589239277F560C95AC | gpg --import -
 
-    - block:
-      - name: create dotfiles group
-        group:
-          name: dotfiles
-          state: present
-        become: true
-        become_user: root
+              - name: nodejs-intelephense
 
-      - name: create dotfiles user
-        user:
-          name: dotfiles
-          group: dotfiles
-          home: /var/lib/dotfiles
-          create_home: false
-          shell: /bin/bash
-          system: true
-        become: true
-        become_user: root
+              - name: spotify
+                preexec: |
+                  #!/usr/bin/env bash
+                  source ./env
+                  curl -sSf --proto '=https' https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg | gpg --import -
 
-      - name: create dotfiles directory
-        file:
-          state: directory
-          path: /var/lib/dotfiles
-          owner: dotfiles
-          group: dotfiles
-          mode: '0775' # group needs write access!
-        become: true
-        become_user: root
+              - name: vim-plug
 
-      - name: fix permissions for dotfiles directory
-        shell: |
-          chown --changes --recursive dotfiles:dotfiles .
-          chmod --changes --recursive g+rwX .
-        args:
-          executable: /bin/bash
-          chdir: /var/lib/dotfiles
-        register: dotfiles_permission_change
-        become: true
-        become_user: root
-        changed_when: dotfiles_permission_change.stdout_lines|length > 0
-      tags: [dotfiles-directory]
+        - set_fact:
+            aur_packages: "{{ aur_packages|map(attribute='dependencies', default=[]) | flatten + aur_packages }}"
 
-    - block:
-      - name: load package list
-        include_vars:
-          file: packages.yml
+        - name: install dependencies
+          shell: |
+            aur_packages=({{ aur_packages | map(attribute='name') | join(' ') }})
 
-      - name: force-update iptables to iptables-nft on arch
-        shell: pacman -Q iptables && yes | pacman -S iptables-nft
-        changed_when: false
-        become: true
-        when: distro == 'archlinux'
+            source pkgbuilds/{{ item.name }}/PKGBUILD
 
-      - set_fact:
-          defined_packages: "{{ packages|json_query('keys(list)') }}"
+            installed=0
 
-      - set_fact:
-          distro_packages: "{{ packages|json_query('list.*.%s'|format(distro)) }}"
+            dependencies=(${depends[@]} ${makedepends[@]})
+            for dep in "${dependencies[@]}" ; do
+              aur=0
+              for aur_pkg in "${aur_packages[@]}" ; do
+                if [[ "${aur_pkg}" == "${dep}" ]] ; then
+                  aur=1
+                  break
+                fi
+              done
 
-      - name: check list
-        assert:
-          that: "defined_packages|length == distro_packages|length"
+              if (( aur )) ; then
+                continue
+              fi
 
-      - set_fact:
-          defined_packages_remove: "{{ packages|json_query('keys(remove)') }}"
-
-      - set_fact:
-          distro_packages_remove: "{{ packages|json_query('remove.*.%s'|format(distro)) }}"
-
-      - name: check list
-        assert:
-          that: "defined_packages_remove|length == distro_packages_remove|length"
-
-      - name: remove packages
-        package:
-          name: "{{ packages|json_query(query) }}"
-          state: absent
-        become: true
-        vars:
-          query: "{{ 'remove.*.%s[]'|format(distro) }}"
-
-      - name: install packages
-        package:
-          name: "{{ packages|json_query(query) }}"
-          state: present
-        become: true
-        vars:
-          query: "{{ 'list.*.%s[]'|format(distro) }}"
-
-      - name: install machine-specific packages
-        package:
-          name: "{{ machine.packages }}"
-          state: present
-        when: machine.packages is defined
-        become: true
-
-      tags: [packages]
-
-    - block:
-      - name: create build user on arch
-        user:
-          name: makepkg
-          home: /var/lib/makepkg
-          create_home: true
-          shell: /bin/bash
-          system: true
-        become: true
-
-      - set_fact:
-          aur_packages:
-            - name: portfolio-performance-bin
-              preexec: |
-                #!/usr/bin/env bash
-                source ./env
-                curl -sSf --proto '=https' https://keys.openpgp.org/vks/v1/by-fingerprint/E46E6F8FF02E4C83569084589239277F560C95AC | gpg --import -
-
-            - name: nodejs-intelephense
-
-            - name: spotify
-              preexec: |
-                #!/usr/bin/env bash
-                source ./env
-                curl -sSf --proto '=https' https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg | gpg --import -
-
-            - name: vim-plug
-
-      - set_fact:
-          aur_packages: "{{ aur_packages|map(attribute='dependencies', default=[]) | flatten + aur_packages }}"
-
-      - name: install dependencies
-        shell: |
-          aur_packages=({{ aur_packages | map(attribute='name') | join(' ') }})
-
-          source pkgbuilds/{{ item.name }}/PKGBUILD
-
-          installed=0
-
-          dependencies=(${depends[@]} ${makedepends[@]})
-          for dep in "${dependencies[@]}" ; do
-            aur=0
-            for aur_pkg in "${aur_packages[@]}" ; do
-              if [[ "${aur_pkg}" == "${dep}" ]] ; then
-                aur=1
-                break
+              if ! pacman -Qq "${dep}" >/dev/null 2>&1 ; then
+                installed=1
+                pacman -S --noconfirm --needed "${dep}"
               fi
             done
 
-            if (( aur )) ; then
-              continue
-            fi
-
-            if ! pacman -Qq "${dep}" >/dev/null 2>&1 ; then
-              installed=1
-              pacman -S --noconfirm --needed "${dep}"
-            fi
-          done
-
-          if (( installed )) ; then
-            exit 123
-          else
-            exit 0
-          fi
-        args:
-          executable: /bin/bash
-        register: install_deps
-        failed_when: install_deps.rc not in (0, 123)
-        changed_when: install_deps.rc == 123
-        become: true
-        loop: "{{ aur_packages }}"
-        loop_control:
-          label: "{{ item.name }}"
-
-      - name: create build root directory
-        file:
-          path: "/var/lib/makepkg/{{ item.name }}/"
-          state: directory
-          mode: '0700'
-          owner: makepkg
-          group: makepkg
-        become_user: makepkg
-        become: true
-        loop: "{{ aur_packages }}"
-        loop_control:
-          label: "{{ item.name }}"
-
-      - name: create build gpg directory
-        file:
-          path: "/var/lib/makepkg/{{ item.name }}/gnupg"
-          state: directory
-          mode: '0700'
-          owner: makepkg
-          group: makepkg
-        become_user: makepkg
-        become: true
-        loop: "{{ aur_packages }}"
-        loop_control:
-          label: "{{ item.name }}"
-
-      - name: create env file
-        copy:
-          dest: /var/lib/makepkg/{{ item.name }}/env
-          owner: makepkg
-          group: makepkg
-          mode: "0600"
-          content: |
-            export GNUPGHOME="/var/lib/makepkg/{{ item.name }}/gnupg"
-        become_user: makepkg
-        become: true
-        loop: "{{ aur_packages }}"
-        loop_control:
-          label: "{{ item.name }}"
-
-      - name: check preexec script
-        stat:
-          path: /var/lib/makepkg/{{ item.name }}/preexec
-        become_user: makepkg
-        become: true
-        when: item.preexec is defined
-        loop: "{{ aur_packages }}"
-        register: preexec_before
-        loop_control:
-          label: "{{ item.name }}"
-
-      - name: install preexec script
-        copy:
-          dest: /var/lib/makepkg/{{ item.name }}/preexec
-          owner: makepkg
-          group: makepkg
-          mode: "0700"
-          content: "{{ item.preexec }}"
-        become_user: makepkg
-        become: true
-        when: item.preexec is defined
-        loop: "{{ aur_packages }}"
-        loop_control:
-          label: "{{ item.name }}"
-
-      - name: check preexec script
-        stat:
-          path: /var/lib/makepkg/{{ item.name }}/preexec
-        become_user: makepkg
-        become: true
-        when: item.preexec is defined
-        loop: "{{ aur_packages }}"
-        register: preexec_after
-        loop_control:
-          label: "{{ item.name }}"
-
-      - name: run preexec script
-        command: 
-          cmd: "{{ item.1.stat.path }}"
-          chdir: "{{ item.1.stat.path | dirname }}"
-        become_user: makepkg
-        become: true
-        when:
-          - not item[0].stat.exists
-          - item[0].stat.checksum|default('') != item[1].stat.checksum
-        loop: "{{ preexec_before.results| reject('skipped')|zip(preexec_after.results| reject('skipped')) }}"
-        loop_control:
-          label: "{{ item.1.stat.path }}"
-
-      - name: create build script
-        copy:
-          owner: makepkg
-          group: makepkg
-          mode: "0700"
-          dest: /var/lib/makepkg/{{ item.name }}/build.sh
-          content: |
-            #!/usr/bin/env bash
-
-            source /var/lib/makepkg/{{ item.name }}/env
-
-            export PKGEXT='.pkg.tar'
-            export BUILDDIR=/var/lib/makepkg/{{ item.name }}/build/
-            export SRCDEST=/var/lib/makepkg/{{ item.name }}/src/
-            export PKGDEST=/var/lib/makepkg/{{ item.name }}/
-
-            cd /var/lib/dotfiles/pkgbuilds/{{ item.name }}/
-
-            source ./PKGBUILD
-
-            for arch in "${arch[@]}" ; do
-              if [[ "${arch}" == "any" ]] ; then
-                arch="any"
-                break
-              fi
-              if [[ "${arch}" == "x86_64" ]] ; then
-                arch="x86_64"
-              fi
-            done
-
-            if [[ ! "${arch}" ]] ; then
-              printf 'unsupported arch' >&2
-              exit 1
-            fi
-
-            if [[ "${epoch}" ]] ; then
-              version="${epoch}:${pkgver}-${pkgrel}"
-            else
-              version="${pkgver}-${pkgrel}"
-            fi
-
-            filename="${PKGDEST%/}/${pkgname}-${version}-${arch}${PKGEXT}"
-
-            needed_build=0
-            if [[ ! -e "${filename}" ]] ; then
-              needed_build=1
-              makepkg \
-                --clean \
-                --nosign || exit 1
-            fi
-
-            printf '%s' "${filename}" > /var/lib/makepkg/{{ item.name }}/pkgname
-        become: true
-        become_user: makepkg
-        loop: "{{ aur_packages }}"
-        loop_control:
-          label: "{{ item.name }}"
-
-      - name: create install script
-        copy:
-          owner: root
-          group: root
-          mode: "0700"
-          dest: /var/lib/makepkg/{{ item.name }}/install.sh
-          content: |
-            #!/usr/bin/env bash
-
-            sudo -u makepkg -g makepkg /var/lib/makepkg/{{ item.name }}/build.sh || exit 1
-
-            filename="$(</var/lib/makepkg/{{ item.name }}/pkgname)"
-
-            name=$(pacman -Qi --file "${filename}"  | grep '^Name' | awk '{print $3}')
-            version=$(pacman -Qi --file "${filename}"  | grep '^Version' | awk '{print $3}')
-
-            if [[ "$(pacman -Q "${name}")" == "${name} ${version}" ]] ; then
-              exit 0
-            else
-              pacman --upgrade --needed --noconfirm "$filename" || exit 1
+            if (( installed )) ; then
               exit 123
+            else
+              exit 0
             fi
-        become: true
-        loop: "{{ aur_packages }}"
-        loop_control:
-          label: "{{ item.name }}"
+          args:
+            executable: /bin/bash
+          register: install_deps
+          failed_when: install_deps.rc not in (0, 123)
+          changed_when: install_deps.rc == 123
+          become: true
+          loop: "{{ aur_packages }}"
+          loop_control:
+            label: "{{ item.name }}"
 
-      - name: build and install aur package
-        command: /var/lib/makepkg/{{ item.name }}/install.sh
-        register: aur_install
-        changed_when: aur_install.rc == 123
-        failed_when: aur_install.rc not in (0, 123)
-        become: true
-        loop: "{{ aur_packages }}"
-        loop_control:
-          label: "{{ item.name }}"
+        - name: create build root directory
+          file:
+            path: "/var/lib/makepkg/{{ item.name }}/"
+            state: directory
+            mode: '0700'
+            owner: makepkg
+            group: makepkg
+          become_user: makepkg
+          become: true
+          loop: "{{ aur_packages }}"
+          loop_control:
+            label: "{{ item.name }}"
 
-      - name: clean up build leftovers
-        file:
-          path: /var/lib/makepkg/{{ item[0].name }}/{{ item[1] }}/
-          state: absent
-        become_user: makepkg
-        become: true
-        with_nested:
-          - "{{ aur_packages }}"
-          -
-            - build
-            - src
-        loop_control:
-          label: "{{ item[0].name }}/{{ item[1] }}"
+        - name: create build gpg directory
+          file:
+            path: "/var/lib/makepkg/{{ item.name }}/gnupg"
+            state: directory
+            mode: '0700'
+            owner: makepkg
+            group: makepkg
+          become_user: makepkg
+          become: true
+          loop: "{{ aur_packages }}"
+          loop_control:
+            label: "{{ item.name }}"
 
-      tags: ["aur"]
-      when: distro == 'archlinux'
+        - name: create env file
+          copy:
+            dest: /var/lib/makepkg/{{ item.name }}/env
+            owner: makepkg
+            group: makepkg
+            mode: "0600"
+            content: |
+              export GNUPGHOME="/var/lib/makepkg/{{ item.name }}/gnupg"
+          become_user: makepkg
+          become: true
+          loop: "{{ aur_packages }}"
+          loop_control:
+            label: "{{ item.name }}"
 
-    - block:
-      - name: configure timesyncd on arch
-        copy:
-          owner: root
-          group: root
-          mode: "0644"
-          dest: /etc/systemd/timesyncd.conf
-          content: |
-            [Time]
-            NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org 2.arch.pool.ntp.org 3.arch.pool.ntp.org
-            FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org
-        become: true
+        - name: check preexec script
+          stat:
+            path: /var/lib/makepkg/{{ item.name }}/preexec
+          become_user: makepkg
+          become: true
+          when: item.preexec is defined
+          loop: "{{ aur_packages }}"
+          register: preexec_before
+          loop_control:
+            label: "{{ item.name }}"
 
-      - name: install lz4
-        package:
-          name: lz4
-          state: present
-        become: true
+        - name: install preexec script
+          copy:
+            dest: /var/lib/makepkg/{{ item.name }}/preexec
+            owner: makepkg
+            group: makepkg
+            mode: "0700"
+            content: "{{ item.preexec }}"
+          become_user: makepkg
+          become: true
+          when: item.preexec is defined
+          loop: "{{ aur_packages }}"
+          loop_control:
+            label: "{{ item.name }}"
 
-      - name: use lz4 for mkinitcpio compression
-        lineinfile:
-          path: /etc/mkinitcpio.conf
-          regexp: '^#?COMPRESSION=.*$'
-          line: 'COMPRESSION="lz4"'
-        become: true
-        notify:
-          - rebuild initrd
-      when: distro == 'archlinux'
+        - name: check preexec script
+          stat:
+            path: /var/lib/makepkg/{{ item.name }}/preexec
+          become_user: makepkg
+          become: true
+          when: item.preexec is defined
+          loop: "{{ aur_packages }}"
+          register: preexec_after
+          loop_control:
+            label: "{{ item.name }}"
 
-    - set_fact:
-        disable_services:
-          - sshd
-      when: distro == 'archlinux'
+        - name: run preexec script
+          command:
+            cmd: "{{ item.1.stat.path }}"
+            chdir: "{{ item.1.stat.path | dirname }}"
+          become_user: makepkg
+          become: true
+          when:
+            - not item[0].stat.exists
+            - item[0].stat.checksum|default('') != item[1].stat.checksum
+          loop: "{{ preexec_before.results| reject('skipped')|zip(preexec_after.results| reject('skipped')) }}"
+          loop_control:
+            label: "{{ item.1.stat.path }}"
 
-    - name: disable services
-      service:
-        state: stopped
-        enabled: false
-        name: "{{ item }}"
-      with_items: "{{ disable_services }}"
+        - name: create build script
+          copy:
+            owner: makepkg
+            group: makepkg
+            mode: "0700"
+            dest: /var/lib/makepkg/{{ item.name }}/build.sh
+            content: |
+              #!/usr/bin/env bash
+
+              source /var/lib/makepkg/{{ item.name }}/env
+
+              export PKGEXT='.pkg.tar'
+              export BUILDDIR=/var/lib/makepkg/{{ item.name }}/build/
+              export SRCDEST=/var/lib/makepkg/{{ item.name }}/src/
+              export PKGDEST=/var/lib/makepkg/{{ item.name }}/
+
+              cd /var/lib/dotfiles/pkgbuilds/{{ item.name }}/
+
+              source ./PKGBUILD
+
+              for arch in "${arch[@]}" ; do
+                if [[ "${arch}" == "any" ]] ; then
+                  arch="any"
+                  break
+                fi
+                if [[ "${arch}" == "x86_64" ]] ; then
+                  arch="x86_64"
+                fi
+              done
+
+              if [[ ! "${arch}" ]] ; then
+                printf 'unsupported arch' >&2
+                exit 1
+              fi
+
+              if [[ "${epoch}" ]] ; then
+                version="${epoch}:${pkgver}-${pkgrel}"
+              else
+                version="${pkgver}-${pkgrel}"
+              fi
+
+              filename="${PKGDEST%/}/${pkgname}-${version}-${arch}${PKGEXT}"
+
+              needed_build=0
+              if [[ ! -e "${filename}" ]] ; then
+                needed_build=1
+                makepkg \
+                  --clean \
+                  --nosign || exit 1
+              fi
+
+              printf '%s' "${filename}" > /var/lib/makepkg/{{ item.name }}/pkgname
+          become: true
+          become_user: makepkg
+          loop: "{{ aur_packages }}"
+          loop_control:
+            label: "{{ item.name }}"
+
+        - name: create install script
+          copy:
+            owner: root
+            group: root
+            mode: "0700"
+            dest: /var/lib/makepkg/{{ item.name }}/install.sh
+            content: |
+              #!/usr/bin/env bash
+
+              sudo -u makepkg -g makepkg /var/lib/makepkg/{{ item.name }}/build.sh || exit 1
+
+              filename="$(</var/lib/makepkg/{{ item.name }}/pkgname)"
+
+              name=$(pacman -Qi --file "${filename}"  | grep '^Name' | awk '{print $3}')
+              version=$(pacman -Qi --file "${filename}"  | grep '^Version' | awk '{print $3}')
+
+              if [[ "$(pacman -Q "${name}")" == "${name} ${version}" ]] ; then
+                exit 0
+              else
+                pacman --upgrade --needed --noconfirm "$filename" || exit 1
+                exit 123
+              fi
+          become: true
+          loop: "{{ aur_packages }}"
+          loop_control:
+            label: "{{ item.name }}"
+
+        - name: build and install aur package
+          command: /var/lib/makepkg/{{ item.name }}/install.sh
+          register: aur_install
+          changed_when: aur_install.rc == 123
+          failed_when: aur_install.rc not in (0, 123)
+          become: true
+          loop: "{{ aur_packages }}"
+          loop_control:
+            label: "{{ item.name }}"
+
+        - name: clean up build leftovers
+          file:
+            path: /var/lib/makepkg/{{ item[0].name }}/{{ item[1] }}/
+            state: absent
+          become_user: makepkg
+          become: true
+          with_nested:
+            - "{{ aur_packages }}"
+            -
+              - build
+              - src
+          loop_control:
+            label: "{{ item[0].name }}/{{ item[1] }}"
+
+    - name: configure timesyncd on arch
+      copy:
+        owner: root
+        group: root
+        mode: "0644"
+        dest: /etc/systemd/timesyncd.conf
+        content: |
+          [Time]
+          NTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org 2.arch.pool.ntp.org 3.arch.pool.ntp.org
+          FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org
       become: true
-      when: manage_services|default(true)|bool
 
-    - set_fact:
-        enable_services:
-          - NetworkManager
-          - docker
-          - libvirtd
-          - systemd-timesyncd
-          - pcscd
-
-    - name: enable services
-      service:
-        state: started
-        enabled: true
-        name: "{{ item }}"
-      with_items: "{{ enable_services }}"
+    - name: install lz4
+      package:
+        name: lz4
+        state: present
       become: true
-      when: manage_services|default(true)|bool
+
+    - name: use vz4 for mkinitcpio compression
+      lineinfile:
+        path: /etc/mkinitcpio.conf
+        regexp: '^#?COMPRESSION=.*$'
+        line: 'COMPRESSION="lz4"'
+      become: true
+      notify:
+        - rebuild initrd
+
+    - name: services
+      tags:
+        - services
+      block:
+        - set_fact:
+            disable_services:
+              - sshd.service
+
+        - name: disable services
+          service:
+            state: stopped
+            enabled: false
+            name: "{{ item }}"
+          with_items: "{{ disable_services }}"
+          become: true
+          when: manage_services|default(true)|bool
+
+        - set_fact:
+            enable_services:
+              - NetworkManager
+              - docker
+              - libvirtd
+              - systemd-timesyncd
+              - pcscd
+
+        - name: enable services
+          service:
+            state: started
+            enabled: true
+            name: "{{ item }}"
+          with_items: "{{ enable_services }}"
+          become: true
+          when: manage_services|default(true)|bool
 
     - name: get systemd boot target
       command: systemctl get-default
@@ -634,7 +637,6 @@
         become: true
 
       when:
-        - distro == 'archlinux'
         - machine.gpu is defined and machine.gpu == 'amd'
 
     - set_fact:
@@ -664,6 +666,8 @@
         apply:
           become: true
           become_user: "{{ user.name }}"
+          tags:
+            - user
       with_items: "{{ users }}"
       no_log: True # less spam
       loop_control:
