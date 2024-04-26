@@ -3,6 +3,7 @@ BindsTo=autostart.target
 PartOf=gpg-agent.service
 After=windowmanager.target
 After=gpg-agent.service
+ConditionPathExists=%t/features/gpg_agent
 
 [Service]
 ExecStart=/usr/bin/env yubikey-touch-detector -libnotify
