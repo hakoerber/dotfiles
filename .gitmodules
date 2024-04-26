@@ -1,6 +1,3 @@
-[submodule "contrib/vim-plug"]
-	path = contrib/vim-plug
-	url = https://github.com/junegunn/vim-plug
 [submodule "ansible_roles/firefox"]
 	path = ansible_roles/firefox
 	url = https://github.com/staticdev/ansible-role-firefox
@@ -13,3 +10,6 @@
 [submodule "pkgbuilds/portfolio-performance-bin"]
 	path = pkgbuilds/portfolio-performance-bin
 	url = https://aur.archlinux.org/portfolio-performance-bin.git
+[submodule "pkgbuilds/vim-plug"]
+	path = pkgbuilds/vim-plug
+	url = https://aur.archlinux.org/vim-plug.git

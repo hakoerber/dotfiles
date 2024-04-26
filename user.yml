@@ -251,25 +251,6 @@
     - dotfiles
 
 - block:
-  - name: create intermediate directories for vim-plug
-    file:
-      path: "{{ item }}"
-      state: directory
-    with_items:
-      - ~/.local/
-      - ~/.local/share/
-      - ~/.local/share/nvim/
-      - ~/.local/share/nvim/site/
-      - ~/.local/share/nvim/site/autoload/
-
-  - name: install vim-plug
-    copy:
-      src: contrib/vim-plug/plug.vim
-      dest: ~/.local/share/nvim/site/autoload/plug.vim
-      owner: "{{ user.name }}"
-      group: "{{ user.name }}"
-      mode: "0644"
-
   - name: install vim plugins
     command: nvim --headless +PlugInstall +qall
     register: vim_plugin_install

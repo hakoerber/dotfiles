@@ -231,6 +231,8 @@
                 source ./env
                 curl -sSf --proto '=https' https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg | gpg --import -
 
+            - name: vim-plug
+
       - set_fact:
           aur_packages: "{{ aur_packages|map(attribute='dependencies', default=[]) | flatten + aur_packages }}"
 
