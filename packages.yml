@@ -421,6 +421,10 @@ packages:
     mold:
       archlinux:
         - mold
+    arch-packaging:
+      archlinux:
+        - namcap
+        - devtools
 
   remove:
     mousepad:
