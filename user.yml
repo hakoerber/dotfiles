@@ -43,6 +43,7 @@
 - set_fact:
     undesired_user_services:
       - gpg-agent.socket
+      - gpg-agent.sock.service
       - gpg-agent-browser.socket
       - gpg-agent-ssh.socket
       - gpg-agent-extra.socket
