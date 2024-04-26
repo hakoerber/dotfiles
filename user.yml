@@ -288,7 +288,6 @@
           toolkit.legacyUserProfileCustomizations.stylesheets: true
           browser.contentblocking.category: "strict"
           browser.newtabpage.enabled: false
-          browser.shell.checkDefaultBrowser: false
           browser.startup.homepage: "about:blank"
           privacy.trackingprotection.enabled: true
           privacy.trackingprotection.socialtracking.enabled: true
@@ -297,7 +296,6 @@
           # Restore last session on startup
           # https://support.mozilla.org/de/questions/1235263
           browser.startup.page: 3
-          browser.sessionstore.resume_from_crash: true
 
           # "Play DRM-controlled content"
           media.eme.enabled: true
