@@ -417,6 +417,9 @@ packages:
       archlinux:
         - namcap
         - devtools
+    dron:
+      archlinux:
+        - drone-cli
 
   remove:
     mousepad:
