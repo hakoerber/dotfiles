@@ -1,0 +1,4 @@
+#!/usr/bin/env python3
+import sys, yaml, json
+
+json.dump([d for d in yaml.safe_load_all(sys.stdin)][-1], sys.stdout, indent=4)
