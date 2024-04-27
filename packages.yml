@@ -420,6 +420,9 @@ packages:
     dron:
       archlinux:
         - drone-cli
+    sqlite:
+      archlinux:
+        - sqlite
 
   remove:
     mousepad:
