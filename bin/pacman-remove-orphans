@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+pacman -Qtdq | xargs --no-run-if-empty sudo pacman -Rns
