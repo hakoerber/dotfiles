@@ -216,6 +216,7 @@ packages:
     rust:
       archlinux:
         - rustup
+        - rust-analyzer
         - cargo-edit
         - cargo-msrv
         - cargo-watch
