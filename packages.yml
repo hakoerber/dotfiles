@@ -413,6 +413,7 @@ packages:
         - ruff
     mold:
       archlinux:
+        - clang
         - mold
     arch-packaging:
       archlinux:
