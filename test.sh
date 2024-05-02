@@ -18,7 +18,9 @@ cleanup() {
     rm -rf "${tmpdir}"
     pids=()
     jobs -p | while IFS="" read -r line; do pids+=("$line"); done
-    kill "${pids[@]}"
+    if (( "${#pids[@]}" > 0)) ; then
+        kill "${pids[@]}"
+    fi
 }
 
 download_iso() {
