@@ -2,8 +2,17 @@ packages:
   list:
     kernel:
       archlinux:
+        - linux-zen
         - linux-zen-headers
         - linux-zen-docs
+        - linux-firmware
+    grub:
+      archlinux:
+        - grub
+        - efibootmgr
+    lvm:
+      archlinux:
+        - lvm2
     build-essentials:
       archlinux:
         - gcc
@@ -42,16 +51,15 @@ packages:
       archlinux:
         - ansible
         - ansible-language-server
+        - python-jmespath
     xdotool:
       archlinux: ["xdotool"]
     arandr:
       archlinux: ["arandr"]
-    borgbackup:
-      archlinux: ["borgbackup"]
     docker:
       archlinux: ["docker", "docker-compose"]
     font-awesome:
-      archlinux: ["ttf-font-awesome"]
+      archlinux: ["ttf-font-awesome", "otf-font-awesome"]
     font-inconsolata:
       archlinux: ["ttf-inconsolata"]
     font-dejavu:
@@ -62,7 +70,7 @@ packages:
       archlinux: ["noto-fonts-emoji"]
     git:
       # tk required for gitk
-      archlinux: ["git", "tk", "git-delta"]
+      archlinux: ["git", "tk", "git-delta", "git-filter-repo"]
     htop:
       archlinux: ["htop"]
     feh:
@@ -77,6 +85,8 @@ packages:
       archlinux: ["pluma"]
     neovim:
       archlinux: ["neovim", "python-pynvim"]
+    vim:
+      archlinux: ["vim"]
     network-manager-applet:
       archlinux: ["network-manager-applet"]
     pasystray:
@@ -104,9 +114,9 @@ packages:
     pdf:
       archlinux: ["ghostscript", "enscript"]
     pandoc:
-      archlinux: ["pandoc", "texlive-core", "texlive-fontsextra", "texlive-latexextra"]
+      archlinux: ["pandoc-cli", "texlive-basic", "texlive-fontsextra", "texlive-latexextra"]
     libvirt:
-      archlinux: ["virt-manager", "libvirt", "dnsmasq", "ebtables", "dmidecode", "virt-install", "virt-viewer", "libguestfs", "edk2-ovmf"]
+      archlinux: ["virt-manager", "libvirt", "dnsmasq", "iptables-nft", "dmidecode", "virt-install", "virt-viewer", "libguestfs", "edk2-ovmf"]
     firefox:
       archlinux: ["firefox"]
     ranger:
@@ -125,7 +135,7 @@ packages:
       archlinux: ["xcompmgr"]
     python:
       archlinux:
-        - python3
+        - python
         - python-lsp-server
     python-modules:
       archlinux:
@@ -171,7 +181,7 @@ packages:
     gpg:
       archlinux: ["gnupg", "paperkey", "yubikey-manager", "yubikey-touch-detector"]
     networkmanager:
-      archlinux: ["networkmanager"]
+      archlinux: ["networkmanager", "capnet-assist"]
     pulseaudio:
       archlinux:
         - pulseaudio
@@ -301,7 +311,7 @@ packages:
     php:
       archlinux: ["php"]
     exa:
-      archlinux: ["exa"]
+      archlinux: ["eza"]
     just:
       archlinux: ["just"]
     ripgrep:
@@ -419,12 +429,17 @@ packages:
       archlinux:
         - namcap
         - devtools
+        - arch-install-scripts
+        - archiso
     dron:
       archlinux:
         - drone-cli
     sqlite:
       archlinux:
         - sqlite
+    css:
+      archlinux:
+        - vscode-css-languageserver
 
   remove:
     mousepad:
@@ -443,3 +458,5 @@ packages:
       archlinux: ["openvpn"]
     bluetooth:
       archlinux: ["bluez", "bluez-tools", "blueman"]
+    borgbackup:
+k     archlinux: ["borg"]
