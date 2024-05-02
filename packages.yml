@@ -431,7 +431,7 @@ packages:
         - devtools
         - arch-install-scripts
         - archiso
-    dron:
+    drone:
       archlinux:
         - drone-cli
     sqlite:
@@ -459,4 +459,4 @@ packages:
     bluetooth:
       archlinux: ["bluez", "bluez-tools", "blueman"]
     borgbackup:
-k     archlinux: ["borg"]
+      archlinux: ["borg"]
