@@ -58,13 +58,6 @@ block = "net"
 format = " $icon{ $signal_strength|}{ $ssid | }"
 
 [[block]]
-block = "load"
-format = " $icon $1m.eng(w:4) "
-warning = 4
-critical = 1000
-interval = 1
-
-[[block]]
 block = "battery"
 interval = 10
 format = " $icon $percentage $time "
