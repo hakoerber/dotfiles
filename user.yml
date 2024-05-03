@@ -45,7 +45,7 @@
 
 - name: disable undesired services
   tags:
-    - undesired-services
+    - user:undesired-services
   block:
     - set_fact:
         undesired_user_services:
@@ -92,7 +92,7 @@
 
 - name: configure dotfiles
   tags:
-    - dotfiles
+    - user:dotfiles
   block:
     - name: load dotfile list
       include_vars:
@@ -262,7 +262,7 @@
 
 - name: vim
   tags:
-    - vim
+    - user:vim
   block:
     - name: install vim plugins
       command: nvim --headless +PlugInstall +qall
@@ -276,7 +276,7 @@
 
 - name: firefox
   tags:
-    - firefox
+    - user:firefox
   block:
     - name: create firefox directories
       firefox_profile:
@@ -369,7 +369,7 @@
 
 - name: handle autostart units
   tags:
-    - autostart
+    - user:autostart
   block:
     - name: create systemd user directory
       file:
@@ -415,7 +415,7 @@
 
 - name: gpg
   tags:
-    - gpg
+    - user:gpg
   block:
     - name: import gpg key
       command: gpg --import ./gpgkeys/{{ user.gpg_key.email }}.gpg.asc
