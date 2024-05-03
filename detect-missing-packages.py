@@ -16,4 +16,4 @@ for appname, appconfig in apps['packages']['list'].items():
                 missing_config[distro] = []
             missing_config[distro].append(appname)
 
-print(yaml.dump(missing_config))
+print(yaml.dump(missing_config), end="")
