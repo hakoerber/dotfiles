@@ -169,10 +169,6 @@ gitmaster() {
     git stash pop
 }
 
-_remote() {
-    [[ -n "$SSH_CONNECTION" ]]
-}
-
 cd() {
     builtin cd "$@" && ls
 }
@@ -371,30 +367,15 @@ tmp() {
     cd "$(mktemp -d)"
 }
 
-autoload -Uz vcs_info
-
-_vcsbase="%{$fg[red]%}[%r] %{$fg[blue]%}[%{%B%}%b%{$fg[red]%}%m%{$fg[blue]%}] %{$fg[red]%}%{%B%}%c%u"
-
-zstyle ':vcs_info:*' stagedstr 'I'
-zstyle ':vcs_info:*' unstagedstr 'M'
-
-zstyle ':vcs_info:*' enable git
-zstyle ':vcs_info:*' check-for-changes true
-zstyle ':vcs_info:*' get-revision true
-
-zstyle ':vcs_info:git*' formats "$_vcsbase"
-zstyle ':vcs_info:git*' actionformats "%{$fg[red]%}(%a) $_vcsbase"
-
-zstyle ':vcs_info:git*+set-message:*' hooks git-untracked git-st git-remotebranch
-
 +vi-git-untracked() {
     if [[ $(git rev-parse --is-inside-work-tree 2> /dev/null) == 'true' ]] && \
     [[ $(git ls-files --other --directory --exclude-standard | sed q | wc -l | tr -d ' ') == 1 ]] ; then
-        hook_com[unstaged]+='?%f'
+        hook_com[unstaged]+='+U'
     fi
 }
 
-+vi-git-st() {
++vi-git-remotebranch() {
+    local remote
     local ahead behind
     local -a gitstatus
 
@@ -404,43 +385,46 @@ zstyle ':vcs_info:git*+set-message:*' hooks git-untracked git-st git-remotebranc
     behind=$(git rev-list HEAD..${hook_com[branch]}@{upstream} 2>/dev/null | wc -l)
     (( $behind )) && gitstatus+=( "-${behind}" )
 
-    hook_com[misc]+=${(j:/:)gitstatus}
-}
-
-+vi-git-remotebranch() {
-    local remote
-
     remote=${$(git rev-parse --verify ${hook_com[branch]}@{upstream} \
         --symbolic-full-name 2>/dev/null)/refs\/remotes\/}
 
     if [[ -n ${remote} ]] ; then
-        hook_com[branch]="${hook_com[branch]} %b%{$fg[magenta]%}<${remote}>"
+        hook_com[branch]="${hook_com[branch]}:%b%{$fg[magenta]%}${remote}${(j:/:)gitstatus}${reset_color}"
     fi
 }
+
+setopt PROMPT_SUBST
+
+autoload -Uz vcs_info
+
+zstyle ':vcs_info:*' stagedstr 'I'
+zstyle ':vcs_info:*' unstagedstr 'M'
+
+zstyle ':vcs_info:*' enable git
+zstyle ':vcs_info:*' check-for-changes true
+zstyle ':vcs_info:*' get-revision true
+
+zstyle ':vcs_info:*' formats "[%b] [%c%u]"
+zstyle ':vcs_info:*' actionformats '%a '
+
+zstyle ':vcs_info:git*+set-message:*' hooks git-untracked git-remotebranch
 
 precmd() {
     vcs_info
 }
 
-autoload -Uz vcs_info
-zstyle ':vcs_info:*' enable git hg
-zstyle ':vcs_info:*' check-for-changes true
-
-zstyle ':vcs_info:git*' formats "%{${fg[cyan]}%}[%{${fg[green]}%}%s%{${fg[cyan]}%}][%{${fg[blue]}%}%r/%S%%{${fg[cyan]}%}][%{${fg[blue]}%}%b%{${fg[yellow]}%}%m%u%c%{${fg[cyan]}%}]%{$reset_color%}"
-
-_topstr='%{$fg[green]%}%n@%m%{$fg[white]%}  ─  %{%B$fg[yellow]%}%~%{%b%} ${vcs_info_msg_0_}%{$fg[white]%} '
-botstr='%B${PINFO}%#%b '
-
-if _remote ; then
-    _topstr="%{$fg[red]%}[remote]%{$fg[white]%} ${_topstr}"
+if [[ DARKMODE == "true" ]] ; then
+    c=white
+else
+    c=black
 fi
 
-setopt prompt_subst
+_topstr='%{$fg[green]%}%n@%m%{$fg[$c]%}  ─  %{%B$fg[yellow]%}%3~%{%b%} ${vcs_info_msg_0_}%{$fg[$c]%} '
+botstr='%B${PINFO}%(!.#.$)%b '
 
-
-PROMPT='%{$fg[white]%}┌─ '"${_topstr}"'
+PROMPT='%{$fg[$c]%}┌─ '"${_topstr}"'
 └─ '"${botstr}"
-RPROMPT="%{$fg[cyan]%}%*%{$fg[white]%} ─ [%?]"
+RPROMPT="%{$fg[cyan]%}%*%{$fg[$c]%} ─ [%?]"
 
 autoload zkbd
 
