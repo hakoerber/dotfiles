@@ -145,7 +145,7 @@ packages:
     black:
       archlinux: ["python-black"]
     xbacklight:
-      archlinux: ["xorg-xbacklight"]
+      archlinux: ["acpilight"]
     wireshark:
       archlinux: ["wireshark-cli", "wireshark-qt"]
     nmap:

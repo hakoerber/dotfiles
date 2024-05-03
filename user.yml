@@ -8,6 +8,7 @@
       - sudonopw
       - games
       - kvm
+      - video
 
 - name: create user group
   group:
