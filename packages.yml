@@ -68,6 +68,11 @@ packages:
       archlinux: ["ttf-linux-libertine"]
     font-emoji:
       archlinux: ["noto-fonts-emoji"]
+    fonts:
+      archlinux:
+        - noto-fonts
+        - noto-fonts-extra
+        - noto-fonts-cjk
     git:
       # tk required for gitk
       archlinux: ["git", "tk", "git-delta", "git-filter-repo"]
