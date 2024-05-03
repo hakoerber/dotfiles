@@ -1,33 +1,36 @@
-- set_fact:
-    user_groups:
-      - libvirt
-      - wheel
-      - vboxusers
-      - wireshark
-      - docker
-      - sudonopw
-      - games
-      - kvm
-      - video
+- name: base user configuration
+  tags: [user:base]
+  block:
+    - set_fact:
+        user_groups:
+          - libvirt
+          - wheel
+          - vboxusers
+          - wireshark
+          - docker
+          - sudonopw
+          - games
+          - kvm
+          - video
 
-- name: create user group
-  group:
-    name: "{{ user.name }}"
-    state: present
-  become: true
-  become_user: root
+    - name: create user group
+      group:
+        name: "{{ user.name }}"
+        state: present
+      become: true
+      become_user: root
 
-- name: create user
-  user:
-    name: "{{ user.name }}"
-    state: present
-    home: "/home/{{ user.name }}"
-    create_home: true
-    groups: "{{ [user.name, 'dotfiles'] + user_groups }}"
-    shell: /usr/bin/zsh
-    skeleton: /dev/null
-  become: true
-  become_user: root
+    - name: create user
+      user:
+        name: "{{ user.name }}"
+        state: present
+        home: "/home/{{ user.name }}"
+        create_home: true
+        groups: "{{ [user.name, 'dotfiles'] + user_groups }}"
+        shell: /usr/bin/zsh
+        skeleton: /dev/null
+      become: true
+      become_user: root
 
 - name: create systemd directory
   file:
