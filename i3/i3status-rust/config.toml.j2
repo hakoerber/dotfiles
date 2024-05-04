@@ -55,7 +55,7 @@ update = true
 
 [[block]]
 block = "net"
-format = " $icon{ $signal_strength|}{ $ssid | }"
+format = " $icon{ $signal_strength|}{ $ssid.str(max_width:10) | }"
 
 [[block]]
 block = "battery"
