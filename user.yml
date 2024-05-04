@@ -43,30 +43,6 @@
     - "/home/{{ user.name }}/.config/systemd/"
     - "/home/{{ user.name }}/.config/systemd/user/"
 
-- name: disable undesired services
-  tags:
-    - user:undesired-services
-  block:
-    - set_fact:
-        undesired_user_services:
-          - gpg-agent.socket
-          - gpg-agent.sock.service
-          - gpg-agent-browser.socket
-          - gpg-agent-ssh.socket
-          - gpg-agent-extra.socket
-          - xdg-user-dirs-update.service
-          - gnome-keyring-daemon.service
-
-    # systemd needs a login session, machinectl handles that for us
-    - name: stop and mask undesired services
-      command:
-        cmd: machinectl --quiet --uid {{ user.name }} shell -- .host /usr/bin/env systemctl --user mask --now "{{ item }}"
-      become: true
-      become_user: root
-      register: undesired_service_cmd
-      changed_when: undesired_service_cmd.stderr != ""
-      loop: "{{ undesired_user_services }}"
-
 - name: create directory for getty autologin
   file:
     state: directory
