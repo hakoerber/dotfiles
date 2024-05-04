@@ -445,6 +445,9 @@ packages:
     css:
       archlinux:
         - vscode-css-languageserver
+    watchexec:
+      archlinux:
+        - watchexec
 
   remove:
     mousepad:
