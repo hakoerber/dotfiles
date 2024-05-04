@@ -238,6 +238,8 @@
 
               - name: vim-plug
 
+              - name: terraform-ls-bin
+
         - set_fact:
             aur_packages: "{{ aur_packages|map(attribute='dependencies', default=[]) | flatten + aur_packages }}"
 

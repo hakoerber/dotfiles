@@ -13,3 +13,6 @@
 [submodule "pkgbuilds/vim-plug"]
 	path = pkgbuilds/vim-plug
 	url = https://aur.archlinux.org/vim-plug.git
+[submodule "pkgbuilds/terraform-ls-bin"]
+	path = pkgbuilds/terraform-ls-bin
+	url = https://aur.archlinux.org/terraform-ls-bin.git
