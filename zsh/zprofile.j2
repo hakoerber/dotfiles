@@ -4,15 +4,7 @@ if [[ "$(passwd --status $USER | awk '{print $2}')" =~ ^(NP|L)$ ]] ; then
     while ! sudo passwd $USER ; do ; done
 fi
 
-_path=(
-    "$HOME/bin"
-    "$HOME/.cargo/bin"
-)
-
-for part in ${_path[@]} ; do
-    PATH="${part}:$PATH"
-done
-export PATH
+export PATH="${PATH}:${HOME}/bin"
 
 export EDITOR="helix"
 export VISUAL="helix"
@@ -40,6 +32,9 @@ export GNUPGHOME="$HOME/.gnupg"
 export PASSWORD_STORE_DIR="$HOME/.password-store"
 
 export GTK2_RC_FILES=${XDG_CONFIG_HOME}/gtkrc-2.0
+
+export CARGO_HOME="${XDG_STATE_HOME}/cargo"
+export PATH="${PATH}:${CARGO_HOME}/bin"
 
 umask 0022
 
