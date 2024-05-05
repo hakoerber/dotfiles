@@ -410,11 +410,7 @@ precmd() {
     vcs_info
 }
 
-if [[ -e "$XDG_RUNTIME_DIR/darkmode" ]] ; then
-    mainc=white
-else
-    mainc=black
-fi
+mainc=white
 
 _topstr='%F{green}%n%F{$mainc} ─ %B%F{yellow}%5~%b ${vcs_info_msg_0_}%F{$mainc} '
 botstr='%B${PINFO}%(!.#.$)%b '
