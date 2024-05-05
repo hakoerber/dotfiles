@@ -1,15 +1,7 @@
-[[ -z "$PS1" ]] && return
-
 {% if user.gpg_agent %}
 export GPG_TTY=$(tty)
 export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
 {% endif %}
-
-if [[ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] ; then
-    source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-elif [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] ; then
-    source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-fi
 
 {% if user.ssh_agent %}
 if ! pgrep -u "$USER" ssh-agent > /dev/null ; then
@@ -389,7 +381,7 @@ tmp() {
         --symbolic-full-name 2>/dev/null)/refs\/remotes\/}
 
     if [[ -n ${remote} ]] ; then
-        hook_com[branch]="${hook_com[branch]}:%b%{$fg[magenta]%}${remote}${(j:/:)gitstatus}${reset_color}"
+        hook_com[branch]="%F{cyan}${hook_com[branch]}%F{$mainc}:%b%F{magenta}${remote}%F{yellow}${(j:/:)gitstatus}%F{$mainc}"
     fi
 }
 
@@ -413,18 +405,18 @@ precmd() {
     vcs_info
 }
 
-if [[ DARKMODE == "true" ]] ; then
-    c=white
+if [[ -e "$XDG_RUNTIME_DIR/darkmode" ]] ; then
+    mainc=white
 else
-    c=black
+    mainc=black
 fi
 
-_topstr='%{$fg[green]%}%n@%m%{$fg[$c]%}  ─  %{%B$fg[yellow]%}%3~%{%b%} ${vcs_info_msg_0_}%{$fg[$c]%} '
+_topstr='%F{green}%n%F{$mainc} ─ %B%F{yellow}%4~%b ${vcs_info_msg_0_}%F{$mainc} '
 botstr='%B${PINFO}%(!.#.$)%b '
 
-PROMPT='%{$fg[$c]%}┌─ '"${_topstr}"'
+PROMPT='%F{$mainc}┌─ '"${_topstr}"'
 └─ '"${botstr}"
-RPROMPT="%{$fg[cyan]%}%*%{$fg[$c]%} ─ [%?]"
+RPROMPT='%b%F{cyan}%*%F{$mainc} [%?]'
 
 autoload zkbd
 
@@ -455,5 +447,10 @@ bindkey '^i' expand-or-complete-prefix
 
 export FZF_DEFAULT_OPTS='--height 50% --border'
 eval "$(fzf --zsh)"
+
+# These have to be sourced at the end, see
+# https://github.com/zsh-users/zsh-syntax-highlighting?tab=readme-ov-file#why-must-zsh-syntax-highlightingzsh-be-sourced-at-the-end-of-the-zshrc-file
+source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 {% endraw %}
