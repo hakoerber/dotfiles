@@ -88,6 +88,8 @@ dotfiles:
     to: scripts
   - from: helix/config.toml
     to: .config/helix/config.toml
+  - from: helix/languages.toml
+    to: .config/helix/languages.toml
 dotfiles_remove:
   - .gitconfig
   - .vimrc
