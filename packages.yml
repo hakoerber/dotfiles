@@ -113,7 +113,7 @@ packages:
     tmux:
       archlinux: ["tmux"]
     zsh:
-      archlinux: ["zsh", "zsh-syntax-highlighting", "zsh-autosuggestions", "zsh-completions"]
+      archlinux: ["zsh", "zsh-syntax-highlighting", "zsh-completions"]
     zathura:
       archlinux: ["zathura", "zathura-pdf-poppler"]
     pdf:
