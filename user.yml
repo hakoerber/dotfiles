@@ -343,6 +343,21 @@
       loop_control:
         label: "{{ item.profile_path }}"
 
+- name: handle user units
+  tags:
+    - user:units
+  block:
+    - name: link user service files
+      file:
+        state: link
+        force: true
+        follow: false
+        path: "/home/{{ user.name }}/.config/systemd/user/{{ item | basename }}"
+        src: "{{ item }}"
+        owner: "{{ user.name }}"
+        group: "{{ user.name }}"
+      with_fileglob: /var/lib/dotfiles/services/*
+
 - name: handle autostart units
   tags:
     - user:autostart

@@ -1,0 +1,9 @@
+[Unit]
+After=windowmanager.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env switch-color-mode light
+ExecStop=/usr/bin/env switch-color-mode dark
+RemainAfterExit=true
+PassEnvironment=DISPLAY

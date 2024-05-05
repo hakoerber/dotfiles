@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -o nounset
+
+set -x
+
+apply() {
+    local mode="${1}"
+
+    case "${mode}" in
+        dark)
+            theme=monokai
+            ;;
+        light)
+            theme=github_light
+            ;;
+    esac
+
+    sed -i "s#themes/.*\.toml#themes/${theme}.toml#" "${XDG_CONFIG_HOME}/alacritty/config.toml"
+
+    sed -i "s#theme = .*\$#theme = \"${theme}\"#" "${XDG_CONFIG_HOME}/helix/config.toml"
+
+    pkill -SIGUSR1 helix
+
+    printf '%s' "${mode}" > "${XDG_RUNTIME_DIR}"/color_mode
+}
+
+case "${1:-}" in
+    dark)
+        apply dark
+        ;;
+    light)
+        apply light
+        ;;
+    *)
+        exit 1
+        ;;
+esac
