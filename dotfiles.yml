@@ -44,8 +44,7 @@ dotfiles:
   - from: vim/vimrc
     to: .config/nvim/init.vim
   - from: x/Xresources
-    to: .Xresources
-    template: true
+    to: .config/Xresources
   - from: x/xinitrc
     to: .xinitrc
   - from: zsh/zprofile
