@@ -27,8 +27,6 @@ export XDG_CACHE_HOME="$HOME/.cache"
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_STATE_HOME="$HOME/.local/state"
 
-export GNUPGHOME="$HOME/.gnupg"
-
 export PASSWORD_STORE_DIR="$HOME/.password-store"
 
 export GTK2_RC_FILES=${XDG_CONFIG_HOME}/gtkrc-2.0
@@ -43,6 +41,8 @@ export ANSIBLE_CONFIG="${XDG_CONFIG_HOME}/ansible.cfg"
 export ANSIBLE_GALAXY_CACHE_DIR="${XDG_CACHE_HOME}/ansible/galaxy_cache"
 
 export DOCKER_CONFIG="$XDG_CONFIG_HOME"/docker
+
+export GNUPGHOME="$XDG_STATE_HOME"/gnupg
 
 umask 0022
 

@@ -1,6 +1,4 @@
 empty_directories:
-  - name: .gnupg
-    mode: '0700'
   - name: .config/nvim
   - name: .config/rofi
   - name: .config/gtk-3.0
@@ -21,12 +19,12 @@ dotfiles:
     to: .config/git/config
     template: true
   - from: gnupg/dirmngr.conf
-    to: .gnupg/dirmngr.conf
+    to: .local/state/gnupg/dirmngr.conf
   - from: gnupg/gpg-agent.conf
-    to: .gnupg/gpg-agent.conf
+    to: .local/state/gnupg/gpg-agent.conf
     template: true
   - from: gnupg/gpg.conf
-    to: .gnupg/gpg.conf
+    to: .local/state/gnupg/gpg.conf
     template: true
   - from: i3/config
     to: .config/i3/config
