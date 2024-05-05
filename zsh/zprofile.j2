@@ -17,7 +17,9 @@ export LANG=en_US.UTF-8
 export LC_TIME=de_DE.UTF-8
 export LC_COLLATE=C
 
-export GOPATH=~/.go
+export GOPATH="$XDG_DATA_HOME"/go
+export GOMODCACHE="$XDG_CACHE_HOME"/go/mod 
+
 export PATH="$PATH:$(go env GOPATH)/bin"
 
 export QT_QPA_PLATFORMTHEME=qt5ct
