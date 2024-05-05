@@ -14,6 +14,7 @@ empty_directories:
   - name: .config/tmux
   - name: .config/i3
   - name: .config/zsh
+  - name: .config/alacritty
 dotfiles:
   - from: git/gitconfig
     to: .config/git/config
@@ -66,7 +67,7 @@ dotfiles:
   - from: vscodium/keybindings.json
     to: .config/VSCodium/User/keybindings.json
   - from: alacritty/alacritty.toml
-    to: .config/alacritty.toml
+    to: .config/alacritty/config.toml
     template: true
   - from: rofi/config
     to: .config/rofi/config
