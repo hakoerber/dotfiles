@@ -69,6 +69,8 @@ dotfiles:
   - from: alacritty/alacritty.toml
     to: .config/alacritty/config.toml
     template: true
+  - from: alacritty/themes
+    to: .config/alacritty/themes
   - from: rofi/config
     to: .config/rofi/config
   - from: gtk/gtk-3.0.ini
