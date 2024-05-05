@@ -15,6 +15,7 @@ empty_directories:
   - name: .config/git
   - name: .config/tmux
   - name: .config/i3
+  - name: .config/zsh
 dotfiles:
   - from: git/gitconfig
     to: .config/git/config
@@ -48,11 +49,13 @@ dotfiles:
   - from: x/xinitrc
     to: .xinitrc
   - from: zsh/zprofile
-    to: .zprofile
+    to: .config/zsh/.zprofile
     template: true
   - from: zsh/zshrc
-    to: .zshrc
+    to: .config/zsh/.zshrc
     template: true
+  - from: zsh/zshenv
+    to: .zshenv
   - from: dunst/dunstrc
     to: .config/dunstrc
     template: true
