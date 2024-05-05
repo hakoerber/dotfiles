@@ -36,6 +36,8 @@ export GTK2_RC_FILES=${XDG_CONFIG_HOME}/gtkrc-2.0
 export CARGO_HOME="${XDG_STATE_HOME}/cargo"
 export PATH="${PATH}:${CARGO_HOME}/bin"
 
+export PASSWORD_STORE_DIR="$XDG_STATE_HOME"/pass
+
 umask 0022
 
 {% set env = machine.environment | combine(user.environment) %}
