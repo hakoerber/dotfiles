@@ -45,7 +45,7 @@ dotfiles:
   - from: x/Xresources
     to: .config/Xresources
   - from: x/xinitrc
-    to: .xinitrc
+    to: .config/xinitrc
   - from: zsh/zprofile
     to: .config/zsh/.zprofile
     template: true
