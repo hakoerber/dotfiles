@@ -3,7 +3,6 @@
 declare -a aurdeps=()
 
 proctected=(
-  nvidia-dkms
   intel-ucode
   amd-ucode
   base

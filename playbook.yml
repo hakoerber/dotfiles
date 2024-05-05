@@ -607,39 +607,55 @@
           permit nopass nolog setenv {PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin} :sudonopw
       become: true
 
-    - block:
-      - name: install AMDGPU packages
-        package:
-          name:
-            - mesa
-            - lib32-mesa
-            - xf86-video-amdgpu
-            - vulkan-radeon
-            - lib32-vulkan-radeon
-            - libva-mesa-driver
-            - lib32-libva-mesa-driver
-            - mesa-vdpau
-            - lib32-mesa-vdpau
-          state: present
-        become: true
+    - name: gpu configuration
+      tags:
+        - gpu
+      block:
+        - name: AMD configuration
+          when: machine.gpu == 'amd'
+          block:
+            - name: install AMDGPU packages
+              package:
+                name:
+                  - mesa
+                  - lib32-mesa
+                  - xf86-video-amdgpu
+                  - vulkan-radeon
+                  - lib32-vulkan-radeon
+                  - libva-mesa-driver
+                  - lib32-libva-mesa-driver
+                  - mesa-vdpau
+                  - lib32-mesa-vdpau
+                state: present
+              become: true
 
-      - name: set AMDGPU options
-        copy:
-          owner: root
-          group: root
-          mode: "0600"
-          dest: /etc/X11/xorg.conf.d/20-amdgpu.conf
-          content: |
-            Section "Device"
-                Identifier "AMD"
-                Driver "amdgpu"
-                Option "VariableRefresh" "true"
-                Option "TearFree" "true"
-            EndSection
-        become: true
+            - name: set AMDGPU options
+              copy:
+                owner: root
+                group: root
+                mode: "0600"
+                dest: /etc/X11/xorg.conf.d/20-amdgpu.conf
+                content: |
+                  Section "Device"
+                      Identifier "AMD"
+                      Driver "amdgpu"
+                      Option "VariableRefresh" "true"
+                      Option "TearFree" "true"
+                  EndSection
+              become: true
 
+        - name: Nvidia configuration
+          when: machine.gpu == 'nvidia'
+          block:
+            - name: install nouveau packages
+              package:
+                name:
+                  - mesa
+                  - lib32-mesa
+                state: present
+              become: true
       when:
-        - machine.gpu is defined and machine.gpu == 'amd'
+        - machine.gpu is defined
 
     - set_fact:
         users: "{{ machine.users }}"
