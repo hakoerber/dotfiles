@@ -34,7 +34,7 @@ packages:
     doas:
       archlinux: ["opendoas"]
     apt:
-      archlinux: [""]
+      archlinux: ["apt"]
     xorg:
       archlinux:
         - xorg-server
