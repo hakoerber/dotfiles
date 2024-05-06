@@ -200,13 +200,6 @@
           vars:
             query: "{{ 'list.*.%s[]'|format(distro) }}"
 
-        - name: install machine-specific packages
-          package:
-            name: "{{ machine.packages }}"
-            state: present
-          when: machine.packages is defined
-          become: true
-
     - name: aur
       tags:
         - aur
