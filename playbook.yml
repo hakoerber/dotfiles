@@ -182,6 +182,14 @@
           vars:
             query: "{{ 'list.*.%s[]'|format(distro) }}"
 
+        - name: remove unconfigured packages
+          script:
+            cmd: ./remove-unconfigured-packages.sh --noconfirm
+          register: unconfigured_packages_cmd
+          failed_when: unconfigured_packages_cmd.rc not in (0, 123)
+          changed_when: unconfigured_packages_cmd.rc == 123
+          become: true
+
     - name: aur
       tags:
         - aur

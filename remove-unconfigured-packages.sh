@@ -37,6 +37,7 @@ readarray -d $'\0' -t packages_to_remove < <(comm --zero-terminated -13 \
   done) 
 
 if (( "${#packages_to_remove}" > 0 )) ; then
-    sudo pacman -Rcns "${packages_to_remove[@]}"
+    sudo pacman -Rcns "${packages_to_remove[@]}" "${@}" || exit $?
+    exit 123
 fi
 
