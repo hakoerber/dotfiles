@@ -142,6 +142,9 @@ packages:
       archlinux:
         - python
         - python-lsp-server
+        - bandit
+        - python-pyflakes
+        - python-pylint
     python-modules:
       archlinux:
         - python-ruamel-yaml
