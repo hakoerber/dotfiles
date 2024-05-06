@@ -75,7 +75,7 @@ command_state = "[[ $($HOME/.i3/scripts/presentation-mode status) == on ]] && ec
 block = "toggle"
 format = "   $icon "
 command_on = "systemctl --user start color-theme-light"
-command_off = "systemctl --user stop color-theme-light"
+command_off = "systemctl --user start color-theme-dark"
 command_state = "[[ $(systemctl --user is-active color-theme-light) == active ]] && echo active"
 
 [[block]]
