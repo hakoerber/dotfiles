@@ -16,3 +16,6 @@
 [submodule "pkgbuilds/terraform-ls-bin"]
 	path = pkgbuilds/terraform-ls-bin
 	url = https://aur.archlinux.org/terraform-ls-bin.git
+[submodule "pkgbuilds/grm-git"]
+	path = pkgbuilds/grm-git
+	url = https://aur.archlinux.org/grm-git.git

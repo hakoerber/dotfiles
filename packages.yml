@@ -450,3 +450,9 @@ packages:
   watchexec:
     archlinux:
       - watchexec
+  postgresql:
+    archlinux:
+      - postgresql
+  tokei:
+    archlinux:
+      - tokei
