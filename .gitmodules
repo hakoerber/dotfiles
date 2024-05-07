@@ -19,3 +19,6 @@
 [submodule "pkgbuilds/grm-git"]
 	path = pkgbuilds/grm-git
 	url = https://aur.archlinux.org/grm-git.git
+[submodule "pkgbuilds/screencfg-git"]
+	path = pkgbuilds/screencfg-git
+	url = https://aur.archlinux.org/screencfg-git.git

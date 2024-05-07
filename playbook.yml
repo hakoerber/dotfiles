@@ -211,19 +211,17 @@
                   source ./env
                   curl -sSf --proto '=https' https://keys.openpgp.org/vks/v1/by-fingerprint/E46E6F8FF02E4C83569084589239277F560C95AC | gpg --import -
 
-              - name: nodejs-intelephense
-
               - name: spotify
                 preexec: |
                   #!/usr/bin/env bash
                   source ./env
                   curl -sSf --proto '=https' https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg | gpg --import -
 
+              - name: nodejs-intelephense
               - name: vim-plug
-
               - name: terraform-ls-bin
-
               - name: grm-git
+              - name: screencfg-git
 
         - set_fact:
             aur_packages: "{{ aur_packages|map(attribute='dependencies', default=[]) | flatten + aur_packages }}"
