@@ -387,6 +387,8 @@ tmp() {
 
     if [[ -n ${remote} ]] ; then
         hook_com[branch]="%F{cyan}${hook_com[branch]}%F{$mainc}:%b%F{magenta}${remote}%F{yellow}${(j:/:)gitstatus}%F{$mainc}"
+    else
+        hook_com[branch]="%F{cyan}${hook_com[branch]}%f"
     fi
 }
 
