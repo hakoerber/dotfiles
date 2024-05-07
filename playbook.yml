@@ -223,6 +223,8 @@
 
               - name: terraform-ls-bin
 
+              - name: grm-git
+
         - set_fact:
             aur_packages: "{{ aur_packages|map(attribute='dependencies', default=[]) | flatten + aur_packages }}"
 
