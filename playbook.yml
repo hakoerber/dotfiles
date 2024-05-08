@@ -159,11 +159,6 @@
           include_vars:
             file: packages.yml
 
-        - name: force-update iptables to iptables-nft on arch
-          shell: pacman -Q iptables && yes | pacman -S iptables-nft
-          changed_when: false
-          become: true
-
         - set_fact:
             defined_packages: "{{ packages }}"
 
