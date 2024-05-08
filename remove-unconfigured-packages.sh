@@ -19,7 +19,7 @@ packages_to_remove=()
 
 readarray -d $'\0' -t packages_to_remove < <(comm --zero-terminated -13 \
   <(cat \
-    <(<packages.yml yaml2json | jq --raw-output0 '.packages | map(.archlinux) | flatten[]') \
+    <(<packages.yml yaml2json | jq --raw-output0 'map(.archlinux) | flatten[]') \
     <(for dep in "${aurdeps[@]}" ; do printf '%s\0' "${dep}" ; done) \
   | sort -zu) \
   <(pacman -Qq --explicit | xargs -I "{}" printf '%s\0' "{}" | sort -zu) \

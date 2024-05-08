@@ -158,12 +158,10 @@
         - name: load package list
           include_vars:
             file: packages.yml
+            name: defined_packages
 
         - set_fact:
-            defined_packages: "{{ packages }}"
-
-        - set_fact:
-            distro_packages: "{{ packages|json_query('*.%s'|format(distro)) }}"
+            distro_packages: "{{ defined_packages|json_query('*.%s'|format(distro)) }}"
 
         - name: check list
           assert:
@@ -171,7 +169,7 @@
 
         - name: install packages
           package:
-            name: "{{ packages|json_query(query) }}"
+            name: "{{ defined_packages|json_query(query) }}"
             state: present
           become: true
           vars:
