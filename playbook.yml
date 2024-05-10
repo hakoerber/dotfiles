@@ -173,7 +173,7 @@
             state: present
           become: true
           vars:
-            query: "{{ 'list.*.%s[]'|format(distro) }}"
+            query: "{{ '*.%s[]'|format(distro) }}"
 
         - name: remove unconfigured packages
           script:
