@@ -15,6 +15,12 @@ gpu:
     - lib32-libva-mesa-driver
     - mesa-vdpau
     - lib32-mesa-vdpau
+    - vulkan-headers
+    - vulkan-tools
   nvidia:
     - mesa
     - lib32-mesa
+    - vulkan-nouveau
+    - lib32-vulkan-nouveau
+    - vulkan-headers
+    - vulkan-tools
