@@ -8,6 +8,12 @@ proctected=(
   base
   java-runtime-common
   jdk17-openjdk
+  lib32-vulkan-radeon
+  vulkan-radeon
+  libva-mesa-driver
+  mesa-vdpau
+  lib32-mesa-vdpau
+  vulkan-mesa-layers
 )
 
 for pkgbuild in pkgbuilds/*/PKGBUILD ; do
