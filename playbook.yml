@@ -10,12 +10,6 @@
       tags:
         - always
 
-    - name: read variables
-      include_vars:
-        file: variables.yml
-      tags:
-        - always
-
     - set_fact:
         distro: "{{ ansible_distribution|lower }}"
       tags:
