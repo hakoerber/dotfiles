@@ -458,3 +458,31 @@ tokei:
 whois:
   archlinux:
     - whois # also contains mkpasswd
+encfs:
+  archlinux:
+    - encfs
+digikam:
+  archlinux:
+    - digikam
+evince:
+  archlinux:
+    - evince
+iftop:
+  archlinux:
+    - iftop
+inkscape:
+  archlinux:
+    - inkscape
+android:
+  archlinux:
+    - android-tools
+audacity:
+  archlinux:
+    - audacity
+calibre:
+  archlinux:
+    - calibre
+deluge:
+  archlinux:
+    - deluge
+    - deluge-gtk
