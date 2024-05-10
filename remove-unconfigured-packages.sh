@@ -14,6 +14,7 @@ proctected=(
   mesa-vdpau
   lib32-mesa-vdpau
   vulkan-mesa-layers
+  lib32-libva-mesa-driver
 )
 
 for pkgbuild in pkgbuilds/*/PKGBUILD ; do
