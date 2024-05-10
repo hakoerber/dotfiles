@@ -455,3 +455,6 @@ postgresql:
 tokei:
   archlinux:
     - tokei
+whois:
+  archlinux:
+    - whois # also contains mkpasswd
