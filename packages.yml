@@ -486,3 +486,12 @@ deluge:
   archlinux:
     - deluge
     - deluge-gtk
+wine:
+  archlinux:
+    - wine
+    - wine-gecko
+    - wine-mono
+    - winetricks
+    - lib32-libpulse
+    - vkd3d
+    - lib32-vkd3d
