@@ -577,55 +577,76 @@
           permit nopass nolog setenv {PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin} :sudonopw
       become: true
 
-    - name: gpu configuration
+    - name: hardware-specific configuration
       tags:
-        - gpu
+        - hardware
       block:
-        - name: AMD configuration
-          when: machine.gpu == 'amd'
+        - name: read driver variables
+          include_vars:
+            file: drivers.yml
+            name: drivers
+          tags:
+            - always
+
+        - name: gpu configuration
+          tags:
+            - hardware:gpu
           block:
-            - name: install AMDGPU packages
+            - name: install AMD cpu packages
               package:
-                name:
-                  - mesa
-                  - lib32-mesa
-                  - xf86-video-amdgpu
-                  - vulkan-radeon
-                  - lib32-vulkan-radeon
-                  - libva-mesa-driver
-                  - lib32-libva-mesa-driver
-                  - mesa-vdpau
-                  - lib32-mesa-vdpau
+                name: "{{ drivers.cpu.amd }}"
                 state: present
               become: true
+              when: machine.cpu == 'amd'
 
-            - name: set AMDGPU options
-              copy:
-                owner: root
-                group: root
-                mode: "0600"
-                dest: /etc/X11/xorg.conf.d/20-amdgpu.conf
-                content: |
-                  Section "Device"
-                      Identifier "AMD"
-                      Driver "amdgpu"
-                      Option "VariableRefresh" "true"
-                      Option "TearFree" "true"
-                  EndSection
-              become: true
-
-        - name: Nvidia configuration
-          when: machine.gpu == 'nvidia'
-          block:
-            - name: install nouveau packages
+            - name: install Intel cpu packages
               package:
-                name:
-                  - mesa
-                  - lib32-mesa
+                name: "{{ drivers.cpu.intel }}"
                 state: present
               become: true
-      when:
-        - machine.gpu is defined
+              when: machine.cpu == 'intel'
+              
+          when:
+            - machine.cpu is defined
+
+        - name: gpu configuration
+          tags:
+            - hardware:gpu
+          block:
+            - name: AMD configuration
+              when: machine.gpu == 'amd'
+              block:
+                - name: install AMDGPU packages
+                  package:
+                    name: "{{ drivers.gpu.amd }}"
+                    state: present
+                  become: true
+
+                - name: set AMDGPU options
+                  copy:
+                    owner: root
+                    group: root
+                    mode: "0600"
+                    dest: /etc/X11/xorg.conf.d/20-amdgpu.conf
+                    content: |
+                      Section "Device"
+                          Identifier "AMD"
+                          Driver "amdgpu"
+                          Option "VariableRefresh" "true"
+                          Option "TearFree" "true"
+                      EndSection
+                  become: true
+
+            - name: Nvidia configuration
+              when: machine.gpu == 'nvidia'
+              block:
+                - name: install nouveau packages
+                  package:
+                    name: "{{ drivers.gpu.gpu }}"
+                    state: present
+                  become: true
+          when:
+            - machine.gpu is defined
 
     - set_fact:
         users: "{{ machine.users }}"
