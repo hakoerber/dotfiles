@@ -17,9 +17,7 @@ fi
 declare -a aurdeps=()
 
 proctected=(
-  base
-  java-runtime-common
-  jdk17-openjdk
+  base # virtual package, would not hurt, but it's weird if its not installed
 )
 
 for pkgbuild in pkgbuilds/*/PKGBUILD ; do
