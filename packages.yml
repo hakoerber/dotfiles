@@ -57,7 +57,7 @@ arandr:
 docker:
   archlinux: ["docker", "docker-compose"]
 font-awesome:
-  archlinux: ["ttf-font-awesome", "otf-font-awesome"]
+  archlinux: ["ttf-font-awesome", "otf-font-awesome", "awesome-terminal-fonts"]
 font-inconsolata:
   archlinux: ["ttf-inconsolata"]
 font-dejavu:
