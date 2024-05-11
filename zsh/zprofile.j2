@@ -88,7 +88,6 @@ touch "${feature_dir}"/gpg_agent
 systemd_envs=(
     GNUPGHOME
     PATH
-    ACPI_LID_NAME
 )
 systemctl --user import-environment "${systemd_envs[@]}"
 
