@@ -32,8 +32,10 @@ EOF
 # might take a bit for the new partion table to be updated in-kernel
 sleep 1
 
-cryptsetup --batch-mode luksFormat --iter-time 1000 ${DEVICE}p3
-cryptsetup --batch-mode open ${DEVICE}p3 cryptpart
+while : ; do
+    cryptsetup --batch-mode luksFormat --iter-time 1000 ${DEVICE}3
+    cryptsetup --batch-mode open --tries 1 ${DEVICE}3 cryptpart && break
+done
 
 pvcreate /dev/mapper/cryptpart
 vgcreate vgbase /dev/mapper/cryptpart
