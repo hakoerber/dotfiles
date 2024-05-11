@@ -252,7 +252,7 @@ steam:
   archlinux:
     - steam
     - lib32-pango
-    - libpango
+    - pango
     - ttf-liberation
 man:
   archlinux: ["man-db", "man-pages"]
