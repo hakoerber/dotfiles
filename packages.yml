@@ -249,7 +249,11 @@ imv:
 pacman:
   archlinux: ["pacman", "pacman-contrib"]
 steam:
-  archlinux: ["steam"]
+  archlinux:
+    - steam
+    - lib32-pango
+    - libpango
+    - ttf-liberation
 man:
   archlinux: ["man-db", "man-pages"]
 nextcloud:
@@ -495,3 +499,4 @@ wine:
     - lib32-libpulse
     - vkd3d
     - lib32-vkd3d
+    - lib32-gnutls
