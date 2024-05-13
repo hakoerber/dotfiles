@@ -67,9 +67,9 @@ missing_format = ""
 [[block]]
 block = "toggle"
 format = "   $icon "
-command_on = "$HOME/.i3/scripts/presentation-mode toggle ; pkill -SIGRTMIN+0 i3status-rs"
-command_off = "$HOME/.i3/scripts/presentation-mode toggle ; pkill -SIGRTMIN+0 i3status-rs"
-command_state = "[[ $($HOME/.i3/scripts/presentation-mode status) == on ]] && echo active"
+command_on = "$XDG_CONFIG_HOME/i3/scripts/presentation-mode toggle ; pkill -SIGRTMIN+0 i3status-rs"
+command_off = "$XDG_CONFIG_HOME/i3/scripts/presentation-mode toggle ; pkill -SIGRTMIN+0 i3status-rs"
+command_state = "[[ $($XDG_CONFIG_HOME/i3/scripts/presentation-mode status) == on ]] && echo active"
 
 [[block]]
 block = "toggle"
