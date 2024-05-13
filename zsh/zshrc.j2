@@ -327,20 +327,6 @@ gb() {
     fi
 }
 
-bm() {
-    case "$1" in
-        dev)
-            cd "$HOME/development/projects"
-            ;;
-        dot)
-            cd "$HOME/dotfiles"
-            ;;
-        *)
-            echo "unknown target"
-            ;;
-    esac
-}
-
 embiggen() {
     enscript --no-header --media=A4 --landscape --font="DejaVuSansMono30" -o - 2>/dev/null | ps2pdf - | zathura -
 }
