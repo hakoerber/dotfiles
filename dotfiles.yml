@@ -23,6 +23,8 @@ dotfiles:
     template: true
   - from: gnupg/dirmngr.conf
     to: .local/state/gnupg/dirmngr.conf
+  - from: gnupg/scdaemon.conf
+    to: .local/state/gnupg/scdaemon.conf
   - from: gnupg/gpg-agent.conf
     to: .local/state/gnupg/gpg-agent.conf
     template: true
