@@ -500,3 +500,6 @@ wine:
     - vkd3d
     - lib32-vkd3d
     - lib32-gnutls
+sqlx:
+  archlinux:
+    - sqlx-cli
