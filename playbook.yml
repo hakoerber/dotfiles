@@ -683,6 +683,17 @@
           state: absent
         become: true
 
+    - name: try to make gpg agent behave
+      block:
+      - name: configure pacman to skip installing gpg user units
+        blockinfile:
+          path: /etc/pacman.conf
+          insertafter: '^#NoExtract'
+          block: |
+            NoExtract = usr/lib/systemd/user/gpg-agent*
+          marker: "# {mark} ANSIBLE MANAGED noextract gpg-agent"
+        become: true
+
     - name: backlight configuration
       tags:
         - backlight
