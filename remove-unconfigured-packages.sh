@@ -32,7 +32,19 @@ readarray -d $'\0' -t packages_to_remove < <(comm --zero-terminated -13 \
   <(cat \
     <(<packages.yml yaml2json | jq --raw-output0 'map(.archlinux) | flatten[]') \
     <(for dep in "${aurdeps[@]}" "${cpu_packages[@]}" "${gpu_packages[@]}" ; do printf '%s\0' "${dep}" ; done) \
-  | sort -zu) \
+  | while IFS= read -r -d $'\0' package; do
+    set -o pipefail
+    if resolved_name=$(pacman -Qi "${package}" 2>/dev/null | grep ^Name | grep ^Name | cut -d ':' -f 2 | tr -d ' ') ; then
+      if [[ "${resolved_name}" != "${package}" ]] ; then
+        if pacman -Qq --explicit "${resolved_name}" >/dev/null ; then
+          printf '%s\0' "${resolved_name}"
+          continue
+        fi
+      fi
+    fi
+    printf '%s\0' "${package}"
+    done | sort -zu 
+) \
   <(pacman -Qq --explicit | xargs -I "{}" printf '%s\0' "{}" | sort -zu) \
 | while IFS= read -r -d $'\0' package; do
     skip=0
