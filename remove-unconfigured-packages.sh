@@ -60,6 +60,10 @@ readarray -d $'\0' -t packages_to_remove < <(comm --zero-terminated -13 \
   done) 
 
 if (( "${#packages_to_remove[@]}" > 0 )) ; then
+    echo "found the following explicitly installed packages that are not configured:"
+    for pkg in "${packages_to_remove[@]}" ; do
+      echo "${pkg}"
+    done
     sudo pacman -Rcns "${packages_to_remove[@]}" "${@}" || exit $?
     exit 123
 fi
