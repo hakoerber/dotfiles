@@ -21,6 +21,7 @@ proctected=(
 )
 
 for pkgbuild in pkgbuilds/*/PKGBUILD ; do
+  # shellcheck disable=SC1090
   source "${pkgbuild}"
   aurdeps+=("${depends[@]%%[<=>]*}" "${makedepends[@]%%[<=>]*}" "${pkgname}")
 done
