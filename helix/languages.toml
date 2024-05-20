@@ -1,3 +1,11 @@
 [[language]]
 name = "bash"
 indent = { unit = "    " , tab-width = 4 }
+
+[[language]]
+name = "python"
+indent = { unit = "    " , tab-width = 4 }
+
+[[language]]
+name = "dockerfile"
+indent = { unit = "    " , tab-width = 4 }
