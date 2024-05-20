@@ -55,7 +55,7 @@ xdotool:
 arandr:
   archlinux: ["arandr"]
 docker:
-  archlinux: ["docker", "docker-compose"]
+  archlinux: ["docker", "docker-compose", "docker-buildx"]
 font-awesome:
   archlinux: 
     - ttf-font-awesome
