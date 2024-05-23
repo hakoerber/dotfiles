@@ -63,6 +63,8 @@ font-awesome:
     - awesome-terminal-fonts
 font-inconsolata:
   archlinux: ["ttf-inconsolata"]
+font-jetbrainsmono:
+  archlinux: ["ttf-jetbrains-mono"]
 font-dejavu:
   archlinux: ["ttf-dejavu"]
 font-libertine:
