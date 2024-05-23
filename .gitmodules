@@ -22,6 +22,3 @@
 [submodule "pkgbuilds/screencfg-git"]
 	path = pkgbuilds/screencfg-git
 	url = https://aur.archlinux.org/screencfg-git.git
-[submodule "pkgbuilds/aws-sam-cli-git"]
-	path = pkgbuilds/aws-sam-cli-git
-	url = https://aur.archlinux.org/aws-sam-cli.git
