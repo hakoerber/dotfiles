@@ -132,12 +132,12 @@ alias json2yaml="python3 -c 'import sys, yaml, json; yaml.safe_dump(json.loads(s
 
 alias currentbranch='git rev-parse --abbrev-ref HEAD'
 
-alias issh="ssh -o StrictHostKeyChecking=false -o UserKnownHostsFile=/dev/null"
 alias gfix='git commit --amend --no-edit'
 alias gfixa='git commit --amend --no-edit --all '
 alias gfixp='git commit --amend --no-edit --patch'
 
 alias issh="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+alias iscp="scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 alias newpw="pwgen --secure 25 1"
 
