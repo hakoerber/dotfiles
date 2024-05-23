@@ -1,6 +1,10 @@
+
 [[language]]
 name = "bash"
 indent = { unit = "    " , tab-width = 4 }
+
+[language-server.pylsp.config.pylsp.plugins]
+flake8 = {enabled = false}
 
 [[language]]
 name = "python"
