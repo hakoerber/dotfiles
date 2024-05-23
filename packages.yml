@@ -148,6 +148,8 @@ python:
     - bandit
     - python-pyflakes
     - python-pylint
+    - flake8
+    - mypy
 python-modules:
   archlinux:
     - python-ruamel-yaml
