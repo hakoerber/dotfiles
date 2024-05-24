@@ -510,3 +510,6 @@ wine:
 sqlx:
   archlinux:
     - sqlx-cli
+geeqie:
+  archlinux:
+    - geeqie
