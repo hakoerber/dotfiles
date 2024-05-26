@@ -56,26 +56,24 @@ arandr:
   archlinux: ["arandr"]
 docker:
   archlinux: ["docker", "docker-compose", "docker-buildx"]
-font-awesome:
-  archlinux: 
-    - ttf-font-awesome
-    - otf-font-awesome
+awesome-terminal-fonts:
+  archlinux:
     - awesome-terminal-fonts
 font-inconsolata:
-  archlinux: ["ttf-inconsolata"]
-font-jetbrainsmono:
-  archlinux: ["ttf-jetbrains-mono"]
-font-dejavu:
-  archlinux: ["ttf-dejavu"]
-font-libertine:
-  archlinux: ["ttf-linux-libertine"]
-font-emoji:
-  archlinux: ["noto-fonts-emoji"]
-fonts:
   archlinux:
-    - noto-fonts
-    - noto-fonts-extra
-    - noto-fonts-cjk
+    - ttf-inconsolata
+    - ttf-inconsolata-nerd
+font-jetbrainsmono:
+  archlinux:
+    - ttf-jetbrains-mono
+    - ttf-jetbrains-mono-nerd
+font-dejavu:
+  archlinux:
+    - ttf-dejavu
+    - ttf-dejavu-nerd
+font-libertine:
+  archlinux:
+    - ttf-linux-libertine
 git:
   # tk required for gitk
   archlinux: ["git", "tk", "git-delta", "git-filter-repo"]
