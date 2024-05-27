@@ -389,7 +389,7 @@
               done
 
               if [[ ! "${arch}" ]] ; then
-                printf 'unsupported arch' >&2
+                printf 'unsupported arch\n' >&2
                 exit 1
               fi
 

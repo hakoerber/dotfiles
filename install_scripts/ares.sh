@@ -7,12 +7,12 @@ set -o errexit
 DEVICE="/dev/sda"
 
 if [[ ! -b "${DEVICE}" ]] ; then
-    printf '%s does not look like a device' "${DEVICE}"
+    printf '%s does not look like a device\n' "${DEVICE}"
     exit 1
 fi
 
 if [[ ! -d /sys/firmware/efi/efivars ]] ; then
-    printf 'efivars does not exist, looks like the system is not booted in EFI mode'
+    printf 'efivars does not exist, looks like the system is not booted in EFI mode\n'
     exit 1
 fi
 

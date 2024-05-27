@@ -12,7 +12,7 @@ DOTDIR="/var/lib/dotfiles"
 
 os_release_file=/etc/os-release
 if [[ ! -e "${os_release_file}" ]] ; then
-    2>&1 printf 'Could not find %, exiting' "${os_release_file}"
+    2>&1 printf 'Could not find %, exiting\n' "${os_release_file}"
     exit 1
 fi
 
@@ -38,7 +38,7 @@ install() {
         fi
         sudowrap pacman -S --needed --noconfirm "${package}"
     else
-        2>&1 printf 'Unsupported distro %s, exiting' "$NAME"
+        2>&1 printf 'Unsupported distro %s, exiting\n' "$NAME"
         exit 1
     fi
 }
