@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-set -o errexit
-
-cd ~/code/personal/time-tracking/
-source venv/bin/activate
-source ~/.attendance_env
-
-./call.py "${@}"

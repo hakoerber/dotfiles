@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-set -o nounset
-
-rm -r "${1}"
-cd ./.gitdir
-git worktree remove "${1}"
-git branch -D "${1}"
