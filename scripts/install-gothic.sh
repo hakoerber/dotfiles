@@ -13,7 +13,7 @@ set -o nounset
 set -o xtrace
 set -o errexit
 
-downloaddir=~/download/gothic
+downloaddir="${XDG_DOWNLOAD_DIR}"/gothic
 
 mkdir -p "${downloaddir}"
 cd "${downloaddir}"

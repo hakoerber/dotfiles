@@ -21,7 +21,7 @@ export WINEARCH=win64
 
 export WINEVERSION=6.3
 
-DOWNLOADDIR=~/download/gothic2
+DOWNLOADDIR="${XDG_DOWNLOAD_DIR}"/gothic2
 
 mkdir -p "${WINEPREFIX}"
 
