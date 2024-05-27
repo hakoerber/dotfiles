@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
 # Stolen from https://devops.stackexchange.com/a/8984 and adapted to my use case
 
-if [[ -z "$@" ]]; then
+if (( $# == 0 )) ; then
   echo "Missing file input arguments"
   exit 1
 fi
 
 for FILE in "$@"
 do
-  RESOURCE=$(sed -n 's/^resource "\([^"]*\)" "\([^"]*\)".*/-target=\1.\2 /gp' $FILE)
-  MODULE=$(sed -n 's/^module "\([^"]*\)".*/-target=module.\1 /gp' $FILE)
+  RESOURCE=$(sed -n 's/^resource "\([^"]*\)" "\([^"]*\)".*/-target=\1.\2 /gp' "$FILE")
+  MODULE=$(sed -n 's/^module "\([^"]*\)".*/-target=module.\1 /gp' "$FILE")
   if [[ -z "$RESOURCE" ]] && [[ -z "$MODULE" ]]; then
     echo "Cannot detect terraform resource and module in $FILE"
     exit 1
   fi
 
-  if [[ ! -z "$RESOURCE" ]]; then
+  if [[ -n "$RESOURCE" ]]; then
     echo -e $"$RESOURCE"
   fi
-  if [[ ! -z "$MODULE" ]]; then
+  if [[ -n "$MODULE" ]]; then
     echo -e $"$MODULE"
   fi
 done
