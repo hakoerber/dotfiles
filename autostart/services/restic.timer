@@ -1,6 +1,0 @@
-[Unit]
-BindsTo=autostart.target
-After=windowmanager.target
-
-[Timer]
-OnCalendar=Mon..Fri 12:00:00

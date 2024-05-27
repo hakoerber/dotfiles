@@ -25,7 +25,6 @@ users:
   gpg_agent_for_ssh: false
   environment:
     MACHINE_HAS_NEXTCLOUD: "false"
-    MACHINE_HAS_RESTIC_BACKUP: "false"
     MACHINE_HAS_KEEPASSX: "false"
   repositories: []
 
@@ -53,7 +52,6 @@ users:
   enable_passwordstore: true
   environment:
     MACHINE_HAS_NEXTCLOUD: "true"
-    MACHINE_HAS_RESTIC_BACKUP: "false"
     MACHINE_HAS_KEEPASSX: "false"
   repositories:
     - personal_projects

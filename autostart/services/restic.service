@@ -1,8 +1,0 @@
-[Unit]
-ConditionPathExists=%t/features/restic_backup
-
-[Service]
-Type=oneshot
-ExecStart=%h/restic/restic-backup
-RemainAfterExit=true
-PassEnvironment=DISPLAY

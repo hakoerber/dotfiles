@@ -79,7 +79,6 @@ mkdir -p "${feature_dir}"
 [[ $MACHINE_HAS_NEXTCLOUD     == "true" ]] && touch "${feature_dir}"/nextcloud
 [[ $MACHINE_HAS_KEEPASSX      == "true" ]] && touch "${feature_dir}"/keepassx
 [[ $MACHINE_HAS_STEAM         == "true" ]] && touch "${feature_dir}"/steam
-[[ $MACHINE_HAS_RESTIC_BACKUP == "true" ]] && touch "${feature_dir}"/restic_backup
 
 [[ $MACHINE_TYPE == "laptop" ]] && touch "${feature_dir}"/machine_is_laptop
 
