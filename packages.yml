@@ -511,3 +511,6 @@ sqlx:
 geeqie:
   archlinux:
     - geeqie
+xpath:
+  archlinux:
+    - perl-xml-xpath
