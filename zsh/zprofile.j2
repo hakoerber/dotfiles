@@ -4,7 +4,7 @@ if [[ "$(passwd --status $USER | awk '{print $2}')" =~ ^(NP|L)$ ]] ; then
     while ! sudo passwd $USER ; do ; done
 fi
 
-export PATH="${PATH}:${HOME}/bin"
+export PATH="${HOME}/bin:${PATH}"
 
 export EDITOR="helix"
 export VISUAL="helix"
