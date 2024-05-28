@@ -9,8 +9,7 @@ set -o nounset
 set -o xtrace
 set -o errexit
 
-
-STEAMAPPS=/var/games/steamapps/
+STEAMAPPS=$XDG_DATA_HOME/Steam/steamapps/
 
 BASEDIR="${STEAMAPPS}/common/Gothic II"
 

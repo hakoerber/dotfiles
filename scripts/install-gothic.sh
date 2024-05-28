@@ -5,7 +5,7 @@
 # * It *must not* have any symlinks for the directmusic dlls like:
 # pfx/dosdevices/c:/windows/syswow64/dmusic.dll
 
-STEAMAPPS=/var/games/steamapps/
+STEAMAPPS=$XDG_DATA_HOME/Steam/steamapps/
 
 read -p "Make sure that gothic was installed via Steam and started once! <Enter> to continue, <CTRL+C> to abort "
 
