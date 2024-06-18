@@ -22,3 +22,6 @@
 [submodule "pkgbuilds/screencfg-git"]
 	path = pkgbuilds/screencfg-git
 	url = https://aur.archlinux.org/screencfg-git.git
+[submodule "pkgbuilds/google-earth-pro"]
+	path = pkgbuilds/google-earth-pro
+	url = https://aur.archlinux.org/google-earth-pro.git

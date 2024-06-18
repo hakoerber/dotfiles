@@ -74,6 +74,9 @@ font-dejavu:
 font-libertine:
   archlinux:
     - ttf-linux-libertine
+font-awesome:
+  archlinux:
+    - ttf-font-awesome
 git:
   # tk required for gitk
   archlinux: ["git", "tk", "git-delta", "git-filter-repo"]
