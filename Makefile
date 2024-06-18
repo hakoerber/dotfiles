@@ -1,4 +1,4 @@
-ansible_run = ansible-playbook -e ansible_python_interpreter=/usr/bin/python3 --inventory localhost, --diff ./playbook.yml ${ANSIBLE_EXTRA_ARGS}
+ansible_run = ansible-playbook --inventory localhost, --diff ./playbook.yml ${ANSIBLE_EXTRA_ARGS}
 
 .PHONY: all
 all:
