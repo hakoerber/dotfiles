@@ -517,3 +517,6 @@ geeqie:
 xpath:
   archlinux:
     - perl-xml-xpath
+apache: # for apachebench
+  archlinux:
+    - apache
