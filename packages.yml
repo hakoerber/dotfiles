@@ -526,3 +526,12 @@ xfce4-screenshooter:
 picom:
   archlinux:
     - picom
+fuseiso:
+  archlinux:
+    - fuseiso
+7zip:
+  archlinux:
+    - p7zip
+unrar:
+  archlinux:
+    - unrar
