@@ -520,3 +520,6 @@ xpath:
 apache: # for apachebench
   archlinux:
     - apache
+xfce4-screenshooter:
+  archlinux:
+    - xfce4-screenshooter
