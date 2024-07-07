@@ -43,7 +43,7 @@ pandoc \
     --variable papersize=a4 \
     --variable date=$(date --iso-8601=date) \
     --variable fontsize=12pt \
-    --variable fontfamily=libertine \
+    --variable fontfamily=libertinus \
     --variable familydefault=sfdefault \
     --variable documentclass=scrartcl \
     --variable fontfamilyoptions= \

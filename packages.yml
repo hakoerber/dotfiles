@@ -73,7 +73,7 @@ font-dejavu:
     - ttf-dejavu-nerd
 font-libertine:
   archlinux:
-    - ttf-linux-libertine
+    - libertinus-font
 font-awesome:
   archlinux:
     - ttf-font-awesome
