@@ -225,6 +225,7 @@
               - name: terraform-ls-bin
               - name: grm-git
               - name: screencfg-git
+              - name: google-earth-pro
 
         - set_fact:
             aur_packages: "{{ aur_packages|map(attribute='dependencies', default=[]) | flatten + aur_packages }}"
