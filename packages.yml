@@ -523,3 +523,6 @@ apache: # for apachebench
 xfce4-screenshooter:
   archlinux:
     - xfce4-screenshooter
+picom:
+  archlinux:
+    - picom
