@@ -6,6 +6,7 @@ After=i3.service
 ConditionPathExists=%t/features/steam
 
 [Service]
-ExecStart=/usr/bin/env steam
+# `-system-composer`: https://github.com/ValveSoftware/steam-for-linux/issues/10806
+ExecStart=/usr/bin/env steam -system-composer
 PassEnvironment=DISPLAY
 Restart=always
