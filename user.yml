@@ -306,6 +306,9 @@
           # remove this camera / microphone overlay when in calls or similar
           privacy.webrtc.legacyGlobalIndicator: false
 
+          # remove ad tracking garbage
+          dom.private-attribution.submission.enabled: false
+
     - include_role:
         name: firefox
       vars:
