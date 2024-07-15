@@ -276,6 +276,8 @@
           # Restore last session on startup
           # https://support.mozilla.org/de/questions/1235263
           browser.startup.page: 3
+          # reload the tabs properly when restoring
+          browser.sessionstore.restore_on_demand: false
 
           # "Play DRM-controlled content"
           media.eme.enabled: true
