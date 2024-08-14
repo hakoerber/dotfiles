@@ -25,7 +25,7 @@ users:
   gpg_agent_for_ssh: false
   environment:
     MACHINE_HAS_NEXTCLOUD: "false"
-    MACHINE_HAS_KEEPASSX: "false"
+    MACHINE_HAS_KEEPASSXC: "true"
   repositories: []
 
 - name: hannes-private
@@ -52,7 +52,7 @@ users:
   enable_passwordstore: true
   environment:
     MACHINE_HAS_NEXTCLOUD: "true"
-    MACHINE_HAS_KEEPASSX: "false"
+    MACHINE_HAS_KEEPASSXC: "false"
   repositories:
     - personal_projects
 

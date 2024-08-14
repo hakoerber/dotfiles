@@ -1,9 +1,0 @@
-[Unit]
-BindsTo=autostart.target
-After=windowmanager.target
-ConditionPathExists=%t/features/keepassx
-
-[Service]
-ExecStart=/usr/bin/env keepassx --keyfile %h/.secret/main.key %h/.secret/main.kdbx
-PassEnvironment=DISPLAY
-Restart=always

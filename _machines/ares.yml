@@ -59,7 +59,7 @@ workspace:
 
 environment:
   MACHINE_TYPE: "workstation"
-  MACHINE_HAS_KEEPASSX: "false"
+  MACHINE_HAS_KEEPASSXC: "false"
   MACHINE_HAS_NEXTCLOUD: "true"
   MACHINE_HAS_STEAM: "true"
   MACHINE_RESOLUTION_X: "2560"
