@@ -25,3 +25,21 @@
 [submodule "pkgbuilds/google-earth-pro"]
 	path = pkgbuilds/google-earth-pro
 	url = https://aur.archlinux.org/google-earth-pro.git
+[submodule "pkgbuilds/aws-sam-cli"]
+	path = pkgbuilds/aws-sam-cli
+	url = https://aur.archlinux.org/aws-sam-cli.git
+[submodule "pkgbuilds/python-boto3-stubs"]
+	path = pkgbuilds/python-boto3-stubs
+	url = https://aur.archlinux.org/python-boto3-stubs.git
+[submodule "pkgbuilds/python-botocore-stubs"]
+	path = pkgbuilds/python-botocore-stubs
+	url = https://aur.archlinux.org/python-botocore-stubs.git
+[submodule "pkgbuilds/python-dateparser"]
+	path = pkgbuilds/python-dateparser
+	url = https://aur.archlinux.org/python-dateparser.git
+[submodule "pkgbuilds/python-chevron"]
+	path = pkgbuilds/python-chevron
+	url = https://aur.archlinux.org/python-chevron.git
+[submodule "pkgbuilds/python-aws-lambda-builders"]
+	path = pkgbuilds/python-aws-lambda-builders
+	url = https://aur.archlinux.org/python-aws-lambda-builders.git

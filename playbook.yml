@@ -227,6 +227,17 @@
               - name: screencfg-git
               - name: google-earth-pro
 
+              # ===
+              - name: python-botocore-stubs
+              # dependency of
+              - name: python-boto3-stubs
+
+              - name: python-dateparser
+              - name: python-chevron
+              - name: python-aws-lambda-builders
+              # === dependencies of
+              - name: aws-sam-cli
+
         - set_fact:
             aur_packages: "{{ aur_packages|map(attribute='dependencies', default=[]) | flatten + aur_packages }}"
 
