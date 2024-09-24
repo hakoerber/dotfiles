@@ -7,7 +7,7 @@
 
 STEAMAPPS=$XDG_DATA_HOME/Steam/steamapps/
 
-read -p "Make sure that gothic was installed via Steam and started once! <Enter> to continue, <CTRL+C> to abort "
+read -rp "Make sure that gothic was installed via Steam and started once! <Enter> to continue, <CTRL+C> to abort "
 
 set -o nounset
 set -o xtrace
@@ -21,59 +21,51 @@ cd "${downloaddir}"
 curl -C - -L -o gothic_patch_108k.exe "https://www.worldofgothic.de/download.php?id=15"
 curl -C - -L -o gothic1_playerkit-1.08k.exe "https://www.worldofgothic.de/download.php?id=61"
 
-curl -C - -L -o Definitive_Edition_1_4_5.exe "https://www.worldofgothic.de/download.php?id=1586"
+curl -C - -L -o Definitive_Edition_2_2_8.exe "https://www.worldofgothic.de/download.php?id=1586"
 
 # superseded by union
-curl -C - -L -O https://github.com/GothicFixTeam/GothicFix/releases/download/v1.8/G1Classic-SystemPack-1.8.exe
+# curl -C - -L -O https://github.com/GothicFixTeam/GothicFix/releases/download/v1.8/G1Classic-SystemPack-1.8.exe
 
-# curl -C - -L -O https://github.com/GothicFixTeam/GothicFix/releases/download/v1.8/Gothic1_PlayerKit-2.8.exe
+curl -C - -L -o LaaHack.zip https://www.worldofgothic.de/download.php?id=1457
 
-curl -C - -L -o Ninja-2.5.09.exe "https://www.worldofgothic.de/download.php?id=1626"
-# curl -C - -L -o Union_1.0j_22.02.2021.exe "https://www.worldofgothic.de/download.php?id=1625"
+curl -C - -L -O https://github.com/GothicFixTeam/GothicFix/releases/download/v1.8/Gothic1_PlayerKit-2.8.exe
 
-curl -C - -L -o G1CP-1.0.0.exe "https://www.worldofgothic.de/download.php?id=1636"
+curl -C - -L -o Ninja-2.9.14.exe "https://www.worldofgothic.de/download.php?id=1626"
+curl -C - -L -o Union_1.0m_26.06.2022.exe "https://www.worldofgothic.de/download.php?id=1625"
 
-#curl -C - -L -o Spine_1.29.0.exe "https://www.worldofgothic.de/download.php?id=1417"
+curl -C - -L -o G1CP-1.2.0.exe "https://www.worldofgothic.de/download.php?id=1636"
 
-curl -C - -L -o Gothic1-GD3D11-17.7-dev16.zip https://github.com/Kirides/GD3D11/releases/download/v17.7-dev16/Gothic1-GD3D11-17.7-dev16.zip
+curl -C - -L -o GD3D11-v17.8-dev9.zip https://github.com/kirides/GD3D11/releases/download/v17.8-dev9/GD3D11-v17.8-dev9.zip
 curl -C - -L -o RiisisGothic1TextureMixV1.1.zip "https://www.worldofgothic.de/download.php?id=1458"
 
-read -p 'During installation, use "Z:\var\games\steamapps\common\Gothic\" as the install directory! <Enter> to continue, <CTRL+C> to abort '
+read -rp "During installation, use \"${STEAMAPPS}/common/Gothic\" as the install directory! <Enter> to continue, <CTRL+C> to abort "
 
 
 export WINEPREFIX="${STEAMAPPS}/compatdata/65540/pfx/"
 
-#winetricks dxvk
+winetricks dotnet7
 winetricks directmusic
 
-#read -p "In winecfg, go to Libraries tab, in 'existing overrides' search for 'dsound', select it and press remove button "
-#winecfg
+wine "${downloaddir}"/gothic_patch_108k.exe
+wine "${downloaddir}"/gothic1_playerkit-1.08k.exe
 
-# wine "${downloaddir}"/gothic_patch_108k.exe
-# wine "${downloaddir}"/gothic1_playerkit-1.08k.exe
-
-# wine "${downloaddir}"/Gothic1_PlayerKit-2.8.exe
+wine "${downloaddir}"/Gothic1_PlayerKit-2.8.exe
 wine "${downloaddir}"/G1Classic-SystemPack-1.8.exe
 
-wine "${downloaddir}"/Ninja-2.5.09.exe
+unzip -u "${downloaddir}"/LaaHack.zip -d "${STEAMAPPS}/common/Gothic/system"
 
-# cmd="${WINEPREFIX}/dosdevices/c:/windows/syswow64/cmd.exe"
-# cmdtarget="$(readlink "${cmd}")"
-# rm "${WINEPREFIX}/dosdevices/c:/windows/syswow64/cmd.exe"
-# winetricks cmd # for union install
-# wine "${downloaddir}"/Union_1.0j_22.02.2021.exe
-# ln -sf "$cmdtarget" "$cmd"
+# wine "${downloaddir}"/Union_1.0m_26.06.2022.exe
+wine "${downloaddir}"/Ninja-2.9.14.exe
 
-wine "${downloaddir}"/G1CP-1.0.0.exe
-wine "${downloaddir}"/Definitive_Edition_1_4_5.exe
+wine "${downloaddir}"/G1CP-1.2.0.exe
+wine "${downloaddir}"/Definitive_Edition_2_2_8.exe
 
-unzip -u "${downloaddir}"/Gothic1-GD3D11-17.7-dev16.zip -d "${STEAMAPPS}/common/Gothic/system"
+unzip -u "${downloaddir}"/GD3D11-v17.8-dev9.zip -d "${STEAMAPPS}/common/Gothic/system"
 unzip -u "${downloaddir}"/RiisisGothic1TextureMixV1.1.zip -d "${STEAMAPPS}/common/Gothic/Data"
 
+read -rp "Now run the game once and exit! <Enter> to continue, <CTRL+C> to abort "
 
-read -p "Now run the game once and exit! <Enter> to continue, <CTRL+C> to abort "
-
-cd /var/games/steamapps/common/Gothic
+cd "${STEAMAPPS}"/common/Gothic
 
 sed -i 's/^playLogoVideos=.*$/playLogoVideos=0\r/' system/Gothic.ini
 sed -i 's/^sightValue=.*$/sightValue=14\r/' system/Gothic.ini
