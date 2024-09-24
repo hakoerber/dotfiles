@@ -5,7 +5,7 @@ set -o errexit
 
 sudo pacman -Syu
 
-./check-aur-updates.sh
+./update-aur-pkgs.sh
 
 ANSIBLE_DISPLAY_OK_HOSTS=false \
 ANSIBLE_DISPLAY_SKIPPED_HOSTS=false \
