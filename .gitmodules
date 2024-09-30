@@ -43,3 +43,9 @@
 [submodule "pkgbuilds/python-aws-lambda-builders"]
 	path = pkgbuilds/python-aws-lambda-builders
 	url = https://aur.archlinux.org/python-aws-lambda-builders.git
+[submodule "pkgbuilds/python-vdf"]
+	path = pkgbuilds/python-vdf
+	url = https://aur.archlinux.org/python-vdf.git
+[submodule "pkgbuilds/protontricks"]
+	path = pkgbuilds/protontricks
+	url = https://aur.archlinux.org/protontricks.git

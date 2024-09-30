@@ -238,6 +238,11 @@
               # === dependencies of
               - name: aws-sam-cli
 
+              # ===
+              - name: python-vdf
+              # dependency of
+              - name: protontricks
+
         - set_fact:
             aur_packages: "{{ aur_packages|map(attribute='dependencies', default=[]) | flatten + aur_packages }}"
 
