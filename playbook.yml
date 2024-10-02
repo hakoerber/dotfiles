@@ -532,13 +532,13 @@
       block:
         - set_fact:
             disable_services:
-              - sshd.service
+              - sshd
 
         - name: disable services
           service:
             state: stopped
             enabled: false
-            name: "{{ item }}"
+            name: "{{ item }}.service"
           with_items: "{{ disable_services }}"
           become: true
 
@@ -554,7 +554,7 @@
           service:
             state: started
             enabled: true
-            name: "{{ item }}"
+            name: "{{ item }}.service"
           with_items: "{{ enable_services }}"
           become: true
 
