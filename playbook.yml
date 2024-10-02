@@ -254,7 +254,7 @@
 
             installed=0
 
-            dependencies=(${depends[@]} ${makedepends[@]})
+            dependencies=(${depends[@]} ${makedepends[@]} ${checkdepends[@]})
             for dep in "${dependencies[@]}" ; do
               aur=0
               for aur_pkg in "${aur_packages[@]}" ; do

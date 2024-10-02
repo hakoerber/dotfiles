@@ -23,7 +23,7 @@ proctected=(
 for pkgbuild in pkgbuilds/*/PKGBUILD ; do
   # shellcheck disable=SC1090
   source "${pkgbuild}"
-  aurdeps+=("${depends[@]%%[<=>]*}" "${makedepends[@]%%[<=>]*}" "${pkgname}")
+  aurdeps+=("${depends[@]%%[<=>]*}" "${makedepends[@]%%[<=>]*}" "${checkdepends[@]%%[<=>]*}" "${pkgname}")
 done
 
 declare -a packages_to_remove=()
