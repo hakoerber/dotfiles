@@ -529,7 +529,6 @@
             name: "{{ item }}"
           with_items: "{{ disable_services }}"
           become: true
-          when: manage_services|default(true)|bool
 
         - set_fact:
             enable_services:
@@ -546,7 +545,6 @@
             name: "{{ item }}"
           with_items: "{{ enable_services }}"
           become: true
-          when: manage_services|default(true)|bool
 
     - name: get systemd boot target
       command: systemctl get-default
