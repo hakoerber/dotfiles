@@ -77,6 +77,9 @@ font-libertine:
 font-awesome:
   archlinux:
     - ttf-font-awesome
+font-noto:
+  archlinux:
+    - noto-fonts
 git:
   # tk required for gitk
   archlinux: ["git", "tk", "git-delta", "git-filter-repo"]
