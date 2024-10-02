@@ -217,7 +217,7 @@ ruby:
 acpi:
   archlinux: ["acpi", "acpid"]
 nodejs:
-  archlinux: ["nodejs", "npm"]
+  archlinux: ["nodejs", "npm", "yarn"]
 xdg:
   archlinux: ["xdg-utils"]
 dunst:
