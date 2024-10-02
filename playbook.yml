@@ -526,6 +526,58 @@
       notify:
         - rebuild initrd
 
+    - name: libvirtd
+      tags:
+        - libvirtd
+      # Arch defaults to systemd socket activation. Hate that stuff, just run the
+      # damn daemon (so I notice early when something is wrong, not just when I
+      # want to use it).
+      block:
+        - name: mask sockets
+          service:
+            state: stopped
+            enabled: false
+            masked: true
+            name: "{{ item }}"
+          loop:
+            - libvirtd.socket
+            - libvirtd-tls.socket
+            - libvirtd-tcp.socket
+            - libvirtd-ro.socket
+            - libvirtd-admin.socket
+          become: true
+
+        # the libvirtd unit file contains the following setting:
+        #
+        # Environment=LIBVIRTD_ARGS="--timeout 120"
+        #
+        # This will make libvirtd stop after 120 seconds without connections or running
+        # domains. To convince the daemon to just keep being a daemon, this needs to be
+        # removed. Fortunately, the unit also contains the following:
+        #
+        # EnvironmentFile=-/etc/conf.d/libvirtd
+        #
+        # And `EnvironmentFile` trumps `Environment`. Otherwise we'd need to do some
+        # damn systemd override shenanigans.
+        - name: configure libvirtd env variable override
+          copy:
+            owner: root
+            group: root
+            mode: "0600"
+            dest: /etc/conf.d/libvirtd
+            content: |
+              LIBVIRTD_ARGS=
+          become: true
+          notify:
+            - restart libvirtd
+
+        - name: enable libvirtd
+          service:
+            state: started
+            enabled: true
+            name: libvirtd.service
+          become: true
+
     - name: services
       tags:
         - services
@@ -546,7 +598,6 @@
             enable_services:
               - NetworkManager
               - docker
-              - libvirtd
               - systemd-timesyncd
               - pcscd
 
@@ -648,7 +699,7 @@
                 state: present
               become: true
               when: machine.cpu == 'intel'
-              
+
           when:
             - machine.cpu is defined
 
@@ -766,5 +817,11 @@
     - name: restart journald
       service:
         name: systemd-journald
+        state: restarted
+      become: true
+
+    - name: restart libvirtd
+      service:
+        name: libvirtd
         state: restarted
       become: true
