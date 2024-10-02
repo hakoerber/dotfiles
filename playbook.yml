@@ -138,7 +138,7 @@
 
         - name: fix group for dotfiles directory
           shell: |
-            chgrp --changes --recursive dotfiles . | grep -v "changed group of './.git/index'"
+            chgrp --changes --recursive dotfiles . | grep -Ev "changed group of ('./.git/index'|'./.git/modules/)"
           args:
             executable: /bin/bash
             chdir: /var/lib/dotfiles
@@ -150,7 +150,7 @@
 
         - name: fix group permissions for dotfiles directory
           shell: |
-            chmod --changes --recursive g+rwX . | grep -v "mode of './.git/index'"
+            chmod --changes --recursive g+rwX . | grep -Ev "mode of ('./.git/index'|'./.git/modules/)"
           args:
             executable: /bin/bash
             chdir: /var/lib/dotfiles
