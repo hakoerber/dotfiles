@@ -246,6 +246,7 @@ rust:
     - rustup
     - rust-analyzer
     - cargo-edit
+    - cargo-expand
     - cargo-msrv
     - cargo-watch
     - cargo-release
