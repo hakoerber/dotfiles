@@ -49,3 +49,6 @@
 [submodule "pkgbuilds/protontricks"]
 	path = pkgbuilds/protontricks
 	url = https://aur.archlinux.org/protontricks.git
+[submodule "pkgbuilds/slack-desktop"]
+	path = pkgbuilds/slack-desktop
+	url = https://aur.archlinux.org/slack-desktop.git

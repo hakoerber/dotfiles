@@ -255,6 +255,9 @@
               # dependency of
               - name: protontricks
 
+              # ===
+              - name: slack-desktop
+
         - set_fact:
             aur_packages: "{{ aur_packages|map(attribute='dependencies', default=[]) | flatten + aur_packages }}"
 
