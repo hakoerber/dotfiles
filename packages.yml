@@ -546,3 +546,6 @@ taplo:
 prettier:
   archlinux:
     - prettier
+sccache:
+  archlinux:
+    - sccache
