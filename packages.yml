@@ -154,6 +154,7 @@ python:
     - python-pylint
     - flake8
     - mypy
+    - uv
 python-modules:
   archlinux:
     - python-ruamel-yaml
