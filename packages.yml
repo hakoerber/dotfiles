@@ -543,3 +543,6 @@ unrar:
 taplo:
   archlinux:
     - taplo-cli
+prettier:
+  archlinux:
+    - prettier
