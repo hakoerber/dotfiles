@@ -539,3 +539,6 @@ fuseiso:
 unrar:
   archlinux:
     - unrar
+taplo:
+  archlinux:
+    - taplo-cli
