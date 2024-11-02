@@ -258,6 +258,12 @@
               # ===
               - name: slack-desktop
 
+              # ===
+              - name: python-class-registry
+              - name: python-rst2ansi
+              # dependency of
+              - name: backblaze-b2
+
         - set_fact:
             aur_packages: "{{ aur_packages|map(attribute='dependencies', default=[]) | flatten + aur_packages }}"
 

@@ -52,3 +52,12 @@
 [submodule "pkgbuilds/slack-desktop"]
 	path = pkgbuilds/slack-desktop
 	url = https://aur.archlinux.org/slack-desktop.git
+[submodule "pkgbuilds/backblaze-b2"]
+	path = pkgbuilds/backblaze-b2
+	url = https://aur.archlinux.org/backblaze-b2.git
+[submodule "pkgbuilds/python-class-registry"]
+	path = pkgbuilds/python-class-registry
+	url = https://aur.archlinux.org/python-class-registry.git
+[submodule "pkgbuilds/python-rst2ansi"]
+	path = pkgbuilds/python-rst2ansi
+	url = https://aur.archlinux.org/python-rst2ansi.git
