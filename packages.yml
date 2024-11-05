@@ -253,6 +253,7 @@ rust:
     - cargo-sort
     - cargo-hack
     - cargo-dist
+    - cargo-binstall
 musescore:
   archlinux: ["musescore"]
 sipcalc:
