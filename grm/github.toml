@@ -2,6 +2,7 @@ provider = "github"
 token_command = "pass show github | ~/bin/yaml2json | jq -r '.personal_access_token.grm.value'"
 root = "~/code/github.com"
 worktree = true
+force_ssh = true
 
 [filters]
 owner = true
