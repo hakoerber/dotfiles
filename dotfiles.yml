@@ -17,6 +17,7 @@ empty_directories:
   - name: .config/alacritty
   - name: .local/state/gnupg/
     mode: '0700'
+  - name: .local/state/cargo/
 dotfiles:
   - from: git/gitconfig
     to: .config/git/config
@@ -97,6 +98,8 @@ dotfiles:
     to: .config/helix/config.toml
   - from: helix/languages.toml
     to: .config/helix/languages.toml
+  - from: cargo/config.toml
+    to: .local/state/cargo/config.toml
 dotfiles_remove:
   - .gitconfig
   - .vimrc
