@@ -98,6 +98,8 @@ dotfiles:
     to: .config/helix/config.toml
   - from: helix/languages.toml
     to: .config/helix/languages.toml
+  - from: screencfg/screencfg.toml
+    to: .config/screencfg.toml
   - from: cargo/config.toml
     to: .local/state/cargo/config.toml
 dotfiles_remove:
