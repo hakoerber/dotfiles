@@ -123,14 +123,14 @@
       loop_control:
         label: "{{ item.to }}"
 
-    - name: remove invalid copy target (directories)
+    - name: remove invalid copy target (symlinks)
       file:
         path: "{{ item.stat.path }}"
         state: absent
       when:
         - not item.skipped is defined or not item.skipped
         - item.stat.exists
-        - item.stat.isdir
+        - item.stat.islnk
       with_items: "{{ copy_stat.results }}"
       loop_control:
         label: "{{ item.item.from }}"
@@ -147,16 +147,46 @@
       loop_control:
         label: "{{ item.to }}"
 
-    - name: link dotfiles
-      file:
-        state: link
-        force: true
-        follow: false
-        path: "/home/{{ user.name }}/{{ item.to }}"
+    - name: copy dotfiles
+      copy:
+        dest: "/home/{{ user.name }}/{{ item.to }}"
         src: /var/lib/dotfiles/{{ item.from }}
         owner: "{{ user.name }}"
         group: "{{ user.name }}"
-      when: not item.template|default(false)
+      when: not item.template|default(false) and not item.dir|default(false)
+      with_items: "{{ dotfiles }}"
+      become: true
+      become_user: root
+      loop_control:
+        label: "{{ item.to }}"
+
+    - name: copy directories
+      synchronize:
+        dest: "/home/{{ user.name }}/{{ item.to }}/"
+        src: /var/lib/dotfiles/{{ item.from }}/
+        archive: false
+        owner: false
+        group: false
+        links: true
+        perms: false
+        times: false
+        recursive: true
+        checksum: true
+        delete: true
+      when: item.dir|default(false)
+      with_items: "{{ dotfiles }}"
+      become: true
+      become_user: root
+      loop_control:
+        label: "{{ item.to }}"
+
+    - name: apply directory permissions
+      file:
+        dest: "/home/{{ user.name }}/{{ item.to }}/"
+        owner: "{{ user.name }}"
+        group: "{{ user.name }}"
+        recurse: true
+      when: item.dir|default(false)
       with_items: "{{ dotfiles }}"
       become: true
       become_user: root

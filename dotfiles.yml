@@ -43,6 +43,7 @@ dotfiles:
     to: .config/i3status-rust/icons/awesome.toml
   - from: i3/scripts
     to: .config/i3/scripts
+    dir: true
   - from: tmux/tmux.conf
     to: .config/tmux/tmux.conf
   - from: vim/vimrc
@@ -75,6 +76,7 @@ dotfiles:
     template: true
   - from: alacritty/themes
     to: .config/alacritty/themes
+    dir: true
   - from: rofi/config
     to: .config/rofi/config
   - from: gtk/gtk-3.0.ini
@@ -90,6 +92,7 @@ dotfiles:
     to: .config/qt5ct/qt5ct.conf
   - from: scripts
     to: scripts
+    dir: true
   - from: helix/config.toml
     to: .config/helix/config.toml
   - from: helix/languages.toml
