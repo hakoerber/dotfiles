@@ -607,7 +607,6 @@
               - NetworkManager
               - docker
               - systemd-timesyncd
-              - pcscd
 
         - name: enable services
           service:
@@ -615,6 +614,15 @@
             enabled: true
             name: "{{ item }}.service"
           with_items: "{{ enable_services }}"
+          become: true
+
+        - name: enable sockets
+          service:
+            state: started
+            enabled: true
+            name: "{{ item }}.socket"
+          loop:
+            - pcscd
           become: true
 
     - name: get systemd boot target
