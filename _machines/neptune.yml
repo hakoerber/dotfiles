@@ -26,7 +26,6 @@ users:
   environment:
     MACHINE_HAS_NEXTCLOUD: "false"
     MACHINE_HAS_KEEPASSXC: "true"
-  repositories: []
 
 - name: hannes-private
   vt: 2
@@ -52,8 +51,6 @@ users:
   environment:
     MACHINE_HAS_NEXTCLOUD: "true"
     MACHINE_HAS_KEEPASSXC: "false"
-  repositories:
-    - personal_projects
 
 screen:
   1: DP-4-1-6
