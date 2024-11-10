@@ -5,12 +5,7 @@ idle-timeout = 0
 completion-trigger-len = 2
 
 [editor.statusline]
-left = [
-  "mode",
-  "separator",
-  "file-name",
-  "file-modification-indicator",
-]
+left = ["mode", "separator", "file-name", "file-modification-indicator"]
 
 right = [
   "spinner",
