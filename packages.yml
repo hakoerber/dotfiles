@@ -49,6 +49,7 @@ ansible:
   archlinux:
     - ansible
     - ansible-language-server
+    - ansible-lint
     - python-jmespath
 xdotool:
   archlinux: ["xdotool"]
