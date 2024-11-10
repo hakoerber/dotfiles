@@ -33,8 +33,8 @@ EOF
 sleep 1
 
 while : ; do
-    cryptsetup --batch-mode luksFormat --iter-time 1000 ${DEVICE}3
-    cryptsetup --batch-mode open --tries 1 ${DEVICE}3 cryptpart && break
+    cryptsetup --batch-mode luksFormat --iter-time 1000 ${DEVICE}p3
+    cryptsetup --batch-mode open --tries 1 ${DEVICE}p3 cryptpart && break
 done
 
 pvcreate /dev/mapper/cryptpart
