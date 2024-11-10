@@ -79,7 +79,7 @@ qemuopts=(
 
     "-accel" "kvm"
 
-    "-drive" "if=pflash,format=raw,readonly=true,file=/usr/share/ovmf/x64/OVMF_CODE.fd"
+    "-drive" "if=pflash,format=raw,readonly=true,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd"
     "-drive" "if=pflash,format=raw,file=${tmpdir}/efivars.fd"
     "-machine" "q35,smm=on,acpi=on"
     "-smp" "cpus=8,sockets=1,cores=8,threads=1"
@@ -145,7 +145,7 @@ install_from_iso() {
 EOF
     )
 
-    cp /usr/share/ovmf/x64/OVMF_VARS.fd "${tmpdir}/efivars.fd"
+    cp /usr/share/edk2/x64/OVMF_VARS.4m.fd "${tmpdir}/efivars.fd"
     mkisofs \
         -uid 0 \
         -gid 0 \
