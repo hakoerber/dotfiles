@@ -19,7 +19,6 @@ users:
         - ublock-origin
       manage_css: false
   mail: h.koerber@clipmyhorse.tv
-  git_gpg_sign: false
   ssh_agent: true
   gpg_agent: false
   gpg_agent_for_ssh: false
@@ -40,7 +39,6 @@ users:
         - floccus
       manage_css: true
   mail: hannes@hkoerber.de
-  git_gpg_sign: false
   ssh_agent: false
   gpg_agent: true
   gpg_agent_for_ssh: true
