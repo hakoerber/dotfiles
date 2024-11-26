@@ -553,3 +553,6 @@ prettier:
 sccache:
   archlinux:
     - sccache
+btop:
+  archlinux:
+    - btop
