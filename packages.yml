@@ -337,7 +337,7 @@ mariadb-client:
   archlinux: ["mariadb-clients"]
 php:
   archlinux: ["php"]
-exa:
+eza:
   archlinux: ["eza"]
 just:
   archlinux: ["just"]
