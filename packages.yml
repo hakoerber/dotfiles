@@ -556,3 +556,6 @@ sccache:
 btop:
   archlinux:
     - btop
+hedgewars:
+  archlinux:
+    - hedgewars
