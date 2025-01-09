@@ -230,7 +230,8 @@
                 preexec: |
                   #!/usr/bin/env bash
                   source ./env
-                  curl -sSf --proto '=https' https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg | gpg --import -
+                  echo lel
+                  curl -sSf --proto '=https' https://download.spotify.com/debian/pubkey_C85668DF69375001.gpg | gpg --import -
 
               - name: nodejs-intelephense
               - name: vim-plug
