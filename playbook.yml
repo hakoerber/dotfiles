@@ -392,9 +392,7 @@
             chdir: "{{ item.1.stat.path | dirname }}"
           become_user: makepkg
           become: true
-          when:
-            - not item[0].stat.exists
-            - item[0].stat.checksum|default('') != item[1].stat.checksum
+          when: not item[0].stat.exists or (item[0].stat.checksum|default('') != item[1].stat.checksum)
           loop: "{{ preexec_before.results| reject('skipped')|zip(preexec_after.results| reject('skipped')) }}"
           loop_control:
             label: "{{ item.1.stat.path }}"
