@@ -11,7 +11,7 @@ do
   RESOURCE=$(sed -n 's/^resource "\([^"]*\)" "\([^"]*\)".*/-target=\1.\2 /gp' "$FILE")
   MODULE=$(sed -n 's/^module "\([^"]*\)".*/-target=module.\1 /gp' "$FILE")
   if [[ -z "$RESOURCE" ]] && [[ -z "$MODULE" ]]; then
-    echo "Cannot detect terraform resource and module in $FILE"
+    echo "Cannot detect terraform resource and module in $FILE" >&2
     exit 1
   fi
 
