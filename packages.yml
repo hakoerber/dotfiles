@@ -559,3 +559,6 @@ btop:
 hedgewars:
   archlinux:
     - hedgewars
+supertuxkart:
+  archlinux:
+    - supertuxkart
