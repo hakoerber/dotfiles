@@ -336,7 +336,7 @@ awscli:
 mariadb-client:
   archlinux: ["mariadb-clients"]
 php:
-  archlinux: ["php"]
+  archlinux: ["php", "composer"]
 eza:
   archlinux: ["eza"]
 just:
