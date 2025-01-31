@@ -191,11 +191,11 @@
 
         - name: install packages
           package:
-            name: "{{ defined_packages|json_query(query) }}"
+            name: "{{ defined_packages|json_query(pkg_query) }}"
             state: present
           become: true
           vars:
-            query: "{{ '*.%s[]'|format(distro) }}"
+            pkg_query: "{{ '*.%s[]'|format(distro) }}"
 
         - name: remove unconfigured packages
           script:
