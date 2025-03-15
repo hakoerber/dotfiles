@@ -219,7 +219,7 @@ ruby:
 acpi:
   archlinux: ["acpi", "acpid"]
 nodejs:
-  archlinux: ["nodejs", "npm", "yarn"]
+  archlinux: ["nodejs-lts-jod", "npm", "yarn"]
 xdg:
   archlinux: ["xdg-utils"]
 dunst:
