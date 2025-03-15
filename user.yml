@@ -301,7 +301,7 @@
           browser.startup.homepage: "about:blank"
           privacy.trackingprotection.enabled: true
           privacy.trackingprotection.socialtracking.enabled: true
-          general.smoothScroll: false
+          general.smoothScroll: true
 
           # Restore last session on startup
           # https://support.mozilla.org/de/questions/1235263
