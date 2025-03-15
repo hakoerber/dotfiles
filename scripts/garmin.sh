@@ -11,6 +11,11 @@ MOUNTOPTS="uid=${uid},gid=${gid}"
 
 SYNC_FOLDERS=(
     Activity
+    Settings
+    Courses
+    Records
+    Totals
+    Workouts
 )
 
 RSYNCOPTS=(
