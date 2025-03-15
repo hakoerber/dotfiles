@@ -1,0 +1,52 @@
+font_size: 11
+
+cpu: intel
+
+users:
+- name: hannes
+  vt: 1
+  firefox_profiles:
+    default:
+      extensions:
+        - ublock-origin
+        - passff
+        - privacy-badger17
+        - tree-style-tab
+        - i-dont-care-about-cookies
+        - floccus
+      manage_css: true
+  mail: hannes@hkoerber.de
+  ssh_agent: false
+  gpg_agent: true
+  gpg_agent_for_ssh: true
+  gpg_key:
+    email: hannes@hkoerber.de
+    id: "0xB5C002530C6A2053"
+    fingerprint: "973AE48D71B76735C4712B5BB5C002530C6A2053"
+  environment:
+    MACHINE_HAS_NEXTCLOUD: "true"
+
+screen:
+  1: DisplayPort-0
+  2: DisplayPort-0
+  3: DisplayPort-0
+  4: DisplayPort-0
+  5: DisplayPort-0
+  6: DisplayPort-0
+  7: DisplayPort-0
+  8: DisplayPort-0
+  9: DisplayPort-0
+  0: DisplayPort-0
+
+workspace:
+  1: ""
+  9: ""
+  10: ""
+
+environment:
+  MACHINE_TYPE: "laptop"
+  MACHINE_HAS_KEEPASSXC: "false"
+  MACHINE_HAS_NEXTCLOUD: "true"
+  MACHINE_HAS_STEAM: "false"
+  MACHINE_RESOLUTION_X: "1024"
+  MACHINE_RESOLUTION_Y: "600"
