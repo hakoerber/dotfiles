@@ -79,8 +79,6 @@ qemuopts=(
 
     "-accel" "kvm"
 
-    "-drive" "if=pflash,format=raw,readonly=true,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd"
-    "-drive" "if=pflash,format=raw,file=${tmpdir}/efivars.fd"
     "-machine" "q35,smm=on,acpi=on"
     "-smp" "cpus=8,sockets=1,cores=8,threads=1"
     "-cpu" "host"
@@ -253,10 +251,23 @@ download_iso
 for hostname in "${machines[@]}"; do
     case "${hostname}" in
     ares)
-        hostqemuopts=("-device" "ide-hd,drive=root")
+        hostqemuopts=(
+            "-device" "ide-hd,drive=root"
+            "-drive" "if=pflash,format=raw,readonly=true,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd"
+            "-drive" "if=pflash,format=raw,file=${tmpdir}/efivars.fd"
+        )
         ;;
     neptune)
-        hostqemuopts=("-device" "nvme,serial=rootnvme,drive=root")
+        hostqemuopts=(
+            "-device" "nvme,serial=rootnvme,drive=root"
+            "-drive" "if=pflash,format=raw,readonly=true,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd"
+            "-drive" "if=pflash,format=raw,file=${tmpdir}/efivars.fd"
+        )
+        ;;
+    hades)
+        hostqemuopts=(
+            "-device" "ide-hd,drive=root"
+        )
         ;;
     *)
         exit 1
