@@ -255,8 +255,6 @@ rust:
     - cargo-binstall
 musescore:
   archlinux: ["musescore"]
-sipcalc:
-  archlinux: ["sipcalc"]
 rofi:
   archlinux: ["rofi"]
 imv:
