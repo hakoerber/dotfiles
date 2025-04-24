@@ -565,3 +565,6 @@ supertuxkart:
 dua:
   archlinux:
     - dua-cli
+hexyl:
+  archlinux:
+    - hexyl
