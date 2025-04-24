@@ -110,8 +110,6 @@ pavucontrol:
   archlinux: ["pavucontrol-qt"]
 pinentry-qt:
   archlinux: ["pinentry"]
-pinta:
-  archlinux: ["pinta"]
 pass:
   archlinux: ["pass", "passff-host", "xclip"]
 urxvt:
