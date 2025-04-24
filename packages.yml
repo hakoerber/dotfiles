@@ -162,7 +162,7 @@ python-modules:
 black:
   archlinux: ["python-black"]
 xbacklight:
-  archlinux: ["acpilight"]
+  archlinux: ["xorg-xbacklight"]
 wireshark:
   archlinux: ["wireshark-cli", "wireshark-qt"]
 nmap:
