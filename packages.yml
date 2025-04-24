@@ -241,7 +241,7 @@ inotify:
 rclone:
   archlinux: ["rclone"]
 dnf:
-  archlinux: ["dnf"]
+  archlinux: ["dnf5"]
 rust:
   archlinux:
     - rustup
