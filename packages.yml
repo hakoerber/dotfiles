@@ -564,3 +564,6 @@ dua:
 hexyl:
   archlinux:
     - hexyl
+yq:
+  archlinux:
+    - go-yq
