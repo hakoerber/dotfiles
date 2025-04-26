@@ -161,8 +161,8 @@ python-modules:
     - python-semver
 black:
   archlinux: ["python-black"]
-xbacklight:
-  archlinux: ["xorg-xbacklight"]
+brightnessctl:
+  archlinux: ["brightnessctl"]
 wireshark:
   archlinux: ["wireshark-cli", "wireshark-qt"]
 nmap:
