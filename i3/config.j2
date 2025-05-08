@@ -324,8 +324,8 @@ bindsym XF86AudioNext exec --no-startup-id playerctl -p spotify next
 bindsym XF86AudioPrev exec --no-startup-id playerctl -p spotify previous
 
 # keys seemingly switched
-bindsym XF86MonBrightnessUp   exec --no-startup-id brightnessctl set +8% ; exec --no-startup-id $scriptdir/update-status
-bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set -8% ; exec --no-startup-id $scriptdir/update-status
+bindsym XF86MonBrightnessUp   exec --no-startup-id brightnessctl set 8%+ ; exec --no-startup-id $scriptdir/update-status
+bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 8%- ; exec --no-startup-id $scriptdir/update-status
 
 bindsym $mod+m exec     --no-startup-id pactl set-source-mute '@DEFAULT_SOURCE@' toggle
 bindsym $mod+space exec --no-startup-id pactl set-source-mute '@DEFAULT_SOURCE@' toggle
