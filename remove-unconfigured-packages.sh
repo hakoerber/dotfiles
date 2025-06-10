@@ -21,8 +21,10 @@ proctected=(
 )
 
 for pkgbuild in pkgbuilds/*/PKGBUILD ; do
+  set +o nounset
   # shellcheck disable=SC1090
   source "${pkgbuild}"
+  set -o nounset
   aurdeps+=("${depends[@]%%[<=>]*}" "${makedepends[@]%%[<=>]*}" "${checkdepends[@]%%[<=>]*}" "${pkgname}")
 done
 
