@@ -570,3 +570,7 @@ yq:
 kolourpaint:
   archlinux:
     - kolourpaint
+podman:
+  archlinux:
+    - podman
+    - podman-compose
