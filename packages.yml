@@ -253,6 +253,7 @@ rust:
     - cargo-hack
     - cargo-dist
     - cargo-binstall
+    - rust-script
 musescore:
   archlinux: ["musescore"]
 rofi:
