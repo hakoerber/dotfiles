@@ -553,12 +553,6 @@ sccache:
 btop:
   archlinux:
     - btop
-hedgewars:
-  archlinux:
-    - hedgewars
-supertuxkart:
-  archlinux:
-    - supertuxkart
 dua:
   archlinux:
     - dua-cli
