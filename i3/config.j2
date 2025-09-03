@@ -209,17 +209,12 @@ assign [class="^Wine$"] $workspace10
     bindsym $mod+Return       exec $terminal
     bindsym $mod+Shift+Return exec $calc
 
-    bindsym F1 exec --no-startup-id $scriptdir/shutdown-menu
-    bindsym F2 exec --no-startup-id $scriptdir/screenmenu
+    bindsym F1 exec --no-startup-id workstation-client power menu
 
-    bindsym $mod+F1 exec --no-startup-id $scriptdir/i3exit lock
-    bindsym $mod+F4 exec --no-startup-id $scriptdir/i3exit suspend
-    bindsym $mod+Home exec --no-startup-id $scriptdir/shutdown-menu
+    bindsym $mod+F1 exec --no-startup-id workstation-client power lock
 
     bindsym $mod+$screenshot exec --no-startup-id sh -c 'maim | xclip -selection clipboard -t image/png'
     bindsym $mod+Shift+$screenshot exec --no-startup-id sh -c 'maim --select | xclip -selection clipboard -t image/png'
-
-    bindsym $mod+Shift+v exec --no-startup-id redshift-toggle
 
     bindsym $mod+$pim_toggle exec --no-startup-id $scriptdir/swap-from-workspace $workspace10
 
@@ -313,22 +308,22 @@ bindsym $mod+F9 exec --no-startup-id evolution
 ### SPECIAL KEYBINDS ###########################################################
 ################################################################################
 
-bindsym XF86Sleep exec --no-startup-id $scriptdir/i3exit suspend
-bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute '@DEFAULT_SINK@' toggle
-bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume '@DEFAULT_SINK@' +5%
-bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume '@DEFAULT_SINK@' -5%
+bindsym XF86Sleep exec --no-startup-id workstation-client power lock
 
-bindsym XF86AudioPlay exec --no-startup-id playerctl -p spotify play-pause
-bindsym XF86AudioNext exec --no-startup-id playerctl -p spotify next
-bindsym XF86AudioPrev exec --no-startup-id playerctl -p spotify previous
+bindsym XF86AudioMute exec        --no-startup-id workstation-client pulseaudio output toggle
+bindsym XF86AudioRaiseVolume exec --no-startup-id workstation-client pulseaudio output inc
+bindsym XF86AudioLowerVolume exec --no-startup-id workstation-client pulseaudio output dec
 
-# keys seemingly switched
-bindsym XF86MonBrightnessUp   exec --no-startup-id brightnessctl set 8%+ ; exec --no-startup-id $scriptdir/update-status
-bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 8%- ; exec --no-startup-id $scriptdir/update-status
+bindsym XF86AudioPlay exec --no-startup-id workstation-client spotify toggle
+bindsym XF86AudioNext exec --no-startup-id workstation-client spotify next
+bindsym XF86AudioPrev exec --no-startup-id workstation-client spotify previous
 
-bindsym $mod+m exec     --no-startup-id pactl set-source-mute '@DEFAULT_SOURCE@' toggle
-bindsym $mod+space exec --no-startup-id pactl set-source-mute '@DEFAULT_SOURCE@' toggle
-bindsym KP_Enter   exec --no-startup-id pactl set-source-mute '@DEFAULT_SOURCE@' toggle
+bindsym XF86MonBrightnessUp   exec --no-startup-id workstation-client brightness inc
+bindsym XF86MonBrightnessDown exec --no-startup-id workstation-client brightness dec
+
+bindsym $mod+m     exec --no-startup-id workstation-client pulseaudio input toggle
+bindsym $mod+space exec --no-startup-id workstation-client pulseaudio input toggle
+bindsym KP_Enter   exec --no-startup-id workstation-client pulseaudio input toggle
 
 ##############################################################################
 ### BARS #######################################################################

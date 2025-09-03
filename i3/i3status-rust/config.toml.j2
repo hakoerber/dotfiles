@@ -33,7 +33,7 @@ format = " $icon{ $volume.eng(w:2)|} "
 
 [[block.click]]
 button = "left"
-cmd = "pactl set-sink-mute '@DEFAULT_SINK@' toggle"
+cmd = "workstation-client pulseaudio output toggle"
 update = true
 
 [[block]]
@@ -50,7 +50,7 @@ idle_bg = { link = "warning_bg" }
 
 [[block.click]]
 button = "left"
-cmd = "pactl set-source-mute '@DEFAULT_SOURCE@' toggle"
+cmd = "workstation-client pulseaudio input toggle"
 update = true
 
 [[block]]
@@ -67,31 +67,32 @@ missing_format = ""
 [[block]]
 block = "toggle"
 format = "   $icon "
-command_on = "$XDG_CONFIG_HOME/i3/scripts/presentation-mode toggle ; pkill -SIGRTMIN+0 i3status-rs"
-command_off = "$XDG_CONFIG_HOME/i3/scripts/presentation-mode toggle ; pkill -SIGRTMIN+0 i3status-rs"
-command_state = "[[ $($XDG_CONFIG_HOME/i3/scripts/presentation-mode status) == on ]] && echo active"
+signal = 1
+command_on = "workstation-client present toggle ; pkill -SIGRTMIN+1 i3status-rs"
+command_off = "workstation-client present toggle ; pkill -SIGRTMIN+1 i3status-rs"
+command_state = "[[ $(workstation-client present status) == on ]] && echo active"
 
 [[block]]
 block = "toggle"
 format = "   $icon "
-command_on = "systemctl --user start color-theme-light"
-command_off = "systemctl --user start color-theme-dark"
-command_state = "[[ $(systemctl --user is-active color-theme-light) == active ]] && echo active"
+command_on = "workstation-client theme light"
+command_off = "workstation-client theme dark"
+command_state = "[[ $(workstation-client theme status) == light ]] && echo 1"
 
 [[block]]
 block = "toggle"
 format = "   $icon "
-command_on = "systemctl --user start redshift"
-command_off = "systemctl --user stop redshift"
-command_state = "[[ $(systemctl --user is-active redshift) == active ]] && echo active"
+command_on = "workstation-client redshift start"
+command_off = "workstation-client redshift stop"
+command_state = "[[ $(workstation-client redshift status) == active ]] && echo 1"
 signal = 0
 
 [[block]]
 block = "toggle"
 format = "   $icon "
-command_on = "systemctl --user start spotify"
-command_off = "systemctl --user stop spotify"
-command_state = "[[ $(systemctl --user is-active spotify) == active ]] && echo active"
+command_on = "workstation-client spotify start"
+command_off = "workstation-client spotify stop"
+command_state = "[[ $(workstation-client spotify status) == active ]] && echo 1"
 signal = 0
 
 [[block]]
@@ -101,8 +102,9 @@ command = "ping -n -q -w 2 -c 1 8.8.8.8 >/dev/null 2>/dev/null && printf '{\"tex
 
 [[block]]
 block = "custom"
-command = "curl -s 'https://wttr.in/Ansbach?m&T&format=%c%t' | sed 's/  / /g'"
-interval = 3600
+command = "workstation-client weather get"
+# caching is handled by the workstation daemon
+interval = 60
 
 [[block]]
 block = "time"

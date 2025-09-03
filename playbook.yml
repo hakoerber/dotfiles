@@ -210,6 +210,9 @@
 
         - set_fact:
             aur_packages:
+              # local packages:
+              - name: workstation-mgr
+
               - name: portfolio-performance-bin
                 preexec: |
                   #!/usr/bin/env bash
@@ -430,9 +433,7 @@
 
               filename="${PKGDEST%/}/${pkgname}-${version}-${arch}${PKGEXT}"
 
-              needed_build=0
               if [[ ! -e "${filename}" ]] ; then
-                needed_build=1
                 makepkg \
                   --clean \
                   --nosign || exit 1

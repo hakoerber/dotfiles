@@ -1,0 +1,8 @@
+[Unit]
+BindsTo=autostart.target
+After=windowmanager.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/workstation-mgr serve
+Restart=always
