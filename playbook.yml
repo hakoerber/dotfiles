@@ -468,8 +468,8 @@
 
               filename="$(</var/lib/makepkg/{{ item.name }}/pkgname)"
 
-              name=$(pacman -Qi --file "${filename}"  | grep '^Name' | awk '{print $3}')
-              version=$(pacman -Qi --file "${filename}"  | grep '^Version' | awk '{print $3}')
+              name=$(pacman -Qi --file "${filename}" | grep '^Name' | awk '{print $3}')
+              version=$(pacman -Qi --file "${filename}" | grep '^Version' | awk '{print $3}')
 
               if [[ "$(pacman -Q "${name}")" == "${name} ${version}" ]] ; then
                 exit 0

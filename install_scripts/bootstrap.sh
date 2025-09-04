@@ -3,7 +3,7 @@
 set -o nounset
 set -o errexit
 
-host="${1}"   ; shift
+host="${1}" ; shift
 
 pacman -Sy --noconfirm git # yes its a partial upgrade, but thats just the live cd
 

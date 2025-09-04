@@ -33,7 +33,7 @@
 
     k = "!gitk --all"
 
-    serve = !git daemon --reuseaddr --verbose  --base-path=. --export-all ./.git
+    serve = !git daemon --reuseaddr --verbose --base-path=. --export-all ./.git
 
     last = "log -1 HEAD"
 
@@ -126,7 +126,7 @@
 [includeIf "gitdir:/var/lib/dotfiles/.git"]
     path = /var/lib/dotfiles/gitcfg
 [delta]
-    navigate = true    # use n and N to move between diff sections
+    navigate = true # use n and N to move between diff sections
 
     # delta detects terminal colors automatically; set one of these to disable auto-detection
     # dark = true

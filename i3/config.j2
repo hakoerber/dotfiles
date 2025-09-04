@@ -64,8 +64,8 @@
     set $up    k
     set $right l
 
-    set $splith v
-    set $splitv c
+    set $splith       v
+    set $splitv       c
     set $split_toggle x
 
     set $fullscreen f
@@ -95,7 +95,6 @@
 
     set $screenshot o
 
-
 ################################################################################
 ### WORKSPACE ASSIGNMENTS ######################################################
 ################################################################################
@@ -110,7 +109,6 @@ workspace $workspace7 output {{ machine.screen.7 }}
 workspace $workspace8 output {{ machine.screen.8 }}
 workspace $workspace9 output {{ machine.screen.9 }}
 workspace $workspace10 output {{ machine.screen.0 }}
-
 
 assign [class="^KeePassXC$"] $workspace8
 
@@ -206,8 +204,9 @@ assign [class="^Wine$"] $workspace10
 
     ### START APPLICATIONS #####################################################
 
-    bindsym $mod+d exec --no-startup-id $scriptdir/appmenu
-    bindsym $mod+Return exec $terminal
+    bindsym $mod+d exec --no-startup-id rofi -show combi -combi-modi run -display-combi "run"
+
+    bindsym $mod+Return       exec $terminal
     bindsym $mod+Shift+Return exec $calc
 
     bindsym F1 exec --no-startup-id $scriptdir/shutdown-menu
