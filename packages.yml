@@ -470,6 +470,7 @@ watchexec:
 postgresql:
   archlinux:
     - postgresql
+    - pgformatter
 tokei:
   archlinux:
     - tokei
