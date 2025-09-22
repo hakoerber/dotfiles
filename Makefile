@@ -6,11 +6,7 @@ all:
 
 .PHONY: config
 config:
-	$(ansible_run) --skip-tags system-update
-
-.PHONY: system-update
-system-update:
-	$(ansible_run) --tags system-update
+	$(ansible_run)
 
 .PHONY: reboot
 reboot:

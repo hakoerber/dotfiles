@@ -52,16 +52,6 @@
             marker: "# {mark} ANSIBLE MANAGED parallel_download"
           become: true
 
-        - block:
-          - name: upgrade system
-            pacman:
-              upgrade: true
-              update_cache: true
-            become: true
-            changed_when: false
-
-          tags: [system-update]
-
         - name: install pacman-contrib for paccache
           package:
             name: pacman-contrib
