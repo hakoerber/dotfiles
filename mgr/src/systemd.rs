@@ -14,6 +14,7 @@ pub enum Error {
 pub(crate) enum UnitStatus {
     Active,
     Inactive,
+    Failed,
 }
 
 impl UnitStatus {
@@ -28,8 +29,9 @@ pub(crate) mod user {
     pub(crate) fn unit_status(unit: &str) -> Result<UnitStatus, Error> {
         let output = cmd::run_command("systemctl", &["--user", "is-active", unit])?;
         match output.stdout.as_str().trim() {
-            "active" => Ok(UnitStatus::Active),
-            "inactive" => Ok(UnitStatus::Inactive),
+            "active" | "activating" | "reloading" | "refreshing" => Ok(UnitStatus::Active),
+            "inactive" | "deactivating" | "maintenance" => Ok(UnitStatus::Inactive),
+            "failed" => Ok(UnitStatus::Failed),
             other => Err(Error::UnknownStatusOutput {
                 output: other.to_owned(),
             }),
