@@ -15,6 +15,8 @@ pub enum Error {
     Cli(#[from] cli::ParseError),
     #[error(transparent)]
     Systemd(#[from] systemd::Error),
+    #[error("spotify does not seem to be running")]
+    NotFound,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -156,7 +158,14 @@ pub(crate) fn set(status: Status) -> Result<(), Error> {
 }
 
 fn playerctl(cmd: &str) -> Result<(), Error> {
-    Ok(cmd::command("playerctl", &["-p", "spotify", cmd])?)
+    if cmd::run_command("playerctl", &["-p", "spotify", cmd])?
+        .stderr
+        .contains("No players found")
+    {
+        Err(Error::NotFound)
+    } else {
+        Ok(())
+    }
 }
 
 pub(crate) fn pause() -> Result<(), Error> {

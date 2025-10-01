@@ -153,7 +153,11 @@ fn screen_off() -> Result<(), Error> {
 }
 
 fn lock() -> Result<cmd::RunningProcess, Error> {
-    spotify::pause()?;
+    match spotify::pause() {
+        Ok(_) => (),
+        Err(spotify::Error::NotFound) => (),
+        Err(e) => return Err(e.into()),
+    }
 
     let lock_handle = cmd::start_command(
         "i3lock",
