@@ -1,31 +1,12 @@
 ansible_run = ansible-playbook --inventory localhost, --diff ./playbook.yml ${ANSIBLE_EXTRA_ARGS}
 
-.PHONY: all
-all:
-	$(ansible_run)
-
 .PHONY: config
 config:
 	$(ansible_run)
 
-.PHONY: reboot
-reboot:
-	sudo reboot
-
-.PHONY: poweroff
-poweroff:
-	sudo poweroff
-
-.PHONY: weekend
-weekend: | update poweroff
-
-.PHONY: packages
-packages:
-	$(ansible_run) --tags packages
-
-.PHONY: dotfiles
-dotfiles:
-	$(ansible_run) --tags dotfiles
+.PHONY: maintenance
+maintenance:
+	./maintenance.sh
 
 .PHONY: test
 test:
