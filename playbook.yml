@@ -1,41 +1,42 @@
+---
 - name: configure system
   hosts: localhost
   connection: local
   become: false
   tasks:
-    - name: read machine-specific variables
-      include_vars:
+    - name: Read machine-specific variables
+      ansible.builtin.include_vars:
         file: _machines/{{ ansible_hostname }}.yml
         name: machine
       tags:
         - always
 
-    - set_fact:
-        distro: "{{ ansible_distribution|lower }}"
+    - ansible.builtin.set_fact:
+        distro: "{{ ansible_distribution | lower }}"
       tags:
         - always
 
-    - name: check for valid distro
-      assert:
+    - name: Check for valid distro
+      ansible.builtin.assert:
         that: distro in ('archlinux')
 
     - block:
-      - name: install ansible requirements
-        package:
-          name: "{{ packages[distro] }}"
-          state: present
-        become: true
-        vars:
-          packages:
-            archlinux:
-              - python-jmespath
+        - name: Install ansible requirements
+          ansible.builtin.package:
+            name: "{{ packages[distro] }}"
+            state: present
+          become: true
+          vars:
+            packages:
+              archlinux:
+                - python-jmespath
 
-    - name: pacman
+    - name: Pacman
       tags:
         - pacman
       block:
-        - name: enable multilib repository
-          blockinfile:
+        - name: Enable multilib repository
+          ansible.builtin.blockinfile:
             path: /etc/pacman.conf
             block: |
               [multilib]
@@ -43,56 +44,57 @@
             marker: "# {mark} ANSIBLE MANAGED multilib"
           become: true
 
-        - name: enable parallel download
-          blockinfile:
+        - name: Enable parallel download
+          ansible.builtin.blockinfile:
             path: /etc/pacman.conf
-            insertafter: '\[options\]'
+            insertafter: "\\[options\\]"
             block: |
               ParallelDownloads = 5
             marker: "# {mark} ANSIBLE MANAGED parallel_download"
           become: true
 
-        - name: install pacman-contrib for paccache
-          package:
+        - name: Install pacman-contrib for paccache
+          ansible.builtin.package:
             name: pacman-contrib
             state: present
           become: true
 
         - block:
-          - name: install pacman cache clean service
-            copy:
-              dest: /etc/systemd/system/pacman-cache-cleanup.service
-              owner: root
-              group: root
-              mode: '0644'
-              content: |
-                [Service]
-                Type=oneshot
-                ExecStart=/bin/sh -c '/usr/bin/paccache -rk1 && /usr/bin/paccache -ruk0'
-                RemainAfterExit=true
-            become: true
+            - name: Install pacman cache clean service
+              ansible.builtin.copy:
+                dest: /etc/systemd/system/pacman-cache-cleanup.service
+                owner: root
+                group: root
+                mode: "0644"
+                content: |
+                  [Service]
+                  Type=oneshot
+                  ExecStart=/bin/sh -c '/usr/bin/paccache -rk1 && /usr/bin/paccache -ruk0'
+                  RemainAfterExit=true
+              become: true
 
-          - name: install pacman cache clean timer
-            copy:
-              dest: /etc/systemd/system/pacman-cache-cleanup.timer
-              owner: root
-              group: root
-              mode: '0644'
-              content: |
-                [Timer]
-                OnCalendar=daily
+            - name: Install pacman cache clean timer
+              ansible.builtin.copy:
+                dest: /etc/systemd/system/pacman-cache-cleanup.timer
+                owner: root
+                group: root
+                mode: "0644"
+                content: |
+                  [Timer]
+                  OnCalendar=daily
 
-                [Install]
-                WantedBy=multi-user.target
-            become: true
+                  [Install]
+                  WantedBy=multi-user.target
+              become: true
 
-          - name: enable pacman cache clean timer
-            systemd:
-              name: pacman-cache-cleanup.timer
-              enabled: true
-              state: started
-              daemon_reload: true
-            become: true
+            - ansible.builtin.systemd:
+                name: pacman-cache-cleanup.timer
+                enabled: true
+                state: started
+                daemon_reload: true
+              become: true
+
+              name: Enable pacman cache clean timer
 
     - name: dotfiles directory
       tags:
@@ -122,7 +124,7 @@
             path: /var/lib/dotfiles
             owner: dotfiles
             group: dotfiles
-            mode: '0775' # group needs write access!
+            mode: "0775" # group needs write access!
           become: true
           become_user: root
 
@@ -307,7 +309,7 @@
           file:
             path: "/var/lib/makepkg/{{ item.name }}/"
             state: directory
-            mode: '0700'
+            mode: "0700"
             owner: makepkg
             group: makepkg
           become_user: makepkg
@@ -320,7 +322,7 @@
           file:
             path: "/var/lib/makepkg/{{ item.name }}/gnupg"
             state: directory
-            mode: '0700'
+            mode: "0700"
             owner: makepkg
             group: makepkg
           become_user: makepkg
@@ -491,8 +493,7 @@
           become: true
           with_nested:
             - "{{ aur_packages }}"
-            -
-              - build
+            - - build
               - src
           loop_control:
             label: "{{ item[0].name }}/{{ item[1] }}"
@@ -518,7 +519,7 @@
     - name: use vz4 for mkinitcpio compression
       lineinfile:
         path: /etc/mkinitcpio.conf
-        regexp: '^#?COMPRESSION=.*$'
+        regexp: "^#?COMPRESSION=.*$"
         line: 'COMPRESSION="lz4"'
       become: true
       notify:
@@ -632,22 +633,22 @@
     - name: handle lid switch
       lineinfile:
         path: /etc/systemd/logind.conf
-        regexp: '^HandleLidSwitch='
-        line: 'HandleLidSwitch=ignore'
+        regexp: "^HandleLidSwitch="
+        line: "HandleLidSwitch=ignore"
       become: true
 
     - name: handle power key
       lineinfile:
         path: /etc/systemd/logind.conf
-        regexp: '^HandlePowerKey='
-        line: 'HandlePowerKey=suspend'
+        regexp: "^HandlePowerKey="
+        line: "HandlePowerKey=suspend"
       become: true
 
     - name: limit journald size
       lineinfile:
         path: /etc/systemd/journald.conf
-        regexp: '^#?SystemMaxUse=.*$'
-        line: 'SystemMaxUse=50M'
+        regexp: "^#?SystemMaxUse=.*$"
+        line: "SystemMaxUse=50M"
       become: true
       notify:
         - restart journald
@@ -755,31 +756,31 @@
 
     # See https://bbs.archlinux.org/viewtopic.php?id=259764
     - block:
-      - name: configure pacman to skip installing nextcloud dbus file
-        blockinfile:
-          path: /etc/pacman.conf
-          insertafter: '^#NoExtract'
-          block: |
-            NoExtract = usr/share/dbus-1/services/com.nextcloudgmbh.Nextcloud.service
-          marker: "# {mark} ANSIBLE MANAGED noextract nextcloud"
-        become: true
+        - name: configure pacman to skip installing nextcloud dbus file
+          blockinfile:
+            path: /etc/pacman.conf
+            insertafter: "^#NoExtract"
+            block: |
+              NoExtract = usr/share/dbus-1/services/com.nextcloudgmbh.Nextcloud.service
+            marker: "# {mark} ANSIBLE MANAGED noextract nextcloud"
+          become: true
 
-      - name: remove nextcloud dbus file
-        file:
-          path: /usr/share/dbus-1/services/com.nextcloudgmbh.Nextcloud.service
-          state: absent
-        become: true
+        - name: remove nextcloud dbus file
+          file:
+            path: /usr/share/dbus-1/services/com.nextcloudgmbh.Nextcloud.service
+            state: absent
+          become: true
 
     - name: try to make gpg agent behave
       block:
-      - name: configure pacman to skip installing gpg user units
-        blockinfile:
-          path: /etc/pacman.conf
-          insertafter: '^#NoExtract'
-          block: |
-            NoExtract = usr/lib/systemd/user/gpg-agent*
-          marker: "# {mark} ANSIBLE MANAGED noextract gpg-agent"
-        become: true
+        - name: configure pacman to skip installing gpg user units
+          blockinfile:
+            path: /etc/pacman.conf
+            insertafter: "^#NoExtract"
+            block: |
+              NoExtract = usr/lib/systemd/user/gpg-agent*
+            marker: "# {mark} ANSIBLE MANAGED noextract gpg-agent"
+          become: true
 
     - name: backlight configuration
       tags:
@@ -791,7 +792,7 @@
             dest: /etc/udev/rules.d/backlight.rules
             owner: root
             group: root
-            mode: '0644'
+            mode: "0644"
             content: |
               ACTION=="add", SUBSYSTEM=="backlight", RUN+="/bin/chgrp video $sys$devpath/brightness", RUN+="/bin/chmod g+w $sys$devpath/brightness"
           become: true
@@ -804,7 +805,7 @@
           tags:
             - user
       with_items: "{{ users }}"
-      no_log: True # less spam
+      no_log: true # less spam
       loop_control:
         loop_var: user
       tags:
