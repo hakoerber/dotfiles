@@ -8,6 +8,10 @@ pub enum ParseError {
     UnknownAction { action: String },
     #[error("unexpected input: {rest:?}")]
     UnexpectedInput { rest: Vec<String> },
+    #[error("missing argument")]
+    MissingArgument,
+    #[error("error parsing argument: {message}")]
+    ArgumentParse { message: String },
 }
 
 pub trait CliCommand {

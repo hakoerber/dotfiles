@@ -11,6 +11,7 @@ pub mod power;
 pub mod present;
 pub(crate) mod pulseaudio;
 pub(crate) mod redshift;
+pub(crate) mod sleep;
 pub(crate) mod spotify;
 pub(crate) mod systemd;
 pub(crate) mod theme;
@@ -36,6 +37,8 @@ pub enum ExecError {
     #[error(transparent)]
     Brightness(#[from] brightness::Error),
     #[error(transparent)]
+    Sleep(#[from] sleep::Error),
+    #[error(transparent)]
     Parse(#[from] cli::ParseError),
 }
 
@@ -49,6 +52,7 @@ pub enum Action {
     Redshift(redshift::Action),
     Weather(weather::Action),
     Brightness(brightness::Action),
+    Sleep(sleep::Action),
 }
 
 impl wire::WireCommand for Action {
@@ -62,6 +66,7 @@ impl wire::WireCommand for Action {
             0x06 => Ok(Self::Redshift(redshift::Action::parse_wire(input)?)),
             0x07 => Ok(Self::Weather(weather::Action::parse_wire(input)?)),
             0x08 => Ok(Self::Brightness(brightness::Action::parse_wire(input)?)),
+            0x09 => Ok(Self::Sleep(sleep::Action::parse_wire(input)?)),
             other => Err(wire::server::ParseError::Unknown(other)),
         }
     }
@@ -105,6 +110,11 @@ impl wire::WireCommand for Action {
             }
             Self::Brightness(action) => {
                 let mut v = vec![0x08];
+                v.extend_from_slice(&action.to_wire());
+                v
+            }
+            Self::Sleep(action) => {
+                let mut v = vec![0x09];
                 v.extend_from_slice(&action.to_wire());
                 v
             }
@@ -159,6 +169,10 @@ impl cli::CliCommand for Action {
                     &choice, rest,
                 )?))
             }
+            "sleep" => {
+                let choice = rest.next().ok_or(cli::ParseError::MissingAction)?;
+                Ok(Self::Sleep(sleep::Action::parse_str(&choice, rest)?))
+            }
             s => Err(cli::ParseError::UnknownAction {
                 action: s.to_owned(),
             }),
@@ -185,6 +199,7 @@ impl Exec for Action {
             Self::Redshift(action) => Ok(action.execute()?),
             Self::Weather(action) => Ok(action.execute()?),
             Self::Brightness(action) => Ok(action.execute()?),
+            Self::Sleep(action) => Ok(action.execute()?),
         }
     }
 }

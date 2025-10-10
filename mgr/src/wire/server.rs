@@ -32,6 +32,8 @@ pub enum ParseError {
     Unknown(u8),
     #[error("received surplus input: {0:?}")]
     Surplus(Vec<u8>),
+    #[error("expected {expected} bytes, received only {received}")]
+    MissingBytes { expected: usize, received: usize },
 }
 
 fn handle_client(stream: &mut UnixStream) -> Result<(), Error> {
