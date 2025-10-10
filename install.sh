@@ -8,6 +8,12 @@
 set -o errexit
 set -o nounset
 
+# Make sure to standardize locale, regardless of the machine config
+#
+# Having a different locale broke "yes | pacman -S" to force-install
+# iptables, for example
+export LC_ALL="en_US.UTF-8"
+
 DOTDIR="/var/lib/dotfiles"
 
 os_release_file=/etc/os-release

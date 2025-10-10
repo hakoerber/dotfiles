@@ -1,3 +1,9 @@
+# Make sure to standardize locale, regardless of the machine config
+#
+# Having a different locale broke "yes | pacman -S" to force-install
+# iptables, for example
+export LC_ALL = en_US.UTF-8
+
 ansible_run = ansible-playbook --inventory localhost, --diff ./playbook.yml ${ANSIBLE_EXTRA_ARGS}
 
 .PHONY: config
