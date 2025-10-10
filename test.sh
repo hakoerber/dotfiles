@@ -264,11 +264,6 @@ for hostname in "${machines[@]}"; do
             "-drive" "if=pflash,format=raw,file=${tmpdir}/efivars.fd"
         )
         ;;
-    hades)
-        hostqemuopts=(
-            "-device" "ide-hd,drive=root"
-        )
-        ;;
     *)
         exit 1
         ;;
