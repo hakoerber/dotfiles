@@ -1,6 +1,6 @@
 # Maintainer: Hannes Körber <hannes@hkoerber.de>
 pkgname='workstation-mgr'
-pkgver=3
+pkgver=5
 pkgrel=1
 pkgdesc=''
 arch=('x86_64')
