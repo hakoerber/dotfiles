@@ -6,6 +6,7 @@ pkgdesc=''
 arch=('x86_64')
 depends=('glibc' 'gcc-libs')
 makedepends=('cargo')
+options=(!lto)
 source=()
 sha256sums=()
 
