@@ -44,28 +44,31 @@
     - "/home/{{ user.name }}/.config/systemd/"
     - "/home/{{ user.name }}/.config/systemd/user/"
 
-- name: Create directory for getty autologin
-  ansible.builtin.file:
-    state: directory
-    path: /etc/systemd/system/getty@tty{{ user.vt }}.service.d
-    owner: root
-    group: root
-    mode: "0755"
-  become: true
-  become_user: root
+- name: Configure autologin
+  when: user.autologin|default(true) is sameas True
+  block:
+  - name: Create directory for getty autologin
+    ansible.builtin.file:
+      state: directory
+      path: /etc/systemd/system/getty@tty{{ user.vt }}.service.d
+      owner: root
+      group: root
+      mode: "0755"
+    become: true
+    become_user: root
 
-- name: Enable getty autologin
-  ansible.builtin.copy:
-    dest: /etc/systemd/system/getty@tty{{ user.vt }}.service.d/override.conf
-    owner: root
-    group: root
-    mode: "0644"
-    content: |
-      [Service]
-      ExecStart=
-      ExecStart=-/sbin/agetty --autologin {{ user.name }} --noclear %I $TERM
-  become: true
-  become_user: root
+  - name: Enable getty autologin
+    ansible.builtin.copy:
+      dest: /etc/systemd/system/getty@tty{{ user.vt }}.service.d/override.conf
+      owner: root
+      group: root
+      mode: "0644"
+      content: |
+        [Service]
+        ExecStart=
+        ExecStart=-/sbin/agetty --autologin {{ user.name }} --noclear %I $TERM
+    become: true
+    become_user: root
 
 - name: Configure dotfiles
   tags:
