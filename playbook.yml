@@ -627,8 +627,9 @@
       changed_when: false
       check_mode: false
 
-    - set_fact:
-        default_target: multi-user.target
+    - name: define systemd default target
+      set_fact:
+        default_target: "{{ machine.system_default_target|default('multi-user.target') }}"
 
     - name: set systemd boot target
       command: systemctl set-default {{ default_target }}
