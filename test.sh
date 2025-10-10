@@ -265,6 +265,7 @@ for hostname in "${machines[@]}"; do
         )
         ;;
     *)
+        printf "unknown hostname: %s\n" "${hostname}" >&2
         exit 1
         ;;
     esac
