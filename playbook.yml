@@ -42,7 +42,12 @@
               [multilib]
               Include = /etc/pacman.d/mirrorlist
             marker: "# {mark} ANSIBLE MANAGED multilib"
+          notify:
+            - refresh package lists
           become: true
+
+        - name: Make sure that package lists are refreshed if necessary
+          ansible.builtin.meta: flush_handlers
 
         - name: Enable parallel download
           ansible.builtin.blockinfile:
@@ -812,6 +817,11 @@
         - always
 
   handlers:
+    - name: refresh package lists
+      community.general.pacman:
+        update_cache: true
+      become: true
+
     - name: rebuild initrd
       command: mkinitcpio -P
       become: true
