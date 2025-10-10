@@ -1,0 +1,62 @@
+font_size: 11
+
+gpu: intel
+cpu: intel
+
+users:
+- name: hannes
+  vt: 1
+  firefox_profiles:
+    default:
+      extensions:
+        - ublock-origin
+        - passff
+        - privacy-badger17
+        - tree-style-tab
+        - i-dont-care-about-cookies
+        - floccus
+      manage_css: true
+    media:
+      extensions:
+        - ublock-origin
+        - passff
+        - privacy-badger17
+        - tree-style-tab
+        - i-dont-care-about-cookies
+      manage_css: true
+      bigger_font: true
+  mail: hannes@hkoerber.de
+  ssh_agent: false
+  gpg_agent: true
+  gpg_agent_for_ssh: true
+  gpg_key:
+    email: hannes@hkoerber.de
+    id: "0xB5C002530C6A2053"
+    fingerprint: "973AE48D71B76735C4712B5BB5C002530C6A2053"
+  environment:
+    MACHINE_HAS_NEXTCLOUD: "true"
+
+screen:
+  1: HDMI-1
+  2: HDMI-1
+  3: HDMI-1
+  4: HDMI-1
+  5: HDMI-1
+  6: HDMI-1
+  7: HDMI-1
+  8: HDMI-1
+  9: HDMI-1
+  0: HDMI-1
+
+workspace:
+  1: ""
+  2: ""
+  3: ""
+
+environment:
+  MACHINE_TYPE: "tv"
+  MACHINE_HAS_KEEPASSXC: "false"
+  MACHINE_HAS_NEXTCLOUD: "true"
+  MACHINE_HAS_STEAM: "false"
+  MACHINE_RESOLUTION_X: "1920"
+  MACHINE_RESOLUTION_Y: "1080"

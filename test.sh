@@ -241,7 +241,7 @@ configure_new_system() {
     wait
 }
 
-machines=(ares neptune)
+machines=(ares neptune dionysus)
 if (($# > 0)); then
     machines=("${@}")
 fi
@@ -258,6 +258,13 @@ for hostname in "${machines[@]}"; do
         )
         ;;
     neptune)
+        hostqemuopts=(
+            "-device" "nvme,serial=rootnvme,drive=root"
+            "-drive" "if=pflash,format=raw,readonly=true,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd"
+            "-drive" "if=pflash,format=raw,file=${tmpdir}/efivars.fd"
+        )
+        ;;
+    dionysus)
         hostqemuopts=(
             "-device" "nvme,serial=rootnvme,drive=root"
             "-drive" "if=pflash,format=raw,readonly=true,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd"
