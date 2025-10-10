@@ -55,11 +55,11 @@ fn main() -> MainResult {
     fn inner() -> Result<(), Error> {
         let mut args = env::args().skip(1);
 
-        let socket = socket::get_socket_path()?;
-        let mut stream = UnixStream::connect(socket)?;
-
         let action =
             Action::parse_str(args.next().ok_or(ParseError::MissingAction)?.as_str(), args)?;
+
+        let socket = socket::get_socket_path()?;
+        let mut stream = UnixStream::connect(socket)?;
 
         action.send(&mut stream)?;
 
