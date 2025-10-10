@@ -127,6 +127,10 @@ send_mon() {
 install_from_iso() {
     local hostname="${1}"
     shift
+    local lukscfg="${1}"
+    shift
+    local homecfg="${1}"
+    shift
     local hostqemuopts=("$@")
     rm -rf "${tmpdir:?}"/*
 
@@ -186,10 +190,23 @@ EOF
       mkdir /repo/
       mount /dev/disk/by-label/REPO /repo/
 
-      printf 'lukspw\nlukspw\nrootpw\nrootpw\n' | \
-        /repo/install_scripts/"${hostname}".sh
+      if [[ "${lukscfg}" == "luks" ]] ; then
+          printf 'lukspw\nlukspw\nrootpw\nrootpw\n' | \
+            /repo/install_scripts/"${hostname}".sh
 
-      mount /dev/mapper/vgbase-root /mnt
+          mount /dev/mapper/vgbase-root /mnt
+          if [[ "${homecfg}" == "separate" ]] ; then
+              mount /dev/mapper/vgbase-home /mnt/home
+          fi
+      else
+          printf 'rootpw\nrootpw\n' | \
+            /repo/install_scripts/"${hostname}".sh
+          mount /dev/disk/by-partlabel/root /mnt
+          if [[ "${homecfg}" == "separate" ]] ; then
+              mount /dev/disk/by-partlabel/home /mnt/home
+          fi
+      fi
+
 
       cat << SPECIALS > /tmp/specials.sh
         if [[ "\\\$(tty)" == "/dev/tty1" ]] ; then
@@ -209,7 +226,7 @@ SPECIALS
 
       rsync -rl /repo/ /mnt/var/lib/dotfiles/
 
-      umount /mnt
+      umount --recursive /mnt
 
       poweroff
 EOF
@@ -219,6 +236,10 @@ EOF
 
 configure_new_system() {
     local hostname="${1}"
+    shift
+    local lukscfg="${1}"
+    shift
+    local homecfg="${1}"
     shift
     local hostqemuopts=("${@}")
 
@@ -231,24 +252,36 @@ configure_new_system() {
 
     qemu-system-x86_64 -name "${hostname}" "${qemuopts[@]}" "${hostqemuopts[@]}" "${opts[@]}" &
 
-    # 5s for grub timeout, 5s for kernel boot
-    echo waiting for luks password prompt ...
-    sleep 10s
-    echo 'lukspw' | send_mon "${mon_sock}"
+    if [[ "${lukscfg}" == "luks" ]] ; then
+        # 5s for grub timeout, 5s for kernel boot
+        echo waiting for luks password prompt ...
+        sleep 10s
+        echo 'lukspw' | send_mon "${mon_sock}"
+    fi
 
     echo waiting for boot ...
     sleep 10s
     wait
 }
 
-machines=(ares neptune dionysus hera)
+declare -A machinecfg
+machinecfg["ares"]="luks|combined"
+machinecfg["neptune"]="luks|combined"
+machinecfg["dionysus"]="luks|combined"
+machinecfg["hera"]="noluks|separate"
+
 if (($# > 0)); then
     machines=("${@}")
+else
+    machines=("${!machinecfg[@]}")
 fi
 
 download_iso
 
 for hostname in "${machines[@]}"; do
+    IFS='|' read -r -a cfg <<< "${machinecfg[${hostname}]}"
+    lukscfg="${cfg[0]}"
+    homecfg="${cfg[1]}"
     case "${hostname}" in
     ares)
         hostqemuopts=(
@@ -284,6 +317,6 @@ for hostname in "${machines[@]}"; do
         ;;
     esac
     [[ ! "${hostqemuopts[*]}" ]] && exit 1
-    install_from_iso "${hostname}" "${hostqemuopts[@]}"
-    configure_new_system "${hostname}" "${hostqemuopts[@]}"
+    install_from_iso "${hostname}" "${lukscfg}" "${homecfg}" "${hostqemuopts[@]}"
+    configure_new_system "${hostname}" "${lukscfg}" "${homecfg}" "${hostqemuopts[@]}"
 done
