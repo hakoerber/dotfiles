@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+set -o nounset
+set -o errexit
+
 for pkg in pkgbuilds/* ; do
     if [[ -n "$(builtin cd "${pkg}" && git rev-parse --show-superproject-working-tree)" ]] ; then
         printf "checking git submodule %s\n" "${pkg}"
