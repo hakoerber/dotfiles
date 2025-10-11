@@ -817,6 +817,14 @@
       tags:
         - always
 
+    - include_tasks: "{{ item }}"
+      with_first_found:
+        - files:
+            - "_machines/{{ ansible_hostname }}-tasks.yml"
+          skip: true
+      tags:
+        - always
+
   handlers:
     - name: refresh package lists
       community.general.pacman:
