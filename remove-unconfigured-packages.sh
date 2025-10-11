@@ -32,6 +32,7 @@ declare -a packages_to_remove=()
 
 readarray -d $'\0' -t packages_to_remove < <(comm --zero-terminated -13 \
   <(cat \
+    <(<_machines/"$(hostname --short)".yml yaml2json | jq --raw-output0 '(.additional_packages // [])[]') \
     <(<packages.yml yaml2json | jq --raw-output0 'map(.archlinux) | flatten[]') \
     <(for dep in "${aurdeps[@]}" "${cpu_packages[@]}" "${gpu_packages[@]}" ; do printf '%s\0' "${dep}" ; done) \
   | while IFS= read -r -d $'\0' package; do

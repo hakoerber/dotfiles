@@ -194,6 +194,12 @@
           vars:
             pkg_query: "{{ '*.%s[]'|format(distro) }}"
 
+        - name: install additional packages
+          package:
+            name: "{{ machine.additional_packages|default([]) }}"
+            state: present
+          become: true
+
         - name: remove unconfigured packages
           script:
             cmd: ./remove-unconfigured-packages.sh --noconfirm
