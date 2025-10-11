@@ -6,6 +6,18 @@ cpu: intel
 # make sure that display manager works
 system_default_target: "graphical.target"
 
+additional_packages:
+  - plasma-desktop
+  - konsole
+  - dolphin
+  - kdeplasma-addons
+  - plasma-nm
+  - plasma-pa
+  - plasma-systemmonitor
+  - sddm
+  - sddm-kcm
+  - thunderbird
+
 users:
 - name: hannes
   vt: 1

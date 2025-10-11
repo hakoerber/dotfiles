@@ -1,0 +1,132 @@
+---
+- name: Enable sddm
+  ansible.builtin.systemd:
+    name: sddm.service
+    enabled: true
+    daemon_reload: true
+  become: true
+
+- name: Autoupdate
+  tags: [test]
+  block:
+    - name: Deploy autoupdate script
+      copy:
+        owner: root
+        group: root
+        mode: "0755"
+        dest: /usr/local/bin/pacman-autoupdate
+        content: |
+          #!/usr/bin/env bash
+
+          set -o errexit
+          set -o nounset
+          set -o pipefail
+
+          for battery in /sys/class/power_supply/*/capacity ; do
+              capacity="$(< "$battery")"
+              if (( "${capacity}" < 40 )) ; then
+                  printf "Battery at %s%%, exiting\n" "${capacity}" >&2
+                  exit 0
+              fi
+          done
+
+          if nmcli --terse --fields GENERAL.METERED dev show 2>/dev/null | grep -q "yes" ; then
+              printf "Detected metered connection, exiting\n" >&2
+              exit 0
+          fi
+
+          pacman --sync --refresh --sysupgrade --noprogressbar --noconfirm
+
+    - name: Install pacman autoupdate service
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/pacman-autoupdate.service
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/local/bin/pacman-autoupdate
+      become: true
+
+    - name: Install pacman autoupdate timer
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/pacman-autoupdate.timer
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          [Timer]
+          OnCalendar=daily
+          OnBootSec=5min
+          OnUnitInactiveSec=120min
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Enable pacman autoupdate timer
+      ansible.builtin.systemd:
+        name: pacman-autoupdate.timer
+        enabled: true
+        state: started
+        daemon_reload: true
+      become: true
+  become: true
+
+- name: User configuration
+  block:
+    - name: Create user group
+      ansible.builtin.group:
+        name: "herta"
+        state: present
+      become: true
+
+    - name: Create user
+      ansible.builtin.user:
+        name: "herta"
+        state: present
+        home: "/home/herta"
+        create_home: true
+        groups:
+          - dotfiles
+          - libvirt
+          - wheel
+          - vboxusers
+          - wireshark
+          - docker
+          - sudonopw
+          - games
+          - kvm
+          - video
+        shell: /usr/bin/zsh
+        skeleton: /dev/null
+      become: true
+
+- name: Create sddm config folder
+  ansible.builtin.file:
+    state: directory
+    path: /etc/sddm.conf.d/
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Enable autologin
+  ansible.builtin.copy:
+    dest: /etc/sddm.conf.d/autologin.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Autologin]
+      User=herta
+      Session=plasma
+
+- name: Lock on startup
+  ansible.builtin.copy:
+    dest: /etc/xdg/kscreenlockerrc
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Daemon]
+      LockOnStart=true
