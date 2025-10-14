@@ -58,3 +58,6 @@
 [submodule "pkgbuilds/python-rst2ansi"]
 	path = pkgbuilds/python-rst2ansi
 	url = https://aur.archlinux.org/python-rst2ansi.git
+[submodule "pkgbuilds/claude-code"]
+	path = pkgbuilds/claude-code
+	url = https://aur.archlinux.org/claude-code.git

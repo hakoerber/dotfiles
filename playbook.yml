@@ -270,6 +270,9 @@
               # dependency of
               - name: backblaze-b2
 
+              # ===
+              - name: claude-code
+
         - set_fact:
             aur_packages: "{{ aur_packages|map(attribute='dependencies', default=[]) | flatten + aur_packages }}"
 
