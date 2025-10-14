@@ -74,6 +74,9 @@ export PSQL_HISTORY="$XDG_STATE_HOME/psql_history"
 export PGPASSFILE="$XDG_CONFIG_HOME/pgpass"
 export PGSERVICEFILE="$XDG_CONFIG_HOME/pg_service.conf"
 
+export REDISCLI_HISTFILE="$XDG_DATA_HOME"/rediscli_history
+export REDISCLI_RCFILE="$XDG_CONFIG_HOME"/redisclirc
+
 umask 0022
 
 {% set env = machine.environment | combine(user.environment) %}
