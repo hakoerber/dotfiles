@@ -146,8 +146,6 @@ set wrapscan
 set termguicolors
 
 " === keybinds ===
-set pastetoggle=<F11>
-
 set signcolumn=yes
 
 let maplocalleader = "ö"
