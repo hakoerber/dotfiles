@@ -77,6 +77,9 @@ export PGSERVICEFILE="$XDG_CONFIG_HOME/pg_service.conf"
 export REDISCLI_HISTFILE="$XDG_DATA_HOME"/rediscli_history
 export REDISCLI_RCFILE="$XDG_CONFIG_HOME"/redisclirc
 
+export PYTHON_HISTORY=$XDG_STATE_HOME/python_history
+export PYTHONPYCACHEPREFIX=$XDG_CACHE_HOME/python
+
 umask 0022
 
 {% set env = machine.environment | combine(user.environment) %}
