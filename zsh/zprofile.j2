@@ -69,6 +69,11 @@ export AWS_CONFIG_FILE="$XDG_CONFIG_HOME"/aws/config
 
 export XINITRC="$XDG_CONFIG_HOME"/xinitrc
 
+export PSQLRC="$XDG_CONFIG_HOME/psqlrc"
+export PSQL_HISTORY="$XDG_STATE_HOME/psql_history"
+export PGPASSFILE="$XDG_CONFIG_HOME/pgpass"
+export PGSERVICEFILE="$XDG_CONFIG_HOME/pg_service.conf"
+
 umask 0022
 
 {% set env = machine.environment | combine(user.environment) %}
