@@ -761,6 +761,15 @@
                     name: "{{ drivers.gpu.nvidia }}"
                     state: present
                   become: true
+
+            - name: Intel configuration
+              when: machine.gpu == 'intel'
+              block:
+                - name: install intel packages
+                  package:
+                    name: "{{ drivers.gpu.intel }}"
+                    state: present
+                  become: true
           when:
             - machine.gpu is defined
 

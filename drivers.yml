@@ -26,3 +26,9 @@ gpu:
     - lib32-vulkan-nouveau
     - vulkan-headers
     - vulkan-tools
+  intel:
+    - mesa
+    - mesa-utils
+    - lib32-mesa
+    - vulkan-intel
+    - lib32-vulkan-intel
