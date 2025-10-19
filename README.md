@@ -18,7 +18,7 @@ For easier installation, the install scripts are available via shortlinks. To
 (re)install a new machine from a Arch live environment:
 
 ```
-curl --proto '=https' -sSfL https://s.hkoerber.de/i/${hostname}.sh | bash
+curl --proto '=https' -O -sSfL https://s.hkoerber.de/i/bootstrap.sh && bash bootstrap.sh {host}
 ```
 
 ## Manual Installation
