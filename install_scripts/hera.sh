@@ -83,7 +83,7 @@ cat <<EOF > /etc/hosts
 127.0.1.1 hera
 EOF
 
-sed -i 's/^HOOKS=.*$/HOOKS=(base udev autodetect keyboard keymap consolefont modconf block filesystems resume fsck)/' /etc/mkinitcpio.conf
+sed -i 's/^HOOKS=.*$/HOOKS=(base udev autodetect keyboard keymap consolefont modconf block filesystems resume fsck microcode)/' /etc/mkinitcpio.conf
 
 mkinitcpio -P
 
