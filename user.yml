@@ -6,7 +6,6 @@
         user_groups:
           - libvirt
           - wheel
-          - vboxusers
           - wireshark
           - docker
           - sudonopw

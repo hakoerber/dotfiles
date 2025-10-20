@@ -91,7 +91,6 @@
           - dotfiles
           - libvirt
           - wheel
-          - vboxusers
           - wireshark
           - docker
           - sudonopw

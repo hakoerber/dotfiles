@@ -226,8 +226,6 @@ cloc:
   archlinux: ["cloc"]
 bwm-ng:
   archlinux: ["bwm-ng"]
-virtualbox:
-  archlinux: ["virtualbox"]
 ssh:
   archlinux: ["openssh"]
 sshfs:
