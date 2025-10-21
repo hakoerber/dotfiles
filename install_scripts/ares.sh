@@ -89,7 +89,7 @@ cat <<EOF > /etc/hosts
 127.0.1.1 ares
 EOF
 
-sed -i 's/^HOOKS=.*$/HOOKS=(base udev autodetect keyboard keymap consolefont modconf block encrypt lvm2 filesystems resume fsck microcode)/' /etc/mkinitcpio.conf
+sed -i 's/^HOOKS=.*$/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt lvm2 filesystems resume fsck)/' /etc/mkinitcpio.conf
 
 mkinitcpio -P
 

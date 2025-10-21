@@ -2,6 +2,7 @@ font_size: 11
 
 gpu: intel
 cpu: intel
+encrypted_root: false
 
 # make sure that display manager works
 system_default_target: "graphical.target"

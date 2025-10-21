@@ -2,6 +2,7 @@ font_size: 11
 
 gpu: intel
 cpu: intel
+encrypted_root: true
 
 users:
 - name: hannes

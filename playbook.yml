@@ -530,6 +530,25 @@
         state: present
       become: true
 
+    - name: set mkinitcpio hooks
+      set_fact:
+        mkinitcpio_hooks: "base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt lvm2 filesystems resume fsck"
+      when: machine.encrypted_root|bool
+
+    - name: set mkinitcpio hooks
+      set_fact:
+        mkinitcpio_hooks: "base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems resume fsck"
+      when: not machine.encrypted_root|bool
+
+    - name: configure mkinitcpio hooks
+      lineinfile:
+        path: /etc/mkinitcpio.conf
+        regexp: "^#?HOOKS=.*$"
+        line: 'HOOKS=({{ mkinitcpio_hooks }})'
+      become: true
+      notify:
+        - rebuild initrd
+
     - name: use vz4 for mkinitcpio compression
       lineinfile:
         path: /etc/mkinitcpio.conf
