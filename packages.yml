@@ -571,3 +571,6 @@ podman:
 pulumi:
   archlinux:
     - pulumi
+reflector:
+  archlinux:
+    - reflector

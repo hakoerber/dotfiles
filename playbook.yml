@@ -208,6 +208,14 @@
           changed_when: unconfigured_packages_cmd.rc == 123
           become: true
 
+    - name: Enable reflector timer
+      ansible.builtin.systemd:
+        name: reflector.timer
+        enabled: true
+        state: started
+        daemon_reload: true
+      become: true
+
     - name: aur
       tags:
         - aur
