@@ -35,7 +35,10 @@
               exit 0
           fi
 
-          pacman --sync --refresh --sysupgrade --noprogressbar --noconfirm
+          # Make sure that keys are up to date, otherwise sig checks may fail
+          pacman --sync --noprogressbar --noconfirm --refresh --needed archlinux-keyring
+
+          pacman --sync --noprogressbar --noconfirm --sysupgrade
 
     - name: Install pacman autoupdate service
       ansible.builtin.copy:

@@ -3,7 +3,7 @@
 set -o nounset
 set -o errexit
 
-sudo pacman -Syu
+sudo bash -c "pacman -Sy --needed archlinux-keyring && pacman -Syu"
 
 ./update-aur-pkgs.sh
 
