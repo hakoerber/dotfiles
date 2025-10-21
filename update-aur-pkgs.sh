@@ -11,7 +11,7 @@ for pkg in pkgbuilds/* ; do
         printf "checking local package %s\n" "${pkg}"
         (
             builtin cd "${pkg}" || exit 1
-            makepkg --nodeps --nobuild --noextract
+            makepkg --nodeps --nobuild --noextract --cleanbuild
         )
     fi
     if git status --porcelain "${pkg}" | grep -q . ; then
