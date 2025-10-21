@@ -1,11 +1,4 @@
 ---
-- name: Enable sddm
-  ansible.builtin.systemd:
-    name: sddm.service
-    enabled: true
-    daemon_reload: true
-  become: true
-
 - name: Autoupdate
   tags: [test]
   block:
@@ -104,31 +97,40 @@
         skeleton: /dev/null
       become: true
 
-- name: Create sddm config folder
-  ansible.builtin.file:
-    state: directory
-    path: /etc/sddm.conf.d/
-    owner: root
-    group: root
-    mode: "0755"
+- name: Display Manager
+  block:
+    - name: Enable sddm
+      ansible.builtin.systemd:
+        name: sddm.service
+        enabled: true
+        daemon_reload: true
+      become: true
 
-- name: Enable autologin
-  ansible.builtin.copy:
-    dest: /etc/sddm.conf.d/autologin.conf
-    owner: root
-    group: root
-    mode: "0644"
-    content: |
-      [Autologin]
-      User=herta
-      Session=plasma
+    - name: Create sddm config folder
+      ansible.builtin.file:
+        state: directory
+        path: /etc/sddm.conf.d/
+        owner: root
+        group: root
+        mode: "0755"
 
-- name: Lock on startup
-  ansible.builtin.copy:
-    dest: /etc/xdg/kscreenlockerrc
-    owner: root
-    group: root
-    mode: "0644"
-    content: |
-      [Daemon]
-      LockOnStart=true
+    - name: Enable autologin
+      ansible.builtin.copy:
+        dest: /etc/sddm.conf.d/autologin.conf
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          [Autologin]
+          User=herta
+          Session=plasma
+
+    - name: Lock on startup
+      ansible.builtin.copy:
+        dest: /etc/xdg/kscreenlockerrc
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          [Daemon]
+          LockOnStart=true
