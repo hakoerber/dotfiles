@@ -25,7 +25,7 @@ sed -e 's/\s*\([^#]*\).*/\1/' << EOF | sfdisk ${DEVICE}
     device: ${DEVICE}
 
     ${DEVICE}p1 : name=uefi, size=512M , type=uefi
-    ${DEVICE}p2 : name=boot, size=512M , type=linux
+    ${DEVICE}p2 : name=boot, size=1G   , type=linux
     ${DEVICE}p3 : name=swap, size=16G  , type=linux
     ${DEVICE}p4 : name=root, size=60G  , type=linux
     ${DEVICE}p5 : name=home,             type=linux
