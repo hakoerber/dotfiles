@@ -1,6 +1,5 @@
 ---
 - name: Autoupdate
-  tags: [test]
   block:
     - name: Deploy autoupdate script
       copy:
