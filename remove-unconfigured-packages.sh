@@ -62,12 +62,29 @@ readarray -d $'\0' -t packages_to_remove < <(comm --zero-terminated -13 \
     printf '%s\0' "${package}"
   done) 
 
+packages_removed=0
+
 if (( "${#packages_to_remove[@]}" > 0 )) ; then
     echo "found the following explicitly installed packages that are not configured:"
     for pkg in "${packages_to_remove[@]}" ; do
       echo "${pkg}"
     done
     sudo pacman -Rcns "${packages_to_remove[@]}" "${@}" || exit $?
+    packages_removed=1
+fi
+
+readarray -t orphans < <(pacman -Qdtq)
+
+if (( "${#orphans[@]}" > 0 )) ; then
+    echo "found the following orphaned packages:"
+    for pkg in "${orphans[@]}" ; do
+      echo "${pkg}"
+    done
+    sudo pacman -Rcns "${orphans[@]}" "${@}" || exit $?
+    packages_removed=1
+fi
+
+if (( packages_removed)) ; then
     exit 123
 fi
 
