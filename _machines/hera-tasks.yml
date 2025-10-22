@@ -133,3 +133,130 @@
         content: |
           [Daemon]
           LockOnStart=true
+
+- name: Backup
+  block:
+    - name: create restic config directory
+      file:
+        path: /etc/restic
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      become: true
+
+    - name: create restic exclude file
+      copy:
+        dest: /etc/restic/exclude.lst
+        content: |
+          /home/*/.cache/**
+          /home/*/.mozilla/firefox/*/Cache/**
+        owner: root
+        group: root
+        mode: "0755"
+      become: true
+
+    - name: create restic cache directory
+      file:
+        path: /var/cache/restic
+        state: directory
+        owner: root
+        group: root
+        mode: "0700"
+      become: true
+
+    - name: create restic wrapper script
+      copy:
+        owner: root
+        group: root
+        mode: "0700"
+        dest: /usr/local/bin/restic-cmd
+        content: |
+          #!/usr/bin/env bash
+          source /etc/restic/env
+
+          set -o nounset
+          set -o errexit
+          set -o pipefail
+
+          export B2_ACCOUNT_ID
+          export B2_ACCOUNT_KEY
+
+          export RESTIC_PASSWORD_FILE=/etc/restic/repopassword
+
+          restic \
+            --cache-dir=/var/cache/restic/ \
+            --repo="b2:${BUCKET_NAME}:backup" \
+            --password-file=/etc/restic/repopassword \
+            --verbose \
+            "${@}"
+      become: true
+
+    - name: add backup script
+      copy:
+        owner: root
+        group: root
+        mode: "0700"
+        dest: /usr/local/bin/restic-backup
+        content: |
+          #!/usr/bin/env bash
+
+          set -o nounset
+          set -o errexit
+          set -o pipefail
+
+          run() {
+            name="${1}" ; shift
+            printf '[%s] %s - start\n' "${name}" "$(date --utc --iso-8601=seconds)"
+            "${@}"
+            printf '[%s] %s - end\n' "${name}" "$(date --utc --iso-8601=seconds)"
+          }
+
+          run backup restic-cmd \
+              backup \
+              --exclude-file /etc/restic/exclude.lst \
+              /home/
+
+          run forget restic-cmd \
+              forget \
+              --prune
+              --keep-daily 30 \
+              --keep-monthly 12 \
+              --keep-yearly 3
+      become: true
+
+
+    - name: Install restic backup service
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/restic-backup.service
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          [Service]
+          Type=oneshot
+          ExecStart=systemd-inhibit /usr/local/bin/restic-backup
+      become: true
+
+    - name: Install restic backup timer
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/restic-backup.timer
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          [Timer]
+          OnCalendar=daily
+          Persistent=true
+
+          [Install]
+          WantedBy=multi-user.target
+      become: true
+
+    - name: Enable restic backup timer
+      ansible.builtin.systemd:
+        name: restic-backup.timer
+        enabled: true
+        state: started
+        daemon_reload: true
+      become: true
