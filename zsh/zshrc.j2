@@ -379,6 +379,16 @@ tmp() {
     fi
 }
 
+# taken verbatim from https://yazi-rs.github.io/docs/quick-start, extended with "command" in
+# the last line to not use aliased `rm`
+function y() {
+    local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+    yazi "$@" --cwd-file="$tmp"
+    IFS= read -r -d '' cwd < "$tmp"
+    [ -n "$cwd" ] && [ "$cwd" != "$PWD" ] && builtin cd -- "$cwd"
+    command rm -f -- "$tmp"
+}
+
 setopt PROMPT_SUBST
 
 autoload -Uz vcs_info

@@ -574,3 +574,17 @@ pulumi:
 reflector:
   archlinux:
     - reflector
+yazi:
+  archlinux:
+    - yazi
+    - ffmpeg
+    - 7zip
+    - jq
+    - poppler
+    - fd
+    - ripgrep
+    - fzf
+    - xsel
+    - zoxide
+    - resvg
+    - imagemagick
