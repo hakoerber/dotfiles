@@ -77,7 +77,7 @@ font-libertine:
     - libertinus-font
 font-awesome:
   archlinux:
-    - ttf-font-awesome
+    - woff2-font-awesome
 font-noto:
   archlinux:
     - noto-fonts
