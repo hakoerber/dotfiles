@@ -17,15 +17,6 @@ users:
         - i-dont-care-about-cookies
         - floccus
       manage_css: true
-    media:
-      extensions:
-        - ublock-origin
-        - passff
-        - privacy-badger17
-        - tree-style-tab
-        - i-dont-care-about-cookies
-      manage_css: true
-      bigger_font: true
   mail: hannes@hkoerber.de
   ssh_agent: false
   gpg_agent: true
