@@ -12,7 +12,6 @@ users:
       extensions:
         - ublock-origin
         - passff
-        - privacy-badger17
         - tree-style-tab
         - i-dont-care-about-cookies
         - floccus
