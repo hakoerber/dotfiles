@@ -222,7 +222,7 @@
 
           run forget restic-cmd \
               forget \
-              --prune
+              --prune \
               --keep-daily 30 \
               --keep-monthly 12 \
               --keep-yearly 3
