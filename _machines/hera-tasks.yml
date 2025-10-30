@@ -189,7 +189,7 @@
 
           restic \
             --cache-dir=/var/cache/restic/ \
-            --repo="b2:${BUCKET_NAME}:backup" \
+            --repo="b2:${BUCKET_NAME}:hera" \
             --password-file=/etc/restic/repopassword \
             --verbose \
             "${@}"
