@@ -14,6 +14,9 @@
           set -o nounset
           set -o pipefail
 
+          # Prevent failures when not battery present
+          shopt -s nullglob
+
           for battery in /sys/class/power_supply/*/capacity ; do
               capacity="$(< "$battery")"
               if (( "${capacity}" < 40 )) ; then
