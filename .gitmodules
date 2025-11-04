@@ -10,9 +10,6 @@
 [submodule "pkgbuilds/portfolio-performance-bin"]
 	path = pkgbuilds/portfolio-performance-bin
 	url = https://aur.archlinux.org/portfolio-performance-bin.git
-[submodule "pkgbuilds/vim-plug"]
-	path = pkgbuilds/vim-plug
-	url = https://aur.archlinux.org/vim-plug.git
 [submodule "pkgbuilds/terraform-ls-bin"]
 	path = pkgbuilds/terraform-ls-bin
 	url = https://aur.archlinux.org/terraform-ls-bin.git

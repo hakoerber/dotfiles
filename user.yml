@@ -270,20 +270,6 @@
         owner: "{{ user.name }}"
         group: "{{ user.name }}"
 
-- name: Vim
-  tags:
-    - user:vim
-  block:
-    - name: Install vim plugins
-      ansible.builtin.command: nvim --headless +PlugInstall +qall
-      register: vim_plugin_install
-      changed_when: vim_plugin_install.stderr != ""
-
-    - name: Update vim plugins
-      ansible.builtin.command: nvim --headless +PlugUpdate +qall
-      register: vim_plugin_update
-      changed_when: vim_plugin_update.stderr != ""
-
 - name: Firefox
   tags:
     - user:firefox

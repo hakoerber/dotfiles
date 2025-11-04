@@ -248,7 +248,6 @@
                   curl -sSf --proto '=https' https://download.spotify.com/debian/pubkey_C85668DF69375001.gpg | gpg --import -
 
               - name: nodejs-intelephense
-              - name: vim-plug
               - name: terraform-ls-bin
               - name: grm-git
               - name: screencfg-git
