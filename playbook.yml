@@ -449,13 +449,14 @@
 
               source ./PKGBUILD
 
-              for arch in "${arch[@]}" ; do
-                if [[ "${arch}" == "any" ]] ; then
+              for a in "${arch[@]}" ; do
+                if [[ "${a}" == "any" ]] ; then
                   arch="any"
                   break
                 fi
-                if [[ "${arch}" == "x86_64" ]] ; then
+                if [[ "${a}" == "x86_64" ]] ; then
                   arch="x86_64"
+                  break
                 fi
               done
 
