@@ -376,6 +376,7 @@ json:
 markdown:
   archlinux:
     - marksman
+    - mdformat
 lldb:
   archlinux:
     - lldb
