@@ -208,13 +208,29 @@
           changed_when: unconfigured_packages_cmd.rc == 123
           become: true
 
-    - name: Enable reflector timer
-      ansible.builtin.systemd:
-        name: reflector.timer
-        enabled: true
-        state: started
-        daemon_reload: true
-      become: true
+    - name: reflector
+      block:
+      - name: Configure reflector
+        ansible.builtin.copy:
+          dest: /etc/xdg/reflector/reflector.conf
+          owner: root
+          group: root
+          mode: "0644"
+          content: |
+            --save /etc/pacman.d/mirrorlist
+            --protocol https
+            --country Germany
+            --latest 5
+            --sort age
+        become: true
+
+      - name: Enable reflector timer
+        ansible.builtin.systemd:
+          name: reflector.timer
+          enabled: true
+          state: started
+          daemon_reload: true
+        become: true
 
     - name: aur
       tags:
