@@ -6,13 +6,13 @@
   tasks:
     - name: Read machine-specific variables
       ansible.builtin.include_vars:
-        file: _machines/{{ ansible_hostname }}.yml
+        file: _machines/{{ ansible_facts['hostname'] }}.yml
         name: machine
       tags:
         - always
 
     - ansible.builtin.set_fact:
-        distro: "{{ ansible_distribution | lower }}"
+        distro: "{{ ansible_facts['distribution'] | lower }}"
       tags:
         - always
 
@@ -881,7 +881,7 @@
     - include_tasks: "{{ item }}"
       with_first_found:
         - files:
-            - "_machines/{{ ansible_hostname }}-tasks.yml"
+            - "_machines/{{ ansible_facts['hostname'] }}-tasks.yml"
           skip: true
       tags:
         - always
