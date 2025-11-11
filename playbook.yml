@@ -859,6 +859,175 @@
               ACTION=="add", SUBSYSTEM=="backlight", RUN+="/bin/chgrp video $sys$devpath/brightness", RUN+="/bin/chmod g+w $sys$devpath/brightness"
           become: true
 
+    - name: Firefox
+      tags:
+        - firefox
+      block:
+        - name: create firefox directories
+          file:
+            state: directory
+            path: "{{ item }}"
+            owner: root
+            group: root
+            mode: "0775"
+          become: true
+          become_user: root
+          loop:
+            - /etc/firefox
+            - /etc/firefox/policies
+
+        - set_fact:
+            firefox_policy:
+              policies:
+                AutofillAddressEnabled: false
+                AutofillCreditCardEnabled: false
+                DefaultDownloadDirectory: "${home}/download"
+                DisableFeedbackCommands: true
+                DisableFirefoxAccounts: true
+                DisableFirefoxStudies: true
+                DisableForgetButton: true
+                DisableMasterPasswordCreation: true
+                DisableProfileImport: true
+                DisableProfileRefresh: true
+                DisableSafeMode: true
+                DisableSetDesktopBackground: true
+                DisableTelemetry: true
+                DisplayBookmarksToolbar: "always"
+                DisplayMenuBar: "default-off"
+                DontCheckDefaultBrowser: true
+                EnableTrackingProtection:
+                  Value: true
+                  Locked: false
+                  Category: "strict"
+                  BaselineExceptions: true
+                  ConvenienceExceptions: false
+                ExtensionSettings:
+                  "*":
+                    allowed_types:
+                      - extension
+                  "jid1-KKzOGWgsW3Ao4Q@jetpack": # I don't care about cookies
+                    installation_mode: "normal_installed"
+                    install_url: "https://addons.mozilla.org/firefox/downloads/file/4202634/i_dont_care_about_cookies.xpi"
+                    default_area: "menupanel"
+                    private_browsing: true
+                    updates_disabled: false
+                  "uBlock0@raymondhill.net": # Ublock origin
+                    installation_mode: "normal_installed"
+                    install_url: "https://addons.mozilla.org/firefox/downloads/file/4598854/ublock_origin-1.67.0.xpi"
+                    default_area: "navbar"
+                    private_browsing: true
+                    updates_disabled: false
+                  "treestyletab@piro.sakura.ne.jp": # I don't care about cookies
+                    installation_mode: "normal_installed"
+                    install_url: "https://addons.mozilla.org/firefox/downloads/file/4602712/tree_style_tab-4.2.7.xpi"
+                    default_area: "navbar"
+                    private_browsing: true
+                    updates_disabled: false
+                  "{9063c2e9-e07c-4c2c-9646-cfe7ca8d0498}": # Old Reddit redirect
+                    installation_mode: "normal_installed"
+                    install_url: "https://addons.mozilla.org/firefox/downloads/file/4526031/old_reddit_redirect-2.0.9.xpi"
+                    default_area: "menupanel"
+                    private_browsing: true
+                    updates_disabled: false
+                FirefoxHome:
+                  Search: false
+                  TopSites: false
+                  SponsoredTopSites: false
+                  Highlights: false
+                  Pocket: false
+                  Stories: false
+                  SponsoredPocket: false
+                  SponsoredStories: false
+                  Snippets: false
+                  Locked: true
+                GenerativeAI:
+                  Enabled: false
+                  Chatbot: false
+                  LinkPreviews: false
+                  TabGroups: false
+                Homepage:
+                  URL: "about:newtab"
+                  StartPage: "previous-session"
+                MicrosoftEntraSSO: false
+                NewTabPage: false
+                NoDefaultBookmarks: true
+                OfferToSaveLogins: false
+                OverrideFirstRunPage: ""
+                PasswordManagerEnabled: false
+                Preferences:
+                  "browser.translations.automaticallyPopup":
+                    Value: false
+                    Status: "default"
+                    Type: "boolean"
+                  "browser.aboutConfig.showWarning":
+                    Value: false
+                    Status: "default"
+                    Type: "boolean"
+                  "general.smoothScroll":
+                    Value: true
+                    Status: "default"
+                    Type: "boolean"
+                  # "Play DRM-controlled content"
+                  "media.eme.enabled":
+                    Value: true
+                    Status: "default"
+                    Type: "boolean"
+                  # Restore last session on startup
+                  # https://support.mozilla.org/de/questions/1235263
+                  "browser.startup.page":
+                    Value: 3
+                    Status: "default"
+                    Type: "number"
+                  # reload the tabs properly when restoring
+                  "browser.sessionstore.restore_on_demand":
+                    Value: false
+                    Status: "default"
+                    Type: "boolean"
+                  # "Check spelling as you type"
+                  "layout.spellcheckDefault":
+                    Value: 0
+                    Status: "default"
+                    Type: "number"
+                  # remove ad tracking garbage
+                  "dom.private-attribution.submission.enabled":
+                    Value: false
+                    Status: "default"
+                    Type: "boolean"
+                  # (Try to) disable automatic update, as firefox is pulling a Windows
+                  "app.update.auto":
+                    Value: false
+                    Status: "default"
+                    Type: "boolean"
+                  "app.update.service.enabled": 
+                    Value: false
+                    Status: "default"
+                    Type: "boolean"
+                PromptForDownloadLocation: false
+                RequestedLocales:
+                  - en-US
+                  - de
+                SearchSuggestEnabled: false
+                ShowHomeButton: false
+                SkipTermsOfUse: true
+                UserMessaging:
+                  ExtensionRecommendations: false
+                  FeatureRecommendations: false
+                  UrlbarInterventions: false
+                  SkipOnboarding: true
+                  MoreFromMozilla: false
+                  FirefoxLabs: false
+                VisualSearchEnabled: false
+
+        - name: Firefox global policies
+          ansible.builtin.copy:
+            dest: "/etc/firefox/policies/policies.json"
+            owner: root
+            group: root
+            mode: "0644"
+            content: "{{ firefox_policy | to_nice_json }}"
+          become: true
+          become_user: root
+
     - set_fact:
         users: "{{ machine.users }}"
       tags:

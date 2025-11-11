@@ -274,99 +274,79 @@
   tags:
     - user:firefox
   block:
-    - name: Create firefox directories
-      firefox_profile:
-        name: "{{ item.key }}"
-      loop: "{{ user.firefox_profiles | dict2items }}"
-      check_mode: false
-      register: firefox_profile_names
-
-    - ansible.builtin.set_fact:
-        firefox_preferences:
-          browser.aboutConfig.showWarning: false
-          extensions.pocket.enabled: false
-          toolkit.legacyUserProfileCustomizations.stylesheets: true
-          browser.contentblocking.category: "strict"
-          browser.newtabpage.enabled: false
-          browser.startup.homepage: "about:blank"
-          privacy.trackingprotection.enabled: true
-          privacy.trackingprotection.socialtracking.enabled: true
-          general.smoothScroll: true
-
-          # Restore last session on startup
-          # https://support.mozilla.org/de/questions/1235263
-          browser.startup.page: 3
-          # reload the tabs properly when restoring
-          browser.sessionstore.restore_on_demand: false
-
-          # "Play DRM-controlled content"
-          media.eme.enabled: true
-
-          # "Recommend (extensions|features) as you browse"
-          browser.newtabpage.activity-stream.asrouter.userprefs.cfr.addons: false
-          browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features: false
-
-          # "Ask to save logins and passwords for websites"
-          signon.rememberSignons: false
-
-          # "Allow Firefox to make personalized extension recommendations"
-          browser.discovery.enabled: false
-
-          # "Allow Firefox to install and run studies"
-          app.shield.optoutstudies.enabled: false
-
-          # "Check spelling as you type"
-          layout.spellcheckDefault: 0
-
-          # Ask for download directory
-          browser.download.useDownloadDir: false
-
-          # (Try to) disable automatic update, as firefox is pulling a Windows
-          app.update.auto: false
-          app.update.service.enabled: false
-
-          # remove this camera / microphone overlay when in calls or similar
-          privacy.webrtc.legacyGlobalIndicator: false
-
-          # remove ad tracking garbage
-          dom.private-attribution.submission.enabled: false
-
-    - ansible.builtin.include_role:
-        name: firefox
-      vars:
-        firefox_profiles: "{{ {item.key: item.value} | combine({item.key: {'preferences': firefox_preferences}}, recursive=True) }}"
-      loop: "{{ user.firefox_profiles | dict2items }}"
-      when: not ansible_check_mode
-
-    - name: Firefox - create chrome directory
+    - name: Create firefox base directories
       ansible.builtin.file:
-        path: "{{ item.profile_path }}/chrome/"
+        path: "{{ item }}"
         state: directory
         mode: "0755"
-      with_items: "{{ firefox_profile_names.results }}"
-      when: not ansible_check_mode
-      loop_control:
-        label: "{{ item.profile_path }}"
+      loop:
+        - "~/.mozilla/"
+        - "~/.mozilla/firefox/"
 
-    - name: Firefox - configure firefox custom css
+    - name: Create firefox profile directories
+      ansible.builtin.file:
+        path: "~/.mozilla/firefox/profile-{{ item.key }}"
+        state: directory
+        mode: "0755"
+      loop: "{{ user.firefox_profiles | dict2items }}"
+      loop_control:
+        label: "{{ item.key }}"
+
+    - name: Create chrome directory
+      ansible.builtin.file:
+        path: "~/.mozilla/firefox/profile-{{ item.key }}/chrome/"
+        state: directory
+        mode: "0755"
+      loop: "{{ user.firefox_profiles | dict2items }}"
+      loop_control:
+        label: "{{ item.key }}"
+
+    - name: Configure firefox custom css
       ansible.builtin.copy:
-        dest: "{{ item.profile_path }}/chrome/userChrome.css"
+        dest: "~/.mozilla/firefox/profile-{{ item.key }}/chrome/userChrome.css"
+        # from https://www.kvakil.me/posts/2023-09-12-my-tree-style-tab-configuration.html
         content: |
-          #TabsToolbar {
-            visibility: collapse !important;
-          }
+          // Hide the title bar.
           #titlebar {
+            appearance: none !important;
+            height: 0px;
+          }
+
+          #titlebar > #toolbar-menubar {
+            margin-top: 0px;
+          }
+
+          // Hide regular tab toolbar.
+          #main-window[tabsintitlebar="true"]:not([extradragspace="true"]) #TabsToolbar > .toolbar-items {
+            opacity: 0;
+            pointer-events: none;
+          }
+
+          #main-window:not([tabsintitlebar="true"]) #TabsToolbar {
             visibility: collapse !important;
           }
-          #sidebar-header {
-            visibility: collapse !important;
+
+          // Hide the side toolbar noise.
+          #TabsToolbar {
+            min-width: 0 !important;
+            min-height: 0 !important;
+          }
+
+          #TabsToolbar > .titlebar-buttonbox-container {
+            display: block;
+            position: absolute;
+            top: 12px;
+            left: 0px;
+          }
+
+          #sidebar-box[sidebarcommand="treestyletab_piro_sakura_ne_jp-sidebar-action"] #sidebar-header {
+            display: none;
           }
       when:
-        - not ansible_check_mode
-        - user.firefox_profiles[item.profile_name].manage_css is sameas True
-      with_items: "{{ firefox_profile_names.results }}"
+        - item.value.manage_css is sameas True
+      loop: "{{ user.firefox_profiles | dict2items }}"
       loop_control:
-        label: "{{ item.profile_path }}"
+        label: "{{ item.key }}"
 
 - name: Handle user units
   tags:

@@ -3,6 +3,6 @@ BindsTo=autostart.target
 After=windowmanager.target
 
 [Service]
-ExecStart=/usr/bin/env firefox --setDefaultBrowser -P %i
+ExecStart=/usr/bin/env firefox --profile %h/.mozilla/firefox/profile-%i
 PassEnvironment=DISPLAY
 Restart=always

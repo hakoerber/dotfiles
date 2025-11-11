@@ -1,6 +1,3 @@
-[submodule "ansible_roles/firefox"]
-	path = ansible_roles/firefox
-	url = https://github.com/staticdev/ansible-role-firefox
 [submodule "pkgbuilds/spotify"]
 	path = pkgbuilds/spotify
 	url = https://aur.archlinux.org/spotify.git
