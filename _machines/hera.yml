@@ -18,6 +18,14 @@ additional_packages:
   - sddm
   - sddm-kcm
   - thunderbird
+  # kde archive manager
+  - ark
+  # kde image viewer
+  - gwenview
+  # german language packs
+  - hunspell-de
+  - thunderbird-i18n-de
+  - firefox-i18n-de
 
 users:
 - name: hannes
