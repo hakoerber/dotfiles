@@ -1,0 +1,3 @@
+[Desktop Entry]
+Exec=/bin/sh -c '/usr/bin/firefox --profile "$HOME/.mozilla/firefox/profile-default" %u'
+

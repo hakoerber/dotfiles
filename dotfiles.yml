@@ -99,6 +99,9 @@ dotfiles:
     to: .config/screencfg.toml
   - from: cargo/config.toml
     to: .local/state/cargo/config.toml
+  - from: applications
+    to: .local/share/applications
+    dir: true
 dotfiles_remove:
   - .gitconfig
   - .vimrc
