@@ -118,6 +118,13 @@
 [url "ssh://git@code.hkoerber.de:2222/"]
     insteadOf = https://code.hkoerber.de/
 
+# https://stackoverflow.com/a/71971739
+[url "https://github.com/"]
+    insteadOf = "git@github.com:"
+[url "git@github.com:"]
+    pushInsteadOf = "https://github.com/"
+    pushInsteadOf = "git@github.com:"
+
 [init]
 	defaultBranch = main
 [safe]
