@@ -1,3 +1,4 @@
 [Desktop Entry]
-Exec=/bin/sh -c '/usr/bin/firefox --profile "$HOME/.mozilla/firefox/profile-default" %u'
-
+Type=Application
+Name=Firefox
+Exec=firefox-default --new-tab %u
