@@ -318,8 +318,6 @@ fzf:
   archlinux: ["fzf"]
 chromium:
   archlinux: ["chromium"]
-signal:
-  archlinux: ["signal-desktop"]
 go:
   archlinux: ["go", "gopls", "delve"]
 helix:
