@@ -261,7 +261,7 @@
                   #!/usr/bin/env bash
                   source ./env
                   echo lel
-                  curl -sSf --proto '=https' https://download.spotify.com/debian/pubkey_C85668DF69375001.gpg | gpg --import -
+                  curl -sSf --proto '=https' https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.gpg | gpg --import -
 
               - name: nodejs-intelephense
               - name: terraform-ls-bin
