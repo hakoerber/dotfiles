@@ -55,3 +55,6 @@
 [submodule "pkgbuilds/claude-code"]
 	path = pkgbuilds/claude-code
 	url = https://aur.archlinux.org/claude-code.git
+[submodule "pkgbuilds/aws-session-manager-plugin"]
+	path = pkgbuilds/aws-session-manager-plugin
+	url = https://aur.archlinux.org/aws-session-manager-plugin.git
