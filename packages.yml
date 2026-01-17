@@ -448,6 +448,9 @@ mold:
   archlinux:
     - clang
     - mold
+wild:
+  archlinux:
+    - wild
 arch-packaging:
   archlinux:
     - namcap
