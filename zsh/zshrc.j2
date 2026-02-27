@@ -333,12 +333,7 @@ embiggen() {
 }
 
 journal() {
-    journaldir=~/sync/journal/
-    file="$journaldir/$(date +%Y-%m-%d).md"
-    if [[ ! -e $file ]] ; then
-        cp $journaldir/template.md $file || return
-    fi
-    $EDITOR $file
+    $EDITOR ~/sync/journal/"$(date +%Y-%m-%d).md"
 }
 
 prefix() {
