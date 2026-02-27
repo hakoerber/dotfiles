@@ -101,12 +101,6 @@ json = true
 command = "ping -n -q -w 2 -c 1 8.8.8.8 >/dev/null 2>/dev/null && printf '{\"text\":\"\",\"state\":\"Info\"}' || printf '{\"text\":\"\",\"state\":\"Critical\"}'"
 
 [[block]]
-block = "custom"
-command = "workstation-client weather get"
-# caching is handled by the workstation daemon
-interval = 60
-
-[[block]]
 block = "time"
 interval = 1
 format = " $timestamp.datetime(f:'[CW %V] %a %d.%m.%Y %H:%M:%S', l:de_DE) "
