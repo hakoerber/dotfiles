@@ -383,7 +383,8 @@ yaml:
     - yaml-language-server
 qemu:
   archlinux:
-    - qemu-full
+    - qemu-base
+    - qemu-desktop
     - tigervnc
 cloud-init:
   archlinux:
