@@ -13,3 +13,14 @@ indent = { unit = "    ", tab-width = 4 }
 [[language]]
 name = "dockerfile"
 indent = { unit = "    ", tab-width = 4 }
+
+[[language]]
+name = "markdown"
+language-servers = ["marksman", "mdpls"]
+
+text-width = 100
+soft-wrap = { enable = true, wrap-at-text-width = true, wrap-indicator = "" }
+
+[language-server.mdpls]
+command = "mdpls"
+config = { markdown.preview.auto = true }
