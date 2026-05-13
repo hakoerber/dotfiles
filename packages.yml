@@ -496,6 +496,7 @@ inkscape:
 android:
   archlinux:
     - android-tools
+    - android-udev
 audacity:
   archlinux:
     - audacity
