@@ -3,6 +3,6 @@ BindsTo=autostart.target
 After=windowmanager.target
 
 [Service]
-ExecStart=/usr/bin/env spotify
+ExecStart=/usr/bin/env spotify --audio-api=pulseaudio
 PassEnvironment=DISPLAY
 Restart=always
