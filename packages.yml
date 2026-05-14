@@ -592,3 +592,6 @@ yazi:
     - zoxide
     - resvg
     - imagemagick
+filezilla:
+  archlinux:
+    - filezilla
