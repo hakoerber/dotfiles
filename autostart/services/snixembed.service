@@ -1,0 +1,9 @@
+[Unit]
+BindsTo=autostart.target
+After=windowmanager.target
+After=i3.service
+
+[Service]
+ExecStart=/usr/bin/env snixembed
+PassEnvironment=DISPLAY
+Restart=always

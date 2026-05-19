@@ -92,6 +92,8 @@ i3:
   archlinux:
     - i3-wm
     - i3status-rust
+    # required to make icons work
+    - snixembed
 i3lock:
   archlinux: ["i3lock"]
 pluma:
