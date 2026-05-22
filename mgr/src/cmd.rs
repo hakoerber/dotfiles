@@ -14,9 +14,11 @@ pub enum Error {
     CommandTerminatedBySignal { command: &'static str },
     #[error(
         "command \"{command}\" failed [{code}]: {stderr}",
-        code = match *.code {
-            Some(code) => &.code.to_string(),
-            _ => "unknown exit code",
+        code = {
+            match *.code {
+                Some(code) => code.to_string(),
+                _ => "unknown exit code".to_owned(),
+            }
         },
         stderr = if .stderr.is_empty() {
             "[stderr empty]"

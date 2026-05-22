@@ -4,11 +4,11 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-thiserror = { version = "2.0.16", default-features = false }
+thiserror = { version = "2.0.18", default-features = false }
 time = { version = "0.3.47", default-features = false, features = ["formatting", "parsing", "std"] }
-tracing = { version = "0.1.41", default-features = false }
-tracing-subscriber = { version = "0.3.20", default-features = false, features = ["fmt"] }
-ureq = { version = "3.1.0", default-features = false, features = ["rustls"] }
+tracing = { version = "0.1.44", default-features = false }
+tracing-subscriber = { version = "0.3.23", default-features = false, features = ["fmt"] }
+ureq = { version = "3.3.0", default-features = false, features = ["rustls"] }
 
 [[bin]]
 name = "workstation-mgr"
