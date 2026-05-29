@@ -58,3 +58,6 @@
 [submodule "pkgbuilds/aws-session-manager-plugin"]
 	path = pkgbuilds/aws-session-manager-plugin
 	url = https://aur.archlinux.org/aws-session-manager-plugin.git
+[submodule "pkgbuilds/cargo-lambda-bin"]
+	path = pkgbuilds/cargo-lambda-bin
+	url = https://aur.archlinux.org/cargo-lambda-bin.git
