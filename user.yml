@@ -425,3 +425,17 @@
         executable: /bin/bash # required for <<<
       register: gpg_trust_output
       changed_when: gpg_trust_output.stderr_lines|length > 0
+
+- name: Spotify
+  tags:
+    - user:spotify
+  block:
+    # https://aur.archlinux.org/packages/spotify#comment-1067633
+    - name: Fix spotify auto API
+      ansible.builtin.copy:
+        dest: "/home/{{ user.name }}/.config/spotify-flags.conf"
+        owner: "{{ user.name }}"
+        group: "{{ user.name }}"
+        mode: "0644"
+        content: |
+          --audio-api=pulseaudio
