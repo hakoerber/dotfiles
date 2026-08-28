@@ -51,6 +51,7 @@ docker:
 - docker
 - docker-compose
 - docker-buildx
+- dockerfile-language-server
 awesome-terminal-fonts:
 - awesome-terminal-fonts
 font-inconsolata:
