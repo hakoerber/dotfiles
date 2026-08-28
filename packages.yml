@@ -514,8 +514,9 @@ fuseiso:
 - p7zip
 unrar:
 - unrar
-taplo:
+toml:
 - taplo-cli
+- tombi
 prettier:
 - prettier
 sccache:
