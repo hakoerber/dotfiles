@@ -23,13 +23,12 @@
     - block:
         - name: Install ansible requirements
           ansible.builtin.package:
-            name: "{{ packages[distro] }}"
+            name: "{{ packages }}"
             state: present
           become: true
           vars:
             packages:
-              archlinux:
-                - python-jmespath
+              - python-jmespath
 
     - name: Pacman
       tags:
@@ -142,20 +141,11 @@
             file: packages.yml
             name: defined_packages
 
-        - set_fact:
-            distro_packages: "{{ defined_packages|json_query('*.%s'|format(distro)) }}"
-
-        - name: check list
-          assert:
-            that: "defined_packages|length == distro_packages|length"
-
         - name: install packages
           package:
-            name: "{{ defined_packages|json_query(pkg_query) }}"
+            name: "{{ defined_packages | json_query('*[]') }}"
             state: present
           become: true
-          vars:
-            pkg_query: "{{ '*.%s[]'|format(distro) }}"
 
         - name: install additional packages
           package:

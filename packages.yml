@@ -1,602 +1,551 @@
 kernel:
-  archlinux:
-    - linux-zen
-    - linux-zen-headers
-    - linux-zen-docs
-    - linux-firmware
+- linux-zen
+- linux-zen-headers
+- linux-zen-docs
+- linux-firmware
 grub:
-  archlinux:
-    - grub
-    - efibootmgr
+- grub
+- efibootmgr
 lvm:
-  archlinux:
-    - lvm2
+- lvm2
 build-essentials:
-  archlinux:
-    - gcc
-    - ctags
-    - cmake
-    - maven
-    - base-devel
+- gcc
+- ctags
+- cmake
+- maven
+- base-devel
 posix:
-  archlinux:
-    - posix
+- posix
 make:
-  archlinux: ["make"]
+- make
 gdb:
-  archlinux: ["gdb"]
+- gdb
 strace:
-  archlinux: ["strace"]
+- strace
 sudo:
-  archlinux: ["sudo"]
+- sudo
 doas:
-  archlinux: ["opendoas"]
+- opendoas
 apt:
-  archlinux: ["apt"]
+- apt
 xorg:
-  archlinux:
-    - xorg-server
-    - xorg-xrandr
-    - xorg-xkill
-    - xorg-setxkbmap
-    - xorg-xev
-    - xorg-xprop
-    - xorg-xset
-    - xorg-xinit
+- xorg-server
+- xorg-xrandr
+- xorg-xkill
+- xorg-setxkbmap
+- xorg-xev
+- xorg-xprop
+- xorg-xset
+- xorg-xinit
 dmenu:
-  archlinux: ["dmenu"]
+- dmenu
 ansible:
-  archlinux:
-    - ansible
-    - ansible-language-server
-    - ansible-lint
-    - python-jmespath
+- ansible
+- ansible-language-server
+- ansible-lint
+- python-jmespath
 xdotool:
-  archlinux: ["xdotool"]
+- xdotool
 arandr:
-  archlinux: ["arandr"]
+- arandr
 docker:
-  archlinux: ["docker", "docker-compose", "docker-buildx"]
+- docker
+- docker-compose
+- docker-buildx
 awesome-terminal-fonts:
-  archlinux:
-    - awesome-terminal-fonts
+- awesome-terminal-fonts
 font-inconsolata:
-  archlinux:
-    - ttf-inconsolata
-    - ttf-inconsolata-nerd
+- ttf-inconsolata
+- ttf-inconsolata-nerd
 font-jetbrainsmono:
-  archlinux:
-    - ttf-jetbrains-mono
-    - ttf-jetbrains-mono-nerd
+- ttf-jetbrains-mono
+- ttf-jetbrains-mono-nerd
 font-dejavu:
-  archlinux:
-    - ttf-dejavu
-    - ttf-dejavu-nerd
+- ttf-dejavu
+- ttf-dejavu-nerd
 font-libertine:
-  archlinux:
-    - libertinus-font
+- libertinus-font
 font-awesome:
-  archlinux:
-    - woff2-font-awesome
+- woff2-font-awesome
 font-noto:
-  archlinux:
-    - noto-fonts
+- noto-fonts
 git:
-  # tk required for gitk
-  archlinux: ["git", "tk", "git-delta", "git-filter-repo"]
+- git
+- tk
+- git-delta
+- git-filter-repo
 htop:
-  archlinux: ["htop"]
+- htop
 feh:
-  archlinux: ["feh"]
+- feh
 i3:
-  archlinux:
-    - i3-wm
-    - i3status-rust
-    # required to make icons work
-    - snixembed
+- i3-wm
+- i3status-rust
+- snixembed
 i3lock:
-  archlinux: ["i3lock"]
+- i3lock
 pluma:
-  archlinux: ["pluma"]
+- pluma
 neovim:
-  archlinux: ["neovim", "python-pynvim"]
+- neovim
+- python-pynvim
 vim:
-  archlinux: ["vim"]
+- vim
 network-manager-applet:
-  archlinux: ["network-manager-applet"]
+- network-manager-applet
 pasystray:
-  archlinux: ["pasystray"]
+- pasystray
 redshift:
-  archlinux: ["redshift"]
+- redshift
 pavucontrol:
-  archlinux: ["pavucontrol-qt"]
+- pavucontrol-qt
 pinentry-qt:
-  archlinux: ["pinentry"]
+- pinentry
 pass:
-  archlinux: ["pass", "passff-host", "xclip"]
+- pass
+- passff-host
+- xclip
 urxvt:
-  archlinux: ["rxvt-unicode"]
+- rxvt-unicode
 alacritty:
-  archlinux: ["alacritty"]
+- alacritty
 tmux:
-  archlinux: ["tmux"]
+- tmux
 zsh:
-  archlinux: ["zsh", "zsh-syntax-highlighting", "zsh-completions"]
+- zsh
+- zsh-syntax-highlighting
+- zsh-completions
 zathura:
-  archlinux: ["zathura", "zathura-pdf-poppler"]
+- zathura
+- zathura-pdf-poppler
 pdf:
-  archlinux: ["ghostscript", "enscript"]
+- ghostscript
+- enscript
 pandoc:
-  archlinux: ["pandoc-cli", "texlive-basic", "texlive-fontsextra", "texlive-latexextra"]
+- pandoc-cli
+- texlive-basic
+- texlive-fontsextra
+- texlive-latexextra
 libvirt:
-  archlinux: ["virt-manager", "libvirt", "dnsmasq", "iptables-nft", "dmidecode", "virt-install", "virt-viewer", "libguestfs", "edk2-ovmf"]
+- virt-manager
+- libvirt
+- dnsmasq
+- iptables-nft
+- dmidecode
+- virt-install
+- virt-viewer
+- libguestfs
+- edk2-ovmf
 firefox:
-  archlinux: ["firefox"]
+- firefox
 ranger:
-  archlinux: ["ranger"]
+- ranger
 thunar:
-  archlinux: ["thunar"]
+- thunar
 unclutter:
-  archlinux: ["unclutter"]
+- unclutter
 libreoffice:
-  archlinux: ["libreoffice-fresh", "libreoffice-fresh-de"]
+- libreoffice-fresh
+- libreoffice-fresh-de
 qt-theming:
-  archlinux: ["breeze", "breeze-icons", "breeze-grub", "qt5ct"]
+- breeze
+- breeze-icons
+- breeze-grub
+- qt5ct
 gtk-theming:
-  archlinux: ["breeze-gtk", "lxappearance"]
+- breeze-gtk
+- lxappearance
 xcompmgr:
-  archlinux: ["xcompmgr"]
+- xcompmgr
 python:
-  archlinux:
-    - python
-    - python-lsp-server
-    - bandit
-    - python-pyflakes
-    - python-pylint
-    - flake8
-    - mypy
-    - uv
+- python
+- python-lsp-server
+- bandit
+- python-pyflakes
+- python-pylint
+- flake8
+- mypy
+- uv
 python-modules:
-  archlinux:
-    - python-ruamel-yaml
-    - python-gitpython
-    - python-semver
+- python-ruamel-yaml
+- python-gitpython
+- python-semver
 black:
-  archlinux: ["python-black"]
+- python-black
 brightnessctl:
-  archlinux: ["brightnessctl"]
+- brightnessctl
 wireshark:
-  archlinux: ["wireshark-cli", "wireshark-qt"]
+- wireshark-cli
+- wireshark-qt
 nmap:
-  archlinux: ["nmap"]
+- nmap
 curl:
-  archlinux: ["curl"]
+- curl
 wget:
-  archlinux: ["wget"]
+- wget
 tree:
-  archlinux: ["tree"]
+- tree
 which:
-  archlinux: ["which"]
+- which
 zip:
-  archlinux: ["zip", "unzip"]
+- zip
+- unzip
 traceroute:
-  archlinux: ["traceroute"]
+- traceroute
 tcpdump:
-  archlinux: ["tcpdump"]
+- tcpdump
 tar:
-  archlinux: ["tar"]
+- tar
 rsync:
-  archlinux: ["rsync"]
+- rsync
 net-tools:
-  archlinux: ["net-tools"]
+- net-tools
 ntfs:
-  archlinux: ["ntfs-3g"]
+- ntfs-3g
 lsof:
-  archlinux: ["lsof"]
+- lsof
 iptables:
-  archlinux: ["iptables-nft"]
+- iptables-nft
 pwgen:
-  archlinux: ["pwgen"]
+- pwgen
 gpg:
-  archlinux: ["gnupg", "paperkey", "yubikey-manager", "yubikey-touch-detector"]
+- gnupg
+- paperkey
+- yubikey-manager
+- yubikey-touch-detector
 networkmanager:
-  archlinux: ["networkmanager", "capnet-assist"]
+- networkmanager
+- capnet-assist
 pulseaudio:
-  archlinux:
-    - pulseaudio
-    - pulseaudio-alsa
-    - lib32-libpulse
-    - alsa-utils
-    - alsa-firmware
-    - sof-firmware
-    - alsa-ucm-conf
+- pulseaudio
+- pulseaudio-alsa
+- lib32-libpulse
+- alsa-utils
+- alsa-firmware
+- sof-firmware
+- alsa-ucm-conf
 iw:
-  archlinux: ["iw"]
+- iw
 cowsay:
-  archlinux: ["cowsay"]
+- cowsay
 ruby:
-  archlinux: ["ruby"]
+- ruby
 acpi:
-  archlinux: ["acpi", "acpid"]
+- acpi
+- acpid
 nodejs:
-  archlinux: ["nodejs-lts-jod", "npm", "yarn"]
+- nodejs-lts-jod
+- npm
+- yarn
 xdg:
-  archlinux: ["xdg-utils"]
+- xdg-utils
 dunst:
-  archlinux: ["dunst"]
+- dunst
 cloc:
-  archlinux: ["cloc"]
+- cloc
 bwm-ng:
-  archlinux: ["bwm-ng"]
+- bwm-ng
 ssh:
-  archlinux: ["openssh"]
+- openssh
 sshfs:
-  archlinux: ["sshfs"]
+- sshfs
 expect:
-  archlinux: ["expect"]
+- expect
 inotify:
-  archlinux: ["inotify-tools"]
+- inotify-tools
 rclone:
-  archlinux: ["rclone"]
+- rclone
 dnf:
-  archlinux: ["dnf5"]
+- dnf5
 rust:
-  archlinux:
-    - rustup
-    - rust-analyzer
-    - cargo-edit
-    - cargo-expand
-    - cargo-msrv
-    - cargo-watch
-    - cargo-release
-    - cargo-sort
-    - cargo-hack
-    - cargo-dist
-    - cargo-binstall
-    - rust-script
+- rustup
+- rust-analyzer
+- cargo-edit
+- cargo-expand
+- cargo-msrv
+- cargo-watch
+- cargo-release
+- cargo-sort
+- cargo-hack
+- cargo-dist
+- cargo-binstall
+- rust-script
 musescore:
-  archlinux: ["musescore"]
+- musescore
 rofi:
-  archlinux: ["rofi"]
+- rofi
 imv:
-  archlinux: ["imv"]
+- imv
 pacman:
-  archlinux: ["pacman", "pacman-contrib"]
+- pacman
+- pacman-contrib
 steam:
-  archlinux:
-    - steam
-    - lib32-pango
-    - pango
-    - ttf-liberation
+- steam
+- lib32-pango
+- pango
+- ttf-liberation
 man:
-  archlinux: ["man-db", "man-pages"]
+- man-db
+- man-pages
 nextcloud:
-  archlinux: ["nextcloud-client"]
+- nextcloud-client
 kwallet:
-  archlinux: ["kwallet", "kwalletmanager"]
+- kwallet
+- kwalletmanager
 pv:
-  archlinux: ["pv"]
+- pv
 stress:
-  archlinux: ["stress"]
+- stress
 mpris:
-  archlinux: ["playerctl"]
+- playerctl
 imagemagick:
-  archlinux: ["imagemagick"]
+- imagemagick
 mpv:
-  archlinux: ["mpv"]
+- mpv
 gnome-keyring:
-  archlinux: ["gnome-keyring", "seahorse"]
+- gnome-keyring
+- seahorse
 element:
-  archlinux: ["element-desktop"]
+- element-desktop
 maim:
-  archlinux: ["maim"]
+- maim
 mkinitcpio:
-  archlinux: ["mkinitcpio"]
+- mkinitcpio
 terraform:
-  archlinux: ["terraform"]
+- terraform
 synclient:
-  archlinux: ["xf86-input-synaptics"]
+- xf86-input-synaptics
 ncdu:
-  archlinux: ["ncdu"]
+- ncdu
 dust:
-  archlinux: ["dust"]
+- dust
 font-utils:
-  archlinux: ["woff2"]
+- woff2
 jq:
-  archlinux: ["jq"]
+- jq
 musl:
-  archlinux: ["musl"]
+- musl
 kdeconnect:
-  archlinux: ["kdeconnect"]
+- kdeconnect
 restic:
-  archlinux: ["restic"]
+- restic
 discord:
-  archlinux: ["discord"]
+- discord
 kubectl:
-  archlinux: ["kubectl"]
+- kubectl
 bind:
-  archlinux: ["bind"]
+- bind
 fzf:
-  archlinux: ["fzf"]
+- fzf
 chromium:
-  archlinux: ["chromium"]
+- chromium
 go:
-  archlinux: ["go", "gopls", "delve"]
+- go
+- gopls
+- delve
 helix:
-  archlinux: ["helix"]
+- helix
 keepassxc:
-  archlinux: ["keepassxc"]
+- keepassxc
 awscli:
-  archlinux: ["aws-cli-v2"]
+- aws-cli-v2
 mariadb-client:
-  archlinux: ["mariadb-clients"]
+- mariadb-clients
 php:
-  archlinux: ["php", "composer"]
+- php
+- composer
 eza:
-  archlinux: ["eza"]
+- eza
 just:
-  archlinux: ["just"]
+- just
 ripgrep:
-  archlinux: ["ripgrep"]
+- ripgrep
 fd:
-  archlinux: ["fd"]
+- fd
 bat:
-  archlinux: ["bat"]
+- bat
 mdbook:
-  archlinux: ["mdbook"]
+- mdbook
 bash:
-  archlinux:
-    - bash
-    - bash-language-server
-    - shellcheck
-    - shfmt
+- bash
+- bash-language-server
+- shellcheck
+- shfmt
 packer:
-  archlinux: ["packer"]
+- packer
 c:
-  archlinux:
-    - gcc
-    - clang
+- gcc
+- clang
 sed:
-  archlinux:
-    - sed
+- sed
 findutils:
-  archlinux:
-    - findutils
+- findutils
 html:
-  archlinux:
-    - vscode-html-languageserver
+- vscode-html-languageserver
 typescript:
-  archlinux:
-    - typescript
-    - typescript-language-server
+- typescript
+- typescript-language-server
 json:
-  archlinux:
-    - vscode-json-languageserver
-    - gron
+- vscode-json-languageserver
+- gron
 markdown:
-  archlinux:
-    - marksman
-    - mdformat
+- marksman
+- mdformat
 lldb:
-  archlinux:
-    - lldb
+- lldb
 yaml:
-  archlinux:
-    - yaml-language-server
+- yaml-language-server
 qemu:
-  archlinux:
-    - qemu-base
-    - qemu-desktop
-    - tigervnc
+- qemu-base
+- qemu-desktop
+- tigervnc
 cloud-init:
-  archlinux:
-    - cloud-init
-    - cloud-utils
+- cloud-init
+- cloud-utils
 netcat:
-  archlinux:
-    - openbsd-netcat
+- openbsd-netcat
 telnet:
-  archlinux:
-    - inetutils
+- inetutils
 cloudformation-tools:
-  archlinux:
-    - python-cfn-lint
+- python-cfn-lint
 johntheripper:
-  archlinux:
-    - john
+- john
 age:
-  archlinux:
-    - age
+- age
 httpie:
-  archlinux:
-    - httpie
+- httpie
 yt-dlp:
-  archlinux:
-    - yt-dlp
+- yt-dlp
 ytfzf:
-  archlinux:
-    - ytfzf
-    - ueberzug
+- ytfzf
+- ueberzug
 ffmpeg:
-  archlinux:
-    - ffmpeg
+- ffmpeg
 zeal:
-  archlinux:
-    - zeal
+- zeal
 kcharselect:
-  archlinux:
-    - kcharselect
+- kcharselect
 bottom:
-  archlinux:
-    - bottom
-# for iotop
+- bottom
 sysstat:
-  archlinux:
-    - sysstat
+- sysstat
 qrencode:
-  archlinux:
-    - qrencode
+- qrencode
 iotop:
-  archlinux:
-    - iotop
+- iotop
 w3m:
-  archlinux:
-    - w3m
+- w3m
 ruff:
-  archlinux:
-    - ruff
+- ruff
 mold:
-  archlinux:
-    - clang
-    - mold
+- clang
+- mold
 wild:
-  archlinux:
-    - wild
+- wild
 arch-packaging:
-  archlinux:
-    - namcap
-    - devtools
-    - arch-install-scripts
-    - archiso
+- namcap
+- devtools
+- arch-install-scripts
+- archiso
 drone:
-  archlinux:
-    - drone-cli
+- drone-cli
 sqlite:
-  archlinux:
-    - sqlite
+- sqlite
 css:
-  archlinux:
-    - vscode-css-languageserver
+- vscode-css-languageserver
 watchexec:
-  archlinux:
-    - watchexec
+- watchexec
 postgresql:
-  archlinux:
-    - postgresql
-    - pgformatter
+- postgresql
+- pgformatter
 tokei:
-  archlinux:
-    - tokei
+- tokei
 whois:
-  archlinux:
-    - whois # also contains mkpasswd
+- whois
 encfs:
-  archlinux:
-    - encfs
+- encfs
 digikam:
-  archlinux:
-    - digikam
+- digikam
 evince:
-  archlinux:
-    - evince
+- evince
 iftop:
-  archlinux:
-    - iftop
+- iftop
 inkscape:
-  archlinux:
-    - inkscape
+- inkscape
 android:
-  archlinux:
-    - android-tools
-    - android-udev
+- android-tools
+- android-udev
 audacity:
-  archlinux:
-    - audacity
+- audacity
 calibre:
-  archlinux:
-    - calibre
+- calibre
 deluge:
-  archlinux:
-    - deluge
-    - deluge-gtk
+- deluge
+- deluge-gtk
 wine:
-  archlinux:
-    - wine
-    - wine-gecko
-    - wine-mono
-    - winetricks
-    - lib32-libpulse
-    - vkd3d
-    - lib32-vkd3d
-    - lib32-gnutls
+- wine
+- wine-gecko
+- wine-mono
+- winetricks
+- lib32-libpulse
+- vkd3d
+- lib32-vkd3d
+- lib32-gnutls
 sqlx:
-  archlinux:
-    - sqlx-cli
+- sqlx-cli
 geeqie:
-  archlinux:
-    - geeqie
+- geeqie
 xpath:
-  archlinux:
-    - perl-xml-xpath
-apache: # for apachebench
-  archlinux:
-    - apache
+- perl-xml-xpath
+apache:
+- apache
 xfce4-screenshooter:
-  archlinux:
-    - xfce4-screenshooter
+- xfce4-screenshooter
 picom:
-  archlinux:
-    - picom
+- picom
 fuseiso:
-  archlinux:
-    - fuseiso
+- fuseiso
 7zip:
-  archlinux:
-    - p7zip
+- p7zip
 unrar:
-  archlinux:
-    - unrar
+- unrar
 taplo:
-  archlinux:
-    - taplo-cli
+- taplo-cli
 prettier:
-  archlinux:
-    - prettier
+- prettier
 sccache:
-  archlinux:
-    - sccache
+- sccache
 btop:
-  archlinux:
-    - btop
+- btop
 dua:
-  archlinux:
-    - dua-cli
+- dua-cli
 hexyl:
-  archlinux:
-    - hexyl
+- hexyl
 yq:
-  archlinux:
-    - go-yq
+- go-yq
 kolourpaint:
-  archlinux:
-    - kolourpaint
+- kolourpaint
 podman:
-  archlinux:
-    - podman
-    - podman-compose
+- podman
+- podman-compose
 pulumi:
-  archlinux:
-    - pulumi
+- pulumi
 reflector:
-  archlinux:
-    - reflector
+- reflector
 yazi:
-  archlinux:
-    - yazi
-    - ffmpeg
-    - 7zip
-    - jq
-    - poppler
-    - fd
-    - ripgrep
-    - fzf
-    - xsel
-    - zoxide
-    - resvg
-    - imagemagick
+- yazi
+- ffmpeg
+- 7zip
+- jq
+- poppler
+- fd
+- ripgrep
+- fzf
+- xsel
+- zoxide
+- resvg
+- imagemagick
 filezilla:
-  archlinux:
-    - filezilla
+- filezilla
 protontricks:
-  archlinux:
-    - protontricks
+- protontricks
