@@ -345,6 +345,7 @@ go:
 - go
 - gopls
 - delve
+- golangci-lint
 helix:
 - helix
 keepassxc:
