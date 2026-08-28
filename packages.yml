@@ -597,3 +597,6 @@ yazi:
 filezilla:
   archlinux:
     - filezilla
+protontricks:
+  archlinux:
+    - protontricks
