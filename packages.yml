@@ -361,6 +361,7 @@ eza:
 - eza
 just:
 - just
+- just-lsp
 ripgrep:
 - ripgrep
 fd:
