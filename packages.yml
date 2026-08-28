@@ -41,7 +41,6 @@ dmenu:
 - dmenu
 ansible:
 - ansible
-- ansible-language-server
 - ansible-lint
 - python-jmespath
 xdotool:
