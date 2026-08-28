@@ -394,6 +394,7 @@ lldb:
 - lldb
 yaml:
 - yaml-language-server
+- yamllint
 qemu:
 - qemu-base
 - qemu-desktop
