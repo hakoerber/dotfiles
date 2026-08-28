@@ -166,6 +166,8 @@ python:
 - flake8
 - mypy
 - uv
+- ty
+- jedi-language-server
 python-modules:
 - python-ruamel-yaml
 - python-gitpython
