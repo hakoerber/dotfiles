@@ -24,7 +24,16 @@ impl WireCommand for Action {
     fn parse_wire(mut input: impl Iterator<Item = u8>) -> Result<Self, server::ParseError> {
         match input.next().ok_or(server::ParseError::Eof)? {
             0x01 => {
-                const BYTES: usize = (u64::BITS / 8) as usize;
+                const BYTES: usize = {
+                    #[expect(
+                        clippy::as_conversions,
+                        reason = "bit size for u64 will always fit a usize"
+                    )]
+                    #[expect(clippy::integer_division, reason = "divisor is const and non-null")]
+                    {
+                        (u64::BITS / 8) as usize
+                    }
+                };
                 let input = input.take(BYTES).collect::<Vec<u8>>();
                 let input: [u8; BYTES] =
                     input
@@ -34,7 +43,7 @@ impl WireCommand for Action {
                             received: vec.len(),
                         })?;
 
-                let secs = u64::from_le_bytes(input);
+                let secs = u64::from_ne_bytes(input);
                 let duration = std::time::Duration::from_secs(secs);
                 Ok(Self::Sleep(duration))
             }
@@ -46,7 +55,7 @@ impl WireCommand for Action {
         match *self {
             Self::Sleep(duration) => {
                 let mut v = vec![0x01];
-                v.extend(duration.as_secs().to_le_bytes());
+                v.extend(duration.as_secs().to_ne_bytes());
                 v
             }
         }

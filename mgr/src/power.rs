@@ -154,8 +154,7 @@ fn screen_off() -> Result<(), Error> {
 
 fn lock() -> Result<cmd::RunningProcess, Error> {
     match spotify::pause() {
-        Ok(_) => (),
-        Err(spotify::Error::NotFound) => (),
+        Ok(()) | Err(spotify::Error::NotFound) => (),
         Err(e) => return Err(e.into()),
     }
 
