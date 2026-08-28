@@ -555,3 +555,5 @@ filezilla:
 - filezilla
 protontricks:
 - protontricks
+systemd:
+- systemd-lsp
