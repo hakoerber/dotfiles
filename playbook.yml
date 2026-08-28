@@ -133,30 +133,6 @@
           become: true
           become_user: root
 
-        - name: fix group for dotfiles directory
-          shell: |
-            chgrp --changes --recursive dotfiles . | grep -Ev "changed group of ('./.git/index'|'./.git/modules/)"
-          args:
-            executable: /bin/bash
-            chdir: /var/lib/dotfiles
-          register: dotfiles_group_change
-          become: true
-          become_user: root
-          failed_when: dotfiles_group_change.rc not in (0, 1)
-          changed_when: dotfiles_group_change.rc == 0 # == lines selected, i.e. some output
-
-        - name: fix group permissions for dotfiles directory
-          shell: |
-            chmod --changes --recursive g+rwX . | grep -Ev "mode of ('./.git/index'|'./.git/modules/)"
-          args:
-            executable: /bin/bash
-            chdir: /var/lib/dotfiles
-          register: dotfiles_permission_change
-          become: true
-          become_user: root
-          failed_when: dotfiles_permission_change.rc not in (0, 1)
-          changed_when: dotfiles_permission_change.rc == 0 # == lines selected, i.e. some output
-
     - name: packages
       tags:
         - packages
