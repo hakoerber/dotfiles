@@ -17,7 +17,7 @@ export LC_ALL="en_US.UTF-8"
 DOTDIR="/var/lib/dotfiles"
 
 os_release_file=/etc/os-release
-if [[ ! -e "${os_release_file}" ]] ; then
+if [[ ! -e "${os_release_file}" ]]; then
     2>&1 printf 'Could not find %, exiting\n' "${os_release_file}"
     exit 1
 fi
@@ -26,7 +26,7 @@ fi
 source "${os_release_file}"
 
 sudowrap() {
-    if (( $(id -u) != 0 )) ; then
+    if (($(id -u) != 0)); then
         sudo "${@}"
     else
         "${@}"
@@ -35,10 +35,11 @@ sudowrap() {
 
 cache_updated=0
 install() {
-    local package="$1" ; shift
+    local package="$1"
+    shift
 
-    if [[ $NAME == "Arch Linux" ]] ; then
-        if (( ! cache_updated )) ; then
+    if [[ $NAME == "Arch Linux" ]]; then
+        if ((!cache_updated)); then
             sudowrap pacman -Sy
             cache_updated=1
         fi
@@ -49,7 +50,7 @@ install() {
     fi
 }
 
-command -v make    >/dev/null || install "make"
-command -v ansible >/dev/null || install "ansible"
+command -v make > /dev/null || install "make"
+command -v ansible > /dev/null || install "ansible"
 
 cd "${DOTDIR}" && make

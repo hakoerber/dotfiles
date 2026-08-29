@@ -40,7 +40,7 @@ if [[ -n "${mnt}" ]]; then
         exit 1
     fi
 else
-    if findmnt --mountpoint "${MOUNTPOINT}" >/dev/null; then
+    if findmnt --mountpoint "${MOUNTPOINT}" > /dev/null; then
         printf "%s already in use\n" "${MOUNTPOINT}" >&2
         exit 1
     else

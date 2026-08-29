@@ -31,14 +31,14 @@ mkdir -p "${WINEPREFIX}"
 
 archive() {
     origin="$1"
-    if [[ -e "${ARCHIVE}" ]] ; then
+    if [[ -e "${ARCHIVE}" ]]; then
         return
     fi
     tar -cv --zstd -p -f "${ARCHIVE}" -C "${GAMEDATA}" .
 }
 
 extract() {
-    if [[ -e "${GAMEDATA}" ]] ; then
+    if [[ -e "${GAMEDATA}" ]]; then
         return
     fi
 
@@ -74,7 +74,7 @@ ini() {
         local file="$1"
         local key="$2"
         local value="$3"
-        if ! grep -q "^${key}=" "${file}" ; then
+        if ! grep -q "^${key}=" "${file}"; then
             echo "Key ${key} not fmund in ${file}"
             exit 1
         fi
@@ -106,7 +106,6 @@ ini() {
     set_ini system/SystemPack.ini InDoorPortalDistanceMultiplier 3
 }
 
-
 case $1 in
     install)
         extract
@@ -133,7 +132,7 @@ case $1 in
 
         # winetricks -q dxvk
         winetricks -q directmusic
-        if command -v setup_dxvk >/dev/null ; then
+        if command -v setup_dxvk > /dev/null; then
             setup_dxvk install
         else
             echo "WARNING: Using dxvk via winetricks, untested"
@@ -163,7 +162,7 @@ case $1 in
         unzip -o "${DOWNLOADDIR}"/Normalmaps_LHiver.zip -d "${t}"
         zip_exit="$?"
         set -o errexit
-        if (( $zip_exit != 0 )) && (( $zip_exit != 2 )) ; then
+        if (($zip_exit != 0)) && (($zip_exit != 2)); then
             echo zip failed
             exit 1
         fi

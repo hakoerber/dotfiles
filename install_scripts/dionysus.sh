@@ -6,12 +6,12 @@ set -o errexit
 
 DEVICE="/dev/nvme0n1"
 
-if [[ ! -b "${DEVICE}" ]] ; then
+if [[ ! -b "${DEVICE}" ]]; then
     printf '%s does not look like a device\n' "${DEVICE}"
     exit 1
 fi
 
-if [[ ! -d /sys/firmware/efi/efivars ]] ; then
+if [[ ! -d /sys/firmware/efi/efivars ]]; then
     printf 'efivars does not exist, looks like the system is not booted in EFI mode\n'
     exit 1
 fi
@@ -32,7 +32,7 @@ EOF
 # might take a bit for the new partion table to be updated in-kernel
 sleep 1
 
-while : ; do
+while :; do
     cryptsetup --batch-mode luksFormat --iter-time 1000 ${DEVICE}p3
     cryptsetup --batch-mode open --tries 1 ${DEVICE}p3 cryptpart && break
 done

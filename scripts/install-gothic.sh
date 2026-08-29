@@ -40,7 +40,6 @@ curl -C - -L -o RiisisGothic1TextureMixV1.1.zip "https://www.worldofgothic.de/do
 
 read -rp "During installation, use \"${STEAMAPPS}/common/Gothic\" as the install directory! <Enter> to continue, <CTRL+C> to abort "
 
-
 export WINEPREFIX="${STEAMAPPS}/compatdata/65540/pfx/"
 
 winetricks dotnet7

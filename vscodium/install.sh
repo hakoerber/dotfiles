@@ -11,5 +11,3 @@ codium --install-extension asvetliakov.vscode-neovim
 codium --install-extension monokai.theme-monokai-pro-vscode
 codium --install-extension yzhang.markdown-all-in-one
 codium --install-extension puppet.puppet-vscode
-
-

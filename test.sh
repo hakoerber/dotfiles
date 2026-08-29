@@ -18,7 +18,7 @@ cleanup() {
     rm -rf "${tmpdir}"
     pids=()
     jobs -p | while IFS="" read -r line; do pids+=("$line"); done
-    if (( "${#pids[@]}" > 0)) ; then
+    if (("${#pids[@]}" > 0)); then
         kill "${pids[@]}"
     fi
 }
@@ -137,7 +137,7 @@ install_from_iso() {
     ssh-keygen -f "${tmpdir}"/ssh.key -N '' -t ed25519 -C 'archiso-tmp'
 
     cloud-localds "${tmpdir}/userdata.img" <(
-        cat <<EOF
+        cat << EOF
     #cloud-config
     users:
       - name: root
@@ -178,7 +178,7 @@ EOF
     wait_for_ssh
 
     # shellcheck disable=SC2087
-    ssh -tt "${sshopts[@]}" <<EOF || true
+    ssh -tt "${sshopts[@]}" << EOF || true
       mkdir /var/cache/pacman-cache-host
       mount -t 9p -o trans=virtio,version=9p2000.L,ro pacman-cache /var/cache/pacman-cache-host
 
@@ -252,7 +252,7 @@ configure_new_system() {
 
     qemu-system-x86_64 -name "${hostname}" "${qemuopts[@]}" "${hostqemuopts[@]}" "${opts[@]}" &
 
-    if [[ "${lukscfg}" == "luks" ]] ; then
+    if [[ "${lukscfg}" == "luks" ]]; then
         # 5s for grub timeout, 5s for kernel boot
         echo waiting for luks password prompt ...
         sleep 10s
@@ -283,38 +283,38 @@ for hostname in "${machines[@]}"; do
     lukscfg="${cfg[0]}"
     homecfg="${cfg[1]}"
     case "${hostname}" in
-    ares)
-        hostqemuopts=(
-            "-device" "ide-hd,drive=root"
-            "-drive" "if=pflash,format=raw,readonly=true,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd"
-            "-drive" "if=pflash,format=raw,file=${tmpdir}/efivars.fd"
-        )
-        ;;
-    neptune)
-        hostqemuopts=(
-            "-device" "nvme,serial=rootnvme,drive=root"
-            "-drive" "if=pflash,format=raw,readonly=true,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd"
-            "-drive" "if=pflash,format=raw,file=${tmpdir}/efivars.fd"
-        )
-        ;;
-    dionysus)
-        hostqemuopts=(
-            "-device" "nvme,serial=rootnvme,drive=root"
-            "-drive" "if=pflash,format=raw,readonly=true,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd"
-            "-drive" "if=pflash,format=raw,file=${tmpdir}/efivars.fd"
-        )
-        ;;
-    hera)
-        hostqemuopts=(
-            "-device" "nvme,serial=rootnvme,drive=root"
-            "-drive" "if=pflash,format=raw,readonly=true,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd"
-            "-drive" "if=pflash,format=raw,file=${tmpdir}/efivars.fd"
-        )
-        ;;
-    *)
-        printf "unknown hostname: %s\n" "${hostname}" >&2
-        exit 1
-        ;;
+        ares)
+            hostqemuopts=(
+                "-device" "ide-hd,drive=root"
+                "-drive" "if=pflash,format=raw,readonly=true,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd"
+                "-drive" "if=pflash,format=raw,file=${tmpdir}/efivars.fd"
+            )
+            ;;
+        neptune)
+            hostqemuopts=(
+                "-device" "nvme,serial=rootnvme,drive=root"
+                "-drive" "if=pflash,format=raw,readonly=true,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd"
+                "-drive" "if=pflash,format=raw,file=${tmpdir}/efivars.fd"
+            )
+            ;;
+        dionysus)
+            hostqemuopts=(
+                "-device" "nvme,serial=rootnvme,drive=root"
+                "-drive" "if=pflash,format=raw,readonly=true,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd"
+                "-drive" "if=pflash,format=raw,file=${tmpdir}/efivars.fd"
+            )
+            ;;
+        hera)
+            hostqemuopts=(
+                "-device" "nvme,serial=rootnvme,drive=root"
+                "-drive" "if=pflash,format=raw,readonly=true,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd"
+                "-drive" "if=pflash,format=raw,file=${tmpdir}/efivars.fd"
+            )
+            ;;
+        *)
+            printf "unknown hostname: %s\n" "${hostname}" >&2
+            exit 1
+            ;;
     esac
     [[ ! "${hostqemuopts[*]}" ]] && exit 1
     install_from_iso "${hostname}" "${lukscfg}" "${homecfg}" "${hostqemuopts[@]}"
