@@ -30,7 +30,6 @@ mkdir -p "${WINEPREFIX}"
 # fi
 
 archive() {
-    origin="$1"
     if [[ -e "${ARCHIVE}" ]]; then
         return
     fi
@@ -139,7 +138,7 @@ case $1 in
             winetricks dxvk
         fi
 
-        read -p 'During installation, use "${GAMEDATA//\//\\}" as the install directory! <Enter> to continue, <CTRL+C> to abort '
+        read -rp "During installation, use \"${GAMEDATA//\//\\}\" as the install directory! <Enter> to continue, <CTRL+C> to abort "
 
         wine "${DOWNLOADDIR}"/g2addon-2_6.exe
         wine "${DOWNLOADDIR}"/gothic2_fix-2.6.0.0-rev2.exe
@@ -162,7 +161,7 @@ case $1 in
         unzip -o "${DOWNLOADDIR}"/Normalmaps_LHiver.zip -d "${t}"
         zip_exit="$?"
         set -o errexit
-        if (($zip_exit != 0)) && (($zip_exit != 2)); then
+        if ((zip_exit != 0)) && ((zip_exit != 2)); then
             echo zip failed
             exit 1
         fi
@@ -172,12 +171,12 @@ case $1 in
 
         unzip -o "${DOWNLOADDIR}"/LaaHack.zip -d "${laatmp}"
 
-        read -p "For the LAA Hack, select only ${GAMEDATA}/system/Gothic2.exe [<Enter> to continue] "
+        read -rp "For the LAA Hack, select only ${GAMEDATA}/system/Gothic2.exe [<Enter> to continue] "
         wine "${laatmp}"/LaaHack.exe
         rm -rf "${laatmp}"
 
         # Required to create all ini files
-        read -p "Now run the game once and exit! [<Enter> to continue] "
+        read -rp "Now run the game once and exit! [<Enter> to continue] "
 
         ini
         ;;
@@ -189,7 +188,7 @@ case $1 in
         start
         ;;
     archive)
-        archive "$2"
+        archive
         ;;
     exec)
         "${@}"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cd $(mktemp -d)
+cd "$(mktemp -d)" || exit 1
 
 wget "https://aka.ms/vs/16/release/vc_redist.x64.exe"
 

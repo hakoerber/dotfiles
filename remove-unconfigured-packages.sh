@@ -25,6 +25,7 @@ for pkgbuild in pkgbuilds/*/PKGBUILD; do
     # shellcheck disable=SC1090
     source "${pkgbuild}"
     set -o nounset
+    # shellcheck disable=SC2154
     aurdeps+=("${depends[@]%%[<=>]*}" "${makedepends[@]%%[<=>]*}" "${checkdepends[@]%%[<=>]*}" "${pkgname}")
 done
 
