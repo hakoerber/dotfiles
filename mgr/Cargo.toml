@@ -5,9 +5,15 @@ edition = "2024"
 
 [dependencies]
 thiserror = { version = "2.0.20", default-features = false }
-time = { version = "0.3.55", default-features = false, features = ["formatting", "parsing", "std"] }
+time = { version = "0.3.55", default-features = false, features = [
+  "formatting",
+  "parsing",
+  "std",
+] }
 tracing = { version = "0.1.44", default-features = false }
-tracing-subscriber = { version = "0.3.23", default-features = false, features = ["fmt"] }
+tracing-subscriber = { version = "0.3.23", default-features = false, features = [
+  "fmt",
+] }
 ureq = { version = "3.4.0", default-features = false, features = ["rustls"] }
 
 [[bin]]
