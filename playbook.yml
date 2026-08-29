@@ -517,7 +517,7 @@
       lineinfile:
         path: /etc/mkinitcpio.conf
         regexp: "^#?HOOKS=.*$"
-        line: 'HOOKS=({{ mkinitcpio_hooks }})'
+        line: "HOOKS=({{ mkinitcpio_hooks }})"
       become: true
       notify:
         - rebuild initrd
@@ -969,7 +969,7 @@
                     Value: false
                     Status: "default"
                     Type: "boolean"
-                  "app.update.service.enabled": 
+                  "app.update.service.enabled":
                     Value: false
                     Status: "default"
                     Type: "boolean"
