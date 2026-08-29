@@ -53,7 +53,7 @@ mount /dev/disk/by-partlabel/boot /mnt/boot
 mkdir /mnt/home
 mount /dev/disk/by-partlabel/home /mnt/home
 
-pacstrap /mnt base linux-zen linux-firmware networkmanager intel-ucode grub efibootmgr
+pacstrap /mnt base linux-zen linux-firmware networkmanager intel-ucode grub efibootmgr lsb-release
 
 genfstab -U /mnt >> /mnt/etc/fstab
 

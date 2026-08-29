@@ -59,7 +59,7 @@ mount ${DEVICE}p2 /mnt/boot
 mkswap /dev/vgbase/swap
 swapon /dev/vgbase/swap
 
-pacstrap /mnt base linux-zen linux-firmware networkmanager intel-ucode lvm2 grub efibootmgr
+pacstrap /mnt base linux-zen linux-firmware networkmanager intel-ucode lvm2 grub efibootmgr lsb-release
 
 genfstab -U /mnt >> /mnt/etc/fstab
 
