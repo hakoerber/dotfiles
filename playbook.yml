@@ -42,7 +42,7 @@
               Include = /etc/pacman.d/mirrorlist
             marker: "# {mark} ANSIBLE MANAGED multilib"
           notify:
-            - refresh package lists
+            - Refresh package lists
           become: true
 
         - name: Make sure that package lists are refreshed if necessary
@@ -519,7 +519,7 @@
         line: "HOOKS=({{ mkinitcpio_hooks }})"
       become: true
       notify:
-        - rebuild initrd
+        - Rebuild initrd
 
     - name: Use vz4 for mkinitcpio compression
       ansible.builtin.lineinfile:
@@ -528,7 +528,7 @@
         line: 'COMPRESSION="lz4"'
       become: true
       notify:
-        - rebuild initrd
+        - Rebuild initrd
 
     - name: Libvirtd
       tags:
@@ -573,7 +573,7 @@
               LIBVIRTD_ARGS=
           become: true
           notify:
-            - restart libvirtd
+            - Restart libvirtd
 
         - name: Enable libvirtd
           ansible.builtin.service:
@@ -657,7 +657,7 @@
         line: "SystemMaxUse=50M"
       become: true
       notify:
-        - restart journald
+        - Restart journald
 
     - name: Disable kernel modules
       ansible.builtin.copy:
