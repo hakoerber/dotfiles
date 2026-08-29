@@ -22,3 +22,7 @@ test:
 fmt:
 	git ls-files -z '*.md'   | xargs -0 prettier --print-width 80 --prose-wrap always --write
 	git ls-files -z '*.toml' | xargs -0 taplo format
+
+.PHONY: lint
+lint:
+	ansible-lint --force-color playbook.yml

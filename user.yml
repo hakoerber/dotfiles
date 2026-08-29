@@ -39,6 +39,7 @@
     path: "{{ item }}"
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
+    mode: "0755"
   loop:
     - "/home/{{ user.name }}/.config/"
     - "/home/{{ user.name }}/.config/systemd/"
@@ -145,6 +146,7 @@
         path: "{{ (['/home', user.name, item.to] | join('/')) | dirname }}"
         owner: "{{ user.name }}"
         group: "{{ user.name }}"
+        mode: "0755"
       with_items: "{{ dotfiles }}"
       become: true
       become_user: root
@@ -157,6 +159,7 @@
         src: /var/lib/dotfiles/{{ item.from }}
         owner: "{{ user.name }}"
         group: "{{ user.name }}"
+        mode: "0644"
       when: not item.template|default(false) and not item.dir|default(false)
       with_items: "{{ dotfiles }}"
       become: true
@@ -225,6 +228,7 @@
         dest: "/home/{{ user.name }}/{{ item.to }}"
         owner: "{{ user.name }}"
         group: "{{ user.name }}"
+        mode: "0644"
         force: true
       become: true
       become_user: root
@@ -243,6 +247,7 @@
       ansible.builtin.file:
         state: directory
         path: "{{ item }}"
+        mode: "0755"
       with_items:
         - ~/tmp
 
@@ -305,6 +310,7 @@
       ansible.builtin.copy:
         dest: "~/.mozilla/firefox/profile-{{ item.key }}/chrome/userChrome.css"
         # from https://www.kvakil.me/posts/2023-09-12-my-tree-style-tab-configuration.html
+        mode: "0644"
         content: |
           // Hide the title bar.
           #titlebar {
@@ -397,6 +403,7 @@
         dest: "/home/{{ user.name }}/.config/systemd/user/autostart.target"
         owner: "{{ user.name }}"
         group: "{{ user.name }}"
+        mode: "0644"
         force: true
         follow: false
 

@@ -91,28 +91,27 @@
                   WantedBy=multi-user.target
               become: true
 
-            - ansible.builtin.systemd:
+            - name: Enable pacman cache clean timer
+              ansible.builtin.systemd:
                 name: pacman-cache-cleanup.timer
                 enabled: true
                 state: started
                 daemon_reload: true
               become: true
 
-              name: Enable pacman cache clean timer
-
-    - name: dotfiles directory
+    - name: Dotfiles directory
       tags:
         - dotfiles-directory
       block:
-        - name: create dotfiles group
-          group:
+        - name: Create dotfiles group
+          ansible.builtin.group:
             name: dotfiles
             state: present
           become: true
           become_user: root
 
-        - name: create dotfiles user
-          user:
+        - name: Create dotfiles user
+          ansible.builtin.user:
             name: dotfiles
             group: dotfiles
             home: /var/lib/dotfiles
@@ -122,44 +121,44 @@
           become: true
           become_user: root
 
-        - name: create dotfiles directory
-          file:
+        - name: Create dotfiles directory
+          ansible.builtin.file:
             state: directory
             path: /var/lib/dotfiles
             mode: "0775" # group needs write access!
           become: true
           become_user: root
 
-    - name: packages
+    - name: Packages
       tags:
         - packages
       block:
-        - name: load package list
-          include_vars:
+        - name: Load package list
+          ansible.builtin.include_vars:
             file: packages.yml
             name: defined_packages
 
-        - name: install packages
-          package:
+        - name: Install packages
+          ansible.builtin.package:
             name: "{{ defined_packages | json_query('*[]') }}"
             state: present
           become: true
 
-        - name: install additional packages
-          package:
-            name: "{{ machine.additional_packages|default([]) }}"
+        - name: Install additional packages
+          ansible.builtin.package:
+            name: "{{ machine.additional_packages | default([]) }}"
             state: present
           become: true
 
-        - name: remove unconfigured packages
-          script:
+        - name: Remove unconfigured packages
+          ansible.builtin.script:
             cmd: ./remove-unconfigured-packages.sh --noconfirm
           register: unconfigured_packages_cmd
           failed_when: unconfigured_packages_cmd.rc not in (0, 123)
           changed_when: unconfigured_packages_cmd.rc == 123
           become: true
 
-    - name: reflector
+    - name: Reflector
       block:
         - name: Configure reflector
           ansible.builtin.copy:
@@ -183,12 +182,12 @@
             daemon_reload: true
           become: true
 
-    - name: aur
+    - name: Aur
       tags:
         - aur
       block:
-        - name: create build user on arch
-          user:
+        - name: Create build user on arch
+          ansible.builtin.user:
             name: makepkg
             home: /var/lib/makepkg
             create_home: true
@@ -196,7 +195,7 @@
             system: true
           become: true
 
-        - set_fact:
+        - ansible.builtin.set_fact:
             aur_packages:
               # local packages:
               - name: workstation-mgr
@@ -245,11 +244,11 @@
               # ===
               - name: cargo-lambda-bin
 
-        - set_fact:
-            aur_packages: "{{ aur_packages|map(attribute='dependencies', default=[]) | flatten + aur_packages }}"
+        - ansible.builtin.set_fact:
+            aur_packages: "{{ aur_packages | map(attribute='dependencies', default=[]) | flatten + aur_packages }}"
 
-        - name: install dependencies
-          shell: |
+        - name: Install dependencies
+          ansible.builtin.shell: |
             aur_packages=({{ aur_packages | map(attribute='name') | join(' ') }})
 
             source pkgbuilds/{{ item.name }}/PKGBUILD
@@ -291,8 +290,8 @@
           loop_control:
             label: "{{ item.name }}"
 
-        - name: create build root directory
-          file:
+        - name: Create build root directory
+          ansible.builtin.file:
             path: "/var/lib/makepkg/{{ item.name }}/"
             state: directory
             mode: "0700"
@@ -304,8 +303,8 @@
           loop_control:
             label: "{{ item.name }}"
 
-        - name: create build gpg directory
-          file:
+        - name: Create build gpg directory
+          ansible.builtin.file:
             path: "/var/lib/makepkg/{{ item.name }}/gnupg"
             state: directory
             mode: "0700"
@@ -317,8 +316,8 @@
           loop_control:
             label: "{{ item.name }}"
 
-        - name: create env file
-          copy:
+        - name: Create env file
+          ansible.builtin.copy:
             dest: /var/lib/makepkg/{{ item.name }}/env
             owner: makepkg
             group: makepkg
@@ -331,8 +330,8 @@
           loop_control:
             label: "{{ item.name }}"
 
-        - name: check preexec script
-          stat:
+        - name: Check preexec script
+          ansible.builtin.stat:
             path: /var/lib/makepkg/{{ item.name }}/preexec
           become_user: makepkg
           become: true
@@ -342,8 +341,8 @@
           loop_control:
             label: "{{ item.name }}"
 
-        - name: install preexec script
-          copy:
+        - name: Install preexec script
+          ansible.builtin.copy:
             dest: /var/lib/makepkg/{{ item.name }}/preexec
             owner: makepkg
             group: makepkg
@@ -356,8 +355,8 @@
           loop_control:
             label: "{{ item.name }}"
 
-        - name: check preexec script
-          stat:
+        - name: Check preexec script
+          ansible.builtin.stat:
             path: /var/lib/makepkg/{{ item.name }}/preexec
           become_user: makepkg
           become: true
@@ -367,19 +366,19 @@
           loop_control:
             label: "{{ item.name }}"
 
-        - name: run preexec script
-          command:
+        - name: Run preexec script # noqa: no-changed-when
+          ansible.builtin.command:
             cmd: "{{ item.1.stat.path }}"
             chdir: "{{ item.1.stat.path | dirname }}"
           become_user: makepkg
           become: true
-          when: not item[0].stat.exists or (item[0].stat.checksum|default('') != item[1].stat.checksum)
-          loop: "{{ preexec_before.results| reject('skipped')|zip(preexec_after.results| reject('skipped')) }}"
+          when: not item[0].stat.exists or (item[0].stat.checksum | default('') != item[1].stat.checksum)
+          loop: "{{ preexec_before.results | reject('skipped') | zip(preexec_after.results | reject('skipped')) }}"
           loop_control:
             label: "{{ item.1.stat.path }}"
 
-        - name: create build script
-          copy:
+        - name: Create build script
+          ansible.builtin.copy:
             owner: makepkg
             group: makepkg
             mode: "0700"
@@ -435,8 +434,8 @@
           loop_control:
             label: "{{ item.name }}"
 
-        - name: create install script
-          copy:
+        - name: Create install script
+          ansible.builtin.copy:
             owner: root
             group: root
             mode: "0700"
@@ -462,8 +461,8 @@
           loop_control:
             label: "{{ item.name }}"
 
-        - name: build and install aur package
-          command: /var/lib/makepkg/{{ item.name }}/install.sh
+        - name: Build and install aur package
+          ansible.builtin.command: /var/lib/makepkg/{{ item.name }}/install.sh
           register: aur_install
           changed_when: aur_install.rc == 123
           failed_when: aur_install.rc not in (0, 123)
@@ -472,8 +471,8 @@
           loop_control:
             label: "{{ item.name }}"
 
-        - name: clean up build leftovers
-          file:
+        - name: Clean up build leftovers
+          ansible.builtin.file:
             path: /var/lib/makepkg/{{ item[0].name }}/{{ item[1] }}/
             state: absent
           become_user: makepkg
@@ -485,8 +484,8 @@
           loop_control:
             label: "{{ item[0].name }}/{{ item[1] }}"
 
-    - name: configure timesyncd on arch
-      copy:
+    - name: Configure timesyncd on arch
+      ansible.builtin.copy:
         owner: root
         group: root
         mode: "0644"
@@ -497,24 +496,24 @@
           FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org
       become: true
 
-    - name: install lz4
-      package:
+    - name: Install lz4
+      ansible.builtin.package:
         name: lz4
         state: present
       become: true
 
-    - name: set mkinitcpio hooks
-      set_fact:
+    - name: Set mkinitcpio hooks
+      ansible.builtin.set_fact:
         mkinitcpio_hooks: "base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt lvm2 filesystems resume fsck"
-      when: machine.encrypted_root|bool
+      when: machine.encrypted_root | bool
 
-    - name: set mkinitcpio hooks
-      set_fact:
+    - name: Set mkinitcpio hooks
+      ansible.builtin.set_fact:
         mkinitcpio_hooks: "base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems resume fsck"
-      when: not machine.encrypted_root|bool
+      when: not machine.encrypted_root | bool
 
-    - name: configure mkinitcpio hooks
-      lineinfile:
+    - name: Configure mkinitcpio hooks
+      ansible.builtin.lineinfile:
         path: /etc/mkinitcpio.conf
         regexp: "^#?HOOKS=.*$"
         line: "HOOKS=({{ mkinitcpio_hooks }})"
@@ -522,8 +521,8 @@
       notify:
         - rebuild initrd
 
-    - name: use vz4 for mkinitcpio compression
-      lineinfile:
+    - name: Use vz4 for mkinitcpio compression
+      ansible.builtin.lineinfile:
         path: /etc/mkinitcpio.conf
         regexp: "^#?COMPRESSION=.*$"
         line: 'COMPRESSION="lz4"'
@@ -531,15 +530,15 @@
       notify:
         - rebuild initrd
 
-    - name: libvirtd
+    - name: Libvirtd
       tags:
         - libvirtd
       # Arch defaults to systemd socket activation. Hate that stuff, just run the
       # damn daemon (so I notice early when something is wrong, not just when I
       # want to use it).
       block:
-        - name: mask sockets
-          service:
+        - name: Mask sockets
+          ansible.builtin.service:
             state: stopped
             enabled: false
             masked: true
@@ -564,8 +563,8 @@
         #
         # And `EnvironmentFile` trumps `Environment`. Otherwise we'd need to do some
         # damn systemd override shenanigans.
-        - name: configure libvirtd env variable override
-          copy:
+        - name: Configure libvirtd env variable override
+          ansible.builtin.copy:
             owner: root
             group: root
             mode: "0600"
@@ -576,45 +575,45 @@
           notify:
             - restart libvirtd
 
-        - name: enable libvirtd
-          service:
+        - name: Enable libvirtd
+          ansible.builtin.service:
             state: started
             enabled: true
             name: libvirtd.service
           become: true
 
-    - name: services
+    - name: Services
       tags:
         - services
       block:
-        - set_fact:
+        - ansible.builtin.set_fact:
             disable_services:
               - sshd
 
-        - name: disable services
-          service:
+        - name: Disable services
+          ansible.builtin.service:
             state: stopped
             enabled: false
             name: "{{ item }}.service"
           with_items: "{{ disable_services }}"
           become: true
 
-        - set_fact:
+        - ansible.builtin.set_fact:
             enable_services:
               - NetworkManager
               - docker
               - systemd-timesyncd
 
-        - name: enable services
-          service:
+        - name: Enable services
+          ansible.builtin.service:
             state: started
             enabled: true
             name: "{{ item }}.service"
           with_items: "{{ enable_services }}"
           become: true
 
-        - name: enable sockets
-          service:
+        - name: Enable sockets
+          ansible.builtin.service:
             state: started
             enabled: true
             name: "{{ item }}.socket"
@@ -622,37 +621,37 @@
             - pcscd
           become: true
 
-    - name: get systemd boot target
-      command: systemctl get-default
+    - name: Get systemd boot target
+      ansible.builtin.command: systemctl get-default
       register: systemd_target
       changed_when: false
       check_mode: false
 
-    - name: define systemd default target
-      set_fact:
-        default_target: "{{ machine.system_default_target|default('multi-user.target') }}"
+    - name: Define systemd default target
+      ansible.builtin.set_fact:
+        default_target: "{{ machine.system_default_target | default('multi-user.target') }}"
 
-    - name: set systemd boot target
-      command: systemctl set-default {{ default_target }}
+    - name: Set systemd boot target # noqa: no-changed-when
+      ansible.builtin.command: systemctl set-default {{ default_target }}
       when: systemd_target.stdout != default_target
       become: true
 
-    - name: handle lid switch
-      lineinfile:
+    - name: Handle lid switch
+      ansible.builtin.lineinfile:
         path: /etc/systemd/logind.conf
         regexp: "^HandleLidSwitch="
         line: "HandleLidSwitch=ignore"
       become: true
 
-    - name: handle power key
-      lineinfile:
+    - name: Handle power key
+      ansible.builtin.lineinfile:
         path: /etc/systemd/logind.conf
         regexp: "^HandlePowerKey="
         line: "HandlePowerKey=suspend"
       become: true
 
-    - name: limit journald size
-      lineinfile:
+    - name: Limit journald size
+      ansible.builtin.lineinfile:
         path: /etc/systemd/journald.conf
         regexp: "^#?SystemMaxUse=.*$"
         line: "SystemMaxUse=50M"
@@ -660,8 +659,8 @@
       notify:
         - restart journald
 
-    - name: disable kernel modules
-      copy:
+    - name: Disable kernel modules
+      ansible.builtin.copy:
         owner: root
         group: root
         mode: "0600"
@@ -682,13 +681,13 @@
           blacklist authencesn
       become: true
 
-    - name: create sudonopw group
-      group:
+    - name: Create sudonopw group
+      ansible.builtin.group:
         name: sudonopw
         system: true
 
-    - name: configure passwordless sudo
-      copy:
+    - name: Configure passwordless sudo
+      ansible.builtin.copy:
         owner: root
         group: root
         mode: "0600"
@@ -697,8 +696,8 @@
           %sudonopw ALL=(ALL) NOPASSWD: ALL
       become: true
 
-    - name: configure passwordless doas
-      copy:
+    - name: Configure passwordless doas
+      ansible.builtin.copy:
         owner: root
         group: root
         mode: "0400"
@@ -707,53 +706,54 @@
           permit nopass nolog setenv {PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin} :sudonopw
       become: true
 
-    - name: hardware-specific configuration
+    - name: Hardware-specific configuration
       tags:
         - hardware
       block:
-        - name: read driver variables
-          include_vars:
+        - name: Read driver variables
+          ansible.builtin.include_vars:
             file: drivers.yml
             name: drivers
           tags:
             - always
 
-        - name: gpu configuration
+        - name: Gpu configuration
           tags:
             - hardware:gpu
+          when:
+            - machine.cpu is defined
           block:
-            - name: install AMD cpu packages
-              package:
+            - name: Install AMD cpu packages
+              ansible.builtin.package:
                 name: "{{ drivers.cpu.amd }}"
                 state: present
               become: true
               when: machine.cpu == 'amd'
 
-            - name: install Intel cpu packages
-              package:
+            - name: Install Intel cpu packages
+              ansible.builtin.package:
                 name: "{{ drivers.cpu.intel }}"
                 state: present
               become: true
               when: machine.cpu == 'intel'
 
-          when:
-            - machine.cpu is defined
-
-        - name: gpu configuration
+        - name: Gpu configuration
           tags:
             - hardware:gpu
+          when:
+            - machine.gpu is defined
           block:
             - name: AMD configuration
               when: machine.gpu == 'amd'
               block:
-                - name: install AMDGPU packages
-                  package:
+                - name: Install AMDGPU packages
+                  ansible.builtin.package:
                     name: "{{ drivers.gpu.amd }}"
                     state: present
                   become: true
 
-                - name: set AMDGPU options
-                  copy:
+                - name: Set AMDGPU options
+                  ansible.builtin.copy:
                     owner: root
                     group: root
                     mode: "0600"
@@ -770,8 +770,8 @@
             - name: Nvidia configuration
               when: machine.gpu == 'nvidia'
               block:
-                - name: install nouveau packages
-                  package:
+                - name: Install nouveau packages
+                  ansible.builtin.package:
                     name: "{{ drivers.gpu.nvidia }}"
                     state: present
                   become: true
@@ -779,18 +779,16 @@
             - name: Intel configuration
               when: machine.gpu == 'intel'
               block:
-                - name: install intel packages
-                  package:
+                - name: Install intel packages
+                  ansible.builtin.package:
                     name: "{{ drivers.gpu.intel }}"
                     state: present
                   become: true
-          when:
-            - machine.gpu is defined
 
     # See https://bbs.archlinux.org/viewtopic.php?id=259764
     - block:
-        - name: configure pacman to skip installing nextcloud dbus file
-          blockinfile:
+        - name: Configure pacman to skip installing nextcloud dbus file
+          ansible.builtin.blockinfile:
             path: /etc/pacman.conf
             insertafter: "^#NoExtract"
             block: |
@@ -798,16 +796,16 @@
             marker: "# {mark} ANSIBLE MANAGED noextract nextcloud"
           become: true
 
-        - name: remove nextcloud dbus file
-          file:
+        - name: Remove nextcloud dbus file
+          ansible.builtin.file:
             path: /usr/share/dbus-1/services/com.nextcloudgmbh.Nextcloud.service
             state: absent
           become: true
 
-    - name: try to make gpg agent behave
+    - name: Try to make gpg agent behave
       block:
-        - name: configure pacman to skip installing gpg user units
-          blockinfile:
+        - name: Configure pacman to skip installing gpg user units
+          ansible.builtin.blockinfile:
             path: /etc/pacman.conf
             insertafter: "^#NoExtract"
             block: |
@@ -815,13 +813,13 @@
             marker: "# {mark} ANSIBLE MANAGED noextract gpg-agent"
           become: true
 
-    - name: backlight configuration
+    - name: Backlight configuration
       tags:
         - backlight
       block:
         # See https://wiki.archlinux.org/title/backlight#ACPI
-        - name: create udev rule to allow video group backlight access
-          copy:
+        - name: Create udev rule to allow video group backlight access
+          ansible.builtin.copy:
             dest: /etc/udev/rules.d/backlight.rules
             owner: root
             group: root
@@ -834,8 +832,8 @@
       tags:
         - firefox
       block:
-        - name: create firefox directories
-          file:
+        - name: Create firefox directories
+          ansible.builtin.file:
             state: directory
             path: "{{ item }}"
             owner: root
@@ -847,7 +845,7 @@
             - /etc/firefox
             - /etc/firefox/policies
 
-        - set_fact:
+        - ansible.builtin.set_fact:
             firefox_policy:
               policies:
                 AutofillAddressEnabled: false
@@ -999,12 +997,12 @@
           become: true
           become_user: root
 
-    - set_fact:
+    - ansible.builtin.set_fact:
         users: "{{ machine.users }}"
       tags:
         - always
 
-    - include_tasks: user.yml
+    - ansible.builtin.include_tasks: user.yml
       args:
         apply:
           become: true
@@ -1018,7 +1016,7 @@
       tags:
         - always
 
-    - include_tasks: "{{ item }}"
+    - ansible.builtin.include_tasks: "{{ item }}"
       with_first_found:
         - files:
             - "_machines/{{ ansible_facts['hostname'] }}-tasks.yml"
@@ -1027,13 +1025,13 @@
         - always
 
   handlers:
-    - name: refresh package lists
+    - name: Refresh package lists
       community.general.pacman:
         update_cache: true
       become: true
 
-    - name: rebuild initrd
-      command: mkinitcpio -P
+    - name: Rebuild initrd # noqa: no-changed-when
+      ansible.builtin.command: mkinitcpio -P
       become: true
       register: mkinitcpio_cmd
       failed_when: >
@@ -1041,14 +1039,14 @@
         and
         not (mkinitcpio_cmd.rc == 1 and "file not found: `fsck.overlay'" in mkinitcpio_cmd.stderr)
 
-    - name: restart journald
-      service:
+    - name: Restart journald
+      ansible.builtin.service:
         name: systemd-journald
         state: restarted
       become: true
 
-    - name: restart libvirtd
-      service:
+    - name: Restart libvirtd
+      ansible.builtin.service:
         name: libvirtd
         state: restarted
       become: true
