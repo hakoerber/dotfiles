@@ -10,14 +10,6 @@ ansible_run = ansible-playbook --inventory localhost, --diff ./playbook.yml ${AN
 config:
 	$(ansible_run)
 
-.PHONY: maintenance
-maintenance:
-	./maintenance.sh
-
-.PHONY: test
-test:
-	./test-in-docker.sh
-
 .PHONY: fmt
 fmt:
 	git ls-files -z '*.md'   | xargs -0 prettier --print-width 80 --prose-wrap always --write
