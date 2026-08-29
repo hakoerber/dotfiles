@@ -367,15 +367,6 @@
   tags:
     - user:autostart
   block:
-    - name: Create systemd user directory
-      ansible.builtin.file:
-        state: directory
-        path: ~/{{ item }}
-      loop:
-        - .config/
-        - .config/systemd/
-        - .config/systemd/user/
-
     - name: Link autostart service files
       ansible.builtin.file:
         state: link
