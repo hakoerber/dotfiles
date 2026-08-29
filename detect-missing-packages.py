@@ -5,7 +5,7 @@ from pprint import pprint
 
 package_file = "./packages.yml"
 
-apps = yaml.safe_load(open(package_file, 'r'))
+apps = yaml.safe_load(open(package_file, "r"))
 
 missing_config = {}
 
