@@ -271,6 +271,7 @@ rust:
 - cargo-hack
 - cargo-dist
 - cargo-binstall
+- cargo-machete
 - rust-script
 musescore:
 - musescore
