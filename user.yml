@@ -140,19 +140,6 @@
       loop_control:
         label: "{{ item.item.from }}"
 
-    - name: Make sure target directories exist
-      ansible.builtin.file:
-        state: directory
-        path: "{{ (['/home', user.name, item.to] | join('/')) | dirname }}"
-        owner: "{{ user.name }}"
-        group: "{{ user.name }}"
-        mode: "0755"
-      with_items: "{{ dotfiles }}"
-      become: true
-      become_user: root
-      loop_control:
-        label: "{{ item.to }}"
-
     - name: Copy dotfiles
       ansible.builtin.copy:
         dest: "/home/{{ user.name }}/{{ item.to }}"

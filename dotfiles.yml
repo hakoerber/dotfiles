@@ -17,6 +17,8 @@ empty_directories:
   - name: .local/state/gnupg/
     mode: '0700'
   - name: .local/state/cargo/
+  - name: .config/VSCodium/
+  - name: .config/VSCodium/User
 dotfiles:
   - from: git/gitconfig
     to: .config/git/config
