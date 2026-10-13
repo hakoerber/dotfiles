@@ -34,6 +34,9 @@ users:
     fingerprint: "973AE48D71B76735C4712B5BB5C002530C6A2053"
   environment:
     MACHINE_HAS_NEXTCLOUD: "true"
+  xset:
+    rate_delay: 1000
+    rate_repeat: 10
 
 screen:
   1: HDMI-1

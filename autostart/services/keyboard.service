@@ -4,7 +4,8 @@ After=windowmanager.target
 
 [Service]
 Type=oneshot
+EnvironmentFile=%h/.config/xset_rate.env
 ExecStart=/usr/bin/env setxkbmap -layout de -variant nodeadkeys
-ExecStart=/usr/bin/env xset r rate 150 50
+ExecStart=/usr/bin/env xset r rate ${XSET_RATE_DELAY} ${XSET_RATE_REPEAT}
 RemainAfterExit=true
 PassEnvironment=DISPLAY
