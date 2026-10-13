@@ -560,3 +560,5 @@ systemd:
 - systemd-lsp
 wasm:
 - wasm-pack
+glab:
+- glab
