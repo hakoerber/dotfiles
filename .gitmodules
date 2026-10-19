@@ -10,12 +10,6 @@
 [submodule "pkgbuilds/terraform-ls-bin"]
 	path = pkgbuilds/terraform-ls-bin
 	url = https://aur.archlinux.org/terraform-ls-bin.git
-[submodule "pkgbuilds/grm-git"]
-	path = pkgbuilds/grm-git
-	url = https://aur.archlinux.org/grm-git.git
-[submodule "pkgbuilds/screencfg-git"]
-	path = pkgbuilds/screencfg-git
-	url = https://aur.archlinux.org/screencfg-git.git
 [submodule "pkgbuilds/aws-sam-cli"]
 	path = pkgbuilds/aws-sam-cli
 	url = https://aur.archlinux.org/aws-sam-cli.git
@@ -52,3 +46,9 @@
 [submodule "pkgbuilds/cargo-lambda-bin"]
 	path = pkgbuilds/cargo-lambda-bin
 	url = https://aur.archlinux.org/cargo-lambda-bin.git
+[submodule "pkgbuilds/screencfg"]
+	path = pkgbuilds/screencfg
+	url = https://aur.archlinux.org/screencfg.git
+[submodule "pkgbuilds/grm"]
+	path = pkgbuilds/grm
+	url = https://aur.archlinux.org/grm.git

@@ -215,8 +215,8 @@
 
               - name: nodejs-intelephense
               - name: terraform-ls-bin
-              - name: grm-git
-              - name: screencfg-git
+              - name: grm
+              - name: screencfg
 
               # ===
               - name: python-botocore-stubs
