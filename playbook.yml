@@ -200,48 +200,24 @@
               # local packages:
               - name: workstation-mgr
 
+              - name: nodejs-intelephense
+              - name: terraform-ls-bin
+              - name: grm
+              - name: screencfg
+              - name: slack-desktop
+              - name: claude-code
+              - name: cargo-lambda-bin
               - name: portfolio-performance-bin
                 preexec: |
                   #!/usr/bin/env bash
                   source ./env
                   curl -sSf --proto '=https' https://keys.openpgp.org/vks/v1/by-fingerprint/E46E6F8FF02E4C83569084589239277F560C95AC | gpg --import -
-
               - name: spotify
                 preexec: |
                   #!/usr/bin/env bash
                   source ./env
                   echo lel
                   curl -sSf --proto '=https' https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.gpg | gpg --import -
-
-              - name: nodejs-intelephense
-              - name: terraform-ls-bin
-              - name: grm
-              - name: screencfg
-
-              # ===
-              - name: python-botocore-stubs
-              # dependency of
-              - name: python-boto3-stubs
-
-              - name: python-chevron
-              - name: python-aws-lambda-builders
-              # === dependencies of
-              - name: aws-sam-cli
-
-              # ===
-              - name: slack-desktop
-
-              # ===
-              - name: python-class-registry
-              - name: python-rst2ansi
-              # dependency of
-              - name: backblaze-b2
-
-              # ===
-              - name: claude-code
-
-              # ===
-              - name: cargo-lambda-bin
 
         - ansible.builtin.set_fact:
             aur_packages: "{{ aur_packages | map(attribute='dependencies', default=[]) | flatten + aur_packages }}"
