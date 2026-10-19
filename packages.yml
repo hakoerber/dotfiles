@@ -22,8 +22,6 @@ gdb:
 - gdb
 strace:
 - strace
-sudo:
-- sudo
 doas:
 - opendoas
 apt:

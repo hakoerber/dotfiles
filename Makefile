@@ -4,7 +4,7 @@
 # iptables, for example
 export LC_ALL = en_US.UTF-8
 
-ansible_run = ansible-playbook --inventory localhost, --diff ./playbook.yml ${ANSIBLE_EXTRA_ARGS}
+ansible_run = ansible-playbook --inventory localhost, --become-method doas --diff ./playbook.yml ${ANSIBLE_EXTRA_ARGS}
 
 .PHONY: config
 config:
