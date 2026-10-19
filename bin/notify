@@ -9,4 +9,12 @@ ${cmd[@]}
 
 exit_code="$?"
 
-notify-send "Command \"${name}\" finished" "Exit code: ${exit_code}\nFull command: ${cmd}"
+
+
+if (( exit_code == 0 )) ; then
+    msg="Command \"${name}\" finished"
+else
+    msg="Command \"${name}\" finished (failed)"
+fi
+
+notify-send "${msg}"
