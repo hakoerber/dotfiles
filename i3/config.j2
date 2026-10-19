@@ -204,7 +204,7 @@ assign [class="^Wine$"] $workspace10
 
     ### START APPLICATIONS #####################################################
 
-    bindsym $mod+d exec --no-startup-id rofi -show combi -combi-modi run -display-combi "run"
+    bindsym $mod+d exec --no-startup-id rofi -show drun -drun-display-format '{name}' -location 0
 
     bindsym $mod+Return       exec $terminal
     bindsym $mod+Shift+Return exec $calc
