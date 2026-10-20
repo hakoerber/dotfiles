@@ -84,8 +84,6 @@ i3:
 - snixembed
 i3lock:
 - i3lock
-pluma:
-- pluma
 neovim:
 - neovim
 - python-pynvim
@@ -560,3 +558,5 @@ wasm:
 - wasm-pack
 glab:
 - glab
+mousepad:
+- mousepad
