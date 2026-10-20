@@ -304,6 +304,7 @@ mkinitcpio:
 - mkinitcpio
 terraform:
 - terraform
+- terragrunt
 synclient:
 - xf86-input-synaptics
 ncdu:
