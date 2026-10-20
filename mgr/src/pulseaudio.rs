@@ -95,18 +95,20 @@ impl Exec for Action {
     fn execute(&self) -> Result<Option<String>, Self::ExecErr> {
         match *self {
             Self::InputToggle => {
-                cmd::command("pactl", &["set-source-mute", "@DEFAULT_SOURCE@", "toggle"])?;
+                cmd::Command::run("pactl", &["set-source-mute", "@DEFAULT_SOURCE@", "toggle"])?
             }
             Self::OutputToggle => {
-                cmd::command("pactl", &["set-sink-mute", "@DEFAULT_SINK@", "toggle"])?;
+                cmd::Command::run("pactl", &["set-sink-mute", "@DEFAULT_SINK@", "toggle"])?
             }
             Self::OutputInc => {
-                cmd::command("pactl", &["set-sink-volume", "@DEFAULT_SINK@", "+5%"])?;
+                cmd::Command::run("pactl", &["set-sink-volume", "@DEFAULT_SINK@", "+5%"])?
             }
             Self::OutputDec => {
-                cmd::command("pactl", &["set-sink-volume", "@DEFAULT_SINK@", "-5%"])?;
+                cmd::Command::run("pactl", &["set-sink-volume", "@DEFAULT_SINK@", "-5%"])?
             }
         }
+        .check()?;
+
         Ok(None)
     }
 }

@@ -26,8 +26,10 @@ impl UnitStatus {
 pub(crate) mod user {
     use super::{super::cmd, Error, UnitStatus};
 
-    pub(crate) fn unit_status(unit: &str) -> Result<UnitStatus, Error> {
-        let output = cmd::run_command("systemctl", &["--user", "is-active", unit])?;
+    pub(crate) fn unit_status(unit: &'static str) -> Result<UnitStatus, Error> {
+        let args = &["--user", "is-active", unit];
+        let output = cmd::Command::run("systemctl", args)?;
+
         match output.stdout.as_str().trim() {
             "active" | "activating" | "reloading" | "refreshing" => Ok(UnitStatus::Active),
             "inactive" | "deactivating" | "maintenance" => Ok(UnitStatus::Inactive),

@@ -69,9 +69,11 @@ impl Exec for Action {
 
     fn execute(&self) -> Result<Option<String>, Self::ExecErr> {
         match *self {
-            Self::Inc => cmd::command("brightnessctl", &["set", "8%+"])?,
-            Self::Dec => cmd::command("brightnessctl", &["set", "8%-"])?,
-        }
+            Self::Inc => cmd::Command::run("brightnessctl", &["set", "8%+"]),
+            Self::Dec => cmd::Command::run("brightnessctl", &["set", "8%-"]),
+        }?
+        .check()?;
+
         Ok(None)
     }
 }

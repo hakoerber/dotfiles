@@ -17,7 +17,7 @@ pub(crate) enum Status {
 }
 
 pub(crate) fn set_status(status: Status) -> Result<(), Error> {
-    Ok(cmd::command(
+    cmd::Command::run(
         "dunstctl",
         &[
             "set-paused",
@@ -26,15 +26,20 @@ pub(crate) fn set_status(status: Status) -> Result<(), Error> {
                 Status::Unpaused => "false",
             },
         ],
-    )?)
+    )?
+    .check()?;
+
+    Ok(())
 }
 
 pub(crate) fn is_paused() -> Result<bool, Error> {
-    let output = cmd::command_output("dunstctl", &["is-paused"])?;
+    let command = cmd::Command::run("dunstctl", &["is-paused"])?.check()?;
 
-    match output.trim() {
+    match command.stdout.trim() {
         "true" => Ok(true),
         "false" => Ok(false),
-        _ => Err(Error::DunstctlIsPausedUnknownOutput { output }),
+        _ => Err(Error::DunstctlIsPausedUnknownOutput {
+            output: command.stdout,
+        }),
     }
 }

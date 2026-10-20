@@ -20,33 +20,37 @@ pub(crate) fn get_choice(actions: &[&'static str]) -> Result<Option<&'static str
 
     event!(Level::DEBUG, "starting rofi");
 
-    let process = cmd::command_output_with_stdin_write(
-        ROFI,
-        &[
-            "-dmenu",
-            "-p",
-            "action",
-            "-l",
-            &actions.len().to_string(),
-            "-no-custom",
-            "-sync",
-            "-format",
-            "i",
-        ],
-        actions
-            .iter()
-            .enumerate()
-            .fold(String::new(), |mut output, (i, action)| {
-                writeln!(
-                    output,
-                    "({i}) {action}",
-                    i = i.checked_add(1).expect("too many action")
-                )
-                .expect("writing to string cannot fail");
-                output
-            })
-            .as_bytes(),
-    )?;
+    let action_len = actions.len().to_string();
+
+    let args = &[
+        "-dmenu",
+        "-p",
+        "action",
+        "-l",
+        action_len.as_str(),
+        "-no-custom",
+        "-sync",
+        "-format",
+        "i",
+    ];
+
+    let process = cmd::Command::start(ROFI, args)?
+        .write(
+            actions
+                .iter()
+                .enumerate()
+                .fold(String::new(), |mut output, (i, action)| {
+                    writeln!(
+                        output,
+                        "({i}) {action}",
+                        i = i.checked_add(1).expect("too many action")
+                    )
+                    .expect("writing to string cannot fail");
+                    output
+                })
+                .as_bytes(),
+        )?
+        .wait()?;
 
     if process.exit_code == 1 {
         Ok(None)

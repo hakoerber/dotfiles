@@ -143,7 +143,7 @@ pub(crate) enum Status {
 }
 
 pub(crate) fn set(status: Status) -> Result<(), Error> {
-    Ok(cmd::command(
+    cmd::Command::run(
         "systemctl",
         &[
             "--user",
@@ -154,16 +154,20 @@ pub(crate) fn set(status: Status) -> Result<(), Error> {
             },
             "spotify.service",
         ],
-    )?)
+    )?
+    .check()?;
+
+    Ok(())
 }
 
-fn playerctl(cmd: &str) -> Result<(), Error> {
-    if cmd::run_command("playerctl", &["-p", "spotify", cmd])?
-        .stderr
-        .contains("No players found")
-    {
+fn playerctl(cmd: &'static str) -> Result<(), Error> {
+    let args = &["-p", "spotify", cmd];
+    let cmd = cmd::Command::run("playerctl", args)?;
+
+    if cmd.stderr.contains("No players found") {
         Err(Error::NotFound)
     } else {
+        cmd.check()?;
         Ok(())
     }
 }

@@ -76,17 +76,19 @@ impl Exec for Action {
     fn execute(&self) -> Result<Option<String>, Self::ExecErr> {
         match *self {
             Self::Dark => {
-                cmd::command(
+                cmd::Command::run(
                     "systemctl",
                     &["--user", "--no-block", "start", "color-theme-dark.service"],
-                )?;
+                )?
+                .check()?;
                 Ok(None)
             }
             Self::Light => {
-                cmd::command(
+                cmd::Command::run(
                     "systemctl",
                     &["--user", "--no-block", "start", "color-theme-light.service"],
-                )?;
+                )?
+                .check()?;
                 Ok(None)
             }
             Self::Status => Ok(
