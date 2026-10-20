@@ -520,8 +520,6 @@ toml:
 - tombi
 prettier:
 - prettier
-sccache:
-- sccache
 btop:
 - btop
 dua:
