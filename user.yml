@@ -211,7 +211,7 @@
 
     - name: Deploy dotfiles templates
       ansible.builtin.template:
-        src: /var/lib/dotfiles/{{ item.from }}.j2
+        src: /var/lib/dotfiles/{{ item.from }}
         dest: "/home/{{ user.name }}/{{ item.to }}"
         owner: "{{ user.name }}"
         group: "{{ user.name }}"

@@ -20,17 +20,17 @@ empty_directories:
   - name: .config/VSCodium/
   - name: .config/VSCodium/User
 dotfiles:
-  - from: git/gitconfig
+  - from: git/gitconfig.j2
     to: .config/git/config
     template: true
   - from: gnupg/dirmngr.conf
     to: .local/state/gnupg/dirmngr.conf
   - from: gnupg/scdaemon.conf
     to: .local/state/gnupg/scdaemon.conf
-  - from: gnupg/gpg-agent.conf
+  - from: gnupg/gpg-agent.conf.j2
     to: .local/state/gnupg/gpg-agent.conf
     template: true
-  - from: gnupg/gpg.conf
+  - from: gnupg/gpg.conf.j2
     to: .local/state/gnupg/gpg.conf
     template: true
   - from: i3/config
@@ -52,15 +52,15 @@ dotfiles:
     to: .config/Xresources
   - from: x/xinitrc
     to: .config/xinitrc
-  - from: zsh/zprofile
+  - from: zsh/zprofile.j2
     to: .config/zsh/.zprofile
     template: true
-  - from: zsh/zshrc
+  - from: zsh/zshrc.j2
     to: .config/zsh/.zshrc
     template: true
   - from: zsh/zshenv
     to: .zshenv
-  - from: dunst/dunstrc
+  - from: dunst/dunstrc.j2
     to: .config/dunstrc
     template: true
   - from: redshift/redshift.conf
@@ -71,7 +71,7 @@ dotfiles:
     to: .config/VSCodium/User/settings.json
   - from: vscodium/keybindings.json
     to: .config/VSCodium/User/keybindings.json
-  - from: alacritty/alacritty.toml
+  - from: alacritty/alacritty.toml.j2
     to: .config/alacritty/config.toml
     template: true
   - from: alacritty/themes
@@ -79,13 +79,13 @@ dotfiles:
     dir: true
   - from: rofi/config
     to: .config/rofi/config
-  - from: gtk/gtk-3.0.ini
+  - from: gtk/gtk-3.0.ini.j2
     to: .config/gtk-3.0/settings.ini
     template: true
-  - from: gtk/gtk-3.0-bigger-font.ini
+  - from: gtk/gtk-3.0-bigger-font.ini.j2
     to: .config/gtk-3.0-overrides/bigger-font/gtk-3.0/settings.ini
     template: true
-  - from: gtk/gtkrc-2.0
+  - from: gtk/gtkrc-2.0.j2
     to: .config/gtkrc-2.0
     template: true
   - from: qt/qt5ct.conf
