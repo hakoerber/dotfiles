@@ -300,8 +300,6 @@ gnome-keyring:
 - seahorse
 element:
 - element-desktop
-maim:
-- maim
 mkinitcpio:
 - mkinitcpio
 terraform:
