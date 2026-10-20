@@ -4,5 +4,5 @@ After=windowmanager.target
 
 [Service]
 ExecStart=/usr/bin/env dunst -config %h/.config/dunstrc
-PassEnvironment=DISPLAY
+PassEnvironment=WAYLAND_DISPLAY
 Restart=always

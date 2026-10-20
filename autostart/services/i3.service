@@ -1,6 +1,0 @@
-[Service]
-Type=simple
-ExecStart=/usr/bin/env i3 --config %h/.config/i3/config
-PassEnvironment=DISPLAY
-
-Restart=no

@@ -1,0 +1,6 @@
+[Service]
+Type=simple
+ExecStartPre=systemctl --user unset-environment WAYLAND_DISPLAY DISPLAY
+ExecStart=/usr/bin/env sway --config %h/.config/sway/config
+
+Restart=no

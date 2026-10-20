@@ -1,12 +1,10 @@
 [Unit]
 BindsTo=autostart.target
 After=windowmanager.target
-After=i3.service
 
 ConditionPathExists=%t/features/steam
 
 [Service]
-# `-system-composer`: https://github.com/ValveSoftware/steam-for-linux/issues/10806
-ExecStart=/usr/bin/env steam -system-composer
-PassEnvironment=DISPLAY
+ExecStart=/usr/bin/env steam
+PassEnvironment=WAYLAND_DISPLAY
 Restart=always

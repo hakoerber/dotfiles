@@ -148,10 +148,18 @@ fn menu() -> Result<(), Error> {
     Ok(())
 }
 
-fn screen_off() -> Result<(), Error> {
-    cmd::Command::run("xset", &["dpms", "force", "off"])?.check()?;
-
-    Ok(())
+fn screen_off_until_activity() -> Result<cmd::Command<'static>, Error> {
+    let swayidle = cmd::Command::start(
+        "swayidle",
+        &[
+            "timeout",
+            "10",
+            "swaymsg 'output * power off'",
+            "resume",
+            "swaymsg 'output * power on'",
+        ],
+    )?;
+    Ok(swayidle)
 }
 
 fn lock() -> Result<cmd::Command<'static>, Error> {
@@ -161,11 +169,10 @@ fn lock() -> Result<cmd::Command<'static>, Error> {
     }
 
     let lock_handle = cmd::Command::start(
-        "i3lock",
+        "swaylock",
         &[
-            "--nofork",
-            "--show-failed-attempts",
             "--ignore-empty-password",
+            "--show-failed-attempts",
             "--color",
             "000000",
         ],
@@ -174,28 +181,22 @@ fn lock() -> Result<cmd::Command<'static>, Error> {
     Ok(lock_handle)
 }
 
-fn reset_screen() -> Result<(), Error> {
-    cmd::Command::run("systemctl", &["--user", "restart", "dpms.service"])?.check()?;
-
-    Ok(())
-}
-
 fn lock_and_screen_off() -> Result<(), Error> {
     let dunst_paused = dunst::is_paused()?;
+
     if dunst_paused {
         dunst::set_status(dunst::Status::Paused)?;
     }
 
-    lock()?.with(|| -> Result<(), Error> {
-        screen_off()?;
-        Ok(())
-    })?;
+    let lock = lock()?;
+    let screen_off = screen_off_until_activity()?;
+
+    lock.wait()?;
+    screen_off.kill()?;
 
     if dunst_paused {
         dunst::set_status(dunst::Status::Unpaused)?;
     }
-
-    reset_screen()?;
 
     Ok(())
 }
@@ -225,11 +226,13 @@ fn poweroff() -> Result<(), Error> {
 }
 
 fn lock_and_suspend() -> Result<(), Error> {
-    lock()?.with(|| -> Result<(), Error> {
-        screen_off()?;
-        suspend()?;
-        Ok(())
-    })?;
+    let lock = lock()?;
+    let screen_off = screen_off_until_activity()?;
+
+    suspend()?;
+
+    lock.wait()?;
+    screen_off.kill()?;
 
     Ok(())
 }

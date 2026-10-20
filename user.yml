@@ -413,17 +413,3 @@
         mode: "0644"
         content: |
           --audio-api=pulseaudio
-
-- name: Xset
-  tags:
-    - user:xset
-  block:
-    - name: Write machine-specific xset rate file
-      ansible.builtin.copy:
-        dest: "/home/{{ user.name }}/.config/xset_rate.env"
-        owner: "{{ user.name }}"
-        group: "{{ user.name }}"
-        mode: "0644"
-        content: |
-          XSET_RATE_DELAY="{{ user.xset.rate_delay }}"
-          XSET_RATE_REPEAT="{{ user.xset.rate_repeat }}"

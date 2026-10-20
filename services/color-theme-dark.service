@@ -6,4 +6,4 @@ Conflicts=color-theme-light.service
 Type=oneshot
 ExecStart=/usr/bin/env switch-color-mode dark
 RemainAfterExit=true
-PassEnvironment=DISPLAY
+PassEnvironment=WAYLAND_DISPLAY

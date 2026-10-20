@@ -43,7 +43,7 @@ export KUBECACHEDIR="$XDG_CACHE_HOME/kube"
 
 export PATH="$PATH:$(go env GOPATH)/bin"
 
-export QT_QPA_PLATFORMTHEME=qt5ct
+export QT_QPA_PLATFORMTHEME=KDE
 
 export PASSWORD_STORE_DIR="$HOME/.password-store"
 
@@ -66,8 +66,6 @@ export PYTHONPYCACHEPREFIX=$XDG_CACHE_HOME/python
 
 export AWS_SHARED_CREDENTIALS_FILE="$XDG_CONFIG_HOME"/aws/credentials
 export AWS_CONFIG_FILE="$XDG_CONFIG_HOME"/aws/config
-
-export XINITRC="$XDG_CONFIG_HOME"/xinitrc
 
 export PSQLRC="$XDG_CONFIG_HOME/psqlrc"
 export PSQL_HISTORY="$XDG_STATE_HOME/psql_history"
@@ -106,18 +104,63 @@ mkdir -p "${feature_dir}"
 touch "${feature_dir}"/gpg_agent
 {% endif %}
 
-# Make important environment variables also usable in the systemd user instance
+# Make all set environment variables also usable in the systemd user instance.
+# `systemctl --user import-environment` without any variables is deprecated, so
+# this needs an explicit list
 systemd_envs=(
-    GNUPGHOME
     PATH
+    EDITOR
+    VISUAL
+    BROWSER
+    PAGER
+    LESS
+    LANG
+    LC_TIME
+    LC_COLLATE
+    XDG_CONFIG_HOME
+    XDG_CACHE_HOME
+    XDG_DATA_HOME
+    XDG_STATE_HOME
+    XDG_DOWNLOAD_DIR
+    XAUTHORITY
+    RUSTUP_HOME
+    GOPATH
+    GOMODCACHE
+    SQLITE_HISTORY
+    KUBECONFIG
+    KUBECACHEDIR
+    PATH
+    QT_QPA_PLATFORMTHEME
+    PASSWORD_STORE_DIR
+    GTK2_RC_FILES
+    CARGO_HOME
+    PATH
+    PASSWORD_STORE_DIR
+    ANSIBLE_HOME
+    ANSIBLE_GALAXY_CACHE_DIR
+    DOCKER_CONFIG
+    GNUPGHOME
+    PYTHON_HISTORY
+    PYTHONPYCACHEPREFIX
+    AWS_SHARED_CREDENTIALS_FILE
+    AWS_CONFIG_FILE
+    PSQLRC
+    PSQL_HISTORY
+    PGPASSFILE
+    PGSERVICEFILE
+    REDISCLI_HISTFILE
+    REDISCLI_RCFILE
+    PYTHON_HISTORY
+    PYTHONPYCACHEPREFIX
+    HISTFILE
 )
-systemctl --user import-environment "${systemd_envs[@]}"
 
-# exec startx breaks some logind fuckery, without exec it works
-if [[ -z $DISPLAY ]] ; then
-    if (( $XDG_VTNR == {{ user.vt }} )) ; then
-        startx
-    else
-        tmux new-session -A -s tmux-tty-$XDG_VTNR
-    fi
+for env in "${systemd_envs[@]}" ; do
+    systemctl --user import-environment "${env}"
+done
+
+if (( $XDG_VTNR == {{ user.vt }} )) ; then
+    systemctl --user start windowmanager.target
+else
+    tmux new-session -A -s tmux-tty-$XDG_VTNR
 fi

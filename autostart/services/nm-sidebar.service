@@ -3,6 +3,6 @@ BindsTo=autostart.target
 After=windowmanager.target
 
 [Service]
-ExecStart=/usr/bin/env pasystray
-PassEnvironment=DISPLAY
+ExecStart=/usr/bin/env nm-sidebar --background
+PassEnvironment=WAYLAND_DISPLAY
 Restart=always
