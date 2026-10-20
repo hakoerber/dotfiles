@@ -164,10 +164,6 @@ python:
 - jedi-language-server
 python-modules:
 - python-ruamel-yaml
-- python-gitpython
-- python-semver
-black:
-- python-black
 brightnessctl:
 - brightnessctl
 wireshark:
