@@ -57,7 +57,7 @@ impl Exec for Action {
                 Ok(None)
             }
             Self::Status => Ok(
-                if systemd::user::unit_status("redshift.service")?.is_active() {
+                if systemd::user::unit_status("gammastep.service")?.is_active() {
                     Some("active".to_owned())
                 } else {
                     Some("inactive".to_owned())
@@ -110,7 +110,7 @@ pub(crate) fn set(status: Status) -> Result<(), Error> {
                 Status::On => "start",
                 Status::Off => "stop",
             },
-            "redshift.service",
+            "gammastep.service",
         ],
     )?
     .check()?;

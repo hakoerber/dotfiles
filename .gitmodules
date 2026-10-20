@@ -25,3 +25,6 @@
 [submodule "pkgbuilds/grm"]
 	path = pkgbuilds/grm
 	url = https://aur.archlinux.org/grm.git
+[submodule "pkgbuilds/nm-sidebar"]
+	path = pkgbuilds/nm-sidebar
+	url = https://aur.archlinux.org/nm-sidebar.git

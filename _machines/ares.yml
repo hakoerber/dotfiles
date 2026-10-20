@@ -26,9 +26,9 @@ users:
     fingerprint: "973AE48D71B76735C4712B5BB5C002530C6A2053"
   environment:
     MACHINE_HAS_NEXTCLOUD: "true"
-  xset:
-    rate_delay: 150
-    rate_repeat: 50
+  keyboard:
+    repeat_delay: 150
+    repeat_rate: 50
 
 screen:
   1: DisplayPort-0

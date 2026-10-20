@@ -7,7 +7,7 @@ ConditionPathExists=%t/features/nextcloud
 
 [Service]
 ExecStart=/usr/bin/env nextcloud --background
-PassEnvironment=DISPLAY
+PassEnvironment=WAYLAND_DISPLAY
 Restart=always
 
 MemoryHigh=20%

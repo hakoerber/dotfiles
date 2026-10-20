@@ -1,10 +1,9 @@
 icons_format = "{icon}"
 
 [icons]
-icons = "awesome"
+icons = "awesome4"
 
 [icons.overrides]
-microphone = ""
 volume = ""
 bat = "\uf240"
 music = "\uf1bc"
@@ -23,7 +22,7 @@ end_separator = ""
 block = "music"
 player = "spotify"
 separator = " — "
-format = " $icon {$combo $prev $play $next|-} "
+format = " $icon  {$combo $prev $play $next|-} "
 
 [[block]]
 block = "sound"
@@ -35,6 +34,10 @@ format = " $icon{ $volume.eng(w:2)|} "
 button = "left"
 cmd = "workstation-client pulseaudio output toggle"
 update = true
+
+[[block.click]]
+button = "right"
+cmd = "pavucontrol-qt"
 
 [[block]]
 block = "sound"
@@ -52,10 +55,6 @@ idle_bg = { link = "warning_bg" }
 button = "left"
 cmd = "workstation-client pulseaudio input toggle"
 update = true
-
-[[block]]
-block = "net"
-format = " $icon{ $ssid.str(max_width:10) | }" 
 
 [[block]]
 block = "battery"
@@ -82,9 +81,9 @@ command_state = "[[ $(workstation-client theme status) == light ]] && echo 1"
 [[block]]
 block = "toggle"
 format = "   $icon "
-command_on = "workstation-client redshift start"
-command_off = "workstation-client redshift stop"
-command_state = "[[ $(workstation-client redshift status) == active ]] && echo 1"
+command_on = "workstation-client gammastep start"
+command_off = "workstation-client gammastep stop"
+command_state = "[[ $(workstation-client gammastep status) == active ]] && echo 1"
 signal = 0
 
 [[block]]
@@ -99,6 +98,14 @@ signal = 0
 block = "custom"
 json = true
 command = "ping -n -q -w 2 -c 1 8.8.8.8 >/dev/null 2>/dev/null && printf '{\"text\":\"\",\"state\":\"Info\"}' || printf '{\"text\":\"\",\"state\":\"Critical\"}'"
+
+[[block]]
+block = "net"
+format = " $icon " 
+
+[[block.click]]
+button = "left"
+cmd = "nm-sidebar --toggle"
 
 [[block]]
 block = "time"

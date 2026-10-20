@@ -11,7 +11,6 @@ empty_directories:
   - name: .config/helix
   - name: .config/git
   - name: .config/tmux
-  - name: .config/i3
   - name: .config/zsh
   - name: .config/alacritty
   - name: .local/state/gnupg/
@@ -20,6 +19,7 @@ empty_directories:
   - name: .local/share/
   - name: .config/VSCodium/
   - name: .config/VSCodium/User
+  - name: .config/sway
 dotfiles:
   - from: git/gitconfig.j2
     to: .config/git/config
@@ -34,25 +34,14 @@ dotfiles:
   - from: gnupg/gpg.conf.j2
     to: .local/state/gnupg/gpg.conf
     template: true
-  - from: i3/config.j2
-    to: .config/i3/config
-    template: true
-  - from: i3/i3status-rust/config.toml.j2
+  - from: i3status-rust/config.toml
     to: .config/i3status-rust/config.toml
-    template: true
-  - from: i3/i3status-rust/themes/native.toml
+  - from: i3status-rust/themes/native.toml
     to: .config/i3status-rust/themes/native.toml
-  - from: i3/i3status-rust/icons/awesome.toml
+  - from: i3status-rust/icons/awesome.toml
     to: .config/i3status-rust/icons/awesome.toml
-  - from: i3/scripts
-    to: .config/i3/scripts
-    dir: true
   - from: tmux/tmux.conf
     to: .config/tmux/tmux.conf
-  - from: x/Xresources
-    to: .config/Xresources
-  - from: x/xinitrc
-    to: .config/xinitrc
   - from: zsh/zprofile.j2
     to: .config/zsh/.zprofile
     template: true
@@ -64,8 +53,8 @@ dotfiles:
   - from: dunst/dunstrc.j2
     to: .config/dunstrc
     template: true
-  - from: redshift/redshift.conf
-    to: .config/redshift.conf
+  - from: gammastep/gammastep.conf
+    to: .config/gammastep.conf
   - from: vscodium/product.json
     to: .config/VSCodium/product.json
   - from: vscodium/settings.json
@@ -98,19 +87,21 @@ dotfiles:
     to: .config/helix/config.toml
   - from: helix/languages.toml
     to: .config/helix/languages.toml
-  - from: screencfg/screencfg.toml
-    to: .config/screencfg.toml
   - from: cargo/config.toml
     to: .local/state/cargo/config.toml
   - from: applications
     to: .local/share/applications
     dir: true
+  - from: sway/config.j2
+    to: .config/sway/config
+    template: true
 dotfiles_remove:
   - .gitconfig
   - .vimrc
   - .config/nvim/init.vim
   - .tmux.conf
   - .i3
+  - .config/i3
   - .gtkrc-2.0
   - .opt
   - .optbin
