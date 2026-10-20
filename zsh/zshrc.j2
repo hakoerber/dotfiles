@@ -73,9 +73,6 @@ alias tml="tmux list-sessions"
 alias tma="tmux ls 2>/dev/null && tmux attach-session || tmux"
 alias tmn="tmux new-session -A -s"
 
-alias clipc="xclip -selection primary"
-alias clipo="xclip -out -selection clipboard"
-
 alias rgrep="grep -r"
 
 alias calc='python3 -ic "from math import *; import cmath"'
@@ -308,10 +305,6 @@ t() {
 
 sb() {
     echo $(( $1 * $(cat /sys/class/backlight/intel_backlight/max_brightness) / 100)) | sudo tee /sys/class/backlight/intel_backlight/brightness
-}
-
-clip() {
-    tee >(xclip -selection clipboard) | tee >(xclip -selection primary)
 }
 
 gb() {
