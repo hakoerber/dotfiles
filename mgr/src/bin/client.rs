@@ -55,8 +55,14 @@ fn main() -> MainResult {
     fn inner() -> Result<(), Error> {
         let mut args = env::args().skip(1);
 
-        let action =
-            Action::parse_str(args.next().ok_or(ParseError::MissingAction)?.as_str(), args)?;
+        let first_arg = args.next().ok_or(ParseError::MissingAction)?;
+
+        if first_arg == "--version" {
+            println!(env!("CARGO_PKG_VERSION"));
+            return Ok(());
+        }
+
+        let action = Action::parse_str(&first_arg, args)?;
 
         let socket = socket::get_socket_path()?;
         let mut stream = UnixStream::connect(socket)?;

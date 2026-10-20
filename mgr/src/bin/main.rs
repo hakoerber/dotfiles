@@ -76,7 +76,14 @@ fn main() -> MainResult {
 
         let mut args = env::args().skip(1);
 
-        match args.next().ok_or(ParseError::MissingAction)?.as_str() {
+        let first_arg = args.next().ok_or(ParseError::MissingAction)?;
+
+        if first_arg == "--version" {
+            println!(env!("CARGO_PKG_VERSION"));
+            return Ok(());
+        }
+
+        match first_arg.as_str() {
             "serve" => {
                 mgr::wire::server::run()?;
                 Ok(())
