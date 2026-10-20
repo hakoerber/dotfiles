@@ -103,8 +103,6 @@ pass:
 - pass
 - passff-host
 - xclip
-urxvt:
-- rxvt-unicode
 alacritty:
 - alacritty
 tmux:
