@@ -138,8 +138,6 @@ ranger:
 - ranger
 thunar:
 - thunar
-unclutter:
-- unclutter
 libreoffice:
 - libreoffice-fresh
 - libreoffice-fresh-de
