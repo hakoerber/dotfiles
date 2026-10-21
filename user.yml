@@ -106,18 +106,6 @@
       loop_control:
         label: "{{ item.name }}"
 
-    - name: Link this folder to ~/.dotfiles
-      ansible.builtin.file:
-        state: link
-        force: true
-        follow: false
-        owner: "{{ user.name }}"
-        group: "{{ user.name }}"
-        path: "/home/{{ user.name }}/.dotfiles"
-        src: "{{ playbook_dir }}"
-      become: true
-      become_user: root
-
     - name: Get state of copy targets
       ansible.builtin.stat:
         path: ~/{{ item.to }}
@@ -244,23 +232,28 @@
       register: bin_stat
       check_mode: false
 
-    - name: Remove ~/bin if not a link
+    - name: Remove ~/bin if link
       ansible.builtin.file:
         state: absent
         path: "/home/{{ user.name }}/bin"
       when:
         - bin_stat.stat.exists
-        - not bin_stat.stat.islnk
+        - bin_stat.stat.islnk
+
+    - name: Create ~/bin
+      ansible.builtin.file:
+        state: directory
+        path: "/home/{{ user.name }}/bin"
+        mode: "0755"
 
     - name: Link bin directory
-      ansible.builtin.file:
-        state: link
-        force: true
-        follow: false
-        path: "/home/{{ user.name }}/bin"
-        src: /var/lib/dotfiles/bin
+      ansible.builtin.copy:
+        dest: "/home/{{ user.name }}/bin/{{ item | basename }}"
+        src: "{{ item }}"
         owner: "{{ user.name }}"
         group: "{{ user.name }}"
+        mode: "0755"
+      with_fileglob: bin/*
 
 - name: Firefox
   tags:
@@ -345,32 +338,28 @@
   tags:
     - user:units
   block:
-    - name: Link user service files
+    - name: Create ~/.config/systemd/user/
       ansible.builtin.file:
-        state: link
-        force: true
-        follow: false
-        path: "/home/{{ user.name }}/.config/systemd/user/{{ item | basename }}"
+        state: directory
+        path: "/home/{{ user.name }}/.config/systemd/user/"
+        mode: "0755"
+
+    - name: Configure systemd user units
+      ansible.builtin.copy:
+        dest: "/home/{{ user.name }}/.config/systemd/user/{{ item | basename }}"
         src: "{{ item }}"
         owner: "{{ user.name }}"
         group: "{{ user.name }}"
-      with_fileglob: /var/lib/dotfiles/services/*
+        mode: "0755"
+      with_fileglob:
+        - autostart/services/*
+        - services/*
+      tags: [tmp]
 
 - name: Handle autostart units
   tags:
     - user:autostart
   block:
-    - name: Link autostart service files
-      ansible.builtin.file:
-        state: link
-        force: true
-        follow: false
-        path: "/home/{{ user.name }}/.config/systemd/user/{{ item | basename }}"
-        src: "{{ item }}"
-        owner: "{{ user.name }}"
-        group: "{{ user.name }}"
-      with_fileglob: /var/lib/dotfiles/autostart/services/*
-
     - name: Get state of autostart.target
       ansible.builtin.stat:
         path: "/home/{{ user.name }}/.config/systemd/user/autostart.target"
