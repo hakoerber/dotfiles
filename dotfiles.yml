@@ -37,7 +37,7 @@ dotfiles:
   - from: i3/config.j2
     to: .config/i3/config
     template: true
-  - from: i3/i3status-rust/config.toml
+  - from: i3/i3status-rust/config.toml.j2
     to: .config/i3status-rust/config.toml
     template: true
   - from: i3/i3status-rust/themes/native.toml
