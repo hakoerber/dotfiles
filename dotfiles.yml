@@ -34,7 +34,7 @@ dotfiles:
   - from: gnupg/gpg.conf.j2
     to: .local/state/gnupg/gpg.conf
     template: true
-  - from: i3/config
+  - from: i3/config.j2
     to: .config/i3/config
     template: true
   - from: i3/i3status-rust/config.toml
