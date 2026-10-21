@@ -131,7 +131,7 @@
     - name: Copy dotfiles
       ansible.builtin.copy:
         dest: "/home/{{ user.name }}/{{ item.to }}"
-        src: /var/lib/dotfiles/{{ item.from }}
+        src: "{{ item.from }}"
         owner: "{{ user.name }}"
         group: "{{ user.name }}"
         mode: "0644"
@@ -145,7 +145,7 @@
     - name: Copy directories
       ansible.posix.synchronize:
         dest: "/home/{{ user.name }}/{{ item.to }}/"
-        src: /var/lib/dotfiles/{{ item.from }}/
+        src: "{{ item.from }}/"
         archive: false
         owner: false
         group: false
@@ -199,7 +199,7 @@
 
     - name: Deploy dotfiles templates
       ansible.builtin.template:
-        src: /var/lib/dotfiles/{{ item.from }}
+        src: "{{ item.from }}"
         dest: "/home/{{ user.name }}/{{ item.to }}"
         owner: "{{ user.name }}"
         group: "{{ user.name }}"

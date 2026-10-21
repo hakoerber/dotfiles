@@ -99,36 +99,6 @@
                 daemon_reload: true
               become: true
 
-    - name: Dotfiles directory
-      tags:
-        - dotfiles-directory
-      block:
-        - name: Create dotfiles group
-          ansible.builtin.group:
-            name: dotfiles
-            state: present
-          become: true
-          become_user: root
-
-        - name: Create dotfiles user
-          ansible.builtin.user:
-            name: dotfiles
-            group: dotfiles
-            home: /var/lib/dotfiles
-            create_home: false
-            shell: /bin/bash
-            system: true
-          become: true
-          become_user: root
-
-        - name: Create dotfiles directory
-          ansible.builtin.file:
-            state: directory
-            path: /var/lib/dotfiles
-            mode: "0775" # group needs write access!
-          become: true
-          become_user: root
-
     - name: Packages
       tags:
         - packages
