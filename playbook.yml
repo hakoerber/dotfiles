@@ -195,6 +195,15 @@
             system: true
           become: true
 
+        - name: copy PKGBUILDS to build user
+          copy:
+            src: pkgbuilds/
+            dest: /var/lib/makepkg/pkgbuilds/
+            owner: makepkg
+            group: makepkg
+            remote_src: true
+          become: true
+
         - ansible.builtin.set_fact:
             aur_packages:
               # local packages:
@@ -267,7 +276,17 @@
 
         - name: Create build root directory
           ansible.builtin.file:
-            path: "/var/lib/makepkg/{{ item.name }}/"
+            path: "/var/lib/makepkg/build/"
+            state: directory
+            mode: "0700"
+            owner: makepkg
+            group: makepkg
+          become_user: makepkg
+          become: true
+
+        - name: Create build directory for package
+          ansible.builtin.file:
+            path: "/var/lib/makepkg/build/{{ item.name }}/"
             state: directory
             mode: "0700"
             owner: makepkg
@@ -280,7 +299,7 @@
 
         - name: Create build gpg directory
           ansible.builtin.file:
-            path: "/var/lib/makepkg/{{ item.name }}/gnupg"
+            path: "/var/lib/makepkg/build/{{ item.name }}/gnupg"
             state: directory
             mode: "0700"
             owner: makepkg
@@ -293,12 +312,12 @@
 
         - name: Create env file
           ansible.builtin.copy:
-            dest: /var/lib/makepkg/{{ item.name }}/env
+            dest: /var/lib/makepkg/build/{{ item.name }}/env
             owner: makepkg
             group: makepkg
             mode: "0600"
             content: |
-              export GNUPGHOME="/var/lib/makepkg/{{ item.name }}/gnupg"
+              export GNUPGHOME="/var/lib/makepkg/build/{{ item.name }}/gnupg"
           become_user: makepkg
           become: true
           loop: "{{ aur_packages }}"
@@ -307,7 +326,7 @@
 
         - name: Check preexec script
           ansible.builtin.stat:
-            path: /var/lib/makepkg/{{ item.name }}/preexec
+            path: /var/lib/makepkg/build/{{ item.name }}/preexec
           become_user: makepkg
           become: true
           when: item.preexec is defined
@@ -318,7 +337,7 @@
 
         - name: Install preexec script
           ansible.builtin.copy:
-            dest: /var/lib/makepkg/{{ item.name }}/preexec
+            dest: /var/lib/makepkg/build/{{ item.name }}/preexec
             owner: makepkg
             group: makepkg
             mode: "0700"
@@ -332,7 +351,7 @@
 
         - name: Check preexec script
           ansible.builtin.stat:
-            path: /var/lib/makepkg/{{ item.name }}/preexec
+            path: /var/lib/makepkg/build/{{ item.name }}/preexec
           become_user: makepkg
           become: true
           when: item.preexec is defined
@@ -357,18 +376,18 @@
             owner: makepkg
             group: makepkg
             mode: "0700"
-            dest: /var/lib/makepkg/{{ item.name }}/build.sh
+            dest: /var/lib/makepkg/build/{{ item.name }}/build.sh
             content: |
               #!/usr/bin/env bash
 
-              source /var/lib/makepkg/{{ item.name }}/env
+              source /var/lib/makepkg/build/{{ item.name }}/env
 
               export PKGEXT='.pkg.tar'
-              export BUILDDIR=/var/lib/makepkg/{{ item.name }}/build/
-              export SRCDEST=/var/lib/makepkg/{{ item.name }}/src/
-              export PKGDEST=/var/lib/makepkg/{{ item.name }}/
+              export BUILDDIR=/var/lib/makepkg/build/{{ item.name }}/build/
+              export SRCDEST=/var/lib/makepkg/build/{{ item.name }}/src/
+              export PKGDEST=/var/lib/makepkg/build/{{ item.name }}/
 
-              cd /var/lib/dotfiles/pkgbuilds/{{ item.name }}/
+              cd /var/lib/makepkg/pkgbuilds/{{ item.name }}/
 
               source ./PKGBUILD
 
@@ -402,7 +421,7 @@
                   --nosign || exit 1
               fi
 
-              printf '%s' "${filename}" > /var/lib/makepkg/{{ item.name }}/pkgname
+              printf '%s' "${filename}" > /var/lib/makepkg/build/{{ item.name }}/pkgname
           become: true
           become_user: makepkg
           loop: "{{ aur_packages }}"
@@ -414,13 +433,13 @@
             owner: root
             group: root
             mode: "0700"
-            dest: /var/lib/makepkg/{{ item.name }}/install.sh
+            dest: /var/lib/makepkg/build/{{ item.name }}/install.sh
             content: |
               #!/usr/bin/env bash
 
-              sudo -u makepkg -g makepkg /var/lib/makepkg/{{ item.name }}/build.sh || exit 1
+              sudo -u makepkg -g makepkg /var/lib/makepkg/build/{{ item.name }}/build.sh || exit 1
 
-              filename="$(</var/lib/makepkg/{{ item.name }}/pkgname)"
+              filename="$(</var/lib/makepkg/build/{{ item.name }}/pkgname)"
 
               name=$(pacman -Qi --file "${filename}" | grep '^Name' | awk '{print $3}')
               version=$(pacman -Qi --file "${filename}" | grep '^Version' | awk '{print $3}')
@@ -437,7 +456,7 @@
             label: "{{ item.name }}"
 
         - name: Build and install aur package
-          ansible.builtin.command: /var/lib/makepkg/{{ item.name }}/install.sh
+          ansible.builtin.command: /var/lib/makepkg/build/{{ item.name }}/install.sh
           register: aur_install
           changed_when: aur_install.rc == 123
           failed_when: aur_install.rc not in (0, 123)
@@ -448,7 +467,7 @@
 
         - name: Clean up build leftovers
           ansible.builtin.file:
-            path: /var/lib/makepkg/{{ item[0].name }}/{{ item[1] }}/
+            path: /var/lib/makepkg/build/{{ item[0].name }}/{{ item[1] }}/
             state: absent
           become_user: makepkg
           become: true
