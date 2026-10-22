@@ -1,0 +1,8 @@
+[Unit]
+BindsTo=autostart.target
+After=windowmanager.target
+
+[Service]
+ExecStart=/usr/bin/env gammastep -c %h/.config/gammastep.conf
+PassEnvironment=WAYLAND_DISPLAY
+Restart=always

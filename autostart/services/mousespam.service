@@ -2,4 +2,4 @@
 Type=simple
 ExecStart=%h/bin/mousespam
 RemainAfterExit=True
-PassEnvironment=DISPLAY
+PassEnvironment=WAYLAND_DISPLAY

@@ -28,25 +28,10 @@ doas:
 - opendoas
 apt:
 - apt
-xorg:
-- xorg-server
-- xorg-xrandr
-- xorg-xkill
-- xorg-setxkbmap
-- xorg-xev
-- xorg-xprop
-- xorg-xset
-- xorg-xinit
-dmenu:
-- dmenu
 ansible:
 - ansible
 - ansible-lint
 - python-jmespath
-xdotool:
-- xdotool
-arandr:
-- arandr
 docker:
 - docker
 - docker-compose
@@ -78,23 +63,13 @@ htop:
 - htop
 feh:
 - feh
-i3:
-- i3-wm
-- i3status-rust
-- snixembed
-i3lock:
-- i3lock
 neovim:
 - neovim
 - python-pynvim
 vim:
 - vim
-network-manager-applet:
-- network-manager-applet
-pasystray:
-- pasystray
-redshift:
-- redshift
+gammastep:
+- gammastep
 pavucontrol:
 - pavucontrol-qt
 pinentry-qt:
@@ -102,7 +77,6 @@ pinentry-qt:
 pass:
 - pass
 - passff-host
-- xclip
 alacritty:
 - alacritty
 tmux:
@@ -149,8 +123,6 @@ qt-theming:
 gtk-theming:
 - breeze-gtk
 - lxappearance
-xcompmgr:
-- xcompmgr
 python:
 - python
 - python-lsp-server
@@ -305,8 +277,6 @@ mkinitcpio:
 terraform:
 - terraform
 - terragrunt
-synclient:
-- xf86-input-synaptics
 ncdu:
 - ncdu
 dust:
@@ -393,7 +363,6 @@ yaml:
 qemu:
 - qemu-base
 - qemu-desktop
-- tigervnc
 cloud-init:
 - cloud-init
 - cloud-utils
@@ -413,7 +382,6 @@ yt-dlp:
 - yt-dlp
 ytfzf:
 - ytfzf
-- ueberzug
 ffmpeg:
 - ffmpeg
 zeal:
@@ -549,6 +517,14 @@ wasm:
 - wasm-pack
 glab:
 - glab
+sway:
+- sway
+- swaylock
+- swayidle
+- xorg-xwayland
+- xorg-xlsclients
+i3status-rust:
+- i3status-rust
 mousepad:
 - mousepad
 graphviz:

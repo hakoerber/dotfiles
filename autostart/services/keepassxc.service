@@ -5,5 +5,5 @@ ConditionPathExists=%t/features/keepassxc
 
 [Service]
 ExecStart=/usr/bin/env keepassxc --keyfile %h/.secrets/main.keyx %h/.secrets/main.kdbx
-PassEnvironment=DISPLAY
+PassEnvironment=WAYLAND_DISPLAY
 Restart=always

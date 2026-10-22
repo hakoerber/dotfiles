@@ -25,9 +25,9 @@ users:
   environment:
     MACHINE_HAS_NEXTCLOUD: "false"
     MACHINE_HAS_KEEPASSXC: "true"
-  xset:
-    rate_delay: 150
-    rate_repeat: 50
+  keyboard:
+    repeat_delay: 150
+    repeat_rate: 50
 
 - name: hannes-private
   vt: 2
@@ -51,9 +51,9 @@ users:
   environment:
     MACHINE_HAS_NEXTCLOUD: "true"
     MACHINE_HAS_KEEPASSXC: "false"
-  xset:
-    rate_delay: 150
-    rate_repeat: 50
+  keyboard:
+    repeat_delay: 150
+    repeat_rate: 50
 
 screen:
   1: DP-4-1-6
