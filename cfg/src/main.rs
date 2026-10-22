@@ -503,7 +503,7 @@ impl<'a> Plan<'a> {
         Self { changes: vec![] }
     }
 
-    fn add(&mut self, ctx: &'a Context<'a>, action: Box<dyn Plannable<'a> + 'a>) -> Result<()> {
+    fn add(&mut self, ctx: Box<Context<'a>>, action: Box<dyn Plannable<'a> + 'a>) -> Result<()> {
         let plan = action.plan(ctx)?;
         self.changes.push(plan);
         Ok(())
