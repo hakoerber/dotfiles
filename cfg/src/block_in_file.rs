@@ -13,7 +13,7 @@ use sha3::Digest as _;
 use tap::Tap as _;
 
 use super::{
-    Applyable, Change, Checksum, Context, Plannable, Report, Tempfile, checksum,
+    Applyable, Change, ChangeStatus, Checksum, Context, Plannable, Reporter, Tempfile, checksum,
     checksum::checksum_file, move_file, tempfile,
 };
 
@@ -25,7 +25,7 @@ pub(super) struct BlockInFile<'a> {
 }
 
 impl<'a> Plannable<'a> for BlockInFile<'a> {
-    fn plan(self: Box<Self>, ctx: &'a Context<'a>) -> Result<Change<'a>>
+    fn plan(self: Box<Self>, ctx: &'a Context<'a>) -> Result<ChangeStatus<'a>>
     where
         Self: Sized,
     {
@@ -183,7 +183,7 @@ impl<'a> Plannable<'a> for BlockInFile<'a> {
         );
 
         if checksum_from != checksum_to {
-            Ok(Change::Changed(Box::new(BlockInFilePlan {
+            Ok(ChangeStatus::Changed(Box::new(BlockInFilePlan {
                 ctx,
                 args: *self,
                 new_content,
@@ -191,7 +191,7 @@ impl<'a> Plannable<'a> for BlockInFile<'a> {
                 checksum_to,
             })))
         } else {
-            Ok(Change::Clean)
+            Ok(ChangeStatus::Clean)
         }
     }
 }
@@ -239,7 +239,7 @@ impl Applyable for BlockInFilePlan<'_> {
     }
 }
 
-impl Report for BlockInFilePlan<'_> {
+impl Reporter for BlockInFilePlan<'_> {
     fn report(&self) {
         println!("{} -> {}", self.checksum_from, self.checksum_to);
     }

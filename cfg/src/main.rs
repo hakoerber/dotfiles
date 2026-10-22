@@ -151,40 +151,58 @@ struct PacmanRefreshPackageDatabase;
 //     }
 // }
 
-trait Report {
+trait Reporter {
     fn report(&self);
 }
 
-enum Change<'a> {
+enum ChangeStatus<'a> {
     Changed(Box<dyn Applyable + 'a>),
     Clean,
 }
 
-// impl<T> Change<T>
-// where
-//     T: Report + fmt::Debug,
-// {
-//     fn is_changed(&self) -> bool {
-//         matches!(self, Self::Changed(_))
-//     }
-
-//     fn report(self, name: &str) -> Self {
-//         match self {
-//             Change::Changed(ref changes) => {
-//                 println!("{name} changes");
-//                 changes.report();
-//             }
-//             Change::Clean => println!("{name} unchanged"),
-//         }
-//         self
-//     }
-// }
-
-trait Plannable<'a> {
-    fn plan(self: Box<Self>, ctx: &'a Context<'a>) -> Result<Change<'a>>;
+struct Change<'a> {
+    name: &'a str,
+    status: ChangeStatus<'a>,
 }
 
-trait Applyable {
+impl<'a> ChangeStatus<'a> {
+    fn is_changed(&self) -> bool {
+        matches!(self, Self::Changed(_))
+    }
+}
+
+impl<'a> Change<'a> {
+    fn apply(self) -> Result<()> {
+        match self.status {
+            ChangeStatus::Changed(plan) => {
+                plan.apply()?;
+                Ok(())
+            }
+            ChangeStatus::Clean => Ok(()),
+        }
+    }
+
+    fn report(&'a self) -> Report<'a> {
+        match self.status {
+            ChangeStatus::Changed(ref changes) => {
+                println!("{name} changes", name = self.name);
+                changes.report();
+            }
+            ChangeStatus::Clean => println!("{name} unchanged", name = self.name),
+        }
+
+        Report {
+            name: &self.name,
+            change: &self.status,
+        }
+    }
+}
+
+trait Plannable<'a> {
+    fn plan(self: Box<Self>, ctx: &'a Context<'a>) -> Result<ChangeStatus<'a>>;
+}
+
+trait Applyable: Reporter {
     fn apply(&self) -> Result<()>;
 }
 
@@ -219,7 +237,7 @@ struct ChecksumChange {
     to: Checksum,
 }
 
-impl Report for ChecksumChange {
+impl Reporter for ChecksumChange {
     fn report(&self) {
         println!("{} -> {}", self.from, self.to);
     }
@@ -231,7 +249,7 @@ struct FileChangeDetails {
     permission_change: Option<FilePermissionChange>,
 }
 
-impl Report for FileChangeDetails {
+impl Reporter for FileChangeDetails {
     fn report(&self) {
         if let Some(ref checksum_change) = self.checksum_change {
             checksum_change.report()
@@ -248,7 +266,7 @@ enum FileChange {
     Changed(FileChangeDetails),
 }
 
-impl Report for FileChange {
+impl Reporter for FileChange {
     fn report(&self) {
         match self {
             FileChange::Created => println!("file created"),
@@ -340,7 +358,7 @@ struct FilePermissionChange {
     diff: FilePermissionDiff,
 }
 
-impl Report for FilePermissionChange {
+impl Reporter for FilePermissionChange {
     fn report(&self) {
         if let Some(mode) = self.diff.new_mode {
             println!(
@@ -503,9 +521,15 @@ impl<'a> Plan<'a> {
         Self { changes: vec![] }
     }
 
-    fn add(&mut self, ctx: &'a Context<'a>, action: Box<dyn Plannable<'a> + 'a>) -> Result<()> {
+    fn add(
+        &mut self,
+        name: &'a str,
+        ctx: &'a Context<'a>,
+        action: Box<dyn Plannable<'a> + 'a>,
+    ) -> Result<()> {
         let plan = action.plan(ctx)?;
-        self.changes.push(plan);
+        let change = Change { name, status: plan };
+        self.changes.push(change);
         Ok(())
     }
 
@@ -520,19 +544,36 @@ struct PlanFinished<'a> {
     changes: Vec<Change<'a>>,
 }
 
-impl<'a> PlanFinished<'a> {
-    fn report(self) -> PlanReported<'a> {
-        PlanReported {
-            changes: self.changes,
+struct Report<'a> {
+    name: &'a str,
+    change: &'a ChangeStatus<'a>,
+}
+
+struct Reports<'a>(Vec<Report<'a>>);
+
+impl<'a> Reports<'a> {
+    fn print(&'a self) {
+        for report in &self.0 {
+            todo!()
         }
     }
 }
 
-struct PlanReported<'a> {
-    changes: Vec<Change<'a>>,
-}
+impl<'a> PlanFinished<'a> {
+    fn report(&'a self) -> Reports<'a> {
+        let reports = {
+            let mut reports = vec![];
 
-impl<'a> PlanReported<'a> {
+            for change in &self.changes {
+                let report = change.report();
+                reports.push(report);
+            }
+            Reports(reports)
+        };
+
+        reports
+    }
+
     fn approve(self) -> PlanApproved<'a> {
         PlanApproved {
             changes: self.changes,
@@ -547,12 +588,7 @@ struct PlanApproved<'a> {
 impl PlanApproved<'_> {
     fn apply(self) -> Result<()> {
         for change in self.changes {
-            match change {
-                Change::Changed(plan) => {
-                    plan.apply()?;
-                }
-                Change::Clean => {}
-            }
+            change.apply()?;
         }
 
         Ok(())
@@ -575,6 +611,7 @@ fn main() -> Result<()> {
     let mut plan = Plan::new();
 
     plan.add(
+        "pacman multilib",
         &sudo,
         Box::new(BlockInFile {
             path: Path::new("/etc/pacman.conf"),
@@ -585,7 +622,7 @@ fn main() -> Result<()> {
     )?;
 
     let plan = plan.finish();
-    let plan = plan.report();
+    let report = plan.report();
     let plan = plan.approve();
 
     plan.apply()?;
