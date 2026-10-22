@@ -551,3 +551,6 @@ glab:
 - glab
 mousepad:
 - mousepad
+graphviz:
+- graphviz
+- xdot
