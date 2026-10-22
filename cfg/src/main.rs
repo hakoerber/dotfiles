@@ -181,11 +181,11 @@ enum Change<'a> {
 // }
 
 trait Plannable<'a> {
-    fn plan(self: Box<Self>, ctx: &Context) -> Result<Change<'a>>;
+    fn plan(self: Box<Self>, ctx: Box<Context<'a>>) -> Result<Change<'a>>;
 }
 
 trait Applyable {
-    fn apply(&self, ctx: &Context) -> Result<()>;
+    fn apply(&self) -> Result<()>;
 }
 
 fn move_file(from: &Path, to: &Path, elevate: &Elevate) -> Result<()> {
@@ -503,8 +503,7 @@ impl<'a> Plan<'a> {
         Self { changes: vec![] }
     }
 
-    // todo &dyn
-    fn add<'b: 'a>(&mut self, ctx: &Context, action: Box<dyn Plannable<'b>>) -> Result<()> {
+    fn add(&mut self, ctx: &'a Context<'a>, action: Box<dyn Plannable<'a> + 'a>) -> Result<()> {
         let plan = action.plan(ctx)?;
         self.changes.push(plan);
         Ok(())
@@ -545,12 +544,12 @@ struct PlanApproved<'a> {
     changes: Vec<Change<'a>>,
 }
 
-impl PlanReported<'_> {
-    fn apply(self, ctx: &Context) -> Result<()> {
+impl PlanApproved<'_> {
+    fn apply(self) -> Result<()> {
         for change in self.changes {
             match change {
                 Change::Changed(plan) => {
-                    plan.apply(ctx)?;
+                    plan.apply()?;
                 }
                 Change::Clean => {}
             }
@@ -563,6 +562,11 @@ impl PlanReported<'_> {
 fn main() -> Result<()> {
     let cachedir = PathBuf::from(env::var("XDG_CACHE_HOME")?);
 
+    let sudo = Context {
+        cachedir: &cachedir,
+        elevate: Elevate::Sudo(ElevateTo::Root),
+    };
+
     let with_current_user = Context {
         cachedir: &cachedir,
         elevate: Elevate::No,
@@ -571,10 +575,7 @@ fn main() -> Result<()> {
     let mut plan = Plan::new();
 
     plan.add(
-        &Context {
-            cachedir: &cachedir,
-            elevate: Elevate::Sudo(ElevateTo::Root),
-        },
+        Box::new(sudo),
         Box::new(BlockInFile {
             path: Path::new("/etc/pacman.conf"),
             block: &["[multilib]", "Include = /etc/pacman.d/mirrorlist"],
@@ -583,7 +584,11 @@ fn main() -> Result<()> {
         }),
     )?;
 
-    // let plan = plan.finish();
+    let plan = plan.finish();
+    let plan = plan.report();
+    let plan = plan.approve();
+
+    plan.apply()?;
 
     // let multilib_change = block_in_file(&with_sudo)?.report("pacman multilib");
 

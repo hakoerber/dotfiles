@@ -25,7 +25,7 @@ pub(super) struct BlockInFile<'a> {
 }
 
 impl<'a> Plannable<'a> for BlockInFile<'a> {
-    fn plan(self: Box<Self>, ctx: &Context) -> Result<Change<'a>>
+    fn plan(self: Box<Self>, ctx: Box<Context<'a>>) -> Result<Change<'a>>
     where
         Self: Sized,
     {
@@ -184,6 +184,7 @@ impl<'a> Plannable<'a> for BlockInFile<'a> {
 
         if checksum_from != checksum_to {
             Ok(Change::Changed(Box::new(BlockInFilePlan {
+                ctx,
                 args: *self,
                 new_content,
                 checksum_from,
@@ -222,6 +223,7 @@ impl io::Write for FileContent {
 }
 
 struct BlockInFilePlan<'a> {
+    ctx: Box<Context<'a>>,
     args: BlockInFile<'a>,
     new_content: FileContent,
     checksum_from: Checksum,
@@ -229,10 +231,10 @@ struct BlockInFilePlan<'a> {
 }
 
 impl Applyable for BlockInFilePlan<'_> {
-    fn apply(&self, ctx: &Context) -> Result<()> {
-        let mut tmpfile = Tempfile::new_in(ctx.cachedir)?;
+    fn apply(&self) -> Result<()> {
+        let mut tmpfile = Tempfile::new_in(self.ctx.cachedir)?;
         tmpfile.write_all(self.new_content.as_bytes())?;
-        move_file(tmpfile.path(), self.args.path, &ctx.elevate)?;
+        move_file(tmpfile.path(), self.args.path, &self.ctx.elevate)?;
         Ok(())
     }
 }
