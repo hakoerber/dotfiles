@@ -256,7 +256,7 @@ configure_new_system() {
         # 5s for grub timeout, 5s for kernel boot
         echo waiting for luks password prompt ...
         sleep 10s
-        printf 'lukspw' | send_mon "${mon_sock}"
+        echo 'lukspw' | send_mon "${mon_sock}"
     fi
 
     echo waiting for boot ...

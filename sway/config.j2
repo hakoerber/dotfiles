@@ -40,27 +40,27 @@ set {
     $signal_reboot    reboot
     $signal_shutdown  shutdown
 
-    $workspace1  "1{{ "" if machine.workspace.1 is not defined else ': ' ~ machine.workspace.1 }}"
-    $workspace2  "2{{ "" if machine.workspace.2 is not defined else ': ' ~ machine.workspace.2 }}"
-    $workspace3  "3{{ "" if machine.workspace.3 is not defined else ': ' ~ machine.workspace.3 }}"
-    $workspace4  "4{{ "" if machine.workspace.4 is not defined else ': ' ~ machine.workspace.4 }}"
-    $workspace5  "5{{ "" if machine.workspace.5 is not defined else ': ' ~ machine.workspace.5 }}"
-    $workspace6  "6{{ "" if machine.workspace.6 is not defined else ': ' ~ machine.workspace.6 }}"
-    $workspace7  "7{{ "" if machine.workspace.7 is not defined else ': ' ~ machine.workspace.7 }}"
-    $workspace8  "8{{ "" if machine.workspace.8 is not defined else ': ' ~ machine.workspace.8 }}"
-    $workspace9  "9{{ "" if machine.workspace.9 is not defined else ': ' ~ machine.workspace.9 }}"
-    $workspace10 "10{{ "" if machine.workspace.10 is not defined else ': ' ~ machine.workspace.10 }}"
+    $workspace1 "1{{ "" if machine.workspace.num1 is not defined else ': ' ~ machine.workspace.num1 }}"
+    $workspace2 "2{{ "" if machine.workspace.num2 is not defined else ': ' ~ machine.workspace.num2 }}"
+    $workspace3 "3{{ "" if machine.workspace.num3 is not defined else ': ' ~ machine.workspace.num3 }}"
+    $workspace4 "4{{ "" if machine.workspace.num4 is not defined else ': ' ~ machine.workspace.num4 }}"
+    $workspace5 "5{{ "" if machine.workspace.num5 is not defined else ': ' ~ machine.workspace.num5 }}"
+    $workspace6 "6{{ "" if machine.workspace.num6 is not defined else ': ' ~ machine.workspace.num6 }}"
+    $workspace7 "7{{ "" if machine.workspace.num7 is not defined else ': ' ~ machine.workspace.num7 }}"
+    $workspace8 "8{{ "" if machine.workspace.num8 is not defined else ': ' ~ machine.workspace.num8 }}"
+    $workspace9 "9{{ "" if machine.workspace.num9 is not defined else ': ' ~ machine.workspace.num9 }}"
+    $workspace0 "0{{ "" if machine.workspace.num0 is not defined else ': ' ~ machine.workspace.num0 }}"
 
-    $key_workspace1  1
-    $key_workspace2  2
-    $key_workspace3  3
-    $key_workspace4  4
-    $key_workspace5  5
-    $key_workspace6  6
-    $key_workspace7  7
-    $key_workspace8  8
-    $key_workspace9  9
-    $key_workspace10 0
+    $key_workspace1 1
+    $key_workspace2 2
+    $key_workspace3 3
+    $key_workspace4 4
+    $key_workspace5 5
+    $key_workspace6 6
+    $key_workspace7 7
+    $key_workspace8 8
+    $key_workspace9 9
+    $key_workspace0 0
 
     $left  h
     $down  j
@@ -102,19 +102,7 @@ set {
 ### WORKSPACE ASSIGNMENTS ######################################################
 ################################################################################
 
-workspace $workspace1 output {{ machine.screen.1 }}
-workspace $workspace2 output {{ machine.screen.2 }}
-workspace $workspace3 output {{ machine.screen.3 }}
-workspace $workspace4 output {{ machine.screen.4 }}
-workspace $workspace5 output {{ machine.screen.5 }}
-workspace $workspace6 output {{ machine.screen.6 }}
-workspace $workspace7 output {{ machine.screen.7 }}
-workspace $workspace8 output {{ machine.screen.8 }}
-workspace $workspace9 output {{ machine.screen.9 }}
-workspace $workspace10 output {{ machine.screen.0 }}
-
-
-assign [class="^[Ss]team$"] $workspace5
+assign [class="^[Ss]team$"] $workspace0
 assign [app_id="^org.keepassxc.KeePassXC$"] $workspace8
 assign [class="^Spotify$"] $workspace9
 
@@ -164,27 +152,27 @@ bindsym {
     $mod+$focus_parent focus parent
     $mod+$focus_child  focus child
 
-    $mod+$key_workspace1  workspace $workspace1
-    $mod+$key_workspace2  workspace $workspace2
-    $mod+$key_workspace3  workspace $workspace3
-    $mod+$key_workspace4  workspace $workspace4
-    $mod+$key_workspace5  workspace $workspace5
-    $mod+$key_workspace6  workspace $workspace6
-    $mod+$key_workspace7  workspace $workspace7
-    $mod+$key_workspace8  workspace $workspace8
-    $mod+$key_workspace9  workspace $workspace9
-    $mod+$key_workspace10 workspace $workspace10
+    $mod+$key_workspace1 workspace $workspace1
+    $mod+$key_workspace2 workspace $workspace2
+    $mod+$key_workspace3 workspace $workspace3
+    $mod+$key_workspace4 workspace $workspace4
+    $mod+$key_workspace5 workspace $workspace5
+    $mod+$key_workspace6 workspace $workspace6
+    $mod+$key_workspace7 workspace $workspace7
+    $mod+$key_workspace8 workspace $workspace8
+    $mod+$key_workspace9 workspace $workspace9
+    $mod+$key_workspace0 workspace $workspace0
 
-    $mod+Shift+$key_workspace1  move container to workspace $workspace1
-    $mod+Shift+$key_workspace2  move container to workspace $workspace2
-    $mod+Shift+$key_workspace3  move container to workspace $workspace3
-    $mod+Shift+$key_workspace4  move container to workspace $workspace4
-    $mod+Shift+$key_workspace5  move container to workspace $workspace5
-    $mod+Shift+$key_workspace6  move container to workspace $workspace6
-    $mod+Shift+$key_workspace7  move container to workspace $workspace7
-    $mod+Shift+$key_workspace8  move container to workspace $workspace8
-    $mod+Shift+$key_workspace9  move container to workspace $workspace9
-    $mod+Shift+$key_workspace10 move container to workspace $workspace10
+    $mod+Shift+$key_workspace1 move container to workspace $workspace1
+    $mod+Shift+$key_workspace2 move container to workspace $workspace2
+    $mod+Shift+$key_workspace3 move container to workspace $workspace3
+    $mod+Shift+$key_workspace4 move container to workspace $workspace4
+    $mod+Shift+$key_workspace5 move container to workspace $workspace5
+    $mod+Shift+$key_workspace6 move container to workspace $workspace6
+    $mod+Shift+$key_workspace7 move container to workspace $workspace7
+    $mod+Shift+$key_workspace8 move container to workspace $workspace8
+    $mod+Shift+$key_workspace9 move container to workspace $workspace9
+    $mod+Shift+$key_workspace0 move container to workspace $workspace0
 
     $mod+$prev_on_output workspace prev_on_output
     $mod+$next_on_output workspace next_on_output
@@ -206,7 +194,7 @@ bindsym {
 
     $mod+F1 exec --no-startup-id workstation-client power menu
 
-    $mod+$pim_toggle exec --no-startup-id $scriptdir/swap-from-workspace $workspace10
+    $mod+$pim_toggle exec --no-startup-id $scriptdir/swap-from-workspace $workspace0
 
     ### SPECIAL KEYS ###########################################################
 
@@ -331,5 +319,7 @@ bar {
 
     status_command i3status-rs ~/.config/i3status-rust/config.toml
 }
+
+output * bg ~/.local/share/wallpaper.jpg stretch
 
 exec "systemctl --user import-environment WAYLAND_DISPLAY DISPLAY SWAYSOCK ; systemctl --user start autostart.target"

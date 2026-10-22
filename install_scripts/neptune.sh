@@ -115,21 +115,6 @@ ExecStart=-/sbin/agetty -o '-p -f -- \\u' --noclear --autologin root %I $TERM
 EOF
 # ExecStartPost=/bin/rm /etc/systemd/system/getty@tty1.service.d/autologin.conf
 # ExecStartPost=/bin/rmdir /etc/systemd/system/getty@tty1.service.d/
-
-# Run
-cat << 'EOF' > /root/.bash_profile
-    if [[ "\$(tty)" == "/dev/tty1" ]] ; then
-        while ! ping -w 3 -c 3 8.8.8.8 ; do
-            nmtui
-            sleep 5
-        done
-        rm -rf /etc/systemd/system/getty@tty1.service.d/
-        if /var/lib/dotfiles/install.sh ; then
-            rm -f /root/.bash_profile
-            reboot
-        fi
-    fi
-EOF
 CHROOTSCRIPT
 
 chmod +x /mnt/chroot-script.sh
