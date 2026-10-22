@@ -101,7 +101,7 @@ pub(crate) enum Status {
 }
 
 pub(crate) fn set(status: Status) -> Result<(), Error> {
-    Ok(cmd::command(
+    cmd::Command::run(
         "systemctl",
         &[
             "--user",
@@ -112,5 +112,8 @@ pub(crate) fn set(status: Status) -> Result<(), Error> {
             },
             "redshift.service",
         ],
-    )?)
+    )?
+    .check()?;
+
+    Ok(())
 }

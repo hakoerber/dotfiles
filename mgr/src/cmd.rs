@@ -127,11 +127,18 @@ impl<'cmd> Command<'cmd> {
         })
     }
 
-    pub(crate) fn kill(mut self) -> Result<(), Error> {
-        self.process.kill().map_err(|error| Error::KillFailed {
-            program: self.program.to_owned(),
-            error,
-        })
+    pub(crate) fn with<F: Fn() -> Result<(), E>, E: From<Error>>(
+        self,
+        f: F,
+    ) -> Result<FinishedProcess<'cmd>, E> {
+        f()?;
+        event!(
+            Level::DEBUG,
+            "waiting for process {} to finish",
+            self.program
+        );
+        let result = self.wait()?;
+        Ok(result)
     }
 }
 

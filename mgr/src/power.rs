@@ -149,16 +149,18 @@ fn menu() -> Result<(), Error> {
 }
 
 fn screen_off() -> Result<(), Error> {
-    Ok(cmd::command("xset", &["dpms", "force", "off"])?)
+    cmd::Command::run("xset", &["dpms", "force", "off"])?.check()?;
+
+    Ok(())
 }
 
-fn lock() -> Result<cmd::RunningProcess, Error> {
+fn lock() -> Result<cmd::Command<'static>, Error> {
     match spotify::pause() {
         Ok(()) | Err(spotify::Error::NotFound) => (),
         Err(e) => return Err(e.into()),
     }
 
-    let lock_handle = cmd::start_command(
+    let lock_handle = cmd::Command::start(
         "i3lock",
         &[
             "--nofork",
@@ -167,16 +169,15 @@ fn lock() -> Result<cmd::RunningProcess, Error> {
             "--color",
             "000000",
         ],
-    );
+    )?;
 
     Ok(lock_handle)
 }
 
 fn reset_screen() -> Result<(), Error> {
-    Ok(cmd::command(
-        "systemctl",
-        &["--user", "restart", "dpms.service"],
-    )?)
+    cmd::Command::run("systemctl", &["--user", "restart", "dpms.service"])?.check()?;
+
+    Ok(())
 }
 
 fn lock_and_screen_off() -> Result<(), Error> {
@@ -200,19 +201,27 @@ fn lock_and_screen_off() -> Result<(), Error> {
 }
 
 fn suspend() -> Result<(), Error> {
-    Ok(cmd::command("systemctl", &["suspend"])?)
+    cmd::Command::run("systemctl", &["suspend"])?.check()?;
+
+    Ok(())
 }
 
 fn hibernate() -> Result<(), Error> {
-    Ok(cmd::command("systemctl", &["hibernate"])?)
+    cmd::Command::run("systemctl", &["hibernate"])?.check()?;
+
+    Ok(())
 }
 
 fn reboot() -> Result<(), Error> {
-    Ok(cmd::command("systemctl", &["reboot"])?)
+    cmd::Command::run("systemctl", &["reboot"])?.check()?;
+
+    Ok(())
 }
 
 fn poweroff() -> Result<(), Error> {
-    Ok(cmd::command("systemctl", &["poweroff"])?)
+    cmd::Command::run("systemctl", &["poweroff"])?.check()?;
+
+    Ok(())
 }
 
 fn lock_and_suspend() -> Result<(), Error> {
