@@ -25,7 +25,7 @@ pub(super) struct BlockInFile<'a> {
 }
 
 impl<'a> Plannable<'a> for BlockInFile<'a> {
-    fn plan(self: Box<Self>, ctx: Box<Context<'a>>) -> Result<Change<'a>>
+    fn plan(self: Box<Self>, ctx: &'a Context<'a>) -> Result<Change<'a>>
     where
         Self: Sized,
     {
@@ -223,7 +223,7 @@ impl io::Write for FileContent {
 }
 
 struct BlockInFilePlan<'a> {
-    ctx: Box<Context<'a>>,
+    ctx: &'a Context<'a>,
     args: BlockInFile<'a>,
     new_content: FileContent,
     checksum_from: Checksum,

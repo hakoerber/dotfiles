@@ -181,7 +181,7 @@ enum Change<'a> {
 // }
 
 trait Plannable<'a> {
-    fn plan(self: Box<Self>, ctx: Box<Context<'a>>) -> Result<Change<'a>>;
+    fn plan(self: Box<Self>, ctx: &'a Context<'a>) -> Result<Change<'a>>;
 }
 
 trait Applyable {
@@ -503,7 +503,7 @@ impl<'a> Plan<'a> {
         Self { changes: vec![] }
     }
 
-    fn add(&mut self, ctx: Box<Context<'a>>, action: Box<dyn Plannable<'a> + 'a>) -> Result<()> {
+    fn add(&mut self, ctx: &'a Context<'a>, action: Box<dyn Plannable<'a> + 'a>) -> Result<()> {
         let plan = action.plan(ctx)?;
         self.changes.push(plan);
         Ok(())
@@ -575,7 +575,7 @@ fn main() -> Result<()> {
     let mut plan = Plan::new();
 
     plan.add(
-        Box::new(sudo),
+        &sudo,
         Box::new(BlockInFile {
             path: Path::new("/etc/pacman.conf"),
             block: &["[multilib]", "Include = /etc/pacman.d/mirrorlist"],
