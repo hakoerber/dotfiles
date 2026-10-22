@@ -89,9 +89,9 @@ struct Process {
 fn cmd(args: &[&str], elevate: &Elevate) -> Result<Process> {
     let command = match *elevate {
         Elevate::Sudo(ref elevate_to) => match *elevate_to {
-            ElevateTo::Root => vec!["sudo"].tap_mut(|v| v.extend_from_slice(args)),
+            ElevateTo::Root => vec!["sudo", "--"].tap_mut(|v| v.extend_from_slice(args)),
             ElevateTo::User { ref user } => {
-                vec!["sudo", "-u", user].tap_mut(|v| v.extend_from_slice(args))
+                vec!["sudo", "-u", user, "--"].tap_mut(|v| v.extend_from_slice(args))
             }
         },
         Elevate::No => args.to_vec(),
@@ -125,7 +125,7 @@ impl Report for PacmanRefreshPackageDatabase {
 }
 
 fn pacman_refresh_package_database(ctx: &Context) -> Result<Change<PacmanRefreshPackageDatabase>> {
-    cmd(&vec!["pacman", "--sync", "--refresh"], &ctx.elevate)?;
+    cmd(&vec!["pacman", "--sync", "--refresh", "--"], &ctx.elevate)?;
 
     Ok(Change::Changed(PacmanRefreshPackageDatabase))
 }
@@ -136,13 +136,16 @@ fn install_packages<'pkg>(
 ) -> Result<Change<PackageChange<'pkg>>> {
     let mut installed: Vec<&str> = vec![];
     for package in list {
-        if cmd(&vec!["pacman", "--query", "--quiet", package], &ctx.elevate)?
-            .status
-            .code()
+        if cmd(
+            &vec!["pacman", "--query", "--quiet", "--", package],
+            &ctx.elevate,
+        )?
+        .status
+        .code()
             == 1
         {
             cmd(
-                &vec!["pacman", "--needed", "--noconfirm", "--sync", package],
+                &vec!["pacman", "--needed", "--noconfirm", "--sync", "--", package],
                 &ctx.elevate,
             )?;
             installed.push(package);
@@ -397,6 +400,7 @@ fn move_file(from: &Path, to: &Path, elevate: &Elevate) -> Result<()> {
                     "mv",
                     "--force",
                     "--no-target-directory",
+                    "--",
                     from.as_str(),
                     to.as_str(),
                 ],
@@ -470,8 +474,13 @@ impl File<'_> {
     }
 }
 
-#[derive(PartialEq, Eq, Clone, Copy, derive_more::Display, Debug)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
 struct FileMode(u32);
+impl FileMode {
+    fn as_oct_string(&self) -> String {
+        format!("{0:04o}", self.0)
+    }
+}
 
 #[derive(PartialEq, Eq, Clone, Copy, derive_more::Display, Debug)]
 struct Uid(u32);
@@ -479,6 +488,10 @@ struct Uid(u32);
 impl Uid {
     fn root() -> Self {
         Self(0)
+    }
+
+    fn to_string(&self) -> String {
+        self.0.to_string()
     }
 }
 
@@ -488,6 +501,10 @@ struct Gid(u32);
 impl Gid {
     fn root() -> Self {
         Self(0)
+    }
+
+    fn to_string(&self) -> String {
+        self.0.to_string()
     }
 }
 
@@ -530,7 +547,11 @@ struct FilePermissionChange {
 impl Report for FilePermissionChange {
     fn report(&self) {
         if let Some(mode) = self.diff.new_mode {
-            println!("mode: {} -> {}", self.existing.mode, mode);
+            println!(
+                "mode: {} -> {}",
+                self.existing.mode.as_oct_string(),
+                mode.as_oct_string()
+            );
         }
         if let Some(owner) = self.diff.new_owner {
             println!("owner: {} -> {}", self.existing.owner, owner);
@@ -546,25 +567,72 @@ fn file_permissions(
     path: &Path,
     perms: FilePermissions,
 ) -> Result<Change<FilePermissionChange>> {
-    match ctx.elevate {
+    let existing = match ctx.elevate {
         Elevate::Sudo(ref elevate_to) => {
-            let output = cmd(&["stat", "--format='%u %g %a"], &ctx.elevate)?;
-            todo!()
+            let output = cmd(
+                &["stat", "--format", "%u %g %a", "--", path.as_str()],
+                &ctx.elevate,
+            )?;
+            let (owner, group, mode) = {
+                let mut segments = output.stdout.trim().split(' ');
+                let uid = Uid(segments
+                    .next()
+                    .ok_or_else(|| anyhow!("stat output could not be parsed"))?
+                    .parse::<u32>()?);
+                let gid = Gid(segments
+                    .next()
+                    .ok_or_else(|| anyhow!("stat output could not be parsed"))?
+                    .parse::<u32>()?);
+                let mode = FileMode(
+                    segments
+                        .next()
+                        .ok_or_else(|| anyhow!("stat output could not be parsed"))
+                        .map(|s| u32::from_str_radix(s, 8))??,
+                );
+
+                (uid, gid, mode)
+            };
+
+            FilePermissions { mode, owner, group }
         }
         Elevate::No => {
             let stat = std::fs::metadata(path)?;
 
-            let existing_permissions = FilePermissions {
+            FilePermissions {
                 mode: FileMode(stat.mode() & 0o6777),
                 owner: Uid(stat.uid()),
                 group: Gid(stat.gid()),
-            };
+            }
+        }
+    };
 
-            let diff = existing_permissions.diff(&perms);
+    let diff = existing.diff(&perms);
 
-            if diff.is_empty() {
-                Ok(Change::Clean)
-            } else {
+    if diff.is_empty() {
+        Ok(Change::Clean)
+    } else {
+        match ctx.elevate {
+            Elevate::Sudo(ref elevate_to) => {
+                if let Some(uid) = diff.new_owner {
+                    cmd(
+                        &["chown", &uid.to_string(), "--", path.as_str()],
+                        &ctx.elevate,
+                    )?;
+                }
+                if let Some(gid) = diff.new_group {
+                    cmd(
+                        &["chgrp", &gid.to_string(), "--", path.as_str()],
+                        &ctx.elevate,
+                    )?;
+                }
+                if let Some(mode) = diff.new_mode {
+                    cmd(
+                        &["chmod", &mode.as_oct_string(), "--", path.as_str()],
+                        &ctx.elevate,
+                    )?;
+                }
+            }
+            Elevate::No => {
                 if let Some(uid) = diff.new_owner {
                     unixfs::chown(path, Some(uid.0), None)?;
                 }
@@ -574,12 +642,9 @@ fn file_permissions(
                 if let Some(mode) = diff.new_mode {
                     fs::set_permissions(path, fs::Permissions::from_mode(mode.0))?;
                 }
-                Ok(Change::Changed(FilePermissionChange {
-                    existing: perms,
-                    diff,
-                }))
             }
         }
+        Ok(Change::Changed(FilePermissionChange { existing, diff }))
     }
 }
 
