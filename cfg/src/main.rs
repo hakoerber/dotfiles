@@ -309,6 +309,10 @@ struct Plan<'a> {
     changes: Vec<Change<'a>>,
 }
 
+struct ActionRef<'a> {
+    action: &'a Box<dyn Plannable<'a> + 'a>,
+}
+
 impl<'a> Plan<'a> {
     fn new() -> Self {
         Self { changes: vec![] }
