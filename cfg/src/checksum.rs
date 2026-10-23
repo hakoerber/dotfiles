@@ -10,8 +10,8 @@ use sha3::Digest as _;
 use super::Checksum;
 
 pub(crate) fn checksum_file(path: &Path) -> Result<Option<Checksum>> {
-    match checksum(fs::File::open(path)?) {
-        Ok(checksum) => Ok(Some(checksum)),
+    match fs::File::open(path) {
+        Ok(file) => Ok(Some(checksum(file)?)),
         Err(err) => {
             if err.kind() == std::io::ErrorKind::NotFound {
                 Ok(None)

@@ -13,10 +13,11 @@ use sha3::Digest as _;
 use tap::Tap as _;
 
 use super::{
-    Applyable, Change, ChangeStatus, Checksum, Context, Plannable, Reporter, Tempfile, checksum,
-    checksum::checksum_file, move_file, tempfile,
+    Applyable, Change, ChangeStatus, Checksum, Context, FileContent, Plannable, RawFileContent,
+    Reporter, Tempfile, checksum, checksum::checksum_file, file::mv, tempfile,
 };
 
+#[derive(Debug)]
 pub(super) struct BlockInFile<'a> {
     pub(super) path: &'a Path,
     pub(super) block: &'a [&'a str],
@@ -25,11 +26,8 @@ pub(super) struct BlockInFile<'a> {
 }
 
 impl<'a> Plannable<'a> for BlockInFile<'a> {
-    fn plan(self: Box<Self>, ctx: &'a Context<'a>) -> Result<ChangeStatus<'a>>
-    where
-        Self: Sized,
-    {
-        let mut new_content = FileContent::new();
+    fn plan(self: Box<Self>, ctx: &'a Context<'a>) -> Result<ChangeStatus<'a>> {
+        let mut new_content = RawFileContent::new();
 
         let start_marker = format!("{marker} --- START", marker = self.marker);
         let end_marker = format!("{marker} --- END", marker = self.marker);
@@ -49,11 +47,11 @@ impl<'a> Plannable<'a> for BlockInFile<'a> {
             if line == start_marker {
                 match state {
                     State::Before | State::Initial => {
-                        new_content.write_all(start_marker.as_bytes())?;
-                        new_content.write_all(b"\n")?;
+                        new_content.write_all(start_marker.as_bytes());
+                        new_content.write_all(b"\n");
                         for line in self.block {
-                            new_content.write_all(line.as_bytes())?;
-                            new_content.write_all(b"\n")?;
+                            new_content.write_all(line.as_bytes());
+                            new_content.write_all(b"\n");
                         }
                         // we could write end marker here, but it feels wrong
                         state = State::In;
@@ -72,8 +70,8 @@ impl<'a> Plannable<'a> for BlockInFile<'a> {
                         bail!("found end marker before start marker")
                     }
                     State::In => {
-                        new_content.write_all(end_marker.as_bytes())?;
-                        new_content.write_all(b"\n")?;
+                        new_content.write_all(end_marker.as_bytes());
+                        new_content.write_all(b"\n");
                         state = State::After;
                         continue;
                     }
@@ -84,8 +82,8 @@ impl<'a> Plannable<'a> for BlockInFile<'a> {
             } else {
                 match state {
                     State::Before | State::Initial => {
-                        new_content.write_all(line.as_bytes())?;
-                        new_content.write_all(b"\n")?;
+                        new_content.write_all(line.as_bytes());
+                        new_content.write_all(b"\n");
                         state = State::Before;
                         continue;
                     }
@@ -94,8 +92,8 @@ impl<'a> Plannable<'a> for BlockInFile<'a> {
                         continue;
                     }
                     State::After => {
-                        new_content.write_all(line.as_bytes())?;
-                        new_content.write_all(b"\n")?;
+                        new_content.write_all(line.as_bytes());
+                        new_content.write_all(b"\n");
                         continue;
                     }
                 }
@@ -125,21 +123,21 @@ impl<'a> Plannable<'a> for BlockInFile<'a> {
                                     State::Found => bail!("insert_after found more than once"),
                                     State::NotFound => {
                                         state = State::Found;
-                                        new_content.write_all(line.as_bytes())?;
-                                        new_content.write_all(b"\n")?;
-                                        new_content.write_all(start_marker.as_bytes())?;
-                                        new_content.write_all(b"\n")?;
+                                        new_content.write_all(line.as_bytes());
+                                        new_content.write_all(b"\n");
+                                        new_content.write_all(start_marker.as_bytes());
+                                        new_content.write_all(b"\n");
                                         for line in self.block {
-                                            new_content.write_all(line.as_bytes())?;
-                                            new_content.write_all(b"\n")?;
+                                            new_content.write_all(line.as_bytes());
+                                            new_content.write_all(b"\n");
                                         }
-                                        new_content.write_all(end_marker.as_bytes())?;
-                                        new_content.write_all(b"\n")?;
+                                        new_content.write_all(end_marker.as_bytes());
+                                        new_content.write_all(b"\n");
                                     }
                                 }
                             } else {
-                                new_content.write_all(line.as_bytes())?;
-                                new_content.write_all(b"\n")?;
+                                new_content.write_all(line.as_bytes());
+                                new_content.write_all(b"\n");
                             }
                         }
 
@@ -147,27 +145,27 @@ impl<'a> Plannable<'a> for BlockInFile<'a> {
                             State::Found => (),
                             State::NotFound => {
                                 println!("regex never found");
-                                new_content.write_all(start_marker.as_bytes())?;
-                                new_content.write_all(b"\n")?;
+                                new_content.write_all(start_marker.as_bytes());
+                                new_content.write_all(b"\n");
                                 for line in self.block {
-                                    new_content.write_all(line.as_bytes())?;
-                                    new_content.write_all(b"\n")?;
+                                    new_content.write_all(line.as_bytes());
+                                    new_content.write_all(b"\n");
                                 }
-                                new_content.write_all(end_marker.as_bytes())?;
-                                new_content.write_all(b"\n")?;
+                                new_content.write_all(end_marker.as_bytes());
+                                new_content.write_all(b"\n");
                             }
                         }
                     }
                     None => {
                         // just put it at the end
-                        new_content.write_all(start_marker.as_bytes())?;
-                        new_content.write_all(b"\n")?;
+                        new_content.write_all(start_marker.as_bytes());
+                        new_content.write_all(b"\n");
                         for line in self.block {
-                            new_content.write_all(line.as_bytes())?;
-                            new_content.write_all(b"\n")?;
+                            new_content.write_all(line.as_bytes());
+                            new_content.write_all(b"\n");
                         }
-                        new_content.write_all(end_marker.as_bytes())?;
-                        new_content.write_all(b"\n")?;
+                        new_content.write_all(end_marker.as_bytes());
+                        new_content.write_all(b"\n");
                     }
                 }
             }
@@ -183,7 +181,7 @@ impl<'a> Plannable<'a> for BlockInFile<'a> {
         );
 
         if checksum_from != checksum_to {
-            Ok(ChangeStatus::Changed(Box::new(BlockInFilePlan {
+            Ok(ChangeStatus::NeedsChange(Box::new(BlockInFilePlan {
                 ctx,
                 args: *self,
                 new_content,
@@ -196,36 +194,11 @@ impl<'a> Plannable<'a> for BlockInFile<'a> {
     }
 }
 
-struct FileContent(Vec<u8>);
-
-impl FileContent {
-    fn new() -> Self {
-        Self(vec![])
-    }
-
-    fn truncate(&mut self) {
-        self.0.truncate(0);
-    }
-
-    fn as_bytes(&self) -> &[u8] {
-        &self.0
-    }
-}
-
-impl io::Write for FileContent {
-    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        self.0.write(buf)
-    }
-
-    fn flush(&mut self) -> io::Result<()> {
-        self.0.flush()
-    }
-}
-
+#[derive(Debug)]
 struct BlockInFilePlan<'a> {
     ctx: &'a Context<'a>,
     args: BlockInFile<'a>,
-    new_content: FileContent,
+    new_content: RawFileContent,
     checksum_from: Checksum,
     checksum_to: Checksum,
 }
@@ -234,13 +207,16 @@ impl Applyable for BlockInFilePlan<'_> {
     fn apply(&self) -> Result<()> {
         let mut tmpfile = Tempfile::new_in(self.ctx.cachedir)?;
         tmpfile.write_all(self.new_content.as_bytes())?;
-        move_file(tmpfile.path(), self.args.path, &self.ctx.elevate)?;
+        mv(tmpfile.path(), self.args.path, &self.ctx.elevate)?;
         Ok(())
     }
 }
 
 impl Reporter for BlockInFilePlan<'_> {
-    fn report(&self) {
-        println!("{} -> {}", self.checksum_from, self.checksum_to);
+    fn report(&self) -> Vec<String> {
+        vec![format!(
+            "checksum changed: {} -> {}",
+            self.checksum_from, self.checksum_to
+        )]
     }
 }

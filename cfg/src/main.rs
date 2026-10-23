@@ -9,16 +9,18 @@ use std::{
 
 use anyhow::{Result, anyhow, bail};
 use camino::{Utf8Path as Path, Utf8PathBuf as PathBuf};
-use nonempty::{NonEmpty, nonempty};
+use nonempty::nonempty;
+use owo_colors::OwoColorize as _;
 use regex::Regex;
 use sha3::Digest as _;
 use tap::Tap as _;
 
 mod block_in_file;
 mod checksum;
+mod cmd;
+mod file;
+mod package;
 mod tempfile;
-
-use block_in_file::BlockInFile;
 
 use tempfile::Tempfile;
 
@@ -37,61 +39,16 @@ impl fmt::Display for Checksum {
     }
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(Eq, PartialEq, Debug)]
 enum ElevateTo {
     Root,
     User { user: String },
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(Eq, PartialEq, Debug)]
 enum Elevate {
     Sudo(ElevateTo),
     No,
-}
-
-#[derive(Debug)]
-struct ExitStatus(usize);
-
-impl ExitStatus {
-    fn code(&self) -> usize {
-        self.0
-    }
-}
-
-#[derive(Debug)]
-struct Process {
-    stdout: String,
-    stderr: String,
-    status: ExitStatus,
-}
-
-fn cmd(args: &[&str], elevate: &Elevate) -> Result<Process> {
-    let command = match *elevate {
-        Elevate::Sudo(ref elevate_to) => match *elevate_to {
-            ElevateTo::Root => vec!["sudo", "--"].tap_mut(|v| v.extend_from_slice(args)),
-            ElevateTo::User { ref user } => {
-                vec!["sudo", "-u", user, "--"].tap_mut(|v| v.extend_from_slice(args))
-            }
-        },
-        Elevate::No => args.to_vec(),
-    };
-
-    let output = process::Command::new(command[0])
-        .args(&command[1..])
-        .output()?;
-
-    Ok(Process {
-        stdout: output.stdout.try_into()?,
-        stderr: output.stderr.try_into()?,
-        status: ExitStatus(
-            output
-                .status
-                .code()
-                .expect("process to have exit code on stop")
-                .try_into()
-                .expect("exit code to be non-negative"),
-        ),
-    })
 }
 
 #[derive(Debug)]
@@ -152,14 +109,16 @@ struct PacmanRefreshPackageDatabase;
 // }
 
 trait Reporter {
-    fn report(&self);
+    fn report(&self) -> Vec<String>;
 }
 
+#[derive(Debug)]
 enum ChangeStatus<'a> {
-    Changed(Box<dyn Applyable + 'a>),
+    NeedsChange(Box<dyn Applyable + 'a>),
     Clean,
 }
 
+#[derive(Debug)]
 struct Change<'a> {
     name: &'a str,
     status: ChangeStatus<'a>,
@@ -167,14 +126,14 @@ struct Change<'a> {
 
 impl<'a> ChangeStatus<'a> {
     fn is_changed(&self) -> bool {
-        matches!(self, Self::Changed(_))
+        matches!(self, Self::NeedsChange(_))
     }
 }
 
 impl<'a> Change<'a> {
     fn apply(self) -> Result<()> {
         match self.status {
-            ChangeStatus::Changed(plan) => {
+            ChangeStatus::NeedsChange(plan) => {
                 plan.apply()?;
                 Ok(())
             }
@@ -183,17 +142,15 @@ impl<'a> Change<'a> {
     }
 
     fn report(&'a self) -> Report<'a> {
-        match self.status {
-            ChangeStatus::Changed(ref changes) => {
-                println!("{name} changes", name = self.name);
-                changes.report();
-            }
-            ChangeStatus::Clean => println!("{name} unchanged", name = self.name),
-        }
-
         Report {
             name: &self.name,
-            change: &self.status,
+            change: match self.status {
+                ChangeStatus::NeedsChange(ref applyable) => {
+                    let report = applyable.report();
+                    StatusReport::Changes(report)
+                }
+                ChangeStatus::Clean => StatusReport::Unchanged,
+            },
         }
     }
 }
@@ -202,30 +159,11 @@ trait Plannable<'a> {
     fn plan(self: Box<Self>, ctx: &'a Context<'a>) -> Result<ChangeStatus<'a>>;
 }
 
-trait Applyable: Reporter {
+trait Applyable: Reporter + fmt::Debug {
     fn apply(&self) -> Result<()>;
 }
 
-fn move_file(from: &Path, to: &Path, elevate: &Elevate) -> Result<()> {
-    match elevate {
-        Elevate::Sudo(elevate_to) => {
-            cmd(
-                &[
-                    "mv",
-                    "--force",
-                    "--no-target-directory",
-                    "--",
-                    from.as_str(),
-                    to.as_str(),
-                ],
-                elevate,
-            )?;
-        }
-        Elevate::No => fs::rename(from, to)?,
-    }
-    Ok(())
-}
-
+#[derive(Debug)]
 struct Context<'c> {
     cachedir: &'c Path,
     elevate: Elevate,
@@ -237,54 +175,38 @@ struct ChecksumChange {
     to: Checksum,
 }
 
-impl Reporter for ChecksumChange {
-    fn report(&self) {
-        println!("{} -> {}", self.from, self.to);
+#[derive(Debug)]
+struct RawFileContent(Vec<u8>);
+
+impl RawFileContent {
+    fn new() -> Self {
+        Self(vec![])
+    }
+
+    fn truncate(&mut self) {
+        self.0.truncate(0);
+    }
+
+    fn as_bytes(&self) -> &[u8] {
+        &self.0
+    }
+
+    fn write_all(&mut self, buf: &[u8]) {
+        self.0.write(buf).expect("memory writes to not fail");
     }
 }
 
 #[derive(Debug)]
-struct FileChangeDetails {
-    checksum_change: Option<ChecksumChange>,
-    permission_change: Option<FilePermissionChange>,
-}
+struct FileContent<'a>(&'a [&'a str]);
 
-impl Reporter for FileChangeDetails {
-    fn report(&self) {
-        if let Some(ref checksum_change) = self.checksum_change {
-            checksum_change.report()
-        };
-        if let Some(ref permission_change) = self.permission_change {
-            permission_change.report()
-        };
-    }
-}
-
-#[derive(Debug)]
-enum FileChange {
-    Created,
-    Changed(FileChangeDetails),
-}
-
-impl Reporter for FileChange {
-    fn report(&self) {
-        match self {
-            FileChange::Created => println!("file created"),
-            FileChange::Changed(file_change_details) => file_change_details.report(),
-        }
-    }
-}
-
-struct File<'a>(&'a [&'a str]);
-
-impl File<'_> {
-    fn write_to(&self, target: &mut impl io::Write) -> Result<()> {
+impl FileContent<'_> {
+    fn as_raw(&self) -> RawFileContent {
+        let mut raw = RawFileContent::new();
         for line in self.0 {
-            target.write_all(line.as_bytes())?;
-            target.write_all(b"\n")?;
+            raw.write_all(line.as_bytes());
+            raw.write_all(b"\n");
         }
-
-        Ok(())
+        raw
     }
 }
 
@@ -340,6 +262,10 @@ impl FilePermissionDiff {
     fn is_empty(&self) -> bool {
         self.new_mode.is_none() && self.new_owner.is_none() && self.new_group.is_none()
     }
+
+    fn has_changes(&self) -> bool {
+        !self.is_empty()
+    }
 }
 
 impl FilePermissions {
@@ -359,159 +285,26 @@ struct FilePermissionChange {
 }
 
 impl Reporter for FilePermissionChange {
-    fn report(&self) {
+    fn report(&self) -> Vec<String> {
+        let mut out = vec![];
         if let Some(mode) = self.diff.new_mode {
-            println!(
+            out.push(format!(
                 "mode: {} -> {}",
                 self.existing.mode.as_oct_string(),
                 mode.as_oct_string()
-            );
+            ));
         }
         if let Some(owner) = self.diff.new_owner {
-            println!("owner: {} -> {}", self.existing.owner, owner);
+            out.push(format!("owner: {} -> {}", self.existing.owner, owner));
         }
         if let Some(group) = self.diff.new_group {
-            println!("group: {} -> {}", self.existing.group, group);
+            out.push(format!("group: {} -> {}", self.existing.group, group));
         }
+        out
     }
 }
 
-// fn file_permissions(
-//     ctx: &Context,
-//     path: &Path,
-//     perms: FilePermissions,
-// ) -> Result<Change<FilePermissionChange>> {
-//     let existing = match ctx.elevate {
-//         Elevate::Sudo(ref elevate_to) => {
-//             let output = cmd(
-//                 &["stat", "--format", "%u %g %a", "--", path.as_str()],
-//                 &ctx.elevate,
-//             )?;
-//             let (owner, group, mode) = {
-//                 let mut segments = output.stdout.trim().split(' ');
-//                 let uid = Uid(segments
-//                     .next()
-//                     .ok_or_else(|| anyhow!("stat output could not be parsed"))?
-//                     .parse::<u32>()?);
-//                 let gid = Gid(segments
-//                     .next()
-//                     .ok_or_else(|| anyhow!("stat output could not be parsed"))?
-//                     .parse::<u32>()?);
-//                 let mode = FileMode(
-//                     segments
-//                         .next()
-//                         .ok_or_else(|| anyhow!("stat output could not be parsed"))
-//                         .map(|s| u32::from_str_radix(s, 8))??,
-//                 );
-
-//                 (uid, gid, mode)
-//             };
-
-//             FilePermissions { mode, owner, group }
-//         }
-//         Elevate::No => {
-//             let stat = std::fs::metadata(path)?;
-
-//             FilePermissions {
-//                 mode: FileMode(stat.mode() & 0o6777),
-//                 owner: Uid(stat.uid()),
-//                 group: Gid(stat.gid()),
-//             }
-//         }
-//     };
-
-//     let diff = existing.diff(&perms);
-
-//     if diff.is_empty() {
-//         Ok(Change::Clean)
-//     } else {
-//         match ctx.elevate {
-//             Elevate::Sudo(ref elevate_to) => {
-//                 if let Some(uid) = diff.new_owner {
-//                     cmd(
-//                         &["chown", &uid.to_string(), "--", path.as_str()],
-//                         &ctx.elevate,
-//                     )?;
-//                 }
-//                 if let Some(gid) = diff.new_group {
-//                     cmd(
-//                         &["chgrp", &gid.to_string(), "--", path.as_str()],
-//                         &ctx.elevate,
-//                     )?;
-//                 }
-//                 if let Some(mode) = diff.new_mode {
-//                     cmd(
-//                         &["chmod", &mode.as_oct_string(), "--", path.as_str()],
-//                         &ctx.elevate,
-//                     )?;
-//                 }
-//             }
-//             Elevate::No => {
-//                 if let Some(uid) = diff.new_owner {
-//                     unixfs::chown(path, Some(uid.0), None)?;
-//                 }
-//                 if let Some(gid) = diff.new_group {
-//                     unixfs::chown(path, None, Some(gid.0))?;
-//                 }
-//                 if let Some(mode) = diff.new_mode {
-//                     fs::set_permissions(path, fs::Permissions::from_mode(mode.0))?;
-//                 }
-//             }
-//         }
-//         Ok(Change::Changed(FilePermissionChange { existing, diff }))
-//     }
-// }
-
-// fn file<'content>(
-//     ctx: &Context,
-//     path: &Path,
-//     perms: FilePermissions,
-//     content: File<'content>,
-// ) -> Result<Change<FileChange>> {
-//     let mut tmpfile = tempfile(ctx.cachedir)?;
-
-//     content.write_to(&mut tmpfile)?;
-
-//     let tmpfile_path = tmpfile.path().try_into().expect("utf-8 path");
-
-//     let (checksum_from, checksum_to) = (
-//         checksum_file(tmpfile_path)?.expect("tmpfile to exist"),
-//         checksum_file(path)?,
-//     );
-
-//     match checksum_to {
-//         Some(checksum_to) => {
-//             let content_changed = checksum_from != checksum_to;
-
-//             if content_changed {
-//                 move_file(tmpfile_path, path, &ctx.elevate)?;
-//             }
-
-//             let permission_change = file_permissions(ctx, path, perms)?;
-
-//             if content_changed || permission_change.is_changed() {
-//                 Ok(Change::Changed(FileChange::Changed(FileChangeDetails {
-//                     checksum_change: content_changed.then_some(ChecksumChange {
-//                         from: checksum_from,
-//                         to: checksum_to,
-//                     }),
-//                     permission_change: match permission_change {
-//                         Change::Changed(perms) => Some(perms),
-//                         Change::Clean => None,
-//                     },
-//                 })))
-//             } else {
-//                 Ok(Change::Clean)
-//             }
-//         }
-//         None => {
-//             move_file(tmpfile_path, path, &ctx.elevate)?;
-//             file_permissions(ctx, path, perms)?;
-//             Ok(Change::Changed(FileChange::Created))
-//         }
-//     }
-// }
-
+#[derive(Debug)]
 struct Plan<'a> {
     changes: Vec<Change<'a>>,
 }
@@ -527,8 +320,8 @@ impl<'a> Plan<'a> {
         ctx: &'a Context<'a>,
         action: Box<dyn Plannable<'a> + 'a>,
     ) -> Result<()> {
-        let plan = action.plan(ctx)?;
-        let change = Change { name, status: plan };
+        let status = action.plan(ctx)?;
+        let change = Change { name, status };
         self.changes.push(change);
         Ok(())
     }
@@ -544,9 +337,14 @@ struct PlanFinished<'a> {
     changes: Vec<Change<'a>>,
 }
 
+enum StatusReport {
+    Changes(Vec<String>),
+    Unchanged,
+}
+
 struct Report<'a> {
     name: &'a str,
-    change: &'a ChangeStatus<'a>,
+    change: StatusReport,
 }
 
 struct Reports<'a>(Vec<Report<'a>>);
@@ -554,7 +352,28 @@ struct Reports<'a>(Vec<Report<'a>>);
 impl<'a> Reports<'a> {
     fn print(&'a self) {
         for report in &self.0 {
-            todo!()
+            use owo_colors::OwoColorize;
+            use owo_colors::colors::*;
+
+            match report.change {
+                StatusReport::Changes(ref changes) => {
+                    println!(
+                        "{} {name}",
+                        "Resource [CHANGE]".fg::<Yellow>(),
+                        name = report.name
+                    );
+                    for change in changes {
+                        println!("    > {change}");
+                    }
+                }
+                StatusReport::Unchanged => {
+                    println!(
+                        "{}  {name}",
+                        "Resource [CLEAN]".fg::<Green>(),
+                        name = report.name
+                    );
+                }
+            }
         }
     }
 }
@@ -613,7 +432,7 @@ fn main() -> Result<()> {
     plan.add(
         "pacman multilib",
         &sudo,
-        Box::new(BlockInFile {
+        Box::new(block_in_file::BlockInFile {
             path: Path::new("/etc/pacman.conf"),
             block: &["[multilib]", "Include = /etc/pacman.d/mirrorlist"],
             marker: "# MANAGED multilib",
@@ -621,8 +440,69 @@ fn main() -> Result<()> {
         }),
     )?;
 
+    plan.add(
+        "pacman parallel downloads",
+        &sudo,
+        Box::new(block_in_file::BlockInFile {
+            path: Path::new("/etc/pacman.conf"),
+            block: &["ParallelDownloads = 5"],
+            marker: "# MANAGED parallel downloads",
+            insert_after: Some(Regex::new("\\[options\\]").unwrap()),
+        }),
+    )?;
+
+    plan.add(
+        "pacman cache cleanup service",
+        &sudo,
+        Box::new(file::File {
+            path: Path::new("/etc/systemd/system/pacman-cache-cleanup.service"),
+            permissions: FilePermissions {
+                owner: Uid::root(),
+                group: Gid::root(),
+                mode: FileMode(0o644),
+            },
+            content: FileContent(&[
+                "[Service]",
+                "Type=oneshot",
+                "ExecStart=/bin/sh -c '/usr/bin/paccache -rk1 && /usr/bin/paccache -ruk0'",
+                "RemainAfterExit=true",
+            ]),
+        }),
+    )?;
+
+    plan.add(
+        "pacman cache cleanup timer",
+        &sudo,
+        Box::new(file::File {
+            path: Path::new("/etc/systemd/system/pacman-cache-cleanup.timer"),
+            permissions: FilePermissions {
+                owner: Uid::root(),
+                group: Gid::root(),
+                mode: FileMode(0o644),
+            },
+            content: FileContent(&[
+                "[Timer]",
+                "OnCalendar=daily",
+                "",
+                "[Install]",
+                "WantedBy=multi-user.target",
+            ]),
+        }),
+    )?;
+
+    plan.add(
+        "install pacman-contrib",
+        &sudo,
+        Box::new(package::Packages {
+            install: &["pacman-contrib", "xdot"],
+        }),
+    )?;
+
     let plan = plan.finish();
+
     let report = plan.report();
+    report.print();
+
     let plan = plan.approve();
 
     plan.apply()?;
@@ -632,52 +512,6 @@ fn main() -> Result<()> {
     // if multilib_change.is_changed() {
     //     pacman_refresh_package_database(&with_sudo)?.report("pacman database refresh");
     // }
-
-    // block_in_file(
-    //     &with_sudo,
-    //     Path::new("/etc/pacman.conf"),
-    //     &["ParallelDownloads = 5"],
-    //     "# MANAGED parallel downloads",
-    //     Some(Regex::new("\\[options\\]").unwrap()),
-    // )?
-    // .report("pacman parallel downloads");
-
-    // file(
-    //     &with_sudo,
-    //     Path::new("/etc/systemd/system/pacman-cache-cleanup.service"),
-    //     FilePermissions {
-    //         owner: Uid::root(),
-    //         group: Gid::root(),
-    //         mode: FileMode(0o644),
-    //     },
-    //     File(&[
-    //         "[Service]",
-    //         "Type=oneshot",
-    //         "ExecStart=/bin/sh -c '/usr/bin/paccache -rk1 && /usr/bin/paccache -ruk0'",
-    //         "RemainAfterExit=true",
-    //     ]),
-    // )?
-    // .report("pacman cache cleanup service");
-
-    // file(
-    //     &with_sudo,
-    //     Path::new("/etc/systemd/system/pacman-cache-cleanup.timer"),
-    //     FilePermissions {
-    //         owner: Uid::root(),
-    //         group: Gid::root(),
-    //         mode: FileMode(0o644),
-    //     },
-    //     File(&[
-    //         "[Timer]",
-    //         "OnCalendar=daily",
-    //         "",
-    //         "[Install]",
-    //         "WantedBy=multi-user.target",
-    //     ]),
-    // )?
-    // .report("pacman cache cleanup timer");
-
-    // install_packages(&with_sudo, &["pacman-contrib"])?.report("install pacman-contrib");
 
     Ok(())
 }

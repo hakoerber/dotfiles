@@ -1,0 +1,5 @@
+[32mResource [CLEAN][39m  pacman multilib
+[32mResource [CLEAN][39m  pacman parallel downloads
+[32mResource [CLEAN][39m  pacman cache cleanup service
+[32mResource [CLEAN][39m  pacman cache cleanup timer
+[32mResource [CLEAN][39m  install pacman-contrib
