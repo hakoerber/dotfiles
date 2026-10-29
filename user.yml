@@ -27,7 +27,7 @@
         home: "/home/{{ user.name }}"
         create_home: true
         group: "{{ user.name }}"
-        groups: "{{ ['dotfiles'] + user_groups }}"
+        groups: "{{ user_groups }}"
         shell: /usr/bin/zsh
         skeleton: /dev/null
       become: true
