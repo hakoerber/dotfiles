@@ -7,4 +7,4 @@ ConditionPathExists=%t/features/machine_is_laptop
 Type=oneshot
 ExecStart=/usr/bin/env bash -c 'grep "^LID.*enabled" /proc/acpi/wakeup && echo " LID" | sudo tee /proc/acpi/wakeup || true'
 RemainAfterExit=true
-PassEnvironment=DISPLAY
+PassEnvironment=WAYLAND_DISPLAY

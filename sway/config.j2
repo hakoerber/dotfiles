@@ -1,0 +1,335 @@
+input type:keyboard {
+    xkb_layout "de"
+    xkb_variant "nodeadkeys"
+
+    repeat_delay "{{ user.keyboard.repeat_delay }}"
+    repeat_rate "{{ user.keyboard.repeat_rate }}"
+}
+
+input type:touchpad {
+    tap enabled
+    scroll_method two_finger
+}
+
+################################################################################
+### VARIABLES ##################################################################
+################################################################################
+
+set {
+    # Use the win-key as modifier
+    $mod Mod4
+
+    # The default terminal
+    $terminal "alacritty --config-file ~/.config/alacritty/config.toml"
+    $calc "alacritty --config-file ~/.config/alacritty/config.toml -e $SHELL -i -c calc"
+
+    $scriptdir ~/.config/i3/scripts
+
+    # Keys for the exit mode
+    $key_lock      l
+    $key_logout    e
+    $key_suspend   s
+    $key_hibernate h
+    $key_reboot    r
+    $key_shutdown  Shift+S
+
+    $signal_lock      lock
+    $signal_logout    logout
+    $signal_suspend   suspend
+    $signal_hibernate hibernate
+    $signal_reboot    reboot
+    $signal_shutdown  shutdown
+
+    $workspace1  "1{{ "" if machine.workspace.1 is not defined else ': ' ~ machine.workspace.1 }}"
+    $workspace2  "2{{ "" if machine.workspace.2 is not defined else ': ' ~ machine.workspace.2 }}"
+    $workspace3  "3{{ "" if machine.workspace.3 is not defined else ': ' ~ machine.workspace.3 }}"
+    $workspace4  "4{{ "" if machine.workspace.4 is not defined else ': ' ~ machine.workspace.4 }}"
+    $workspace5  "5{{ "" if machine.workspace.5 is not defined else ': ' ~ machine.workspace.5 }}"
+    $workspace6  "6{{ "" if machine.workspace.6 is not defined else ': ' ~ machine.workspace.6 }}"
+    $workspace7  "7{{ "" if machine.workspace.7 is not defined else ': ' ~ machine.workspace.7 }}"
+    $workspace8  "8{{ "" if machine.workspace.8 is not defined else ': ' ~ machine.workspace.8 }}"
+    $workspace9  "9{{ "" if machine.workspace.9 is not defined else ': ' ~ machine.workspace.9 }}"
+    $workspace10 "10{{ "" if machine.workspace.10 is not defined else ': ' ~ machine.workspace.10 }}"
+
+    $key_workspace1  1
+    $key_workspace2  2
+    $key_workspace3  3
+    $key_workspace4  4
+    $key_workspace5  5
+    $key_workspace6  6
+    $key_workspace7  7
+    $key_workspace8  8
+    $key_workspace9  9
+    $key_workspace10 0
+
+    $left  h
+    $down  j
+    $up    k
+    $right l
+
+    $splith       v
+    $splitv       c
+    $split_toggle x
+
+    $fullscreen f
+
+    $layout_stacking s
+    $layout_tabbed   w
+    $layout_default  e
+
+    $focus_parent q
+    $focus_child  a
+
+    $floating_toggle   Shift+p
+    $focus_mode_toggle p
+
+    $prev_on_output u
+    $next_on_output i
+
+    $workspace_back_and_forth asciicircum
+
+    $pim_toggle Tab
+
+    $reload  Shift+C
+    $restart Shift+R
+
+    $kill Shift+Q
+
+    $screenshot o
+}
+
+################################################################################
+### WORKSPACE ASSIGNMENTS ######################################################
+################################################################################
+
+workspace $workspace1 output {{ machine.screen.1 }}
+workspace $workspace2 output {{ machine.screen.2 }}
+workspace $workspace3 output {{ machine.screen.3 }}
+workspace $workspace4 output {{ machine.screen.4 }}
+workspace $workspace5 output {{ machine.screen.5 }}
+workspace $workspace6 output {{ machine.screen.6 }}
+workspace $workspace7 output {{ machine.screen.7 }}
+workspace $workspace8 output {{ machine.screen.8 }}
+workspace $workspace9 output {{ machine.screen.9 }}
+workspace $workspace10 output {{ machine.screen.0 }}
+
+
+assign [class="^[Ss]team$"] $workspace5
+assign [app_id="^org.keepassxc.KeePassXC$"] $workspace8
+assign [class="^Spotify$"] $workspace9
+
+for_window [shell="xwayland"] title_format "[XWayland] %title"
+
+################################################################################
+### KEYBINDINGS ################################################################
+##################9#############################################################
+
+bindsym {
+    $mod+$kill kill
+
+    $mod+$left  focus left
+    $mod+$down  focus down
+    $mod+$up    focus up
+    $mod+$right focus right
+
+    $mod+Left   focus left
+    $mod+Down   focus down
+    $mod+Up     focus up
+    $mod+Right  focus right
+
+    $mod+Shift+$left  move left
+    $mod+Shift+$down  move down
+    $mod+Shift+$up    move up
+    $mod+Shift+$right move right
+
+    $mod+Shift+Left   move left
+    $mod+Shift+Down   move down
+    $mod+Shift+Up     move up
+    $mod+Shift+Right  move right
+
+    $mod+$splith split h
+    $mod+$splitv split v
+
+    $mod+$fullscreen fullscreen
+
+    $mod+$layout_stacking layout stacking
+    $mod+$layout_tabbed   layout tabbed
+    $mod+$layout_default  layout default
+
+    $mod+$split_toggle layout toggle split
+
+    $mod+$floating_toggle   floating toggle
+    $mod+$focus_mode_toggle focus mode_toggle
+
+    $mod+$focus_parent focus parent
+    $mod+$focus_child  focus child
+
+    $mod+$key_workspace1  workspace $workspace1
+    $mod+$key_workspace2  workspace $workspace2
+    $mod+$key_workspace3  workspace $workspace3
+    $mod+$key_workspace4  workspace $workspace4
+    $mod+$key_workspace5  workspace $workspace5
+    $mod+$key_workspace6  workspace $workspace6
+    $mod+$key_workspace7  workspace $workspace7
+    $mod+$key_workspace8  workspace $workspace8
+    $mod+$key_workspace9  workspace $workspace9
+    $mod+$key_workspace10 workspace $workspace10
+
+    $mod+Shift+$key_workspace1  move container to workspace $workspace1
+    $mod+Shift+$key_workspace2  move container to workspace $workspace2
+    $mod+Shift+$key_workspace3  move container to workspace $workspace3
+    $mod+Shift+$key_workspace4  move container to workspace $workspace4
+    $mod+Shift+$key_workspace5  move container to workspace $workspace5
+    $mod+Shift+$key_workspace6  move container to workspace $workspace6
+    $mod+Shift+$key_workspace7  move container to workspace $workspace7
+    $mod+Shift+$key_workspace8  move container to workspace $workspace8
+    $mod+Shift+$key_workspace9  move container to workspace $workspace9
+    $mod+Shift+$key_workspace10 move container to workspace $workspace10
+
+    $mod+$prev_on_output workspace prev_on_output
+    $mod+$next_on_output workspace next_on_output
+
+    $mod+$workspace_back_and_forth workspace back_and_forth
+
+    $mod+Shift+$prev_on_output move container to workspace prev_on_output
+    $mod+Shift+$next_on_output move container to workspace next_on_output
+
+    $mod+$reload  reload
+    $mod+$restart restart
+
+    ### START APPLICATIONS #####################################################
+
+    $mod+d exec --no-startup-id rofi -show drun -drun-display-format '{name}' -location 0
+
+    $mod+Return       exec $terminal
+    $mod+Shift+Return exec $calc
+
+    $mod+F1 exec --no-startup-id workstation-client power menu
+
+    $mod+$pim_toggle exec --no-startup-id $scriptdir/swap-from-workspace $workspace10
+
+    ### SPECIAL KEYS ###########################################################
+
+    XF86Sleep exec --no-startup-id workstation-client power lock
+
+    XF86AudioMute exec        --no-startup-id workstation-client pulseaudio output toggle
+    XF86AudioRaiseVolume exec --no-startup-id workstation-client pulseaudio output inc
+    XF86AudioLowerVolume exec --no-startup-id workstation-client pulseaudio output dec
+
+    XF86AudioPlay exec --no-startup-id workstation-client spotify toggle
+    XF86AudioNext exec --no-startup-id workstation-client spotify next
+    XF86AudioPrev exec --no-startup-id workstation-client spotify previous
+
+    XF86MonBrightnessUp   exec --no-startup-id workstation-client brightness inc
+    XF86MonBrightnessDown exec --no-startup-id workstation-client brightness dec
+
+    $mod+m     exec --no-startup-id workstation-client pulseaudio input toggle
+    $mod+space exec --no-startup-id workstation-client pulseaudio input toggle
+    KP_Enter   exec --no-startup-id workstation-client pulseaudio input toggle
+}
+
+mode "resize" {
+        bindsym $left  resize shrink width  5 px or 5 ppt
+        bindsym $down  resize grow   height 5 px or 5 ppt
+        bindsym $up    resize shrink height 5 px or 5 ppt
+        bindsym $right resize grow   width  5 px or 5 ppt
+
+        bindsym Return mode "default"
+        bindsym Escape mode "default"
+}
+bindsym $mod+r mode "resize"
+
+################################################################################
+### GENERAL SETUP ##############################################################
+################################################################################
+
+default_border pixel 1
+
+# Default orientation for new workspaces will be derived from aspect ratio
+default_orientation auto
+
+# New containers will start in tiling mode
+workspace_layout default
+
+default_floating_border normal 1
+
+hide_edge_borders smart
+
+focus_follows_mouse yes
+mouse_warping output
+
+# Only map a popup in fullscreen mode if it belongs to the fullscreen window
+# <smart|ignore|leave_fullscreen>
+popup_during_fullscreen leave_fullscreen
+
+# Do not always wrap but change to a container on the same level instead
+focus_wrapping force
+
+# Hit the current workspace button again to return to the previous workspace
+workspace_auto_back_and_forth yes
+
+# Draw a window as urgent when switching to its workspace, even if focused, for
+# 500 ms
+force_display_urgency_hint 500 ms
+
+show_marks yes
+
+# Use Mouse+$mod to drag floating windows to their wanted position
+floating_modifier $mod
+
+floating_minimum_size 0 x 0
+floating_maximum_size 0 x 0
+
+font pango:JetBrainsMono {{ machine.font_size }}
+
+################################################################################
+### COLOR SETTINGS #############################################################
+################################################################################
+
+# class                 border  backgr. text    indicator
+client.focused          #e5b567 #e5b567 #000000 #FF0000
+client.focused_inactive #272822 #5f676a #ffffff #484e50
+client.unfocused        #1C1C1C #272822 #cccccc #292d2e
+client.urgent           #272822 #ff7777 #000000 #900000
+
+##############################################################################
+### BARS #######################################################################
+################################################################################
+
+bar {
+    mode dock
+    position bottom
+
+    tray_padding 2
+    tray_output *
+
+    strip_workspace_numbers no
+
+    binding_mode_indicator yes
+
+    workspace_buttons yes
+
+    id bar-0
+
+    font pango:JetBrainsMono, FontAwesome {{ machine.font_size }}
+
+    colors {
+        background #272822
+        statusline #ffffff
+        separator #555555
+
+        focused_separator #e5b567
+        focused_background #272822
+
+        #                  border  bg      text
+        focused_workspace  #e5b567 #4f676a #ffffff
+        active_workspace   #272822 #4f676a #ffffff
+        inactive_workspace #272822 #272822 #dddddd
+        urgent_workspace   #272822 #ff7777 #272822
+        binding_mode       #272822 #e5b567 #272822
+    }
+
+    status_command i3status-rs ~/.config/i3status-rust/config.toml
+}
+
+exec "systemctl --user import-environment WAYLAND_DISPLAY DISPLAY SWAYSOCK ; systemctl --user start autostart.target"

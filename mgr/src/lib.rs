@@ -7,10 +7,10 @@ pub(crate) mod dirs;
 pub mod dmenu;
 pub(crate) mod dunst;
 pub(crate) mod env;
+pub(crate) mod gammastep;
 pub mod power;
 pub mod present;
 pub(crate) mod pulseaudio;
-pub(crate) mod redshift;
 pub(crate) mod sleep;
 pub(crate) mod spotify;
 pub(crate) mod systemd;
@@ -31,7 +31,7 @@ pub enum ExecError {
     #[error(transparent)]
     Spotify(#[from] spotify::Error),
     #[error(transparent)]
-    Redshift(#[from] redshift::Error),
+    Gammastep(#[from] gammastep::Error),
     #[error(transparent)]
     Weather(#[from] weather::Error),
     #[error(transparent)]
@@ -49,7 +49,7 @@ pub enum Action {
     Pulseaudio(pulseaudio::Action),
     Theme(theme::Action),
     Spotify(spotify::Action),
-    Redshift(redshift::Action),
+    Gammastep(gammastep::Action),
     Weather(weather::Action),
     Brightness(brightness::Action),
     Sleep(sleep::Action),
@@ -63,7 +63,7 @@ impl wire::WireCommand for Action {
             0x03 => Ok(Self::Pulseaudio(pulseaudio::Action::parse_wire(input)?)),
             0x04 => Ok(Self::Theme(theme::Action::parse_wire(input)?)),
             0x05 => Ok(Self::Spotify(spotify::Action::parse_wire(input)?)),
-            0x06 => Ok(Self::Redshift(redshift::Action::parse_wire(input)?)),
+            0x06 => Ok(Self::Gammastep(gammastep::Action::parse_wire(input)?)),
             0x07 => Ok(Self::Weather(weather::Action::parse_wire(input)?)),
             0x08 => Ok(Self::Brightness(brightness::Action::parse_wire(input)?)),
             0x09 => Ok(Self::Sleep(sleep::Action::parse_wire(input)?)),
@@ -98,7 +98,7 @@ impl wire::WireCommand for Action {
                 v.extend_from_slice(&action.to_wire());
                 v
             }
-            Self::Redshift(action) => {
+            Self::Gammastep(action) => {
                 let mut v = vec![0x06];
                 v.extend_from_slice(&action.to_wire());
                 v
@@ -155,9 +155,11 @@ impl cli::CliCommand for Action {
                 let choice = rest.next().ok_or(cli::ParseError::MissingAction)?;
                 Ok(Self::Spotify(spotify::Action::parse_str(&choice, rest)?))
             }
-            "redshift" => {
+            "gammastep" => {
                 let choice = rest.next().ok_or(cli::ParseError::MissingAction)?;
-                Ok(Self::Redshift(redshift::Action::parse_str(&choice, rest)?))
+                Ok(Self::Gammastep(gammastep::Action::parse_str(
+                    &choice, rest,
+                )?))
             }
             "weather" => {
                 let choice = rest.next().ok_or(cli::ParseError::MissingAction)?;
@@ -196,7 +198,7 @@ impl Exec for Action {
             Self::Pulseaudio(action) => Ok(action.execute()?),
             Self::Theme(action) => Ok(action.execute()?),
             Self::Spotify(action) => Ok(action.execute()?),
-            Self::Redshift(action) => Ok(action.execute()?),
+            Self::Gammastep(action) => Ok(action.execute()?),
             Self::Weather(action) => Ok(action.execute()?),
             Self::Brightness(action) => Ok(action.execute()?),
             Self::Sleep(action) => Ok(action.execute()?),

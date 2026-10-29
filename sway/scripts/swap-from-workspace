@@ -9,7 +9,7 @@ cmds=()
 
 workspacescratch="${1}"
 
-i3msgworkspaces="$(i3-msg -t get_workspaces)"
+i3msgworkspaces="$(swaymsg -rt get_workspaces)"
 
 output_of_pim=$(printf '%s' "${i3msgworkspaces}" | jq -r 'map(select(.name == "'"${workspacescratch}"'")) | .[0].output')
 
@@ -56,4 +56,4 @@ i3msgcmd=""
 for cmd in "${cmds[@]}"; do
     i3msgcmd="${i3msgcmd}${cmd};"
 done
-i3-msg "${i3msgcmd}"
+swaymsg "${i3msgcmd}"

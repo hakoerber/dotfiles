@@ -5,7 +5,7 @@ use thiserror::Error;
 use super::{
     Exec,
     cli::{self, CliCommand},
-    cmd, dirs, dunst, redshift, spotify,
+    cmd, dirs, dunst, gammastep, spotify,
     wire::{WireCommand, server},
 };
 
@@ -24,7 +24,7 @@ pub enum Error {
     #[error(transparent)]
     Cmd(#[from] cmd::Error),
     #[error(transparent)]
-    Redshift(#[from] redshift::Error),
+    Gammastep(#[from] gammastep::Error),
     #[error(transparent)]
     Spotify(#[from] spotify::Error),
 }
@@ -79,7 +79,7 @@ fn status() -> Result<Status, Error> {
 fn on() -> Result<(), Error> {
     drop(fs::File::create(status_file()?)?);
     dunst::set_status(dunst::Status::Paused)?;
-    redshift::set(redshift::Status::Off)?;
+    gammastep::set(gammastep::Status::Off)?;
     spotify::set(spotify::Status::Off)?;
     Ok(())
 }
@@ -87,7 +87,7 @@ fn on() -> Result<(), Error> {
 fn off() -> Result<(), Error> {
     fs::remove_file(status_file()?)?;
     dunst::set_status(dunst::Status::Unpaused)?;
-    redshift::set(redshift::Status::On)?;
+    gammastep::set(gammastep::Status::On)?;
     spotify::set(spotify::Status::On)?;
     Ok(())
 }

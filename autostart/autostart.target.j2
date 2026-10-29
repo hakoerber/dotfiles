@@ -2,7 +2,6 @@
 BindsTo=windowmanager.target
 After=windowmanager.target
 
-Wants=dpms.service
 Wants=dunst.service
 {% for profile, config in (user.firefox_profiles|default({})).items() %}
 {% if config.bigger_font|default(false) is sameas false %}
@@ -17,19 +16,14 @@ Wants=firefox-gtk-override-bigger-font@{{ profile }}.service
 Wants=gpg-agent.service
 Wants=gnome-keyring.service
 Wants=keepassxc.service
-Wants=keyboard.service
 Wants=laptop-lid.service
 Wants=nextcloud.service
-Wants=nm-applet.service
-Wants=pasystray.service
-Wants=redshift.service
+Wants=nm-sidebar.service
+Wants=gammastep.service
 Wants=spotify.service
 Wants=steam.service
-Wants=touchpad.service
-Wants=xresources.service
 Wants=yubikey-touch-detector.service
 Wants=kdeconnect.service
 Wants=color-theme-dark.service
 Wants=workstation-mgr.service
 Wants=screencfg.service
-Wants=snixembed.service

@@ -4,5 +4,5 @@ After=windowmanager.target
 
 [Service]
 ExecStart=/usr/bin/env firefox --profile %h/.mozilla/firefox/profile-%i
-PassEnvironment=DISPLAY
+PassEnvironment=WAYLAND_DISPLAY
 Restart=always

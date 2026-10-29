@@ -4,5 +4,5 @@ After=windowmanager.target
 
 [Service]
 ExecStart=/usr/bin/env spotify --audio-api=pulseaudio
-PassEnvironment=DISPLAY
+PassEnvironment=WAYLAND_DISPLAY
 Restart=always

@@ -1,9 +1,0 @@
-[Unit]
-BindsTo=autostart.target
-After=windowmanager.target
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/env xrdb -merge -I%h %h/.config/Xresources
-RemainAfterExit=true
-PassEnvironment=DISPLAY

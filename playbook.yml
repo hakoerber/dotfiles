@@ -183,6 +183,7 @@
               - name: slack-desktop
               - name: claude-code
               - name: cargo-lambda-bin
+              - name: nm-sidebar
               - name: portfolio-performance-bin
                 preexec: |
                   #!/usr/bin/env bash
@@ -711,21 +712,6 @@
                   ansible.builtin.package:
                     name: "{{ drivers.gpu.amd }}"
                     state: present
-                  become: true
-
-                - name: Set AMDGPU options
-                  ansible.builtin.copy:
-                    owner: root
-                    group: root
-                    mode: "0600"
-                    dest: /etc/X11/xorg.conf.d/20-amdgpu.conf
-                    content: |
-                      Section "Device"
-                          Identifier "AMD"
-                          Driver "amdgpu"
-                          Option "VariableRefresh" "true"
-                          Option "TearFree" "true"
-                      EndSection
                   become: true
 
             - name: Nvidia configuration
