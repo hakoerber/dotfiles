@@ -176,9 +176,6 @@
 
         - ansible.builtin.set_fact:
             aur_packages:
-              # local packages:
-              - name: workstation-mgr
-
               - name: nodejs-intelephense
               - name: terraform-ls-bin
               - name: grm
