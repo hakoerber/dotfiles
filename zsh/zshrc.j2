@@ -1,9 +1,9 @@
-{% if user.gpg_agent %}
+{% if user.gpg.agent_enabled %}
 export GPG_TTY=$(tty)
 export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
 {% endif %}
 
-{% if user.ssh_agent %}
+{% if user.ssh_agent_enabled %}
 if ! pgrep -u "$USER" ssh-agent > /dev/null ; then
     ssh-agent > "$XDG_RUNTIME_DIR/ssh-agent.env"
 fi

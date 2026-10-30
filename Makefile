@@ -4,10 +4,10 @@
 # iptables, for example
 export LC_ALL = en_US.UTF-8
 
-ansible_run = ansible-playbook --inventory localhost, --diff ./playbook.yml ${ANSIBLE_EXTRA_ARGS}
+ansible_run = ansible-playbook --inventory localhost, --diff ./aur.yml ${ANSIBLE_EXTRA_ARGS}
 
-.PHONY: config
-config:
+.PHONY: aur
+aur:
 	$(ansible_run)
 
 .PHONY: fmt

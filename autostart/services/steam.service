@@ -2,8 +2,6 @@
 BindsTo=autostart.target
 After=windowmanager.target
 
-ConditionPathExists=%t/features/steam
-
 [Service]
 ExecStart=/usr/bin/env steam
 PassEnvironment=WAYLAND_DISPLAY

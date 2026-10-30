@@ -3,8 +3,6 @@ BindsTo=autostart.target
 After=windowmanager.target
 After=gnome-keyring.service
 
-ConditionPathExists=%t/features/nextcloud
-
 [Service]
 ExecStart=/usr/bin/env nextcloud --background
 PassEnvironment=WAYLAND_DISPLAY
