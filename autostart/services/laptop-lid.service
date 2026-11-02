@@ -1,7 +1,6 @@
 [Unit]
 BindsTo=autostart.target
 After=windowmanager.target
-ConditionPathExists=%t/features/machine_is_laptop
 
 [Service]
 Type=oneshot
