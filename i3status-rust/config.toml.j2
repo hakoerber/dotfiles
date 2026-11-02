@@ -18,11 +18,13 @@ critical_fg = "#000000"
 critical_bg = "#F92672"
 end_separator = ""
 
+{% if not is_tv %}
 [[block]]
 block = "music"
 player = "spotify"
 separator = " — "
 format = " $icon  {$combo $prev $play $next|-} "
+{% endif %}
 
 [[block]]
 block = "sound"
@@ -39,6 +41,7 @@ update = true
 button = "right"
 cmd = "pavucontrol-qt"
 
+{% if not is_tv %}
 [[block]]
 block = "sound"
 driver = "pulseaudio"
@@ -55,14 +58,18 @@ idle_bg = { link = "warning_bg" }
 button = "left"
 cmd = "workstation-client pulseaudio input toggle"
 update = true
+{% endif %}
 
+{% if is_laptop %}
 [[block]]
 block = "battery"
 interval = 10
 format = " $icon $percentage $time "
 charging_format = " $icon $percentage "
 missing_format = ""
+{% endif %}
 
+{% if not is_tv %}
 [[block]]
 block = "toggle"
 format = "   $icon "
@@ -85,7 +92,9 @@ command_on = "workstation-client gammastep start"
 command_off = "workstation-client gammastep stop"
 command_state = "[[ $(workstation-client gammastep status) == active ]] && echo 1"
 signal = 0
+{% endif %}
 
+{% if not is_tv %}
 [[block]]
 block = "toggle"
 format = "   $icon "
@@ -93,6 +102,7 @@ command_on = "workstation-client spotify start"
 command_off = "workstation-client spotify stop"
 command_state = "[[ $(workstation-client spotify status) == active ]] && echo 1"
 signal = 0
+{% endif %}
 
 [[block]]
 block = "custom"
@@ -101,7 +111,7 @@ command = "ping -n -q -w 2 -c 1 8.8.8.8 >/dev/null 2>/dev/null && printf '{\"tex
 
 [[block]]
 block = "net"
-format = " $icon " 
+format = " $icon "
 
 [[block.click]]
 button = "left"

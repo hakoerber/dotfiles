@@ -173,8 +173,8 @@ fn lock() -> Result<cmd::Command<'static>, Error> {
         &[
             "--ignore-empty-password",
             "--show-failed-attempts",
-            "--color",
-            "000000",
+            "--image",
+            "~/.local/share/wallpaper.jpg",
         ],
     )?;
 
