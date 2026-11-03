@@ -633,7 +633,7 @@ fn autoupdate<'elevate: 'action, 'action>(
                     set -o nounset
                     set -o pipefail
 
-                    # Prevent failures when not battery present
+                    # Prevent failures when no battery present
                     shopt -s nullglob
 
                     for battery in /sys/class/power_supply/*/capacity ; do
