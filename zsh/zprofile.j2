@@ -41,8 +41,6 @@ export SQLITE_HISTORY=$XDG_STATE_HOME/sqlite_history
 export KUBECONFIG="$XDG_CONFIG_HOME/kube"
 export KUBECACHEDIR="$XDG_CACHE_HOME/kube"
 
-export PATH="$PATH:$(go env GOPATH)/bin"
-
 export QT_QPA_PLATFORMTHEME=KDE
 
 export PASSWORD_STORE_DIR="$HOME/.password-store"
@@ -84,25 +82,6 @@ export TG_PROVIDER_CACHE=1
 export HISTFILE="$XDG_STATE_HOME"/bash_history
 
 umask 0022
-
-{% set env = machine.environment | combine(user.environment) %}
-{% for k, v in env.items() %}
-export {{ k }}="{{ v }}"
-{% endfor %}
-
-feature_dir="${XDG_RUNTIME_DIR}/features/"
-rm -rf "${feature_dir}"/
-mkdir -p "${feature_dir}"
-
-[[ $MACHINE_HAS_NEXTCLOUD == "true" ]] && touch "${feature_dir}"/nextcloud
-[[ $MACHINE_HAS_KEEPASSXC == "true" ]] && touch "${feature_dir}"/keepassxc
-[[ $MACHINE_HAS_STEAM     == "true" ]] && touch "${feature_dir}"/steam
-
-[[ $MACHINE_TYPE == "laptop" ]] && touch "${feature_dir}"/machine_is_laptop
-
-{% if user.gpg_agent %}
-touch "${feature_dir}"/gpg_agent
-{% endif %}
 
 # Make all set environment variables also usable in the systemd user instance.
 # `systemctl --user import-environment` without any variables is deprecated, so
