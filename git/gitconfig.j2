@@ -8,7 +8,7 @@
     unmodify = "checkout --"
     ignore-changes = "update-index --assume-unchangend"
     unignore-changes = "update-index --no-assume-unchanged"
-    visual = "!gitk --all"
+    visual = "!qgit --all"
     staged = "diff --staged"
 
     fe = "fetch --all --prune"
@@ -29,7 +29,7 @@
     pa = "pushall"
     paf = "pushall --force"
 
-    k = "!gitk --all"
+    k = "!qgit --all"
 
     serve = !git daemon --reuseaddr --verbose --base-path=. --export-all ./.git
 
@@ -67,6 +67,7 @@
     whitespace = "blank-at-eol,space-before-tab,blank-at-eof"
     abbrev = 8
     pager = delta
+    excludesfile = ~/.config/git/ignore
 [interactive]
     diffFilter = delta --color-only
 [color]

@@ -23,8 +23,6 @@ set {
     $terminal "alacritty --config-file ~/.config/alacritty/config.toml"
     $calc "alacritty --config-file ~/.config/alacritty/config.toml -e $SHELL -i -c calc"
 
-    $scriptdir ~/.config/i3/scripts
-
     # Keys for the exit mode
     $key_lock      l
     $key_logout    e
@@ -40,16 +38,16 @@ set {
     $signal_reboot    reboot
     $signal_shutdown  shutdown
 
-    $workspace1 "1{{ "" if not machine.workspace.num1 else ': ' ~ machine.workspace.num1 }}"
-    $workspace2 "2{{ "" if not machine.workspace.num2 else ': ' ~ machine.workspace.num2 }}"
-    $workspace3 "3{{ "" if not machine.workspace.num3 else ': ' ~ machine.workspace.num3 }}"
-    $workspace4 "4{{ "" if not machine.workspace.num4 else ': ' ~ machine.workspace.num4 }}"
-    $workspace5 "5{{ "" if not machine.workspace.num5 else ': ' ~ machine.workspace.num5 }}"
-    $workspace6 "6{{ "" if not machine.workspace.num6 else ': ' ~ machine.workspace.num6 }}"
-    $workspace7 "7{{ "" if not machine.workspace.num7 else ': ' ~ machine.workspace.num7 }}"
-    $workspace8 "8{{ "" if not machine.workspace.num8 else ': ' ~ machine.workspace.num8 }}"
-    $workspace9 "9{{ "" if not machine.workspace.num9 else ': ' ~ machine.workspace.num9 }}"
-    $workspace0 "0{{ "" if not machine.workspace.num0 else ': ' ~ machine.workspace.num0 }}"
+    $workspace1  "1{{ "" if not machine.workspace.num1 else ': ' ~ machine.workspace.num1 }}"
+    $workspace2  "2{{ "" if not machine.workspace.num2 else ': ' ~ machine.workspace.num2 }}"
+    $workspace3  "3{{ "" if not machine.workspace.num3 else ': ' ~ machine.workspace.num3 }}"
+    $workspace4  "4{{ "" if not machine.workspace.num4 else ': ' ~ machine.workspace.num4 }}"
+    $workspace5  "5{{ "" if not machine.workspace.num5 else ': ' ~ machine.workspace.num5 }}"
+    $workspace6  "6{{ "" if not machine.workspace.num6 else ': ' ~ machine.workspace.num6 }}"
+    $workspace7  "7{{ "" if not machine.workspace.num7 else ': ' ~ machine.workspace.num7 }}"
+    $workspace8  "8{{ "" if not machine.workspace.num8 else ': ' ~ machine.workspace.num8 }}"
+    $workspace9  "9{{ "" if not machine.workspace.num9 else ': ' ~ machine.workspace.num9 }}"
+    $workspace0 "10{{ "" if not machine.workspace.num0 else ': ' ~ machine.workspace.num0 }}"
 
     $key_workspace1 1
     $key_workspace2 2
@@ -87,8 +85,6 @@ set {
     $next_on_output i
 
     $workspace_back_and_forth asciicircum
-
-    $pim_toggle Tab
 
     $reload  Shift+C
     $restart Shift+R
@@ -194,7 +190,7 @@ bindsym {
 
     $mod+F1 exec --no-startup-id workstation-client power menu
 
-    $mod+$pim_toggle exec --no-startup-id $scriptdir/swap-from-workspace $workspace0
+    $mod+Tab exec --no-startup-id python ~/.config/sway/scripts/swap-from-workspace.py 10
 
     ### SPECIAL KEYS ###########################################################
 

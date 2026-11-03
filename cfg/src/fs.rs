@@ -209,7 +209,7 @@ pub(crate) fn stat(elevate: &Elevate, path: &Path) -> Result<Option<Stat>> {
             let entry_type = u16::from_str_radix(entry_type, 16)?;
 
             // top 4 bits indicate file type
-            let entry_type = match (entry_type & 0xF000) >> 12 {
+            let entry_type = match (entry_type & 0xF000) >> 12_u16 {
                 0b1100 => bail!("sockets unsupported"),
                 0b1010 => EntryType::Symlink,
                 0b1000 => EntryType::File,

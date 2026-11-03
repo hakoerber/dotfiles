@@ -91,7 +91,7 @@ const PACKAGES: PackageConfig = PackageConfig(&[
     ("font-libertine", &["otf-libertinus"]),
     ("font-awesome", &["woff2-font-awesome"]),
     ("font-noto", &["noto-fonts"]),
-    ("git", &["git", "tk", "git-delta", "git-filter-repo"]),
+    ("git", &["git", "qgit", "git-delta", "git-filter-repo"]),
     ("htop", &["htop"]),
     ("feh", &["feh"]),
     ("neovim", &["neovim", "python-pynvim"]),
@@ -130,7 +130,13 @@ const PACKAGES: PackageConfig = PackageConfig(&[
             "edk2-ovmf",
         ],
     ),
-    ("firefox", &["firefox"]),
+    (
+        "firefox",
+        &[
+            "firefox",
+            "pipewire-media-session", // required for screensharing in wayland
+        ],
+    ),
     ("ranger", &["ranger"]),
     ("thunar", &["thunar"]),
     (
@@ -3000,6 +3006,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
         (".config/git", None),
         (".config/tmux", None),
         (".config/sway", None),
+        (".config/sway/scripts", None),
         (".config/zsh", None),
         (".config/alacritty", None),
         (".local/state/", None),
@@ -3177,6 +3184,18 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
         (
             ".local/state/cargo/config.toml",
             include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../cargo/config.toml")).as_slice(),
+        ),
+        (
+            ".config/git/ignore",
+            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../git/ignore")).as_slice(),
+        ),
+        (
+            ".config/sway/scripts/swap-from-workspace.py",
+            include_bytes!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../sway/scripts/swap-from-workspace.py"
+            ))
+            .as_slice(),
         ),
     ] {
         plan.add(
@@ -3968,7 +3987,7 @@ fn configure_tracing(level: tracing::Level) -> impl tracing::Subscriber {
         .finish()
 }
 
-fn private_user(autologin: bool, vt: usize, name: String) -> UserConfig {
+fn private_user(autologin: bool, vt: usize, name: String, steam: FeatureState) -> UserConfig {
     UserConfig {
         autologin,
         vt,
@@ -3988,7 +4007,7 @@ fn private_user(autologin: bool, vt: usize, name: String) -> UserConfig {
             gpg_agent_for_ssh: true,
         }),
         nextcloud: FeatureState::Enabled,
-        steam: FeatureState::Enabled,
+        steam,
         keepassxc: FeatureState::Disabled,
         firefox: FirefoxUserConfig {
             profiles: vec![FirefoxProfile {
@@ -4151,11 +4170,27 @@ fn main() -> Result<()> {
         },
         users: match args.hostname {
             Neptune => vec![
-                private_user(true, 2, "hannes-private".to_owned()),
+                private_user(true, 2, "hannes-private".to_owned(), FeatureState::Disabled),
                 work_user,
             ],
-            Ares | Dionysus => vec![private_user(true, 1, "hannes".to_owned())],
-            Hera => vec![private_user(false, 1, "hannes".to_owned())],
+            Ares => vec![private_user(
+                true,
+                1,
+                "hannes".to_owned(),
+                FeatureState::Enabled,
+            )],
+            Dionysus => vec![private_user(
+                true,
+                1,
+                "hannes".to_owned(),
+                FeatureState::Disabled,
+            )],
+            Hera => vec![private_user(
+                false,
+                1,
+                "hannes".to_owned(),
+                FeatureState::Disabled,
+            )],
         }
         .into_iter()
         .map(|user| {
