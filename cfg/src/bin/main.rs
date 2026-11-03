@@ -3992,16 +3992,29 @@ fn configure_tracing(level: tracing::Level) -> impl tracing::Subscriber {
         .finish()
 }
 
-fn private_user(autologin: bool, vt: usize, name: String, steam: FeatureState) -> UserConfig {
+fn private_user(
+    autologin: bool,
+    vt: usize,
+    name: String,
+    steam: FeatureState,
+    machine: &MachineConfig,
+) -> UserConfig {
     UserConfig {
         autologin,
         vt,
         name,
         fullname: "Hannes Körber".to_owned(),
         mail: "hannes@hkoerber.de".to_owned(),
-        keyboard: UserKeyboardConfig {
-            repeat_delay: 150,
-            repeat_rate: 50,
+        keyboard: if machine.machine_type == Tv {
+            UserKeyboardConfig {
+                repeat_delay: 1000,
+                repeat_rate: 10,
+            }
+        } else {
+            UserKeyboardConfig {
+                repeat_delay: 150,
+                repeat_rate: 50,
+            }
         },
         ssh_agent_enabled: false,
         gpg: Some(UserGpgConfig {
@@ -4090,128 +4103,138 @@ fn main() -> Result<()> {
         },
     };
 
-    let config = Config {
-        machine: match args.hostname {
-            Neptune => MachineConfig {
-                encrypted_root: true,
-                boot_target: Target::MultiUser,
-                cpu: Cpu::Intel,
-                gpu: Gpu::Nvidia,
-                font_size: 11,
-                workspace: WorkspaceConfig {
-                    num1: Some("".to_owned()),
-                    num2: Some("".to_owned()),
-                    num3: Some("".to_owned()),
-                    num4: Some("".to_owned()),
-                    num5: None,
-                    num6: None,
-                    num7: Some("".to_owned()),
-                    num8: Some("".to_owned()),
-                    num9: Some("".to_owned()),
-                    num0: Some("".to_owned()),
-                },
-                machine_type: Laptop,
+    let machine = match args.hostname {
+        Neptune => MachineConfig {
+            encrypted_root: true,
+            boot_target: Target::MultiUser,
+            cpu: Cpu::Intel,
+            gpu: Gpu::Nvidia,
+            font_size: 11,
+            workspace: WorkspaceConfig {
+                num1: Some("".to_owned()),
+                num2: Some("".to_owned()),
+                num3: Some("".to_owned()),
+                num4: Some("".to_owned()),
+                num5: None,
+                num6: None,
+                num7: Some("".to_owned()),
+                num8: Some("".to_owned()),
+                num9: Some("".to_owned()),
+                num0: Some("".to_owned()),
             },
-            Ares => MachineConfig {
-                encrypted_root: true,
-                boot_target: Target::MultiUser,
-                cpu: Cpu::Amd,
-                gpu: Gpu::Amd,
-                font_size: 10,
-                workspace: WorkspaceConfig {
-                    num1: Some("".to_owned()),
-                    num2: None,
-                    num3: None,
-                    num4: None,
-                    num5: None,
-                    num6: None,
-                    num7: None,
-                    num8: None,
-                    num9: Some("".to_owned()),
-                    num0: Some("".to_owned()),
-                },
-                machine_type: Workstation,
-            },
-            Hera => MachineConfig {
-                encrypted_root: false,
-                boot_target: Target::Graphical,
-                cpu: Cpu::Intel,
-                gpu: Gpu::Intel,
-                font_size: 11,
-                workspace: WorkspaceConfig {
-                    num1: Some("".to_owned()),
-                    num2: Some("".to_owned()),
-                    num3: Some("".to_owned()),
-                    num4: Some("".to_owned()),
-                    num5: None,
-                    num6: None,
-                    num7: Some("".to_owned()),
-                    num8: Some("".to_owned()),
-                    num9: Some("".to_owned()),
-                    num0: Some("".to_owned()),
-                },
-                machine_type: Laptop,
-            },
-            Dionysus => MachineConfig {
-                encrypted_root: true,
-                boot_target: Target::MultiUser,
-                cpu: Cpu::Intel,
-                gpu: Gpu::Intel,
-                font_size: 11,
-                workspace: WorkspaceConfig {
-                    num1: Some("".to_owned()),
-                    num2: Some("".to_owned()),
-                    num3: Some("".to_owned()),
-                    num4: None,
-                    num5: None,
-                    num6: None,
-                    num7: None,
-                    num8: None,
-                    num9: None,
-                    num0: None,
-                },
-                machine_type: Laptop,
-            },
+            machine_type: Laptop,
         },
-        users: match args.hostname {
-            Neptune => vec![
-                private_user(true, 2, "hannes-private".to_owned(), FeatureState::Disabled),
-                work_user,
-            ],
-            Ares => vec![private_user(
-                true,
-                1,
-                "hannes".to_owned(),
-                FeatureState::Enabled,
-            )],
-            Dionysus => vec![private_user(
-                true,
-                1,
-                "hannes".to_owned(),
-                FeatureState::Disabled,
-            )],
-            Hera => vec![private_user(
-                false,
-                1,
-                "hannes".to_owned(),
-                FeatureState::Disabled,
-            )],
-        }
-        .into_iter()
-        .map(|user| {
-            (
-                match running_user.as_str() {
-                    "root" => Elevate::No,
-                    name if name == user.name => Elevate::No,
-                    other => Elevate::Sudo(ElevateTo::User {
-                        user: user.name.clone(),
-                    }),
-                },
-                user,
-            )
-        })
-        .collect(),
+        Ares => MachineConfig {
+            encrypted_root: true,
+            boot_target: Target::MultiUser,
+            cpu: Cpu::Amd,
+            gpu: Gpu::Amd,
+            font_size: 10,
+            workspace: WorkspaceConfig {
+                num1: Some("".to_owned()),
+                num2: None,
+                num3: None,
+                num4: None,
+                num5: None,
+                num6: None,
+                num7: None,
+                num8: None,
+                num9: Some("".to_owned()),
+                num0: Some("".to_owned()),
+            },
+            machine_type: Workstation,
+        },
+        Hera => MachineConfig {
+            encrypted_root: false,
+            boot_target: Target::Graphical,
+            cpu: Cpu::Intel,
+            gpu: Gpu::Intel,
+            font_size: 11,
+            workspace: WorkspaceConfig {
+                num1: Some("".to_owned()),
+                num2: Some("".to_owned()),
+                num3: Some("".to_owned()),
+                num4: Some("".to_owned()),
+                num5: None,
+                num6: None,
+                num7: Some("".to_owned()),
+                num8: Some("".to_owned()),
+                num9: Some("".to_owned()),
+                num0: Some("".to_owned()),
+            },
+            machine_type: Laptop,
+        },
+        Dionysus => MachineConfig {
+            encrypted_root: true,
+            boot_target: Target::MultiUser,
+            cpu: Cpu::Intel,
+            gpu: Gpu::Intel,
+            font_size: 11,
+            workspace: WorkspaceConfig {
+                num1: Some("".to_owned()),
+                num2: Some("".to_owned()),
+                num3: Some("".to_owned()),
+                num4: None,
+                num5: None,
+                num6: None,
+                num7: None,
+                num8: None,
+                num9: None,
+                num0: None,
+            },
+            machine_type: Laptop,
+        },
     };
+
+    let users = match args.hostname {
+        Neptune => vec![
+            private_user(
+                true,
+                2,
+                "hannes-private".to_owned(),
+                FeatureState::Disabled,
+                &machine,
+            ),
+            work_user,
+        ],
+        Ares => vec![private_user(
+            true,
+            1,
+            "hannes".to_owned(),
+            FeatureState::Enabled,
+            &machine,
+        )],
+        Dionysus => vec![private_user(
+            true,
+            1,
+            "hannes".to_owned(),
+            FeatureState::Disabled,
+            &machine,
+        )],
+        Hera => vec![private_user(
+            false,
+            1,
+            "hannes".to_owned(),
+            FeatureState::Disabled,
+            &machine,
+        )],
+    }
+    .into_iter()
+    .map(|user| {
+        (
+            match running_user.as_str() {
+                "root" => Elevate::No,
+                name if name == user.name => Elevate::No,
+                other => Elevate::Sudo(ElevateTo::User {
+                    user: user.name.clone(),
+                }),
+            },
+            user,
+        )
+    })
+    .collect();
+
+    let config = Config { machine, users };
 
     let mut plan = Plan::new();
 
