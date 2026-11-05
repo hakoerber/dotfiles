@@ -84,6 +84,7 @@ impl Reporter for PackageDatabaseRefreshPlan<'_> {
 pub enum InstallReason {
     Explicit,
     Dependency,
+    DependencyIfInstalling,
 }
 
 #[derive(Debug)]
@@ -138,6 +139,9 @@ impl<'change> Plannable<'change> for Packages<'change> {
                     }
                 }
             }
+            InstallReason::DependencyIfInstalling => {
+                // in this case, we retain the current setting, except when we install new
+            }
         }
 
         if !install.is_empty() || !set_reason.is_empty() {
@@ -182,7 +186,9 @@ impl Applyable for PackagePlan<'_> {
                     "--database",
                     match self.args.reason {
                         InstallReason::Explicit => "--asexplicit",
-                        InstallReason::Dependency => "--asdeps",
+                        InstallReason::Dependency | InstallReason::DependencyIfInstalling => {
+                            "--asdeps"
+                        }
                     },
                     "--",
                 ]
@@ -210,7 +216,8 @@ impl Reporter for PackagePlan<'_> {
                 name = package.as_ref(),
                 message = match self.args.reason {
                     InstallReason::Explicit => "explicitly installed",
-                    InstallReason::Dependency => "installed as dependency",
+                    InstallReason::Dependency | InstallReason::DependencyIfInstalling =>
+                        "installed as dependency",
                 }
             ));
         }
@@ -321,6 +328,7 @@ impl<'change> Plannable<'change> for LocalPackage<'change> {
                         .await?
                         .iter()
                         .any(|s| s == self.name.as_ref()),
+                    InstallReason::DependencyIfInstalling => false,
                 };
 
                 if installed_version != self.version.as_ref() {
@@ -409,6 +417,7 @@ impl Applyable for LocalPackagePlan<'_> {
                     match self.args.reason {
                         InstallReason::Explicit => "--asexplicit",
                         InstallReason::Dependency => "--asdeps",
+                        InstallReason::DependencyIfInstalling => unreachable!(),
                     },
                     "--",
                     self.args.name.as_ref(),
@@ -449,6 +458,7 @@ impl Reporter for LocalPackagePlan<'_> {
                 match self.args.reason {
                     InstallReason::Explicit => "explicitly installed",
                     InstallReason::Dependency => "installed as dependency",
+                    InstallReason::DependencyIfInstalling => unreachable!(),
                 }
             ));
         }

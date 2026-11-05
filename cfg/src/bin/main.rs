@@ -1524,41 +1524,65 @@ async fn aur<'elevate: 'action, 'action>(
 
         let pkgbuild = Pkgbuild::read(elevate, pkgbuild.contents()).await?;
 
-        for makedepend in &pkgbuild.makedepends {
-            // handled via rustup
-            if makedepend == "cargo" {
-                continue;
+        for (name, list, reason) in [
+            (
+                "depend",
+                &pkgbuild.depends,
+                InstallReason::DependencyIfInstalling, // if it's explicitly installed, keep it as-is
+            ),
+            (
+                "makedepend",
+                &pkgbuild.makedepends,
+                InstallReason::Explicit, // install explicitly because it's not a dependency of the package but should still be installed
+            ),
+            (
+                "checkdepend",
+                &pkgbuild.checkdepends,
+                InstallReason::Explicit,
+            ),
+        ] {
+            for depend in list {
+                // We need to resolve each dependency against the pacman database. it may be a package alias that
+                // is provided by some package. E.g. "cargo" is provded by "rustup". So we need to resolve "cargo",
+                // receive "rustup", and ensure this is installed., and ensure this is installed.
+                let package = if let Some(resolved_name) =
+                    resolve_installed_package(elevate, depend).await?
+                {
+                    plan.add(
+                        Owned(if resolved_name != *depend {
+                            format!(
+                                "install {} {} (resolved for {}) for {}",
+                                name, resolved_name, depend, aur_package.name
+                            )
+                        } else {
+                            format!("install {} {} for {}", name, depend, aur_package.name)
+                        }),
+                        elevate,
+                        Packages {
+                            install: Owned(vec![Owned(resolved_name.clone())]),
+                            reason,
+                        },
+                    );
+
+                    resolved_name
+                } else {
+                    plan.add(
+                        Owned(format!(
+                            "install {} {} for {}",
+                            name, depend, aur_package.name
+                        )),
+                        elevate,
+                        Packages {
+                            install: Owned(vec![Owned(depend.clone())]),
+                            reason,
+                        },
+                    );
+
+                    depend.clone()
+                };
+
+                plan.register_packages(&[Owned(package)]);
             }
-
-            plan.add(
-                Owned(format!(
-                    "install makedepend {} for {}",
-                    makedepend, aur_package.name
-                )),
-                elevate,
-                Packages {
-                    install: Owned(vec![Owned(makedepend.clone())]),
-                    reason: InstallReason::Explicit,
-                },
-            );
-
-            plan.register_packages(&[Owned(makedepend.to_owned())]);
-        }
-
-        for checkdepend in &pkgbuild.checkdepends {
-            plan.add(
-                Owned(format!(
-                    "install checkdepend {} for {}",
-                    checkdepend, aur_package.name
-                )),
-                elevate,
-                Packages {
-                    install: Owned(vec![Owned(checkdepend.clone())]),
-                    reason: InstallReason::Explicit,
-                },
-            );
-
-            plan.register_packages(&[Owned(checkdepend.to_owned())]);
         }
 
         let build_directory = makepkg_build_directory.join(aur_package.name);

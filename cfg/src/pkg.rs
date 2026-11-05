@@ -39,6 +39,16 @@ pub async fn get_package_version(name: &str, elevate: &Elevate) -> Result<Option
         .transpose()
 }
 
+pub async fn resolve_installed_package(elevate: &Elevate, name: &str) -> Result<Option<String>> {
+    Ok(
+        cmd::Process::run("pacman", &["--query", "--quiet", name], elevate, None)
+            .await?
+            .check()
+            .ok()
+            .map(|output| output.stdout.trim().to_owned()),
+    )
+}
+
 pub async fn list_explicitly_installed_packages(elevate: &Elevate) -> Result<Vec<String>> {
     Ok(cmd::Process::run(
         "pacman",
