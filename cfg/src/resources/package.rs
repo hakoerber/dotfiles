@@ -1,10 +1,5 @@
-use std::{
-    cell::{LazyCell, OnceCell},
-    sync::{LazyLock, OnceLock},
-};
-
 use anyhow::Result;
-use nonempty::NonEmpty;
+use async_once_cell::OnceCell;
 use tap::Tap as _;
 
 use crate::{
@@ -18,34 +13,42 @@ use crate::{
 
 use super::super::{Applyable, ChangeStatus, Elevate, Plannable, Reporter, cmd};
 
-static INSTALLED_PACKAGES: OnceLock<Vec<String>> = OnceLock::new();
+static INSTALLED_PACKAGES: OnceCell<Vec<String>> = OnceCell::new();
 
-fn installed_packages(elevate: &Elevate) -> Result<&Vec<String>> {
-    let packages = INSTALLED_PACKAGES.get_or_try_init(|| list_installed_packages(elevate))?;
+async fn installed_packages(elevate: &Elevate) -> Result<&Vec<String>> {
+    let packages = INSTALLED_PACKAGES
+        .get_or_try_init(async { list_installed_packages(elevate).await })
+        .await?;
     Ok(packages)
 }
 
-static EXPLICITLY_INSTALLED_PACKAGES: OnceLock<Vec<String>> = OnceLock::new();
+static EXPLICITLY_INSTALLED_PACKAGES: OnceCell<Vec<String>> = OnceCell::new();
 
-fn explicitly_installed_packages(elevate: &Elevate) -> Result<&Vec<String>> {
+async fn explicitly_installed_packages(elevate: &Elevate) -> Result<&Vec<String>> {
     let packages = EXPLICITLY_INSTALLED_PACKAGES
-        .get_or_try_init(|| list_explicitly_installed_packages(elevate))?;
+        .get_or_try_init(async { list_explicitly_installed_packages(elevate).await })
+        .await?;
     Ok(packages)
 }
 
-static PACKAGES_INSTALLED_AS_DEPENDENCIES: OnceLock<Vec<String>> = OnceLock::new();
+static PACKAGES_INSTALLED_AS_DEPENDENCIES: OnceCell<Vec<String>> = OnceCell::new();
 
-fn packages_installed_as_dependencies(elevate: &Elevate) -> Result<&Vec<String>> {
+async fn packages_installed_as_dependencies(elevate: &Elevate) -> Result<&Vec<String>> {
     let packages = PACKAGES_INSTALLED_AS_DEPENDENCIES
-        .get_or_try_init(|| list_packages_installed_as_dependencies(elevate))?;
+        .get_or_try_init(async { list_packages_installed_as_dependencies(elevate).await })
+        .await?;
     Ok(packages)
 }
 
 #[derive(Debug)]
 pub struct PackageDatabaseRefresh;
 
+#[async_trait::async_trait]
 impl<'change> Plannable<'change> for PackageDatabaseRefresh {
-    fn plan<'elevate>(self: Box<Self>, elevate: &'elevate Elevate) -> Result<ChangeStatus<'change>>
+    async fn plan<'elevate>(
+        self: Box<Self>,
+        _elevate: &'elevate Elevate,
+    ) -> Result<ChangeStatus<'change>>
     where
         'elevate: 'change,
     {
@@ -61,9 +64,12 @@ pub(crate) struct PackageDatabaseRefreshPlan<'a> {
     pub(crate) args: &'a (),
 }
 
+#[async_trait::async_trait]
 impl Applyable for PackageDatabaseRefreshPlan<'_> {
-    fn apply(&self, elevate: &Elevate) -> Result<()> {
-        cmd::Process::run("pacman", &["--sync", "--refresh"], elevate, None)?.check()?;
+    async fn apply(&self, elevate: &Elevate) -> Result<()> {
+        cmd::Process::run("pacman", &["--sync", "--refresh"], elevate, None)
+            .await?
+            .check()?;
         Ok(())
     }
 }
@@ -86,15 +92,20 @@ pub struct Packages<'action> {
     pub reason: InstallReason,
 }
 
+#[async_trait::async_trait]
 impl<'change> Plannable<'change> for Packages<'change> {
-    fn plan<'elevate>(self: Box<Self>, elevate: &'elevate Elevate) -> Result<ChangeStatus<'change>>
+    async fn plan<'elevate>(
+        self: Box<Self>,
+        elevate: &'elevate Elevate,
+    ) -> Result<ChangeStatus<'change>>
     where
         'elevate: 'change,
     {
         let mut install = Vec::new();
 
         for package in self.install.as_ref() {
-            if !installed_packages(elevate)?
+            if !installed_packages(elevate)
+                .await?
                 .iter()
                 .any(|s| s == package.as_ref())
             {
@@ -107,7 +118,8 @@ impl<'change> Plannable<'change> for Packages<'change> {
         match self.reason {
             InstallReason::Explicit => {
                 for package in self.install.as_ref() {
-                    if !explicitly_installed_packages(elevate)?
+                    if !explicitly_installed_packages(elevate)
+                        .await?
                         .iter()
                         .any(|s| s == package.as_ref())
                     {
@@ -117,7 +129,8 @@ impl<'change> Plannable<'change> for Packages<'change> {
             }
             InstallReason::Dependency => {
                 for package in self.install.as_ref() {
-                    if !packages_installed_as_dependencies(elevate)?
+                    if !packages_installed_as_dependencies(elevate)
+                        .await?
                         .iter()
                         .any(|s| s == package.as_ref())
                     {
@@ -147,8 +160,9 @@ pub(crate) struct PackagePlan<'a> {
     pub(crate) set_reason: Vec<MaybeOwned<'a, str>>,
 }
 
+#[async_trait::async_trait]
 impl Applyable for PackagePlan<'_> {
-    fn apply(&self, elevate: &Elevate) -> Result<()> {
+    async fn apply(&self, elevate: &Elevate) -> Result<()> {
         if !self.install.is_empty() {
             cmd::Process::run(
                 "pacman",
@@ -156,7 +170,8 @@ impl Applyable for PackagePlan<'_> {
                     .tap_mut(|v| v.extend(self.install.iter().map(|i| i.as_ref()))),
                 elevate,
                 None,
-            )?
+            )
+            .await?
             .check()?;
         }
 
@@ -174,7 +189,8 @@ impl Applyable for PackagePlan<'_> {
                 .tap_mut(|v| v.extend(self.set_reason.iter().map(|i| i.as_ref()))),
                 elevate,
                 None,
-            )?
+            )
+            .await?
             .check()?;
         }
 
@@ -207,15 +223,20 @@ pub struct PackageRemove<'change> {
     pub remove: MaybeOwned<'change, [MaybeOwned<'change, str>]>,
 }
 
+#[async_trait::async_trait]
 impl<'change> Plannable<'change> for PackageRemove<'change> {
-    fn plan<'elevate>(self: Box<Self>, elevate: &'elevate Elevate) -> Result<ChangeStatus<'change>>
+    async fn plan<'elevate>(
+        self: Box<Self>,
+        elevate: &'elevate Elevate,
+    ) -> Result<ChangeStatus<'change>>
     where
         'elevate: 'change,
     {
         let mut remove = Vec::new();
 
         for package in self.remove.as_ref() {
-            if installed_packages(elevate)?
+            if installed_packages(elevate)
+                .await?
                 .iter()
                 .any(|s| s == package.as_ref())
             {
@@ -241,8 +262,9 @@ pub(crate) struct PackageRemovePlan<'a> {
     pub(crate) remove: Vec<MaybeOwned<'a, str>>,
 }
 
+#[async_trait::async_trait]
 impl Applyable for PackageRemovePlan<'_> {
-    fn apply(&self, elevate: &Elevate) -> Result<()> {
+    async fn apply(&self, elevate: &Elevate) -> Result<()> {
         if !self.remove.is_empty() {
             cmd::Process::run(
                 "pacman",
@@ -250,7 +272,8 @@ impl Applyable for PackageRemovePlan<'_> {
                     .tap_mut(|v| v.extend(self.remove.iter().map(|i| i.as_ref()))),
                 elevate,
                 None,
-            )?
+            )
+            .await?
             .check()?;
         }
 
@@ -276,20 +299,26 @@ pub struct LocalPackage<'action> {
     pub reason: InstallReason,
 }
 
+#[async_trait::async_trait]
 impl<'change> Plannable<'change> for LocalPackage<'change> {
-    fn plan<'elevate>(self: Box<Self>, elevate: &'elevate Elevate) -> Result<ChangeStatus<'change>>
+    async fn plan<'elevate>(
+        self: Box<Self>,
+        elevate: &'elevate Elevate,
+    ) -> Result<ChangeStatus<'change>>
     where
         'elevate: 'change,
     {
-        let package_version = get_package_version(self.name.as_ref(), elevate)?;
+        let package_version = get_package_version(self.name.as_ref(), elevate).await?;
 
         match package_version {
             Some(installed_version) => {
                 let set_reason = match self.reason {
-                    InstallReason::Explicit => !explicitly_installed_packages(elevate)?
+                    InstallReason::Explicit => !explicitly_installed_packages(elevate)
+                        .await?
                         .iter()
                         .any(|s| s == self.name.as_ref()),
-                    InstallReason::Dependency => !packages_installed_as_dependencies(elevate)?
+                    InstallReason::Dependency => !packages_installed_as_dependencies(elevate)
+                        .await?
                         .iter()
                         .any(|s| s == self.name.as_ref()),
                 };
@@ -346,8 +375,9 @@ pub(crate) struct LocalPackagePlan<'a> {
     pub(crate) change: LocalPackageChange<'a>,
 }
 
+#[async_trait::async_trait]
 impl Applyable for LocalPackagePlan<'_> {
-    fn apply(&self, elevate: &Elevate) -> Result<()> {
+    async fn apply(&self, elevate: &Elevate) -> Result<()> {
         match self.change.operation {
             None => (),
             Some(
@@ -365,7 +395,8 @@ impl Applyable for LocalPackagePlan<'_> {
                     ],
                     elevate,
                     None,
-                )?
+                )
+                .await?
                 .check()?;
             }
         }
@@ -384,7 +415,8 @@ impl Applyable for LocalPackagePlan<'_> {
                 ],
                 elevate,
                 None,
-            )?
+            )
+            .await?
             .check()?;
         }
 

@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{Result, bail};
 
 use super::super::{Applyable, ChangeStatus, Elevate, MaybeOwned, Plannable, Reporter, cmd};
 
@@ -14,16 +14,28 @@ pub struct Command<'a> {
     pub check_command: Option<CheckScript<'a>>,
 }
 
+#[async_trait::async_trait]
 impl<'change> Plannable<'change> for Command<'change> {
-    fn plan<'elevate>(self: Box<Self>, elevate: &'elevate Elevate) -> Result<ChangeStatus<'change>>
+    async fn plan<'elevate>(
+        self: Box<Self>,
+        elevate: &'elevate Elevate,
+    ) -> Result<ChangeStatus<'change>>
     where
         'elevate: 'change,
     {
         let needs_execution = if let Some(ref script) = self.check_command {
-            !cmd::Process::run("sh", &[], elevate, Some(script.content.as_ref()))?
-                .unchecked()
-                .status
-                .success()
+            let command = cmd::Process::run("sh", &[], elevate, Some(script.content.as_ref()))
+                .await?
+                .unchecked();
+            match command.status.code() {
+                0 => false,
+                123 => true,
+                other => bail!(
+                    "invalid exit code of check script: {other} {:?} {:?}",
+                    command.stdout,
+                    command.stderr
+                ),
+            }
         } else {
             true
         };
@@ -43,9 +55,12 @@ pub(crate) struct CommandPlan<'a> {
     pub(crate) args: Command<'a>,
 }
 
+#[async_trait::async_trait]
 impl Applyable for CommandPlan<'_> {
-    fn apply(&self, elevate: &Elevate) -> Result<()> {
-        cmd::Process::run(self.args.cmd.as_ref(), self.args.args, elevate, None)?.check()?;
+    async fn apply(&self, elevate: &Elevate) -> Result<()> {
+        cmd::Process::run(self.args.cmd.as_ref(), self.args.args, elevate, None)
+            .await?
+            .check()?;
 
         Ok(())
     }

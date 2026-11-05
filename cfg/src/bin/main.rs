@@ -3,16 +3,19 @@
     reason = "Everything necessary should be included in the binary (PKGBUILDS, locally built packages)"
 )]
 #![allow(unused, reason = "dev")]
+#![deny(unused_must_use)]
 // required for `serde_json::json!()`
 #![recursion_limit = "256"]
+#![allow(incomplete_features, reason = "trying async drop")]
+#![feature(async_drop)]
 
-use std::{collections::HashMap, env, fs};
+use std::env;
 
-use anyhow::{Result, anyhow, bail};
+use anyhow::{Result, anyhow};
 use clap::{Parser, ValueEnum};
 use include_dir::{DirEntry, include_dir};
 use regex::Regex;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use cfg::prelude::*;
 
@@ -434,8 +437,7 @@ const PACKAGES: PackageConfig = PackageConfig(&[
 fn hera<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
-    config: &Config,
-) -> Result<()> {
+) {
     let packages = &[
         Ref("plasma-desktop"),
         Ref("konsole"),
@@ -460,43 +462,43 @@ fn hera<'elevate: 'action, 'action>(
     plan.add(
         "install packages",
         elevate,
-        Box::new(Packages {
+        Packages {
             install: Ref(packages),
             reason: InstallReason::Explicit,
-        }),
-    )?;
+        },
+    );
 
-    plan.register_packages(&Ref(packages));
+    plan.register_packages(packages);
 
     plan.add(
         Ref("create user"),
         elevate,
-        Box::new(User {
+        User {
             name: "herta",
             home: Ref(Path::new("/home/herta")),
             primary_group: PrimaryGroupConfig::Automatic,
             additional_groups: &["wheel", "sudonopw", "games", "kvm", "video"],
             shell: "/usr/bin/zsh",
             system: false,
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         Ref("enable sddm"),
         elevate,
-        Box::new(Service {
+        Service {
             name: "sddm.service",
             state: ServiceState {
                 runtime: ServiceStateRuntime::Active,
                 persistent: ServiceStatePersistent::Enabled,
             },
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         Ref("create sddm config folder"),
         elevate,
-        Box::new(Directory {
+        Directory {
             path: Ref(Path::new("/etc/sddm.conf.d/")),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
@@ -505,13 +507,13 @@ fn hera<'elevate: 'action, 'action>(
                 group: Gid::root(),
                 mode: FileMode(0o755),
             },
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         "enable autologin",
         elevate,
-        Box::new(File {
+        File {
             path: Ref(Path::new("/etc/sddm.conf.d/autologin.conf")),
             permissions: FilePermissions {
                 owner: Uid::root(),
@@ -532,13 +534,13 @@ fn hera<'elevate: 'action, 'action>(
                 )
                 .into_bytes(),
             )),
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         "lock on startup",
         elevate,
-        Box::new(File {
+        File {
             path: Ref(Path::new("/etc/xdg/kscreenlockerrc")),
             permissions: FilePermissions {
                 owner: Uid::root(),
@@ -558,36 +560,33 @@ fn hera<'elevate: 'action, 'action>(
                 )
                 .into_bytes(),
             )),
-        }),
-    )?;
-
-    Ok(())
+        },
+    );
 }
 
-fn orphans<'elevate: 'action, 'action>(
+async fn orphans<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
-    config: &Config,
 ) -> Result<()> {
-    let orphans = list_orphaned_packages(elevate)?;
+    let orphans = list_orphaned_packages(elevate).await?;
 
-    for orphan in orphans {
-        plan.add(
-            Owned(format!("remove orphaned package {orphan}")),
-            elevate,
-            Box::new(PackageRemove {
-                remove: Owned(vec![Owned(orphan)]),
-            }),
-        )?;
-    }
+    plan.with(elevate, |mut plan| {
+        for orphan in orphans {
+            plan.add(
+                Owned(format!("remove orphaned package {orphan}")),
+                PackageRemove {
+                    remove: Owned(vec![Owned(orphan)]),
+                },
+            );
+        }
+    });
 
     Ok(())
 }
 
-fn unmanaged_packages<'elevate: 'action, 'action>(
+async fn unmanaged_packages<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
-    config: &Config,
 ) -> Result<()> {
     let managed_packages = plan.managed_packages();
 
@@ -601,7 +600,7 @@ fn unmanaged_packages<'elevate: 'action, 'action>(
         .map(|s| s.to_owned())
         .collect::<Vec<String>>();
 
-    let explicitly_installed_packages = list_explicitly_installed_packages(elevate)?;
+    let explicitly_installed_packages = list_explicitly_installed_packages(elevate).await?;
 
     for installed_package in explicitly_installed_packages {
         if !managed_packages.contains(&installed_package)
@@ -610,10 +609,10 @@ fn unmanaged_packages<'elevate: 'action, 'action>(
             plan.add(
                 Owned(format!("remove unmanaged package {installed_package}")),
                 elevate,
-                Box::new(PackageRemove {
+                PackageRemove {
                     remove: Owned(vec![Owned(installed_package)]),
-                }),
-            )?;
+                },
+            );
         }
     }
 
@@ -623,12 +622,11 @@ fn unmanaged_packages<'elevate: 'action, 'action>(
 fn autoupdate<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
-    config: &Config,
-) -> Result<()> {
+) {
     plan.add(
         "deploy autoupdate script",
         elevate,
-        Box::new(File {
+        File {
             path: Ref(Path::new("/usr/local/bin/pacman-autoupdate")),
             permissions: FilePermissions {
                 owner: Uid::root(),
@@ -672,13 +670,13 @@ fn autoupdate<'elevate: 'action, 'action>(
                 )
                 .into_bytes(),
             )),
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         "install pacman autoupdate service",
         elevate,
-        Box::new(File {
+        File {
             path: Ref(Path::new("/etc/systemd/system/pacman-autoupdate.service")),
             permissions: FilePermissions {
                 owner: Uid::root(),
@@ -699,20 +697,20 @@ fn autoupdate<'elevate: 'action, 'action>(
                 )
                 .into_bytes(),
             )),
-        }),
-    )?
-    .on_change(Box::new(|| {
-        Ok(Resource::new(
+        },
+    )
+    .on_change(|| {
+        Resource::new(
             Ref("restart service manager due to new packages"),
             elevate,
-            Box::new(DaemonReload {}),
-        ))
-    }))?;
+            DaemonReload {},
+        )
+    });
 
     plan.add(
         "install pacman autoupdate timer",
         elevate,
-        Box::new(File {
+        File {
             path: Ref(Path::new("/etc/systemd/system/pacman-autoupdate.timer")),
             permissions: FilePermissions {
                 owner: Uid::root(),
@@ -737,40 +735,37 @@ fn autoupdate<'elevate: 'action, 'action>(
                 )
                 .into_bytes(),
             )),
-        }),
-    )?
-    .on_change(Box::new(|| {
-        Ok(Resource::new(
+        },
+    )
+    .on_change(|| {
+        Resource::new(
             Ref("restart service manager due to new packages"),
             elevate,
-            Box::new(DaemonReload {}),
-        ))
-    }))?;
+            DaemonReload {},
+        )
+    });
 
     plan.add(
         Ref("enable pacman autoupdate timer"),
         elevate,
-        Box::new(Service {
+        Service {
             name: "pacman-autoupdate.timer",
             state: ServiceState {
                 runtime: ServiceStateRuntime::Active,
                 persistent: ServiceStatePersistent::Enabled,
             },
-        }),
-    )?;
-
-    Ok(())
+        },
+    );
 }
 
 fn restic_backup<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
-    config: &Config,
-) -> Result<()> {
+) {
     plan.add(
         Ref("create restic config directory"),
         elevate,
-        Box::new(Directory {
+        Directory {
             path: Ref(Path::new("/etc/restic")),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
@@ -779,13 +774,13 @@ fn restic_backup<'elevate: 'action, 'action>(
                 group: Gid::root(),
                 mode: FileMode(0o755),
             },
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         Ref("create restic cache directory"),
         elevate,
-        Box::new(Directory {
+        Directory {
             path: Ref(Path::new("/var/cache/restic")),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
@@ -794,13 +789,13 @@ fn restic_backup<'elevate: 'action, 'action>(
                 group: Gid::root(),
                 mode: FileMode(0o755),
             },
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         "create restic exclude file",
         elevate,
-        Box::new(File {
+        File {
             path: Ref(Path::new("/etc/restic/exclude.lst")),
             permissions: FilePermissions {
                 owner: Uid::root(),
@@ -820,13 +815,13 @@ fn restic_backup<'elevate: 'action, 'action>(
                 )
                 .into_bytes(),
             )),
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         "create restic wrapper script",
         elevate,
-        Box::new(File {
+        File {
             path: Ref(Path::new("/usr/local/bin/restic-cmd")),
             permissions: FilePermissions {
                 owner: Uid::root(),
@@ -862,13 +857,13 @@ fn restic_backup<'elevate: 'action, 'action>(
                 )
                 .into_bytes(),
             )),
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         "create restic backup script",
         elevate,
-        Box::new(File {
+        File {
             path: Ref(Path::new("/usr/local/bin/restic-backup")),
             permissions: FilePermissions {
                 owner: Uid::root(),
@@ -910,185 +905,170 @@ fn restic_backup<'elevate: 'action, 'action>(
                 )
                 .into_bytes(),
             )),
-        }),
-    )?;
+        },
+    );
 
-    plan.add(
-        "install restic backup service",
-        elevate,
-        Box::new(File {
-            path: Ref(Path::new("/etc/systemd/system/restic-backup.service")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o644),
-            },
-            on_symlink: SymlinkHandling::Proceed,
-            on_directory: DirectoryHandling::Proceed,
-            binary: false,
-            ignore_checksum_changes: false,
-            content: FileContent::Bytes(Owned(
-                textwrap::dedent(
-                    r#"
-                        [Service]
-                        Type=oneshot
-                        ExecStart=systemd-inhibit /usr/local/bin/restic-backup
-                        "#,
-                )
-                .into_bytes(),
-            )),
-        }),
-    )?
-    .on_change(Box::new(|| {
-        Ok(Resource::new(
+    plan.block("restic backup service", |block| {
+        block.with(elevate, |mut block| {
+            block.add(
+                "install restic backup service",
+                File {
+                    path: Ref(Path::new("/etc/systemd/system/restic-backup.service")),
+                    permissions: FilePermissions {
+                        owner: Uid::root(),
+                        group: Gid::root(),
+                        mode: FileMode(0o644),
+                    },
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Proceed,
+                    binary: false,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Bytes(Owned(
+                        textwrap::dedent(
+                            r#"
+                            [Service]
+                            Type=oneshot
+                            ExecStart=systemd-inhibit /usr/local/bin/restic-backup
+                            "#,
+                        )
+                        .into_bytes(),
+                    )),
+                },
+            );
+
+            block.add(
+                "install restic backup timer",
+                File {
+                    path: Ref(Path::new("/etc/systemd/system/restic-backup.timer")),
+                    permissions: FilePermissions {
+                        owner: Uid::root(),
+                        group: Gid::root(),
+                        mode: FileMode(0o644),
+                    },
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Proceed,
+                    binary: false,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Bytes(Owned(
+                        textwrap::dedent(
+                            r#"
+                            [Timer]
+                            OnCalendar=daily
+                            Persistent=true
+
+                            [Install]
+                            WantedBy=multi-user.target
+                            "#,
+                        )
+                        .into_bytes(),
+                    )),
+                },
+            );
+        });
+    })
+    .on_change(|| {
+        Resource::new(
             Ref("restart service manager due to new packages"),
             elevate,
-            Box::new(DaemonReload {}),
-        ))
-    }));
-
-    plan.add(
-        "install restic backup timer",
-        elevate,
-        Box::new(File {
-            path: Ref(Path::new("/etc/systemd/system/restic-backup.timer")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o644),
-            },
-            on_symlink: SymlinkHandling::Proceed,
-            on_directory: DirectoryHandling::Proceed,
-            binary: false,
-            ignore_checksum_changes: false,
-            content: FileContent::Bytes(Owned(
-                textwrap::dedent(
-                    r#"
-                        [Timer]
-                        OnCalendar=daily
-                        Persistent=true
-
-                        [Install]
-                        WantedBy=multi-user.target
-                        "#,
-                )
-                .into_bytes(),
-            )),
-        }),
-    )?
-    .on_change(Box::new(|| {
-        Ok(Resource::new(
-            Ref("restart service manager due to new packages"),
-            elevate,
-            Box::new(DaemonReload {}),
-        ))
-    }));
+            DaemonReload {},
+        )
+    });
 
     plan.add(
         Ref("enable pacman autoupdate timer"),
         elevate,
-        Box::new(Service {
+        Service {
             name: "restic-backup.timer",
             state: ServiceState {
                 runtime: ServiceStateRuntime::Active,
                 persistent: ServiceStatePersistent::Enabled,
             },
-        }),
-    )?;
-
-    Ok(())
+        },
+    );
 }
 
 fn initrd<'name, 'elevate: 'action, 'action>(
     plan: &mut Plan<'name, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
     config: &Config,
-) -> Result<()> {
-    let lz4 = &[Ref("lz4")];
-    plan.add(
-        "install lz4",
-        elevate,
-        Box::new(Packages {
-            install: Ref(lz4),
-            reason: InstallReason::Explicit,
-        }),
-    )?;
-
-    plan.register_packages(&Ref(lz4));
-
-    let hooks: Vec<&str> = {
-        let mut hooks = vec![
-            "base",
-            "udev",
-            "autodetect",
-            "microcode",
-            "modconf",
-            "kms",
-            "keyboard",
-            "keymap",
-            "consolefont",
-            "block",
-        ];
-
-        if config.machine.encrypted_root {
-            hooks.extend(["encrypt", "lvm2"]);
-        }
-
-        hooks.extend(["filesystems", "resume", "fsck"]);
-
-        hooks
-    };
-
-    let rebuild_mkinitcpio = Box::new(Command {
-        cmd: Ref("mkinitcpio"),
-        args: &["-P"],
-        check_command: None,
-    });
-
-    plan.add(
-        "configure mkinitcpio",
-        elevate,
-        Box::new(File {
-            path: Ref(Path::new("/etc/mkinitcpio.conf")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o644),
+) {
+    plan.with(elevate, |mut plan| {
+        let lz4 = &[Ref("lz4")];
+        plan.add(
+            "install lz4",
+            Packages {
+                install: Ref(lz4),
+                reason: InstallReason::Explicit,
             },
-            on_symlink: SymlinkHandling::Proceed,
-            on_directory: DirectoryHandling::Proceed,
-            binary: false,
-            ignore_checksum_changes: false,
-            content: FileContent::Bytes(Owned(
-                textwrap::dedent(&format!(
-                    r#"
-                    MODULES=()
-                    BINARIES=()
-                    FILES=()
-                    HOOKS=({hooks})
-                    COMPRESSION="lz4"
-                    "#,
-                    hooks = hooks.join(" "),
-                ))
-                .into_bytes(),
-            )),
-        }),
-    )?
-    .on_change(Box::new(|| {
-        Ok(Resource::new(
-            Ref("rebuild initrd"),
-            elevate,
-            rebuild_mkinitcpio,
-        ))
-    }))?;
+        );
 
-    Ok(())
+        plan.register_packages(&Ref(lz4));
+
+        let hooks: Vec<&str> = {
+            let mut hooks = vec![
+                "base",
+                "udev",
+                "autodetect",
+                "microcode",
+                "modconf",
+                "kms",
+                "keyboard",
+                "keymap",
+                "consolefont",
+                "block",
+            ];
+
+            if config.machine.encrypted_root {
+                hooks.extend(["encrypt", "lvm2"]);
+            }
+
+            hooks.extend(["filesystems", "resume", "fsck"]);
+
+            hooks
+        };
+
+        let rebuild_mkinitcpio = Command {
+            cmd: Ref("mkinitcpio"),
+            args: &["-P"],
+            check_command: None,
+        };
+
+        plan.add(
+            "configure mkinitcpio",
+            File {
+                path: Ref(Path::new("/etc/mkinitcpio.conf")),
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o644),
+                },
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Proceed,
+                binary: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Owned(
+                    textwrap::dedent(&format!(
+                        r#"
+                        MODULES=()
+                        BINARIES=()
+                        FILES=()
+                        HOOKS=({hooks})
+                        COMPRESSION="lz4"
+                        "#,
+                        hooks = hooks.join(" "),
+                    ))
+                    .into_bytes(),
+                )),
+            },
+        )
+        .on_change(|| Resource::new(Ref("rebuild initrd"), elevate, rebuild_mkinitcpio));
+    });
 }
 
 fn libvirt<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
-) -> Result<()> {
+) {
     for socket in [
         "libvirtd.socket",
         "libvirtd-tls.socket",
@@ -1099,14 +1079,14 @@ fn libvirt<'elevate: 'action, 'action>(
         plan.add(
             Owned(format!("mask {socket}")),
             elevate,
-            Box::new(Service {
+            Service {
                 name: socket,
                 state: ServiceState {
                     runtime: ServiceStateRuntime::Inactive,
                     persistent: ServiceStatePersistent::Masked,
                 },
-            }),
-        )?;
+            },
+        );
     }
 
     // the libvirtd unit file contains the following setting:
@@ -1124,7 +1104,7 @@ fn libvirt<'elevate: 'action, 'action>(
     plan.add(
         "configure libvirtd env variable override",
         elevate,
-        Box::new(File {
+        File {
             path: Ref(Path::new("/etc/conf.d/libvirtd")),
             permissions: FilePermissions {
                 owner: Uid::root(),
@@ -1136,37 +1116,35 @@ fn libvirt<'elevate: 'action, 'action>(
             binary: false,
             ignore_checksum_changes: false,
             content: Lines(Ref(&[Ref("LIBVIRTD_ARGS=")])),
-        }),
-    )?
-    .on_change(Box::new(|| {
-        Ok(Resource::new(
+        },
+    )
+    .on_change(|| {
+        Resource::new(
             Ref("restart libvirt"),
             elevate,
-            Box::new(RestartService {
+            RestartService {
                 name: "libvirtd.service",
-            }),
-        ))
-    }))?;
+            },
+        )
+    });
 
     plan.add(
         Ref("enable libvirt"),
         elevate,
-        Box::new(Service {
+        Service {
             name: "libvirtd.service",
             state: ServiceState {
                 runtime: ServiceStateRuntime::Active,
                 persistent: ServiceStatePersistent::Enabled,
             },
-        }),
-    )?;
-
-    Ok(())
+        },
+    );
 }
 
 fn services<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
-) -> Result<()> {
+) {
     #[expect(
         clippy::single_element_loop,
         reason = "consistency with enabled services"
@@ -1175,14 +1153,14 @@ fn services<'elevate: 'action, 'action>(
         plan.add(
             Owned(format!("disable service {service}")),
             elevate,
-            Box::new(Service {
+            Service {
                 name: service,
                 state: ServiceState {
                     runtime: ServiceStateRuntime::Inactive,
                     persistent: ServiceStatePersistent::Disabled,
                 },
-            }),
-        )?;
+            },
+        );
     }
 
     for service in [
@@ -1193,14 +1171,14 @@ fn services<'elevate: 'action, 'action>(
         plan.add(
             Owned(format!("enable service {service}")),
             elevate,
-            Box::new(Service {
+            Service {
                 name: service,
                 state: ServiceState {
                     runtime: ServiceStateRuntime::Active,
                     persistent: ServiceStatePersistent::Enabled,
                 },
-            }),
-        )?;
+            },
+        );
     }
 
     #[expect(
@@ -1211,17 +1189,15 @@ fn services<'elevate: 'action, 'action>(
         plan.add(
             Owned(format!("enable socket {socket}")),
             elevate,
-            Box::new(Service {
+            Service {
                 name: socket,
                 state: ServiceState {
                     runtime: ServiceStateRuntime::Active,
                     persistent: ServiceStatePersistent::Enabled,
                 },
-            }),
+            },
         );
     }
-
-    Ok(())
 }
 
 fn copy_dir<'elevate: 'action, 'action>(
@@ -1233,13 +1209,10 @@ fn copy_dir<'elevate: 'action, 'action>(
     makepkg_user: &Uid,
     makepkg_group: &Gid,
 ) -> Result<()> {
-    let source_path =
-        Path::from_path(source.path()).ok_or_else(|| anyhow!("non utf-8 path in pkgbuilds"))?;
-
     plan.add(
         Owned(format!("create pkgbuild folder for {target}")),
         elevate,
-        Box::new(Directory {
+        Directory {
             path: Owned(target.to_owned()),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
@@ -1248,7 +1221,7 @@ fn copy_dir<'elevate: 'action, 'action>(
                 group: makepkg_group.clone(),
                 mode: FileMode(0o700),
             },
-        }),
+        },
     );
 
     for file in source.files() {
@@ -1269,7 +1242,7 @@ fn copy_dir<'elevate: 'action, 'action>(
         plan.add(
             Owned(format!("copy pkgbuild file {path}")),
             elevate,
-            Box::new(File {
+            File {
                 path: Owned(target.join(path)),
                 permissions: FilePermissions {
                     owner: makepkg_user.clone(),
@@ -1281,7 +1254,7 @@ fn copy_dir<'elevate: 'action, 'action>(
                 binary: true,
                 ignore_checksum_changes: false,
                 content: FileContent::Bytes(Owned(file.contents().to_vec())),
-            }),
+            },
         );
     }
 
@@ -1316,7 +1289,7 @@ impl Pkgbuild {
                     match s.split_once(|c|
                         !matches!(c, 'A'..='Z' | 'a'..='z' | '0'..='9' | '@'|'.'|'_'| '+'| '-')
                     ) {
-                        Some((name, rest)) => name.to_owned(),
+                        Some((name, _rest)) => name.to_owned(),
                         None => s.to_owned(),
                     }
 
@@ -1324,7 +1297,7 @@ impl Pkgbuild {
         }
     }
 
-    fn read(elevate: &Elevate, data: &[u8]) -> Result<Self> {
+    async fn read(elevate: &Elevate, data: &[u8]) -> Result<Self> {
         let source = Process::run(
             "sh",
             &[
@@ -1342,7 +1315,8 @@ impl Pkgbuild {
             ],
             elevate,
             Some(data),
-        )?
+        )
+        .await?
         .check()?;
 
         let lines = source.stdout.lines().collect::<Vec<_>>();
@@ -1366,7 +1340,7 @@ impl Pkgbuild {
     }
 }
 
-fn aur<'elevate: 'action, 'action>(
+async fn aur<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
 ) -> Result<()> {
@@ -1444,20 +1418,20 @@ fn aur<'elevate: 'action, 'action>(
     plan.add(
         Ref("create build user"),
         elevate,
-        Box::new(User {
+        User {
             name: "makepkg",
             home: Ref(makepkg_home),
             primary_group: PrimaryGroupConfig::Automatic,
             additional_groups: &[],
             shell: "/bin/bash",
             system: true,
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         Ref("create included packages directory"),
         elevate,
-        Box::new(Directory {
+        Directory {
             path: Owned(included_packages_directory.clone()),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
@@ -1466,8 +1440,8 @@ fn aur<'elevate: 'action, 'action>(
                 group: makepkg_group.clone(),
                 mode: FileMode(0o700),
             },
-        }),
-    )?;
+        },
+    );
 
     for &(name, version, filename, content) in INCLUDED_PACKAGES {
         let package_path = included_packages_directory.join(filename);
@@ -1475,7 +1449,7 @@ fn aur<'elevate: 'action, 'action>(
         plan.add(
             Owned(format!("deploy included package {name}")),
             elevate,
-            Box::new(File {
+            File {
                 content: FileContent::Bytes(Ref(content)),
                 binary: true,
                 // checksum may change, the only thing that matters is the version, which is
@@ -1489,25 +1463,25 @@ fn aur<'elevate: 'action, 'action>(
                     group: makepkg_group.clone(),
                     mode: FileMode(0o700),
                 },
-            }),
-        )?;
+            },
+        );
 
         plan.add(
             Owned(format!("install included package {name}")),
             elevate,
-            Box::new(LocalPackage {
+            LocalPackage {
                 name: Ref(name),
                 path: Owned(package_path),
                 version: Ref(version),
                 reason: InstallReason::Explicit,
-            }),
-        )?;
+            },
+        );
     }
 
     plan.add(
         Ref("create pkgbuild root directory"),
         elevate,
-        Box::new(Directory {
+        Directory {
             path: Owned(pkgbuild_directory.clone()),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
@@ -1516,13 +1490,13 @@ fn aur<'elevate: 'action, 'action>(
                 group: makepkg_group.clone(),
                 mode: FileMode(0o700),
             },
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         Ref("create build directory"),
         elevate,
-        Box::new(Directory {
+        Directory {
             path: Owned(makepkg_build_directory.clone()),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
@@ -1531,7 +1505,7 @@ fn aur<'elevate: 'action, 'action>(
                 group: makepkg_group.clone(),
                 mode: FileMode(0o700),
             },
-        }),
+        },
     );
 
     PKGBUILDS
@@ -1560,7 +1534,7 @@ fn aur<'elevate: 'action, 'action>(
             .get_file(format!("{name}/PKGBUILD", name = aur_package.name))
             .ok_or_else(|| anyhow!("PKGBUILD for {} not found", aur_package.name))?;
 
-        let pkgbuild = Pkgbuild::read(elevate, pkgbuild.contents())?;
+        let pkgbuild = Pkgbuild::read(elevate, pkgbuild.contents()).await?;
 
         for makedepend in &pkgbuild.makedepends {
             // handled via rustup
@@ -1574,13 +1548,13 @@ fn aur<'elevate: 'action, 'action>(
                     makedepend, aur_package.name
                 )),
                 elevate,
-                Box::new(Packages {
+                Packages {
                     install: Owned(vec![Owned(makedepend.clone())]),
                     reason: InstallReason::Explicit,
-                }),
-            )?;
+                },
+            );
 
-            plan.register_packages(&Owned(vec![Owned(makedepend.to_owned())]))?;
+            plan.register_packages(&[Owned(makedepend.to_owned())]);
         }
 
         for checkdepend in &pkgbuild.checkdepends {
@@ -1590,13 +1564,13 @@ fn aur<'elevate: 'action, 'action>(
                     checkdepend, aur_package.name
                 )),
                 elevate,
-                Box::new(Packages {
+                Packages {
                     install: Owned(vec![Owned(checkdepend.clone())]),
                     reason: InstallReason::Explicit,
-                }),
-            )?;
+                },
+            );
 
-            plan.register_packages(&Owned(vec![Owned(checkdepend.to_owned())]))?;
+            plan.register_packages(&[Owned(checkdepend.to_owned())]);
         }
 
         let build_directory = makepkg_build_directory.join(aur_package.name);
@@ -1604,7 +1578,7 @@ fn aur<'elevate: 'action, 'action>(
         plan.add(
             Owned(format!("create build directory for {}", aur_package.name)),
             elevate,
-            Box::new(Directory {
+            Directory {
                 path: Owned(build_directory.clone()),
                 on_symlink: SymlinkHandling::Proceed,
                 on_file: FileHandling::Proceed,
@@ -1613,15 +1587,15 @@ fn aur<'elevate: 'action, 'action>(
                     group: makepkg_group.clone(),
                     mode: FileMode(0o700),
                 },
-            }),
-        )?;
+            },
+        );
 
         let gnupg_directory = build_directory.join("gnupg");
 
         plan.add(
             Owned(format!("create gpg directory for {}", aur_package.name)),
             elevate,
-            Box::new(Directory {
+            Directory {
                 path: Owned(gnupg_directory.clone()),
                 on_symlink: SymlinkHandling::Proceed,
                 on_file: FileHandling::Proceed,
@@ -1630,13 +1604,13 @@ fn aur<'elevate: 'action, 'action>(
                     group: makepkg_group.clone(),
                     mode: FileMode(0o700),
                 },
-            }),
-        )?;
+            },
+        );
 
         plan.add(
             Owned(format!("create env file for {}", aur_package.name)),
             elevate,
-            Box::new(File {
+            File {
                 path: Owned(build_directory.join("env")),
                 permissions: FilePermissions {
                     owner: makepkg_user.clone(),
@@ -1655,14 +1629,14 @@ fn aur<'elevate: 'action, 'action>(
                     ))
                     .into_bytes(),
                 )),
-            }),
-        )?;
+            },
+        );
 
         if let Some(ref preexec) = aur_package.preexec {
             plan.add(
                 Owned(format!("create preexec script for {}", aur_package.name)),
                 elevate,
-                Box::new(File {
+                File {
                     path: Owned(build_directory.join("preexec")),
                     permissions: FilePermissions {
                         owner: makepkg_user.clone(),
@@ -1674,14 +1648,14 @@ fn aur<'elevate: 'action, 'action>(
                     binary: true,
                     ignore_checksum_changes: false,
                     content: FileContent::Bytes(Owned(preexec.clone().into_bytes())),
-                }),
-            )?;
+                },
+            );
         }
 
         plan.add(
             Owned(format!("create build script for {}", aur_package.name)),
             elevate,
-            Box::new(File {
+            File {
                 path: Owned(build_directory.join("build.sh")),
                 permissions: FilePermissions {
                     owner: makepkg_user.clone(),
@@ -1757,15 +1731,15 @@ fn aur<'elevate: 'action, 'action>(
                     .to_owned()
                     .into_bytes(),
                 )),
-            }),
-        )?;
+            },
+        );
 
         let install_script = build_directory.join("install.sh");
 
         plan.add(
             Owned(format!("create install script for {}", aur_package.name)),
             elevate,
-            Box::new(File {
+            File {
                 path: Owned(install_script.clone()),
                 permissions: FilePermissions {
                     owner: makepkg_user.clone(),
@@ -1793,10 +1767,10 @@ fn aur<'elevate: 'action, 'action>(
                     .to_owned()
                     .into_bytes(),
                 )),
-            }),
+            },
         );
 
-        let version = get_package_version(aur_package.name, elevate)?;
+        let version = get_package_version(aur_package.name, elevate).await?;
 
         if !version.is_some_and(|version| {
             version
@@ -1816,15 +1790,15 @@ fn aur<'elevate: 'action, 'action>(
             plan.add(
                 Owned(format!("build aur package {}", aur_package.name)),
                 elevate,
-                Box::new(Command {
+                Command {
                     cmd: Owned(install_script.into_string()),
                     args: &[],
                     check_command: None,
-                }),
-            )?;
+                },
+            );
         }
 
-        plan.register_packages(&Owned(vec![Owned(aur_package.name.to_owned())]));
+        plan.register_packages(&[Owned(aur_package.name.to_owned())]);
     }
 
     Ok(())
@@ -1834,35 +1808,33 @@ fn boot_target<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
     config: &Config,
-) -> Result<()> {
+) {
     plan.add(
         Ref("setting boot target"),
         elevate,
-        Box::new(BootTarget {
+        BootTarget {
             target: config.machine.boot_target,
-        }),
-    )?;
-
-    Ok(())
+        },
+    );
 }
 
 fn sudo<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
-) -> Result<()> {
+) {
     plan.add(
         Ref("add sudonopw"),
         elevate,
-        Box::new(Group {
+        Group {
             name: "sudonopw",
             system: true,
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         Ref("configure passwordless sudo"),
         elevate,
-        Box::new(File {
+        File {
             path: Ref(Path::new("/etc/sudoers.d/sudonopw")),
             permissions: FilePermissions {
                 owner: Uid::root(),
@@ -1874,13 +1846,13 @@ fn sudo<'elevate: 'action, 'action>(
             binary: false,
             ignore_checksum_changes: false,
             content: Lines(Owned(vec![Ref("%sudonopw ALL=(ALL) NOPASSWD: ALL")])),
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         Ref("configure passwordless doas"),
         elevate,
-        Box::new(File {
+        File {
             path: Ref(Path::new("/etc/doas.conf")),
             permissions: FilePermissions {
                 owner: Uid::root(),
@@ -1892,16 +1864,14 @@ fn sudo<'elevate: 'action, 'action>(
             binary: false,
             ignore_checksum_changes: false,
             content: Lines(Owned(vec![Ref("permit nopass nolog setenv {PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin} :sudonopw")])),
-        }),
-    )?;
-
-    Ok(())
+        },
+    );
 }
 
 fn timesyncd<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
-) -> Result<()> {
+) {
     let arch_ntp_servers = [
         "0.arch.pool.ntp.org",
         "1.arch.pool.ntp.org",
@@ -1919,7 +1889,7 @@ fn timesyncd<'elevate: 'action, 'action>(
     plan.add(
         Ref("configure timesyncd"),
         elevate,
-        Box::new(File {
+        File {
             path: Ref(Path::new("/etc/systemd/timesyncd.conf")),
             permissions: FilePermissions {
                 owner: Uid::root(),
@@ -1935,20 +1905,18 @@ fn timesyncd<'elevate: 'action, 'action>(
                 Owned(format!("NTP={}", arch_ntp_servers.join(" "))),
                 Owned(format!("FallbackNTP={}", fallback_ntp_servers.join(" "))),
             ])),
-        }),
-    )?;
-
-    Ok(())
+        },
+    );
 }
 
 fn reflector<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
-) -> Result<()> {
+) {
     plan.add(
         "configure reflector",
         elevate,
-        Box::new(File {
+        File {
             path: Ref(Path::new("/etc/xdg/reflector/reflector.conf")),
             permissions: FilePermissions {
                 owner: Uid::root(),
@@ -1966,54 +1934,52 @@ fn reflector<'elevate: 'action, 'action>(
                 Ref("--latest 5"),
                 Ref("--sort age"),
             ])),
-        }),
-    )?
-    .on_change(Box::new(|| {
-        Ok(Resource::new(
+        },
+    )
+    .on_change(|| {
+        Resource::new(
             Ref("restart reflector"),
             elevate,
-            Box::new(RestartService {
+            RestartService {
                 name: "reflector.service",
-            }),
-        ))
-    }))?;
+            },
+        )
+    });
 
     plan.add(
         "enable reflector timer",
         elevate,
-        Box::new(Service {
+        Service {
             name: "reflector.timer",
             state: ServiceState {
                 runtime: ServiceStateRuntime::Active,
                 persistent: ServiceStatePersistent::Enabled,
             },
-        }),
-    )?;
-    Ok(())
+        },
+    );
 }
 
-fn pacman<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+fn pacman<'plan, 'elevate: 'action, 'action>(
+    plan: &'plan mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
-    config: &Config,
-) -> Result<()> {
-    plan.add(
-        "configure pacman",
-        elevate,
-        Box::new(File {
-            path: Ref(Path::new("/etc/pacman.conf")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o644),
-            },
-            on_symlink: SymlinkHandling::Proceed,
-            on_directory: DirectoryHandling::Proceed,
-            binary: false,
-            ignore_checksum_changes: false,
-            content: FileContent::Bytes(Owned(
-                textwrap::dedent(
-                    r##"
+) {
+    plan.with(elevate, |mut plan| {
+        plan.add(
+            "configure pacman",
+            File {
+                path: Ref(Path::new("/etc/pacman.conf")),
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o644),
+                },
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Proceed,
+                binary: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Owned(
+                    textwrap::dedent(
+                        r##"
                         [options]
                         Architecture = auto
                         HoldPkg = pacman glibc
@@ -2040,42 +2006,41 @@ fn pacman<'elevate: 'action, 'action>(
                         [multilib]
                         Include = /etc/pacman.d/mirrorlist
                     "##,
-                )
-                .into_bytes(),
-            )),
-        }),
-    )?
-    .on_change(Box::new(|| {
-        Ok(Resource::new(
-            Ref("refresh package database"),
-            elevate,
-            Box::new(PackageDatabaseRefresh {}),
-        ))
-    }))?;
-
-    Ok(())
+                    )
+                    .into_bytes(),
+                )),
+            },
+        )
+        .on_change(|| {
+            Resource::new(
+                Ref("refresh package database"),
+                elevate,
+                PackageDatabaseRefresh {},
+            )
+        });
+    });
 }
 
 fn pacman_cache_cleanup<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
-) -> Result<()> {
+) {
     let pacman_contrib = &[Ref("pacman-contrib")];
     plan.add(
         "install pacman-contrib",
         elevate,
-        Box::new(Packages {
+        Packages {
             install: Ref(pacman_contrib),
             reason: InstallReason::Explicit,
-        }),
-    )?;
+        },
+    );
 
-    plan.register_packages(&Ref(pacman_contrib));
+    plan.register_packages(pacman_contrib);
 
     plan.add(
         "pacman cache cleanup service",
         elevate,
-        Box::new(File {
+        File {
             path: Ref(Path::new(
                 "/etc/systemd/system/pacman-cache-cleanup.service",
             )),
@@ -2094,13 +2059,13 @@ fn pacman_cache_cleanup<'elevate: 'action, 'action>(
                 Ref("ExecStart=/bin/sh -c '/usr/bin/paccache -rk1 && /usr/bin/paccache -ruk0'"),
                 Ref("RemainAfterExit=true"),
             ])),
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         "pacman cache cleanup timer",
         elevate,
-        Box::new(File {
+        File {
             path: Ref(Path::new("/etc/systemd/system/pacman-cache-cleanup.timer")),
             permissions: FilePermissions {
                 owner: Uid::root(),
@@ -2118,56 +2083,51 @@ fn pacman_cache_cleanup<'elevate: 'action, 'action>(
                 Ref("[Install]"),
                 Ref("WantedBy=multi-user.target"),
             ])),
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         "enable pacman cache cleanup timer",
         elevate,
-        Box::new(Service {
+        Service {
             name: "pacman-cache-cleanup.timer",
             state: ServiceState {
                 runtime: ServiceStateRuntime::Active,
                 persistent: ServiceStatePersistent::Enabled,
             },
-        }),
-    )?;
-    Ok(())
+        },
+    );
 }
 
 fn install_packages<'elevate: 'action, 'action, 'pkgs>(
     plan: &mut Plan<'_, 'elevate, 'pkgs, 'action>,
     elevate: &'elevate Elevate,
     packages: &'pkgs PackageConfig,
-) -> Result<()> {
-    let mut changes = false;
-
+) {
     for &(section, packages) in packages.0 {
         let packages = packages
             .iter()
             .map(|package| Ref(*package))
             .collect::<Vec<_>>();
 
-        let action = plan.add(
+        plan.add(
             Owned(format!("install packages for {section}")),
             elevate,
-            Box::new(Packages {
+            Packages {
                 install: Owned(packages.clone()),
                 reason: InstallReason::Explicit,
-            }),
-        )?;
+            },
+        );
 
-        plan.register_packages(&Owned(packages));
+        plan.register_packages(&packages);
     }
-
-    Ok(())
 }
 
 fn hardware<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
     config: &Config,
-) -> Result<()> {
+) {
     match config.machine.gpu {
         Gpu::Amd => {
             let amdgpu_packages = &[
@@ -2183,18 +2143,18 @@ fn hardware<'elevate: 'action, 'action>(
             plan.add(
                 "install AMDGPU packages",
                 elevate,
-                Box::new(Packages {
+                Packages {
                     install: Ref(amdgpu_packages),
                     reason: InstallReason::Explicit,
-                }),
-            )?;
+                },
+            );
 
-            plan.register_packages(&Ref(amdgpu_packages));
+            plan.register_packages(amdgpu_packages);
 
             plan.add(
                 "set AMDGPU options",
                 elevate,
-                Box::new(File {
+                File {
                     path: Ref(Path::new("/etc/X11/xorg.conf.d/20-amdgpu.conf")),
                     permissions: FilePermissions {
                         owner: Uid::root(),
@@ -2213,8 +2173,8 @@ fn hardware<'elevate: 'action, 'action>(
                         Ref(r#"    Option "TearFree" "true""#),
                         Ref(r#"EndSection"#),
                     ])),
-                }),
-            )?;
+                },
+            );
         }
         Gpu::Nvidia => {
             let nouveau_packages = &[
@@ -2230,13 +2190,13 @@ fn hardware<'elevate: 'action, 'action>(
             plan.add(
                 "install nouveau packages",
                 elevate,
-                Box::new(Packages {
+                Packages {
                     install: Ref(nouveau_packages),
                     reason: InstallReason::Explicit,
-                }),
-            )?;
+                },
+            );
 
-            plan.register_packages(&Ref(nouveau_packages));
+            plan.register_packages(nouveau_packages);
         }
         Gpu::Intel => {
             let intel_packages = &[
@@ -2250,13 +2210,13 @@ fn hardware<'elevate: 'action, 'action>(
             plan.add(
                 "install intel packages",
                 elevate,
-                Box::new(Packages {
+                Packages {
                     install: Ref(intel_packages),
                     reason: InstallReason::Explicit,
-                }),
-            )?;
+                },
+            );
 
-            plan.register_packages(&Ref(intel_packages));
+            plan.register_packages(intel_packages);
         }
     }
 
@@ -2267,13 +2227,13 @@ fn hardware<'elevate: 'action, 'action>(
             plan.add(
                 "install AMD cpu packages",
                 elevate,
-                Box::new(Packages {
+                Packages {
                     install: Ref(amd_cpu_packages),
                     reason: InstallReason::Explicit,
-                }),
-            )?;
+                },
+            );
 
-            plan.register_packages(&Ref(amd_cpu_packages));
+            plan.register_packages(amd_cpu_packages);
         }
         Cpu::Intel => {
             let intel_cpu_packages = &[Ref("intel-ucode")];
@@ -2281,28 +2241,26 @@ fn hardware<'elevate: 'action, 'action>(
             plan.add(
                 "install intel cpu packages",
                 elevate,
-                Box::new(Packages {
+                Packages {
                     install: Ref(intel_cpu_packages),
                     reason: InstallReason::Explicit,
-                }),
-            )?;
+                },
+            );
 
-            plan.register_packages(&Ref(intel_cpu_packages));
+            plan.register_packages(intel_cpu_packages);
         }
     }
-
-    Ok(())
 }
 
 fn backlight<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
-) -> Result<()> {
+) {
     plan.add(
         // See https://wiki.archlinux.org/title/backlight#ACPI
         Ref("create udev rule to allow video group backlight access"),
         elevate,
-        Box::new(File {
+        File {
             path: Ref(Path::new("/etc/udev/rules.d/backlight.rules")),
             permissions: FilePermissions {
                 owner: Uid::root(),
@@ -2314,20 +2272,18 @@ fn backlight<'elevate: 'action, 'action>(
             binary: false,
             ignore_checksum_changes: false,
             content: Lines(Ref(&[Ref(r#"ACTION=="add", SUBSYSTEM=="backlight", RUN+="/bin/chgrp video $sys$devpath/brightness", RUN+="/bin/chmod g+w $sys$devpath/brightness""#)])),
-        }),
-    )?;
-
-    Ok(())
+        },
+    );
 }
 
 fn kernel_modules<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
-) -> Result<()> {
+) {
     plan.add(
         "disable kernel modules",
         elevate,
-        Box::new(File {
+        File {
             path: Ref(Path::new("/etc/modprobe.d/disable.conf")),
             permissions: FilePermissions {
                 owner: Uid::root(),
@@ -2352,66 +2308,66 @@ fn kernel_modules<'elevate: 'action, 'action>(
                 Ref("blacklist algif_aead"),
                 Ref("blacklist authencesn"),
             ])),
-        }),
-    )?;
-
-    Ok(())
+        },
+    );
 }
 
 fn journald<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
-) -> Result<()> {
-    plan.add(
-        "limit journald size",
-        elevate,
-        Box::new(LineInFile {
-            path: Path::new("/etc/systemd/journald.conf"),
-            line: Ref("SystemMaxUse=50M"),
-            regex: Regex::new(r#"^#?SystemMaxUse=.*$"#).expect("regex to be valid"),
-        }),
-    )?
-    .on_change(Box::new(|| {
-        Ok(Resource::new(
-            Ref("restart journald"),
-            elevate,
-            Box::new(RestartService {
-                name: "systemd-journald.service",
-            }),
-        ))
-    }))?;
-    Ok(())
+) {
+    plan.block("journald", |block| {
+        block
+            .add(
+                "limit journald size",
+                elevate,
+                LineInFile {
+                    path: Path::new("/etc/systemd/journald.conf"),
+                    line: Ref("SystemMaxUse=50M"),
+                    regex: Regex::new(r#"^#?SystemMaxUse=.*$"#).expect("regex to be valid"),
+                },
+            )
+            .on_change(|| {
+                Resource::new(
+                    Ref("restart journald"),
+                    elevate,
+                    RestartService {
+                        name: "systemd-journald.service",
+                    },
+                )
+            });
+    });
 }
 
 fn hardware_switches<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
-) -> Result<()> {
+) {
     plan.add(
         "handle lid switch",
         elevate,
-        Box::new(LineInFile {
+        LineInFile {
             path: Path::new("/etc/systemd/logind.conf"),
             line: Ref("HandleLidSwitch=ignore"),
             regex: Regex::new(r#"^#?HandleLidSwitch=.*$"#).expect("regex to be valid"),
-        }),
-    )?;
+        },
+    );
+
     plan.add(
         "handle power key",
         elevate,
-        Box::new(LineInFile {
+        LineInFile {
             path: Path::new("/etc/systemd/logind.conf"),
             line: Ref("HandlePowerKey=suspend"),
             regex: Regex::new(r#"^#?HandlePowerKey=.*$"#).expect("regex to be valid"),
-        }),
-    )?;
-    Ok(())
+        },
+    );
 }
 
 fn firefox<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
-) -> Result<()> {
+) {
     for directory in [
         Path::new("/etc/firefox"),
         Path::new("/etc/firefox/policies"),
@@ -2419,7 +2375,7 @@ fn firefox<'elevate: 'action, 'action>(
         plan.add(
             Owned(format!("create firefox directories {directory}")),
             elevate,
-            Box::new(Directory {
+            Directory {
                 path: Ref(directory),
                 on_symlink: SymlinkHandling::Proceed,
                 on_file: FileHandling::Proceed,
@@ -2428,8 +2384,8 @@ fn firefox<'elevate: 'action, 'action>(
                     group: Gid::root(),
                     mode: FileMode(0o775),
                 },
-            }),
-        )?;
+            },
+        );
     }
 
     #[expect(clippy::default_numeric_fallback, reason = "")]
@@ -2596,7 +2552,7 @@ fn firefox<'elevate: 'action, 'action>(
     plan.add(
         Ref("set firefox global policies"),
         elevate,
-        Box::new(File {
+        File {
             path: Ref(Path::new("/etc/firefox/policies/policies.json")),
             permissions: FilePermissions {
                 owner: Uid::root(),
@@ -2607,11 +2563,12 @@ fn firefox<'elevate: 'action, 'action>(
             on_symlink: SymlinkHandling::Proceed,
             binary: false,
             ignore_checksum_changes: false,
-            content: FileContent::Bytes(Owned(serde_json::to_vec_pretty(&policies)?)),
-        }),
-    )?;
-
-    Ok(())
+            content: FileContent::Bytes(Owned(
+                serde_json::to_vec_pretty(&policies)
+                    .expect("policies are builtin, will always be serializable"),
+            )),
+        },
+    );
 }
 
 struct UserDirectories {
@@ -2626,33 +2583,33 @@ struct UserDirectories {
     data: PathBuf,
 }
 
-fn root_setup<'elevate: 'action, 'action, 'pkgs>(
+async fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     plan: &mut Plan<'_, 'elevate, 'pkgs, 'action>,
     elevate: &'elevate Elevate,
     config: &Config,
     packages: &'pkgs PackageConfig,
 ) -> Result<()> {
-    pacman(plan, elevate, config)?;
-    pacman_cache_cleanup(plan, elevate)?;
-    install_packages(plan, elevate, packages)?;
-    reflector(plan, elevate)?;
-    initrd(plan, elevate, config)?;
-    libvirt(plan, elevate)?;
-    services(plan, elevate)?;
-    boot_target(plan, elevate, config)?;
-    aur(plan, elevate)?;
-    timesyncd(plan, elevate)?;
-    sudo(plan, elevate)?;
-    hardware(plan, elevate, config)?;
-    hardware_switches(plan, elevate)?;
-    journald(plan, elevate)?;
-    kernel_modules(plan, elevate)?;
-    backlight(plan, elevate)?;
-    firefox(plan, elevate)?;
+    pacman(plan, elevate);
+    pacman_cache_cleanup(plan, elevate);
+    install_packages(plan, elevate, packages);
+    reflector(plan, elevate);
+    initrd(plan, elevate, config);
+    libvirt(plan, elevate);
+    services(plan, elevate);
+    boot_target(plan, elevate, config);
+    Box::pin(aur(plan, elevate)).await?;
+    timesyncd(plan, elevate);
+    sudo(plan, elevate);
+    hardware(plan, elevate, config);
+    hardware_switches(plan, elevate);
+    journald(plan, elevate);
+    kernel_modules(plan, elevate);
+    backlight(plan, elevate);
+    firefox(plan, elevate);
     Ok(())
 }
 
-fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
+async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     root: &'elevate Elevate,
     user_elevate: &'elevate Elevate,
@@ -2664,7 +2621,7 @@ fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
     plan.add(
         "create user",
         root,
-        Box::new(User {
+        User {
             name: &user.name,
             home: Owned(home.clone()),
             primary_group: PrimaryGroupConfig::Automatic,
@@ -2680,11 +2637,11 @@ fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
             ],
             shell: "/usr/bin/zsh",
             system: false,
-        }),
-    )?;
+        },
+    );
 
     if user.autologin {
-        user_autologin(plan, root, user)?;
+        user_autologin(plan, root, user);
     }
 
     let user_directories = {
@@ -2705,18 +2662,24 @@ fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
         }
     };
 
-    user_create_directories(plan, user_elevate, user, &user_directories)?;
-    user_executables(plan, user_elevate, user, &user_directories)?;
+    user_create_directories(plan, user_elevate, user, &user_directories);
+    Box::pin(user_executables(
+        plan,
+        user_elevate,
+        user,
+        &user_directories,
+    ))
+    .await?;
     user_dotfiles(plan, user_elevate, user, machine, &home)?;
-    user_wallpaper(plan, user_elevate, user, &user_directories)?;
-    user_services(plan, user_elevate, user, &user_directories, machine)?;
-    user_spotify(plan, user_elevate, user, &user_directories)?;
-    user_firefox(plan, user_elevate, user, &home)?;
+    user_wallpaper(plan, user_elevate, user, &user_directories);
+    user_services(plan, user_elevate, user, &user_directories, machine);
+    user_spotify(plan, user_elevate, user, &user_directories);
+    user_firefox(plan, user_elevate, user, &home);
 
     plan.add(
         "import my gpg key",
         user_elevate,
-        Box::new(GpgKey {
+        GpgKey {
             content: include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
                 "/../files/gpgkeys/hannes@hkoerber.de.gpg.asc"
@@ -2724,8 +2687,8 @@ fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
             gnupg_directory: Owned(home.join(".local/state/gnupg/")),
             fingerprint: GpgFingerprint("973AE48D71B76735C4712B5BB5C002530C6A2053".to_owned()),
             trust: GpgTrust::Ultimately,
-        }),
-    )?;
+        },
+    );
 
     Ok(())
 }
@@ -2735,14 +2698,14 @@ fn user_firefox<'elevate: 'action, 'action, 'user, 'machine>(
     user_elevate: &'elevate Elevate,
     user: &'user UserConfig,
     home: &Path,
-) -> Result<()> {
+) {
     let mozilla_dir = home.join(".mozilla");
     let firefox_dir = mozilla_dir.join("firefox");
 
     plan.add(
         Ref("create mozilla base directory"),
         user_elevate,
-        Box::new(Directory {
+        Directory {
             path: Owned(mozilla_dir),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
@@ -2751,13 +2714,13 @@ fn user_firefox<'elevate: 'action, 'action, 'user, 'machine>(
                 group: Gid::from(user.name.clone()),
                 mode: FileMode(0o755),
             },
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         Ref("create firefox base directory"),
         user_elevate,
-        Box::new(Directory {
+        Directory {
             path: Owned(firefox_dir.clone()),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
@@ -2766,8 +2729,8 @@ fn user_firefox<'elevate: 'action, 'action, 'user, 'machine>(
                 group: Gid::from(user.name.clone()),
                 mode: FileMode(0o755),
             },
-        }),
-    )?;
+        },
+    );
 
     for profile in &user.firefox.profiles {
         let profile_dir = firefox_dir.join(format!("profile-{}", profile.name));
@@ -2779,7 +2742,7 @@ fn user_firefox<'elevate: 'action, 'action, 'user, 'machine>(
                 profile.name
             )),
             user_elevate,
-            Box::new(Directory {
+            Directory {
                 path: Owned(profile_dir),
                 on_symlink: SymlinkHandling::Proceed,
                 on_file: FileHandling::Proceed,
@@ -2788,8 +2751,8 @@ fn user_firefox<'elevate: 'action, 'action, 'user, 'machine>(
                     group: Gid::from(user.name.clone()),
                     mode: FileMode(0o755),
                 },
-            }),
-        )?;
+            },
+        );
 
         plan.add(
             Owned(format!(
@@ -2797,7 +2760,7 @@ fn user_firefox<'elevate: 'action, 'action, 'user, 'machine>(
                 profile.name
             )),
             user_elevate,
-            Box::new(Directory {
+            Directory {
                 path: Owned(chrome_dir.clone()),
                 on_symlink: SymlinkHandling::Proceed,
                 on_file: FileHandling::Proceed,
@@ -2806,8 +2769,8 @@ fn user_firefox<'elevate: 'action, 'action, 'user, 'machine>(
                     group: Gid::from(user.name.clone()),
                     mode: FileMode(0o755),
                 },
-            }),
-        )?;
+            },
+        );
 
         if profile.manage_css {
             plan.add(
@@ -2816,7 +2779,7 @@ fn user_firefox<'elevate: 'action, 'action, 'user, 'machine>(
                 profile.name
             )),
             user_elevate,
-            Box::new(File {
+            File {
                 path: Owned(chrome_dir.join("userChrome.css")),
                 on_symlink: SymlinkHandling::Proceed,
                 on_directory: DirectoryHandling::Proceed,
@@ -2848,12 +2811,10 @@ fn user_firefox<'elevate: 'action, 'action, 'user, 'machine>(
                     )
                     .into_bytes(),
                 )),
-            }),
-        )?;
+            },
+        );
         }
     }
-
-    Ok(())
 }
 
 fn user_create_directories<'elevate: 'action, 'action, 'user, 'machine>(
@@ -2861,11 +2822,11 @@ fn user_create_directories<'elevate: 'action, 'action, 'user, 'machine>(
     user_elevate: &'elevate Elevate,
     user: &'user UserConfig,
     user_directories: &UserDirectories,
-) -> Result<()> {
+) {
     plan.add(
         "create user config directory",
         user_elevate,
-        Box::new(Directory {
+        Directory {
             path: Owned(user_directories.config.clone()),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
@@ -2874,13 +2835,13 @@ fn user_create_directories<'elevate: 'action, 'action, 'user, 'machine>(
                 group: Gid::from(user.name.clone()),
                 mode: FileMode(0o755),
             },
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         Ref("create download directory"),
         user_elevate,
-        Box::new(Directory {
+        Directory {
             path: Owned(user_directories.download.clone()),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
@@ -2889,13 +2850,13 @@ fn user_create_directories<'elevate: 'action, 'action, 'user, 'machine>(
                 group: Gid::from(user.name.clone()),
                 mode: FileMode(0o755),
             },
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         Ref("create tmp directory"),
         user_elevate,
-        Box::new(Directory {
+        Directory {
             path: Owned(user_directories.tmp.clone()),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
@@ -2904,13 +2865,13 @@ fn user_create_directories<'elevate: 'action, 'action, 'user, 'machine>(
                 group: Gid::from(user.name.clone()),
                 mode: FileMode(0o755),
             },
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         Ref("create scripts directory"),
         user_elevate,
-        Box::new(Directory {
+        Directory {
             path: Owned(user_directories.scripts.clone()),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
@@ -2919,13 +2880,13 @@ fn user_create_directories<'elevate: 'action, 'action, 'user, 'machine>(
                 group: Gid::from(user.name.clone()),
                 mode: FileMode(0o755),
             },
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         Ref("create bin directory"),
         user_elevate,
-        Box::new(Directory {
+        Directory {
             path: Owned(user_directories.bin.clone()),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
@@ -2934,13 +2895,13 @@ fn user_create_directories<'elevate: 'action, 'action, 'user, 'machine>(
                 group: Gid::from(user.name.clone()),
                 mode: FileMode(0o755),
             },
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         Ref("create systemd user directory"),
         user_elevate,
-        Box::new(Directory {
+        Directory {
             path: Owned(user_directories.systemd.clone()),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
@@ -2949,13 +2910,13 @@ fn user_create_directories<'elevate: 'action, 'action, 'user, 'machine>(
                 group: Gid::from(user.name.clone()),
                 mode: FileMode(0o755),
             },
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         Ref("create systemd user unit directory"),
         user_elevate,
-        Box::new(Directory {
+        Directory {
             path: Owned(user_directories.systemd_user_units.clone()),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
@@ -2964,13 +2925,13 @@ fn user_create_directories<'elevate: 'action, 'action, 'user, 'machine>(
                 group: Gid::from(user.name.clone()),
                 mode: FileMode(0o755),
             },
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         Ref("create local directory"),
         user_elevate,
-        Box::new(Directory {
+        Directory {
             path: Owned(user_directories.local.clone()),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
@@ -2979,13 +2940,13 @@ fn user_create_directories<'elevate: 'action, 'action, 'user, 'machine>(
                 group: Gid::from(user.name.clone()),
                 mode: FileMode(0o755),
             },
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         Ref("create data directory"),
         user_elevate,
-        Box::new(Directory {
+        Directory {
             path: Owned(user_directories.data.clone()),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
@@ -2994,10 +2955,8 @@ fn user_create_directories<'elevate: 'action, 'action, 'user, 'machine>(
                 group: Gid::from(user.name.clone()),
                 mode: FileMode(0o755),
             },
-        }),
-    )?;
-
-    Ok(())
+        },
+    );
 }
 
 fn user_spotify<'elevate: 'action, 'action, 'user, 'machine>(
@@ -3005,11 +2964,11 @@ fn user_spotify<'elevate: 'action, 'action, 'user, 'machine>(
     user_elevate: &'elevate Elevate,
     user: &'user UserConfig,
     user_directories: &UserDirectories,
-) -> Result<()> {
+) {
     plan.add(
         Owned("fix spotify audio api".to_owned()),
         user_elevate,
-        Box::new(File {
+        File {
             path: Owned(user_directories.config.join("spotify-flags.conf")),
             on_symlink: SymlinkHandling::Proceed,
             on_directory: DirectoryHandling::Bail,
@@ -3021,16 +2980,15 @@ fn user_spotify<'elevate: 'action, 'action, 'user, 'machine>(
             binary: false,
             ignore_checksum_changes: false,
             content: FileContent::Lines(Ref(&[Ref("--audio-api=pulseaudio")])),
-        }),
-    )?;
-    Ok(())
+        },
+    );
 }
 
 fn user_autologin<'elevate: 'action, 'action, 'user, 'machine>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     root: &'elevate Elevate,
     user: &'user UserConfig,
-) -> Result<()> {
+) {
     let getty_base = PathBuf::from(format!(
         "/etc/systemd/system/getty@tty{vt}.service.d/",
         vt = user.vt
@@ -3039,7 +2997,7 @@ fn user_autologin<'elevate: 'action, 'action, 'user, 'machine>(
     plan.add(
         "create directory for getty autologin",
         root,
-        Box::new(Directory {
+        Directory {
             path: Owned(getty_base.clone()),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
@@ -3048,13 +3006,13 @@ fn user_autologin<'elevate: 'action, 'action, 'user, 'machine>(
                 group: Gid::root(),
                 mode: FileMode(0o755),
             },
-        }),
-    )?;
+        },
+    );
 
     plan.add(
         "enable getty autologin",
         root,
-        Box::new(File {
+        File {
             path: Owned(getty_base.join("override.conf")),
             permissions: FilePermissions {
                 owner: Uid::root(),
@@ -3073,10 +3031,8 @@ fn user_autologin<'elevate: 'action, 'action, 'user, 'machine>(
                     name = user.name
                 )),
             ])),
-        }),
-    )?;
-
-    Ok(())
+        },
+    );
 }
 
 fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
@@ -3121,7 +3077,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
         plan.add(
             Owned(format!("create empty directory {directory}")),
             user_elevate,
-            Box::new(Directory {
+            Directory {
                 path: Owned(home.join(directory)),
                 on_symlink: SymlinkHandling::Proceed,
                 on_file: FileHandling::Proceed,
@@ -3130,8 +3086,8 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
                     group: Gid::from(user.name.clone()),
                     mode: mode.unwrap_or(FileMode(0o755)),
                 },
-            }),
-        )?;
+            },
+        );
     }
 
     for to_remove in [
@@ -3151,13 +3107,13 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
         plan.add(
             Owned(format!("remove entry {to_remove}")),
             user_elevate,
-            Box::new(Remove {
+            Remove {
                 path: Owned(home.join(to_remove)),
                 on_directory: DirectoryHandling::Proceed,
                 on_file: FileHandling::Proceed,
                 on_symlink: SymlinkHandling::Proceed,
-            }),
-        )?;
+            },
+        );
     }
 
     for (path, content) in [
@@ -3321,7 +3277,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
         plan.add(
             Owned(format!("{user}: add dotfile ~/{path}", user = user.name)),
             user_elevate,
-            Box::new(File {
+            File {
                 path: Owned(home.join(path)),
                 on_symlink: SymlinkHandling::Proceed,
                 on_directory: DirectoryHandling::Bail,
@@ -3333,8 +3289,8 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
                 binary: false,
                 ignore_checksum_changes: false,
                 content: FileContent::Bytes(Ref(content)),
-            }),
-        )?;
+            },
+        );
     }
 
     let template_context = TemplateContext {
@@ -3430,7 +3386,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
         plan.add(
             Owned(format!("{user}: add dotfile ~/{path}", user = user.name)),
             user_elevate,
-            Box::new(File {
+            File {
                 path: Owned(home.join(path)),
                 on_symlink: SymlinkHandling::Proceed,
                 on_directory: DirectoryHandling::Bail,
@@ -3442,14 +3398,14 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
                 binary: false,
                 ignore_checksum_changes: false,
                 content: FileContent::Bytes(Owned(template.into_bytes())),
-            }),
-        )?;
+            },
+        );
     }
 
     Ok(())
 }
 
-fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
+async fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     user_elevate: &'elevate Elevate,
     user: &'user UserConfig,
@@ -3475,7 +3431,7 @@ fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
         plan.add(
             Owned(format!("add script {name}")),
             user_elevate,
-            Box::new(File {
+            File {
                 path: Owned(user_directories.scripts.join(name)),
                 on_symlink: SymlinkHandling::Proceed,
                 on_directory: DirectoryHandling::Bail,
@@ -3487,24 +3443,24 @@ fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
                 binary: false,
                 ignore_checksum_changes: false,
                 content: FileContent::Bytes(Ref(content)),
-            }),
-        )?;
+            },
+        );
     }
 
-    for file in files_in_dir(user_elevate, &user_directories.scripts)? {
+    for file in files_in_dir(user_elevate, &user_directories.scripts).await? {
         let name = file.as_str();
 
         if !scripts.iter().any(|&(file, _content)| file == name) {
             plan.add(
                 Owned(format!("remove unmanaged script {name}")),
                 user_elevate,
-                Box::new(Remove {
+                Remove {
                     path: Owned(user_directories.scripts.join(name)),
                     on_symlink: SymlinkHandling::Proceed,
                     on_directory: DirectoryHandling::Bail,
                     on_file: FileHandling::Proceed,
-                }),
-            )?;
+                },
+            );
         }
     }
 
@@ -3528,7 +3484,7 @@ fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
         plan.add(
             Owned(format!("add executable {name}")),
             user_elevate,
-            Box::new(File {
+            File {
                 path: Owned(user_directories.bin.join(name)),
                 on_symlink: SymlinkHandling::Proceed,
                 on_directory: DirectoryHandling::Bail,
@@ -3540,24 +3496,24 @@ fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
                 binary: false,
                 ignore_checksum_changes: false,
                 content: FileContent::Bytes(Ref(content)),
-            }),
-        )?;
+            },
+        );
     }
 
-    for file in files_in_dir(user_elevate, &user_directories.bin)? {
+    for file in files_in_dir(user_elevate, &user_directories.bin).await? {
         let name = file.as_str();
 
         if !bins.iter().any(|&(file, _content)| file == name) {
             plan.add(
                 Owned(format!("remove unmanaged executable {name}")),
                 user_elevate,
-                Box::new(Remove {
+                Remove {
                     path: Owned(user_directories.bin.join(name)),
                     on_symlink: SymlinkHandling::Proceed,
                     on_directory: DirectoryHandling::Bail,
                     on_file: FileHandling::Proceed,
-                }),
-            )?;
+                },
+            );
         }
     }
 
@@ -3569,11 +3525,11 @@ fn user_wallpaper<'elevate: 'action, 'action, 'user, 'machine>(
     user_elevate: &'elevate Elevate,
     user: &'user UserConfig,
     user_directories: &UserDirectories,
-) -> Result<()> {
+) {
     plan.add(
         Ref("install wallpaper"),
         user_elevate,
-        Box::new(File {
+        File {
             path: Owned(user_directories.data.join("wallpaper.jpg")),
             on_symlink: SymlinkHandling::Proceed,
             on_directory: DirectoryHandling::Bail,
@@ -3588,10 +3544,8 @@ fn user_wallpaper<'elevate: 'action, 'action, 'user, 'machine>(
                 env!("CARGO_MANIFEST_DIR"),
                 "/../assets/wallpaper.jpg"
             )))),
-        }),
-    )?;
-
-    Ok(())
+        },
+    );
 }
 fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
@@ -3599,7 +3553,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
     user: &'user UserConfig,
     user_directories: &UserDirectories,
     machine: &MachineConfig,
-) -> Result<()> {
+) {
     for (unit, content, enabled) in [
         (
             "dunst.service",
@@ -3761,7 +3715,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             plan.add(
                 Owned(format!("user autostart service {unit}")),
                 user_elevate,
-                Box::new(File {
+                File {
                     path,
                     on_symlink: SymlinkHandling::Proceed,
                     on_directory: DirectoryHandling::Bail,
@@ -3773,26 +3727,26 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
                     binary: false,
                     ignore_checksum_changes: false,
                     content: FileContent::Bytes(Ref(content)),
-                }),
-            )?;
+                },
+            );
         } else {
             plan.add(
                 Owned(format!("user service {unit}")),
                 user_elevate,
-                Box::new(Remove {
+                Remove {
                     path,
                     on_directory: DirectoryHandling::Bail,
                     on_file: FileHandling::Proceed,
                     on_symlink: SymlinkHandling::Proceed,
-                }),
-            )?;
+                },
+            );
         }
     }
 
     plan.add(
         "autostart target",
         user_elevate,
-        Box::new(File {
+        File {
             path: Owned(user_directories.systemd_user_units.join("autostart.target")),
             on_symlink: SymlinkHandling::Proceed,
             on_directory: DirectoryHandling::Bail,
@@ -3852,8 +3806,8 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
 
                 out
             })),
-        }),
-    )?;
+        },
+    );
 
     for (unit, content) in [
         (
@@ -3876,7 +3830,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
         plan.add(
             Owned(format!("user service {unit}")),
             user_elevate,
-            Box::new(File {
+            File {
                 path: Owned(user_directories.systemd_user_units.join(unit)),
                 on_symlink: SymlinkHandling::Proceed,
                 on_directory: DirectoryHandling::Bail,
@@ -3888,11 +3842,9 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
                 binary: false,
                 ignore_checksum_changes: false,
                 content: FileContent::Bytes(Ref(content)),
-            }),
-        )?;
+            },
+        );
     }
-
-    Ok(())
 }
 
 #[derive(Eq, PartialEq, Serialize)]
@@ -3983,14 +3935,6 @@ struct UserConfig {
     firefox: FirefoxUserConfig,
 }
 
-impl UserConfig {
-    fn get_elevate(&self) -> Elevate {
-        Elevate::Sudo(ElevateTo::User {
-            user: self.name.clone(),
-        })
-    }
-}
-
 struct Config {
     machine: MachineConfig,
     users: Vec<(Elevate, UserConfig)>,
@@ -4058,7 +4002,8 @@ fn private_user(
     }
 }
 
-fn main() -> Result<()> {
+#[tokio::main(flavor = "multi_thread")]
+async fn main() -> Result<()> {
     let args = Cli::try_parse()?;
 
     let subscriber = configure_tracing(if args.debug {
@@ -4069,7 +4014,8 @@ fn main() -> Result<()> {
 
     tracing::subscriber::set_global_default(subscriber)?;
 
-    let running_user = Process::run("id", &["--user", "--name"], &Elevate::No, None)?
+    let running_user = Process::run("id", &["--user", "--name"], &Elevate::No, None)
+        .await?
         .check()?
         .stdout
         .trim()
@@ -4237,7 +4183,7 @@ fn main() -> Result<()> {
             match running_user.as_str() {
                 "root" => Elevate::No,
                 name if name == user.name => Elevate::No,
-                other => Elevate::Sudo(ElevateTo::User {
+                _other => Elevate::Sudo(ElevateTo::User {
                     user: user.name.clone(),
                 }),
             },
@@ -4250,30 +4196,30 @@ fn main() -> Result<()> {
 
     let mut plan = Plan::new();
 
-    root_setup(&mut plan, &root, &config, &PACKAGES)?;
+    Box::pin(root_setup(&mut plan, &root, &config, &PACKAGES)).await?;
 
     for user in &config.users {
         let (ref user_elevate, ref user) = *user;
 
-        configure_user(&mut plan, &root, user_elevate, user, &config.machine)?;
+        configure_user(&mut plan, &root, user_elevate, user, &config.machine).await?;
     }
 
     match args.hostname {
         Hera => {
-            hera(&mut plan, &root, &config)?;
-            autoupdate(&mut plan, &root, &config)?;
-            restic_backup(&mut plan, &root, &config)?;
+            hera(&mut plan, &root);
+            autoupdate(&mut plan, &root);
+            restic_backup(&mut plan, &root);
         }
         Dionysus => {
-            autoupdate(&mut plan, &root, &config)?;
+            autoupdate(&mut plan, &root);
         }
         Ares | Neptune => (),
     }
 
-    unmanaged_packages(&mut plan, &root, &config)?;
-    orphans(&mut plan, &root, &config)?;
+    unmanaged_packages(&mut plan, &root).await?;
+    orphans(&mut plan, &root).await?;
 
-    let plan_finished = plan.finish()?;
+    let plan_finished = plan.finish().await?;
 
     let report = plan_finished.report()?;
     report.print(&if args.only_changed {
@@ -4287,7 +4233,7 @@ fn main() -> Result<()> {
     let plan_approved = plan_finished.approve();
 
     if !args.dry_run && has_changes {
-        plan_approved.apply()?;
+        plan_approved.apply().await?;
     }
 
     Ok(())

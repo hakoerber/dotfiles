@@ -2,9 +2,10 @@ use anyhow::{Result, anyhow};
 
 use super::{Elevate, cmd};
 
-pub fn list_installed_packages(elevate: &Elevate) -> Result<Vec<String>> {
+pub async fn list_installed_packages(elevate: &Elevate) -> Result<Vec<String>> {
     Ok(
-        cmd::Process::run("pacman", &["--query", "--quiet"], elevate, None)?
+        cmd::Process::run("pacman", &["--query", "--quiet"], elevate, None)
+            .await?
             .check()?
             .stdout
             .lines()
@@ -13,17 +14,19 @@ pub fn list_installed_packages(elevate: &Elevate) -> Result<Vec<String>> {
     )
 }
 
-pub fn check_installed(name: &str, elevate: &Elevate) -> Result<bool> {
+pub async fn check_installed(name: &str, elevate: &Elevate) -> Result<bool> {
     Ok(
-        cmd::Process::run("pacman", &["--query", "--quiet", name], elevate, None)?
+        cmd::Process::run("pacman", &["--query", "--quiet", name], elevate, None)
+            .await?
             .unchecked()
             .status
             .success(),
     )
 }
 
-pub fn get_package_version(name: &str, elevate: &Elevate) -> Result<Option<String>> {
-    cmd::Process::run("pacman", &["--query", name], elevate, None)?
+pub async fn get_package_version(name: &str, elevate: &Elevate) -> Result<Option<String>> {
+    cmd::Process::run("pacman", &["--query", name], elevate, None)
+        .await?
         .check()
         .ok()
         .map(|proc| {
@@ -36,13 +39,14 @@ pub fn get_package_version(name: &str, elevate: &Elevate) -> Result<Option<Strin
         .transpose()
 }
 
-pub fn list_explicitly_installed_packages(elevate: &Elevate) -> Result<Vec<String>> {
+pub async fn list_explicitly_installed_packages(elevate: &Elevate) -> Result<Vec<String>> {
     Ok(cmd::Process::run(
         "pacman",
         &["--query", "--quiet", "--explicit"],
         elevate,
         None,
-    )?
+    )
+    .await?
     .check()?
     .stdout
     .lines()
@@ -50,9 +54,10 @@ pub fn list_explicitly_installed_packages(elevate: &Elevate) -> Result<Vec<Strin
     .collect())
 }
 
-pub fn list_packages_installed_as_dependencies(elevate: &Elevate) -> Result<Vec<String>> {
+pub async fn list_packages_installed_as_dependencies(elevate: &Elevate) -> Result<Vec<String>> {
     Ok(
-        cmd::Process::run("pacman", &["--query", "--quiet", "--deps"], elevate, None)?
+        cmd::Process::run("pacman", &["--query", "--quiet", "--deps"], elevate, None)
+            .await?
             .check()?
             .stdout
             .lines()
@@ -61,13 +66,14 @@ pub fn list_packages_installed_as_dependencies(elevate: &Elevate) -> Result<Vec<
     )
 }
 
-pub fn list_orphaned_packages(elevate: &Elevate) -> Result<Vec<String>> {
+pub async fn list_orphaned_packages(elevate: &Elevate) -> Result<Vec<String>> {
     let pacman = cmd::Process::run(
         "pacman",
         &["--query", "--quiet", "--deps", "--unrequired"],
         elevate,
         None,
-    )?
+    )
+    .await?
     .unchecked();
 
     if pacman.stdout.is_empty() && pacman.stderr.is_empty() && pacman.status.code() == 1 {

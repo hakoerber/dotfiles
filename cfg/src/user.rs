@@ -18,8 +18,10 @@ pub(crate) struct User {
     pub(crate) shell: String,
 }
 
-pub(crate) fn find_group(name: &str, elevate: &Elevate) -> Result<Option<Group>> {
-    let getent = cmd::Process::run("getent", &["group", "--", name], elevate, None)?.unchecked();
+pub(crate) async fn find_group(name: &str, elevate: &Elevate) -> Result<Option<Group>> {
+    let getent = cmd::Process::run("getent", &["group", "--", name], elevate, None)
+        .await?
+        .unchecked();
 
     match getent.status.code() {
         0 => {
@@ -41,13 +43,16 @@ pub(crate) fn find_group(name: &str, elevate: &Elevate) -> Result<Option<Group>>
 
 // pub(crate) fn find_username_by_id(name: &str, elevate: &Elevate) -> Result<Option<User>> {}
 
-pub(crate) fn find_user(name: &str, elevate: &Elevate) -> Result<Option<User>> {
-    let getent = cmd::Process::run("getent", &["passwd", "--", name], elevate, None)?.unchecked();
+pub(crate) async fn find_user(name: &str, elevate: &Elevate) -> Result<Option<User>> {
+    let getent = cmd::Process::run("getent", &["passwd", "--", name], elevate, None)
+        .await?
+        .unchecked();
 
     match getent.status.code() {
         0 => {
             let (primary, groups) =
-                cmd::Process::run("id", &["-G", "--name", "--", name], elevate, None)?
+                cmd::Process::run("id", &["-G", "--name", "--", name], elevate, None)
+                    .await?
                     .check()?
                     .stdout
                     .split_whitespace()

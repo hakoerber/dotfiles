@@ -15,15 +15,19 @@ pub struct BlockInFile<'change> {
     pub insert_after: Option<Regex>,
 }
 
+#[async_trait::async_trait]
 impl<'action> Plannable<'action> for BlockInFile<'action> {
-    fn plan<'elevate>(self: Box<Self>, elevate: &'elevate Elevate) -> Result<ChangeStatus<'action>>
+    async fn plan<'elevate>(
+        self: Box<Self>,
+        elevate: &'elevate Elevate,
+    ) -> Result<ChangeStatus<'action>>
     where
         'elevate: 'action,
     {
         let start_marker = format!("{marker} --- START", marker = self.marker);
         let end_marker = format!("{marker} --- END", marker = self.marker);
 
-        let content = fs::read_to_string(elevate, self.path)?;
+        let content = fs::read_to_string(elevate, self.path).await?;
 
         let new_content = {
             enum State {
@@ -192,11 +196,13 @@ struct BlockInFilePlan<'a> {
     checksum_to: Checksum,
 }
 
+#[async_trait::async_trait]
 impl Applyable for BlockInFilePlan<'_> {
-    fn apply(&self, elevate: &Elevate) -> Result<()> {
-        let tmpfile = Tempfile::new(elevate)?;
-        tmpfile.write(self.new_content.as_bytes())?;
-        tmpfile.save_as(self.args.path)?;
+    async fn apply(&self, elevate: &Elevate) -> Result<()> {
+        let tmpfile = Tempfile::new(elevate).await?;
+        tmpfile.write(self.new_content.as_bytes()).await?;
+        // clippy::large_futures
+        Box::pin(tmpfile.save_as(self.args.path)).await?;
         Ok(())
     }
 }
@@ -232,12 +238,16 @@ pub struct LineInFile<'change> {
     pub regex: Regex,
 }
 
+#[async_trait::async_trait]
 impl<'action> Plannable<'action> for LineInFile<'action> {
-    fn plan<'elevate>(self: Box<Self>, elevate: &'elevate Elevate) -> Result<ChangeStatus<'action>>
+    async fn plan<'elevate>(
+        self: Box<Self>,
+        elevate: &'elevate Elevate,
+    ) -> Result<ChangeStatus<'action>>
     where
         'elevate: 'action,
     {
-        let content = fs::read_to_string(elevate, self.path)?;
+        let content = fs::read_to_string(elevate, self.path).await?;
 
         let new_content = {
             enum State {
@@ -300,11 +310,13 @@ struct LineInFilePlan<'a> {
     checksum_to: Checksum,
 }
 
+#[async_trait::async_trait]
 impl Applyable for LineInFilePlan<'_> {
-    fn apply(&self, elevate: &Elevate) -> Result<()> {
-        let tmpfile = Tempfile::new(elevate)?;
-        tmpfile.write(self.new_content.as_bytes())?;
-        tmpfile.save_as(self.args.path)?;
+    async fn apply(&self, elevate: &Elevate) -> Result<()> {
+        let tmpfile = Tempfile::new(elevate).await?;
+        tmpfile.write(self.new_content.as_bytes()).await?;
+        // clippy::large_futures
+        Box::pin(tmpfile.save_as(self.args.path)).await?;
         Ok(())
     }
 }

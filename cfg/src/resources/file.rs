@@ -27,60 +27,65 @@ pub(crate) struct FileChangePlan<'args> {
     pub(crate) change: FileChange,
 }
 
+#[async_trait::async_trait]
 impl Applyable for FileChangePlan<'_> {
-    fn apply(&self, elevate: &Elevate) -> Result<()> {
-        fn rewrite_file(
+    async fn apply(&self, elevate: &Elevate) -> Result<()> {
+        async fn rewrite_file(
             elevate: &Elevate,
             path: &Path,
             content: &MaybeOwned<'_, [u8]>,
             permissions: &FilePermissions,
         ) -> Result<()> {
-            let tmpfile = Tempfile::new(elevate)?;
-            tmpfile.write(content.as_ref())?;
-            tmpfile.save_as(path)?;
-            fs::set_file_owner(elevate, path, &permissions.owner)?;
-            fs::set_file_group(elevate, path, &permissions.group)?;
-            fs::set_file_mode(elevate, path, permissions.mode)?;
+            let tmpfile = Tempfile::new(elevate).await?;
+            tmpfile.write(content.as_ref()).await?;
+            // clippy::large_futures
+            Box::pin(tmpfile.save_as(path)).await?;
+            fs::set_file_owner(elevate, path, &permissions.owner).await?;
+            fs::set_file_group(elevate, path, &permissions.group).await?;
+            fs::set_file_mode(elevate, path, permissions.mode).await?;
             Ok(())
         }
         match self.change {
             FileChange::Create => {
-                rewrite_file(
+                Box::pin(rewrite_file(
                     elevate,
                     self.args.path.as_ref(),
                     &self.args.content.to_bytes(),
                     &self.args.permissions,
-                )?;
+                ))
+                .await?;
             }
             FileChange::ReplaceSymlink => {
-                fs::remove_symlink(elevate, self.args.path.as_ref())?;
-                rewrite_file(
+                fs::remove_symlink(elevate, self.args.path.as_ref()).await?;
+                Box::pin(rewrite_file(
                     elevate,
                     self.args.path.as_ref(),
                     &self.args.content.to_bytes(),
                     &self.args.permissions,
-                )?;
+                ))
+                .await?;
             }
             FileChange::ReplaceDirectory => {
-                fs::remove_recursive(elevate, self.args.path.as_ref())?;
-                rewrite_file(
+                fs::remove_recursive(elevate, self.args.path.as_ref()).await?;
+                Box::pin(rewrite_file(
                     elevate,
                     self.args.path.as_ref(),
                     &self.args.content.to_bytes(),
                     &self.args.permissions,
-                )?;
+                ))
+                .await?;
             }
             FileChange::MetadataChange {
                 ref permission_change,
             } => {
                 if let Some(ref uid) = permission_change.diff.owner {
-                    fs::set_file_owner(elevate, self.args.path.as_ref(), uid)?;
+                    fs::set_file_owner(elevate, self.args.path.as_ref(), uid).await?;
                 }
                 if let Some(ref gid) = permission_change.diff.group {
-                    fs::set_file_group(elevate, self.args.path.as_ref(), gid)?;
+                    fs::set_file_group(elevate, self.args.path.as_ref(), gid).await?;
                 }
                 if let Some(mode) = permission_change.diff.mode {
-                    fs::set_file_mode(elevate, self.args.path.as_ref(), mode)?;
+                    fs::set_file_mode(elevate, self.args.path.as_ref(), mode).await?;
                 }
             }
             FileChange::Changed {
@@ -89,23 +94,24 @@ impl Applyable for FileChangePlan<'_> {
                 existing_content: _,
             } => match *checksum_change {
                 Some(ref _change) => {
-                    rewrite_file(
+                    Box::pin(rewrite_file(
                         elevate,
                         self.args.path.as_ref(),
                         &self.args.content.to_bytes(),
                         &self.args.permissions,
-                    )?;
+                    ))
+                    .await?;
                 }
                 None => {
                     if let Some(ref permission_change) = *permission_change {
                         if let Some(ref uid) = permission_change.diff.owner {
-                            fs::set_file_owner(elevate, self.args.path.as_ref(), uid)?;
+                            fs::set_file_owner(elevate, self.args.path.as_ref(), uid).await?;
                         }
                         if let Some(ref gid) = permission_change.diff.group {
-                            fs::set_file_group(elevate, self.args.path.as_ref(), gid)?;
+                            fs::set_file_group(elevate, self.args.path.as_ref(), gid).await?;
                         }
                         if let Some(mode) = permission_change.diff.mode {
-                            fs::set_file_mode(elevate, self.args.path.as_ref(), mode)?;
+                            fs::set_file_mode(elevate, self.args.path.as_ref(), mode).await?;
                         }
                     }
                 }
@@ -196,18 +202,23 @@ pub struct File<'args> {
     pub ignore_checksum_changes: bool,
 }
 
+#[async_trait::async_trait]
 impl<'args> Plannable<'args> for File<'args> {
-    fn plan<'elevate>(self: Box<Self>, elevate: &'elevate Elevate) -> Result<ChangeStatus<'args>>
+    async fn plan<'elevate>(
+        self: Box<Self>,
+        elevate: &'elevate Elevate,
+    ) -> Result<ChangeStatus<'args>>
     where
         'elevate: 'args,
     {
-        let stat = fs::stat(elevate, self.path.as_ref())?;
+        let stat = fs::stat(elevate, self.path.as_ref()).await?;
 
         if let Some(stat) = stat {
             match stat.entry_type {
                 fs::EntryType::File => {
                     let permission_change =
-                        fs::check_file_permissions(elevate, self.path.as_ref(), &self.permissions)?;
+                        fs::check_file_permissions(elevate, self.path.as_ref(), &self.permissions)
+                            .await?;
 
                     if self.ignore_checksum_changes {
                         if let Some(permission_change) = permission_change {
@@ -219,7 +230,7 @@ impl<'args> Plannable<'args> for File<'args> {
                             Ok(ChangeStatus::Clean)
                         }
                     } else {
-                        let existing_content = fs::read(elevate, self.path.as_ref())?;
+                        let existing_content = fs::read(elevate, self.path.as_ref()).await?;
 
                         let (checksum_from, checksum_to) = (
                             checksum::checksum_from(self.content.to_bytes().as_ref()),
@@ -285,46 +296,65 @@ pub(crate) enum DirectoryChange {
 }
 
 #[derive(Debug)]
-pub(crate) struct DirectoryChangePlan<'args, 'elevate> {
-    pub(crate) elevate: &'elevate Elevate,
+pub(crate) struct DirectoryChangePlan<'args> {
     pub(crate) args: Directory<'args>,
     pub(crate) change: DirectoryChange,
 }
 
-impl Applyable for DirectoryChangePlan<'_, '_> {
-    fn apply(&self, elevate: &Elevate) -> Result<()> {
-        fn create(path: &Path, permissions: &FilePermissions, elevate: &Elevate) -> Result<()> {
-            fs::create_directory(path, elevate)?;
-            fs::set_file_owner(elevate, path, &permissions.owner)?;
-            fs::set_file_group(elevate, path, &permissions.group)?;
-            fs::set_file_mode(elevate, path, permissions.mode)?;
+#[async_trait::async_trait]
+impl Applyable for DirectoryChangePlan<'_> {
+    async fn apply(&self, elevate: &Elevate) -> Result<()> {
+        async fn create(
+            path: &Path,
+            permissions: &FilePermissions,
+            elevate: &Elevate,
+        ) -> Result<()> {
+            fs::create_directory(path, elevate).await?;
+            fs::set_file_owner(elevate, path, &permissions.owner).await?;
+            fs::set_file_group(elevate, path, &permissions.group).await?;
+            fs::set_file_mode(elevate, path, permissions.mode).await?;
             Ok(())
         }
 
         match self.change {
             DirectoryChange::Create => {
-                create(self.args.path.as_ref(), &self.args.permissions, elevate)?;
+                Box::pin(create(
+                    self.args.path.as_ref(),
+                    &self.args.permissions,
+                    elevate,
+                ))
+                .await?;
             }
             DirectoryChange::ReplaceSymlink => {
-                fs::remove_symlink(elevate, self.args.path.as_ref())?;
-                create(self.args.path.as_ref(), &self.args.permissions, elevate)?;
+                fs::remove_symlink(elevate, self.args.path.as_ref()).await?;
+                Box::pin(create(
+                    self.args.path.as_ref(),
+                    &self.args.permissions,
+                    elevate,
+                ))
+                .await?;
             }
             DirectoryChange::ReplaceFile => {
-                fs::remove_file(elevate, self.args.path.as_ref())?;
-                create(self.args.path.as_ref(), &self.args.permissions, elevate)?;
+                fs::remove_file(elevate, self.args.path.as_ref()).await?;
+                Box::pin(create(
+                    self.args.path.as_ref(),
+                    &self.args.permissions,
+                    elevate,
+                ))
+                .await?;
             }
             DirectoryChange::Changed {
                 ref permission_change,
             } => {
                 if let Some(ref permission_change) = *permission_change {
                     if let Some(ref uid) = permission_change.diff.owner {
-                        fs::set_file_owner(elevate, self.args.path.as_ref(), uid)?;
+                        fs::set_file_owner(elevate, self.args.path.as_ref(), uid).await?;
                     }
                     if let Some(ref gid) = permission_change.diff.group {
-                        fs::set_file_group(elevate, self.args.path.as_ref(), gid)?;
+                        fs::set_file_group(elevate, self.args.path.as_ref(), gid).await?;
                     }
                     if let Some(mode) = permission_change.diff.mode {
-                        fs::set_file_mode(elevate, self.args.path.as_ref(), mode)?;
+                        fs::set_file_mode(elevate, self.args.path.as_ref(), mode).await?;
                     }
                 }
             }
@@ -333,7 +363,7 @@ impl Applyable for DirectoryChangePlan<'_, '_> {
     }
 }
 
-impl Reporter for DirectoryChangePlan<'_, '_> {
+impl Reporter for DirectoryChangePlan<'_> {
     fn report(&self) -> Result<Vec<String>> {
         match self.change {
             DirectoryChange::Create => Ok(vec!["create file".to_owned()]),
@@ -380,19 +410,22 @@ pub struct Directory<'args> {
     pub permissions: FilePermissions,
 }
 
+#[async_trait::async_trait]
 impl<'args> Plannable<'args> for Directory<'args> {
-    fn plan<'elevate>(self: Box<Self>, elevate: &'elevate Elevate) -> Result<ChangeStatus<'args>>
+    async fn plan<'elevate>(
+        self: Box<Self>,
+        elevate: &'elevate Elevate,
+    ) -> Result<ChangeStatus<'args>>
     where
         'elevate: 'args,
     {
-        let stat = fs::stat(elevate, self.path.as_ref())?;
+        let stat = fs::stat(elevate, self.path.as_ref()).await?;
 
         if let Some(stat) = stat {
             match stat.entry_type {
                 fs::EntryType::File => match self.on_file {
                     FileHandling::Proceed => {
                         Ok(ChangeStatus::NeedsChange(Box::new(DirectoryChangePlan {
-                            elevate,
                             args: *self,
                             change: DirectoryChange::ReplaceFile,
                         })))
@@ -402,7 +435,6 @@ impl<'args> Plannable<'args> for Directory<'args> {
                 fs::EntryType::Symlink => match self.on_symlink {
                     SymlinkHandling::Proceed => {
                         Ok(ChangeStatus::NeedsChange(Box::new(DirectoryChangePlan {
-                            elevate,
                             args: *self,
                             change: DirectoryChange::ReplaceSymlink,
                         })))
@@ -411,11 +443,11 @@ impl<'args> Plannable<'args> for Directory<'args> {
                 },
                 fs::EntryType::Directory => {
                     let permission_change =
-                        fs::check_file_permissions(elevate, self.path.as_ref(), &self.permissions)?;
+                        fs::check_file_permissions(elevate, self.path.as_ref(), &self.permissions)
+                            .await?;
 
                     if permission_change.is_some() {
                         Ok(ChangeStatus::NeedsChange(Box::new(DirectoryChangePlan {
-                            elevate,
                             args: *self,
                             change: DirectoryChange::Changed { permission_change },
                         })))
@@ -427,7 +459,6 @@ impl<'args> Plannable<'args> for Directory<'args> {
         } else {
             // does not exist
             Ok(ChangeStatus::NeedsChange(Box::new(DirectoryChangePlan {
-                elevate,
                 args: *self,
                 change: DirectoryChange::Create,
             })))
@@ -443,23 +474,23 @@ pub(crate) enum RemoveChange {
 }
 
 #[derive(Debug)]
-pub(crate) struct RemovePlan<'args, 'elevate> {
-    pub(crate) elevate: &'elevate Elevate,
+pub(crate) struct RemovePlan<'args> {
     pub(crate) args: Remove<'args>,
     pub(crate) change: RemoveChange,
 }
 
-impl Applyable for RemovePlan<'_, '_> {
-    fn apply(&self, elevate: &Elevate) -> Result<()> {
+#[async_trait::async_trait]
+impl Applyable for RemovePlan<'_> {
+    async fn apply(&self, elevate: &Elevate) -> Result<()> {
         match self.change {
-            RemoveChange::Directory => fs::remove_recursive(elevate, self.args.path.as_ref()),
-            RemoveChange::File => fs::remove_file(elevate, self.args.path.as_ref()),
-            RemoveChange::Symlink => fs::remove_symlink(elevate, self.args.path.as_ref()),
+            RemoveChange::Directory => fs::remove_recursive(elevate, self.args.path.as_ref()).await,
+            RemoveChange::File => fs::remove_file(elevate, self.args.path.as_ref()).await,
+            RemoveChange::Symlink => fs::remove_symlink(elevate, self.args.path.as_ref()).await,
         }
     }
 }
 
-impl Reporter for RemovePlan<'_, '_> {
+impl Reporter for RemovePlan<'_> {
     fn report(&self) -> Result<Vec<String>> {
         match self.change {
             RemoveChange::Directory => Ok(vec!["remove directory".to_owned()]),
@@ -477,12 +508,16 @@ pub struct Remove<'args> {
     pub on_symlink: SymlinkHandling,
 }
 
+#[async_trait::async_trait]
 impl<'args> Plannable<'args> for Remove<'args> {
-    fn plan<'elevate>(self: Box<Self>, elevate: &'elevate Elevate) -> Result<ChangeStatus<'args>>
+    async fn plan<'elevate>(
+        self: Box<Self>,
+        elevate: &'elevate Elevate,
+    ) -> Result<ChangeStatus<'args>>
     where
         'elevate: 'args,
     {
-        match fs::stat(elevate, self.path.as_ref())? {
+        match fs::stat(elevate, self.path.as_ref()).await? {
             Some(stat) => Ok(ChangeStatus::NeedsChange(Box::new(RemovePlan {
                 change: match stat.entry_type {
                     fs::EntryType::File => match self.on_file {
@@ -499,7 +534,6 @@ impl<'args> Plannable<'args> for Remove<'args> {
                         SymlinkHandling::Proceed => RemoveChange::Symlink,
                     },
                 },
-                elevate,
                 args: *self,
             }))),
             None => Ok(ChangeStatus::Clean),

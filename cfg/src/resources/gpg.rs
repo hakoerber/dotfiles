@@ -12,13 +12,21 @@ pub struct GpgKey<'a> {
     pub gnupg_directory: MaybeOwned<'a, Path>,
 }
 
+#[async_trait::async_trait]
 impl<'change> Plannable<'change> for GpgKey<'change> {
-    fn plan<'elevate>(self: Box<Self>, elevate: &'elevate Elevate) -> Result<ChangeStatus<'change>>
+    async fn plan<'elevate>(
+        self: Box<Self>,
+        elevate: &'elevate Elevate,
+    ) -> Result<ChangeStatus<'change>>
     where
         'elevate: 'change,
     {
-        let key =
-            gpg::get_gpg_key_trust(&self.fingerprint, self.gnupg_directory.as_ref(), elevate)?;
+        let key = Box::pin(gpg::get_gpg_key_trust(
+            &self.fingerprint,
+            self.gnupg_directory.as_ref(),
+            elevate,
+        ))
+        .await?;
         match key {
             Some(trust) => {
                 if trust == self.trust {
@@ -52,21 +60,24 @@ pub(crate) struct GpgPlan<'a> {
     action: GpgAction,
 }
 
+#[async_trait::async_trait]
 impl Applyable for GpgPlan<'_> {
-    fn apply(&self, elevate: &Elevate) -> Result<()> {
+    async fn apply(&self, elevate: &Elevate) -> Result<()> {
         match self.action {
             GpgAction::Import => {
                 gpg::import_key(
                     self.args.content,
                     self.args.gnupg_directory.as_ref(),
                     elevate,
-                )?;
+                )
+                .await?;
                 gpg::trust_key(
                     &self.args.fingerprint,
                     self.args.trust,
                     self.args.gnupg_directory.as_ref(),
                     elevate,
-                )?;
+                )
+                .await?;
             }
             GpgAction::Trust { existing_trust: _ } => {
                 gpg::trust_key(
@@ -74,7 +85,8 @@ impl Applyable for GpgPlan<'_> {
                     self.args.trust,
                     self.args.gnupg_directory.as_ref(),
                     elevate,
-                )?;
+                )
+                .await?;
             }
         }
         Ok(())
