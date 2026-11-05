@@ -110,4 +110,5 @@ fn main() {
 
     println!("cargo::rerun-if-changed=../pkgbuilds");
     println!("cargo::rerun-if-changed=../files");
+    println!("cargo::rerun-if-changed=../assets");
 }

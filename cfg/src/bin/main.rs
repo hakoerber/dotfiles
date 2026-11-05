@@ -3710,7 +3710,7 @@ fn user_wallpaper<'elevate: 'action, 'action, 'user, 'machine>(
             ignore_checksum_changes: false,
             content: FileContent::Bytes(Ref(include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../wallpaper.jpg"
+                "/../assets/wallpaper.jpg"
             )))),
         }),
     )?;
