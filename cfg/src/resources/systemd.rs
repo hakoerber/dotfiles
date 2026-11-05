@@ -1,4 +1,4 @@
-use anyhow::{Result, bail};
+use anyhow::{Result, anyhow, bail};
 use async_trait::async_trait;
 use serde::Serialize;
 
@@ -26,6 +26,13 @@ pub enum ServiceStateRuntime {
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, derive_more::Display)]
+pub enum ServiceStateRuntimeActual {
+    Active,
+    Inactive,
+    ConditionNotMet,
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq, derive_more::Display)]
 pub enum ServiceStatePersistent {
     Enabled,
     Disabled,
@@ -38,10 +45,30 @@ pub struct ServiceState {
     pub persistent: ServiceStatePersistent,
 }
 
+#[derive(Debug)]
+pub struct ServiceStateActual {
+    pub runtime: ServiceStateRuntimeActual,
+    pub persistent: ServiceStatePersistent,
+}
+
 impl ServiceState {
-    fn diff(&self, other: &Self) -> ServiceStateDiff {
+    fn diff(&self, other: &ServiceStateActual) -> ServiceStateDiff {
         ServiceStateDiff {
-            runtime: (self.runtime != other.runtime).then_some(other.runtime),
+            runtime: match (other.runtime, self.runtime) {
+                (ServiceStateRuntimeActual::Active, ServiceStateRuntime::Active)
+                | (ServiceStateRuntimeActual::Inactive, ServiceStateRuntime::Inactive) => None,
+                (ServiceStateRuntimeActual::Active, ServiceStateRuntime::Inactive) => {
+                    Some(ServiceStateRuntime::Inactive)
+                }
+                (ServiceStateRuntimeActual::Inactive, ServiceStateRuntime::Active) => {
+                    Some(ServiceStateRuntime::Active)
+                }
+                (ServiceStateRuntimeActual::ConditionNotMet, _) => {
+                    // when condition not met, we never assume changes
+                    None
+                }
+            },
+
             persistent: (self.persistent != other.persistent).then_some(other.persistent),
         }
     }
@@ -81,24 +108,64 @@ impl<'change> Plannable<'change> for Service<'change> {
         let runtime_state = {
             let systemctl = cmd::Process::run(
                 "systemctl",
-                &["show", "-p", "ActiveState", "--", self.name],
+                &[
+                    "show",
+                    "-p",
+                    "ActiveState",
+                    "-p",
+                    "ConditionResult",
+                    "--",
+                    self.name,
+                ],
                 elevate,
                 None,
             )
             .await?
             .check()?;
-            let Some(state) = systemctl.stdout.trim().strip_prefix("ActiveState=") else {
+
+            let lines: [&str; 2] = systemctl
+                .stdout
+                .trim()
+                .lines()
+                .collect::<Vec<&str>>()
+                .try_into()
+                .map_err(|_err| anyhow!("invalid systemctl show outputs lines"))?;
+
+            let Some(state) = lines
+                .iter()
+                .find_map(|line| line.strip_prefix("ActiveState="))
+            else {
                 bail!(
                     "invalid systemctl active output prefix in \"{}\"",
                     systemctl.stdout.trim()
                 );
             };
 
-            match state {
-                "active" | "activating" | "reloading" | "refreshing" => ServiceStateRuntime::Active,
-                "inactive" | "failed" | "deactivating" | "maintenance" => {
-                    ServiceStateRuntime::Inactive
+            let Some(condition) = lines
+                .iter()
+                .find_map(|line| line.strip_prefix("ConditionResult="))
+                .map(|s| match s {
+                    "yes" => Ok(true),
+                    "no" => Ok(false),
+                    other => Err(anyhow!("invalid conditionresult value {other}")),
+                })
+                .transpose()?
+            else {
+                bail!(
+                    "invalid systemctl condition result output prefix in \"{}\"",
+                    systemctl.stdout.trim()
+                );
+            };
+
+            match (condition, state) {
+                (true, "active" | "activating" | "reloading" | "refreshing") => {
+                    ServiceStateRuntimeActual::Active
                 }
+                (true, "inactive" | "failed" | "deactivating" | "maintenance") => {
+                    ServiceStateRuntimeActual::Inactive
+                }
+                (false, _) => ServiceStateRuntimeActual::ConditionNotMet,
+
                 _ => bail!("invalid systemctl active output \"{}\"", state.trim()),
             }
         };
@@ -123,12 +190,12 @@ impl<'change> Plannable<'change> for Service<'change> {
             }
         };
 
-        let current_state = ServiceState {
+        let current_state = ServiceStateActual {
             runtime: runtime_state,
             persistent: persistent_state,
         };
 
-        let diff = current_state.diff(&self.state);
+        let diff = self.state.diff(&current_state);
 
         if diff.has_changes() {
             Ok(ChangeStatus::NeedsChange(Box::new(ServicePlan {
@@ -145,7 +212,7 @@ impl<'change> Plannable<'change> for Service<'change> {
 #[derive(Debug)]
 pub(crate) struct ServicePlan<'a> {
     pub(crate) args: Service<'a>,
-    pub(crate) current_state: ServiceState,
+    pub(crate) current_state: ServiceStateActual,
     pub(crate) diff: ServiceStateDiff,
 }
 
