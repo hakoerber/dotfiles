@@ -1,8 +1,8 @@
-use std::{fs, io::Write as _, os::unix::fs::PermissionsExt as _};
+use std::{ffi::OsString, fs, io::Write as _, os::unix::fs::PermissionsExt as _};
 
 use anyhow::{Result, anyhow, bail};
 
-use super::{Elevate, Gid, MaybeOwned, Path, Reporter, Uid, cmd};
+use super::{Elevate, Gid, MaybeOwned, Path, PathBuf, Reporter, Uid, cmd};
 
 #[derive(Debug)]
 pub(crate) struct RawFileContent(Vec<u8>);
@@ -325,7 +325,7 @@ pub(crate) fn try_read(elevate: &Elevate, path: &Path) -> Result<Option<Vec<u8>>
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => match stat(elevate, path)? {
             Some(_stat) => {
-                let cat = cmd::cmd_bin("cat", &[path.as_str()], elevate, None)?.check()?;
+                let cat = cmd::Process::run_bin("cat", &[path.as_str()], elevate, None)?.check()?;
                 Ok(Some(cat.stdout))
             }
             None => Ok(None),
@@ -365,4 +365,58 @@ pub(crate) fn write(path: &Path, input: &[u8], elevate: &Elevate) -> Result<()> 
         }
     }
     Ok(())
+}
+
+pub fn files_in_dir(elevate: &Elevate, path: &Path) -> Result<Vec<PathBuf>> {
+    use std::os::unix::ffi::OsStringExt as _;
+
+    match *elevate {
+        Elevate::Sudo(ref _elevate_to) => Ok(cmd::Process::run_bin(
+            "find",
+            &[
+                path.as_str(),
+                "-maxdepth",
+                "1",
+                "-type",
+                "f",
+                "-printf",
+                "%f\0",
+            ],
+            elevate,
+            None,
+        )?
+        .check()?
+        .stdout
+        .split(|c| *c == 0)
+        .map(|chunk| OsString::from_vec(chunk.to_vec()))
+        .map(|s| PathBuf::try_from(s).map_err(|_err| anyhow!("non utf8 path")))
+        .collect::<Result<_>>()?),
+        Elevate::No => Ok(std::fs::read_dir(path)?
+            .map(|entry| {
+                let entry = entry?;
+                let file_type = entry.file_type()?;
+                #[expect(
+                    clippy::filetype_is_file,
+                    reason = "we are really only interested in something file-y"
+                )]
+                if file_type.is_file() || file_type.is_symlink() {
+                    Ok(Some(
+                        PathBuf::try_from(
+                            entry
+                                .path()
+                                .file_name()
+                                .expect("read_dir() does not return paths with .. suffix")
+                                .to_owned(),
+                        )
+                        .map_err(|_err| anyhow!("non utf8 path"))?,
+                    ))
+                } else {
+                    Ok(None)
+                }
+            })
+            .collect::<Result<Vec<Option<PathBuf>>>>()?
+            .into_iter()
+            .flatten() // remove non-paths (`None`)
+            .collect()),
+    }
 }

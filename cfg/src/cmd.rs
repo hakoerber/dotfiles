@@ -56,61 +56,6 @@ impl ProcessRawStatusUnknown {
     }
 }
 
-pub(crate) fn cmd_bin(
-    cmd: &str,
-    args: &[&str],
-    elevate: &Elevate,
-    stdin: Option<&[u8]>,
-) -> io::Result<ProcessRawStatusUnknown> {
-    let (cmd, args) = match *elevate {
-        Elevate::Sudo(ref elevate_to) => match *elevate_to {
-            ElevateTo::Root => ("sudo", vec!["--"]),
-            ElevateTo::User { ref user } => ("sudo", vec!["-u", user, "--"]),
-        }
-        .tap_mut(|v| {
-            v.1.push(cmd);
-            v.1.extend_from_slice(args);
-        }),
-        Elevate::No => (cmd, args.to_vec()),
-    };
-
-    tracing::debug!("running cmd {cmd} {args:?}");
-
-    let mut cmd = process::Command::new(cmd)
-        .args(args)
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .stdin(if stdin.is_some() {
-            Stdio::piped()
-        } else {
-            Stdio::null()
-        })
-        .spawn()?;
-
-    if let Some(data) = stdin {
-        tracing::debug!("writing {} bytes to stdin", data.len());
-        let mut stdin = cmd.stdin.take().expect("stdin is open");
-        stdin.write_all(data)?;
-    }
-
-    let output = cmd.wait_with_output()?;
-
-    tracing::debug!("received {output:?}");
-
-    Ok(ProcessRawStatusUnknown {
-        stdout: output.stdout,
-        stderr: output.stderr,
-        status: ExitStatus(
-            output
-                .status
-                .code()
-                .expect("process to have exit code on stop")
-                .try_into()
-                .expect("exit code to be non-negative"),
-        ),
-    })
-}
-
 #[derive(Debug)]
 pub struct Process {
     pub stdout: String,
@@ -127,6 +72,61 @@ pub struct ProcessStatusUnknown {
 }
 
 impl Process {
+    pub(crate) fn run_bin(
+        cmd: &str,
+        args: &[&str],
+        elevate: &Elevate,
+        stdin: Option<&[u8]>,
+    ) -> io::Result<ProcessRawStatusUnknown> {
+        let (cmd, args) = match *elevate {
+            Elevate::Sudo(ref elevate_to) => match *elevate_to {
+                ElevateTo::Root => ("sudo", vec!["--"]),
+                ElevateTo::User { ref user } => ("sudo", vec!["-u", user, "--"]),
+            }
+            .tap_mut(|v| {
+                v.1.push(cmd);
+                v.1.extend_from_slice(args);
+            }),
+            Elevate::No => (cmd, args.to_vec()),
+        };
+
+        tracing::debug!("running cmd {cmd} {args:?}");
+
+        let mut cmd = process::Command::new(cmd)
+            .args(args)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .stdin(if stdin.is_some() {
+                Stdio::piped()
+            } else {
+                Stdio::null()
+            })
+            .spawn()?;
+
+        if let Some(data) = stdin {
+            tracing::debug!("writing {} bytes to stdin", data.len());
+            let mut stdin = cmd.stdin.take().expect("stdin is open");
+            stdin.write_all(data)?;
+        }
+
+        let output = cmd.wait_with_output()?;
+
+        tracing::debug!("received {output:?}");
+
+        Ok(ProcessRawStatusUnknown {
+            stdout: output.stdout,
+            stderr: output.stderr,
+            status: ExitStatus(
+                output
+                    .status
+                    .code()
+                    .expect("process to have exit code on stop")
+                    .try_into()
+                    .expect("exit code to be non-negative"),
+            ),
+        })
+    }
+
     pub fn run(
         cmd: &str,
         args: &[&str],
@@ -137,7 +137,7 @@ impl Process {
             stdout,
             stderr,
             status,
-        } = cmd_bin(cmd, args, elevate, stdin)?;
+        } = Self::run_bin(cmd, args, elevate, stdin)?;
 
         Ok(ProcessStatusUnknown {
             stdout: stdout.try_into()?,

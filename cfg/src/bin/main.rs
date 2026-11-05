@@ -10,13 +10,17 @@ use std::{collections::HashMap, env, fs};
 
 use anyhow::{Result, anyhow, bail};
 use clap::{Parser, ValueEnum};
-use include_dir::include_dir;
+use include_dir::{DirEntry, include_dir};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 use cfg::prelude::*;
 
 static PKGBUILDS: include_dir::Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../pkgbuilds");
+
+static BINS: include_dir::Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../files/bin");
+
+static SCRIPTS: include_dir::Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../files/scripts");
 
 static INCLUDED_PACKAGES: &[(&str, &str, &str, &[u8])] =
     include!(concat!(env!("OUT_DIR"), "/packages.rs"));
@@ -3451,45 +3455,28 @@ fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
     user: &'user UserConfig,
     user_directories: &UserDirectories,
 ) -> Result<()> {
-    for (script, content) in [
-        (
-            "fix-aoe2.sh",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/scripts/fix-aoe2.sh"
-            ))
-            .as_slice(),
-        ),
-        (
-            "garmin.sh",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/scripts/garmin.sh"
-            ))
-            .as_slice(),
-        ),
-        (
-            "install-gothic.sh",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/scripts/install-gothic.sh"
-            ))
-            .as_slice(),
-        ),
-        (
-            "install-gothic2.sh",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/scripts/install-gothic2.sh"
-            ))
-            .as_slice(),
-        ),
-    ] {
+    let scripts: Vec<(&str, &[u8])> = SCRIPTS
+        .entries()
+        .iter()
+        .map(|entry| match *entry {
+            DirEntry::Dir(ref d) => Err(anyhow!("subdirectories in scripts not supported")),
+            DirEntry::File(ref file) => {
+                let path = Path::from_path(file.path())
+                    .ok_or_else(|| anyhow!("non utf-8 path in scripts"))?;
+
+                let name = path.file_name().expect("file to have a name");
+
+                Ok((name, file.contents()))
+            }
+        })
+        .collect::<Result<_, _>>()?;
+
+    for &(name, content) in &scripts {
         plan.add(
-            Owned(format!("add script {script}")),
+            Owned(format!("add script {name}")),
             user_elevate,
             Box::new(File {
-                path: Owned(user_directories.scripts.join(script)),
+                path: Owned(user_directories.scripts.join(name)),
                 on_symlink: SymlinkHandling::Proceed,
                 on_directory: DirectoryHandling::Bail,
                 permissions: FilePermissions {
@@ -3504,173 +3491,45 @@ fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
         )?;
     }
 
-    for (bin, content) in [
-        (
-            "ascii",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/ascii")).as_slice(),
-        ),
-        (
-            "asciihex",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/bin/asciihex"
-            ))
-            .as_slice(),
-        ),
-        (
-            "days-until",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/bin/days-until"
-            ))
-            .as_slice(),
-        ),
-        (
-            "firefox-default",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/bin/firefox-default"
-            ))
-            .as_slice(),
-        ),
-        (
-            "git-rewrite-author",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/bin/git-rewrite-author"
-            ))
-            .as_slice(),
-        ),
-        (
-            "gpg-yubikey-rescan",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/bin/gpg-yubikey-rescan"
-            ))
-            .as_slice(),
-        ),
-        (
-            "kw",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/kw")).as_slice(),
-        ),
-        (
-            "markdown-to-pdf",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/bin/markdown-to-pdf"
-            ))
-            .as_slice(),
-        ),
-        (
-            "mousespam",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/bin/mousespam"
-            ))
-            .as_slice(),
-        ),
-        (
-            "mousespam-toggle",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/bin/mousespam-toggle"
-            ))
-            .as_slice(),
-        ),
-        (
-            "nato",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/nato")).as_slice(),
-        ),
-        (
-            "natode",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/natode")).as_slice(),
-        ),
-        (
-            "notify",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/notify")).as_slice(),
-        ),
-        (
-            "pacman-remove-orphans",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/bin/pacman-remove-orphans"
-            ))
-            .as_slice(),
-        ),
-        (
-            "paselect",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/bin/paselect"
-            ))
-            .as_slice(),
-        ),
-        (
-            "pass",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/pass")).as_slice(),
-        ),
-        (
-            "pf",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/pf")).as_slice(),
-        ),
-        (
-            "pprint",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/pprint")).as_slice(),
-        ),
-        (
-            "pw",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/pw")).as_slice(),
-        ),
-        (
-            "qr",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/qr")).as_slice(),
-        ),
-        (
-            "randmac",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/randmac")).as_slice(),
-        ),
-        (
-            "split-multiyaml-to-json",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/bin/split-multiyaml-to-json"
-            ))
-            .as_slice(),
-        ),
-        (
-            "switch-color-mode",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/bin/switch-color-mode"
-            ))
-            .as_slice(),
-        ),
-        (
-            "terraform-get-targets",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/bin/terraform-get-targets"
-            ))
-            .as_slice(),
-        ),
-        (
-            "unascii",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/unascii")).as_slice(),
-        ),
-        (
-            "yaml2json",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/bin/yaml2json"
-            ))
-            .as_slice(),
-        ),
-    ] {
+    for file in files_in_dir(user_elevate, &user_directories.scripts)? {
+        let name = file.as_str();
+
+        if !scripts.iter().any(|&(file, _content)| file == name) {
+            plan.add(
+                Owned(format!("remove unmanaged script {name}")),
+                user_elevate,
+                Box::new(Remove {
+                    path: Owned(user_directories.scripts.join(name)),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Bail,
+                    on_file: FileHandling::Proceed,
+                }),
+            )?;
+        }
+    }
+
+    let bins: Vec<(&str, &[u8])> = BINS
+        .entries()
+        .iter()
+        .map(|entry| match *entry {
+            DirEntry::Dir(ref d) => Err(anyhow!("subdirectories in bin not supported")),
+            DirEntry::File(ref file) => {
+                let path =
+                    Path::from_path(file.path()).ok_or_else(|| anyhow!("non utf-8 path in bin"))?;
+
+                let name = path.file_name().expect("file to have a name");
+
+                Ok((name, file.contents()))
+            }
+        })
+        .collect::<Result<_, _>>()?;
+
+    for &(name, content) in &bins {
         plan.add(
-            Owned(format!("add executable {bin}")),
+            Owned(format!("add executable {name}")),
             user_elevate,
             Box::new(File {
-                path: Owned(user_directories.bin.join(bin)),
+                path: Owned(user_directories.bin.join(name)),
                 on_symlink: SymlinkHandling::Proceed,
                 on_directory: DirectoryHandling::Bail,
                 permissions: FilePermissions {
@@ -3683,6 +3542,23 @@ fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
                 content: FileContent::Bytes(Ref(content)),
             }),
         )?;
+    }
+
+    for file in files_in_dir(user_elevate, &user_directories.bin)? {
+        let name = file.as_str();
+
+        if !bins.iter().any(|&(file, _content)| file == name) {
+            plan.add(
+                Owned(format!("remove unmanaged executable {name}")),
+                user_elevate,
+                Box::new(Remove {
+                    path: Owned(user_directories.bin.join(name)),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Bail,
+                    on_file: FileHandling::Proceed,
+                }),
+            )?;
+        }
     }
 
     Ok(())
