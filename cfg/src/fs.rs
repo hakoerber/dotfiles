@@ -398,61 +398,97 @@ pub(crate) async fn write(path: &Path, input: &[u8], elevate: &Elevate) -> Resul
     Ok(())
 }
 
-pub async fn files_in_dir(elevate: &Elevate, path: &Path) -> Result<Vec<PathBuf>> {
+pub async fn exists(elevate: &Elevate, path: &Path) -> Result<bool> {
+    match *elevate {
+        Elevate::Sudo(ref _elevate_to) => {
+            Ok(
+                cmd::Process::run("test", &["-d", path.as_str()], elevate, None)
+                    .await?
+                    .unchecked()
+                    .status
+                    .success(),
+            )
+        }
+        Elevate::No => Ok(fs::try_exists(path).await?),
+    }
+}
+
+pub async fn files_in_dir(elevate: &Elevate, path: &Path) -> Result<Option<Vec<PathBuf>>> {
     use std::os::unix::ffi::OsStringExt as _;
     use tokio_stream::{StreamExt as _, wrappers::ReadDirStream};
 
     match *elevate {
-        Elevate::Sudo(ref _elevate_to) => Ok(cmd::Process::run_bin(
-            "find",
-            &[
-                path.as_str(),
-                "-maxdepth",
-                "1",
-                "-type",
-                "f",
-                "-printf",
-                "%f\0",
-            ],
-            elevate,
-            None,
-        )
-        .await?
-        .check()?
-        .stdout
-        .split(|c| *c == 0)
-        .map(|chunk| OsString::from_vec(chunk.to_vec()))
-        .map(|s| PathBuf::try_from(s).map_err(|_err| anyhow!("non utf8 path")))
-        .collect::<Result<_>>()?),
+        Elevate::Sudo(ref _elevate_to) => {
+            if exists(elevate, path).await? {
+                Ok(Some(
+                    cmd::Process::run_bin(
+                        "find",
+                        &[
+                            path.as_str(),
+                            "-maxdepth",
+                            "1",
+                            "-type",
+                            "f",
+                            "-printf",
+                            "%f\0",
+                        ],
+                        elevate,
+                        None,
+                    )
+                    .await?
+                    .check()?
+                    .stdout
+                    .split(|c| *c == 0)
+                    .map(|chunk| OsString::from_vec(chunk.to_vec()))
+                    .map(|s| PathBuf::try_from(s).map_err(|_err| anyhow!("non utf8 path")))
+                    .collect::<Result<_>>()?,
+                ))
+            } else {
+                Ok(None)
+            }
+        }
         Elevate::No => {
-            Ok(ReadDirStream::new(fs::read_dir(path).await?)
-                .then(|entry| async {
-                    let entry = entry?;
-                    let file_type = entry.file_type().await?;
-                    #[expect(
-                        clippy::filetype_is_file,
-                        reason = "we are really only interested in something file-y"
-                    )]
-                    if file_type.is_file() || file_type.is_symlink() {
-                        Ok(Some(
-                            PathBuf::try_from(
-                                entry
-                                    .path()
-                                    .file_name()
-                                    .expect("read_dir() does not return paths with .. suffix")
-                                    .to_owned(),
-                            )
-                            .map_err(|_err| anyhow!("non utf8 path"))?,
-                        ))
-                    } else {
+            match fs::read_dir(path).await {
+                Ok(dir) => {
+                    Ok(Some(
+                        ReadDirStream::new(dir)
+                            .then(|entry| async {
+                                let entry = entry?;
+                                let file_type = entry.file_type().await?;
+                                #[expect(
+                                    clippy::filetype_is_file,
+                                    reason = "we are really only interested in something file-y"
+                                )]
+                                if file_type.is_file() || file_type.is_symlink() {
+                                    Ok(Some(
+                                PathBuf::try_from(
+                                    entry
+                                        .path()
+                                        .file_name()
+                                        .expect("read_dir() does not return paths with .. suffix")
+                                        .to_owned(),
+                                )
+                                .map_err(|_err| anyhow!("non utf8 path"))?,
+                            ))
+                                } else {
+                                    Ok(None)
+                                }
+                            })
+                            .collect::<Result<Vec<Option<PathBuf>>>>()
+                            .await?
+                            .into_iter()
+                            .flatten() // remove non-paths (`None`)
+                            .collect(),
+                    ))
+                }
+                Err(err) => {
+                    if err.kind() == std::io::ErrorKind::NotFound {
                         Ok(None)
+                    } else {
+                        Err(err.into())
                     }
-                })
-                .collect::<Result<Vec<Option<PathBuf>>>>()
-                .await?
-                .into_iter()
-                .flatten() // remove non-paths (`None`)
-                .collect())
+                }
+            }
         }
     }
 }

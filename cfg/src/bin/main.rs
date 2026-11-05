@@ -3447,20 +3447,22 @@ async fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
         );
     }
 
-    for file in files_in_dir(user_elevate, &user_directories.scripts).await? {
-        let name = file.as_str();
+    if let Some(dir) = files_in_dir(user_elevate, &user_directories.scripts).await? {
+        for file in dir {
+            let name = file.as_str();
 
-        if !scripts.iter().any(|&(file, _content)| file == name) {
-            plan.add(
-                Owned(format!("remove unmanaged script {name}")),
-                user_elevate,
-                Remove {
-                    path: Owned(user_directories.scripts.join(name)),
-                    on_symlink: SymlinkHandling::Proceed,
-                    on_directory: DirectoryHandling::Bail,
-                    on_file: FileHandling::Proceed,
-                },
-            );
+            if !scripts.iter().any(|&(file, _content)| file == name) {
+                plan.add(
+                    Owned(format!("remove unmanaged script {name}")),
+                    user_elevate,
+                    Remove {
+                        path: Owned(user_directories.scripts.join(name)),
+                        on_symlink: SymlinkHandling::Proceed,
+                        on_directory: DirectoryHandling::Bail,
+                        on_file: FileHandling::Proceed,
+                    },
+                );
+            }
         }
     }
 
@@ -3500,20 +3502,22 @@ async fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
         );
     }
 
-    for file in files_in_dir(user_elevate, &user_directories.bin).await? {
-        let name = file.as_str();
+    if let Some(dir) = files_in_dir(user_elevate, &user_directories.bin).await? {
+        for file in dir {
+            let name = file.as_str();
 
-        if !bins.iter().any(|&(file, _content)| file == name) {
-            plan.add(
-                Owned(format!("remove unmanaged executable {name}")),
-                user_elevate,
-                Remove {
-                    path: Owned(user_directories.bin.join(name)),
-                    on_symlink: SymlinkHandling::Proceed,
-                    on_directory: DirectoryHandling::Bail,
-                    on_file: FileHandling::Proceed,
-                },
-            );
+            if !bins.iter().any(|&(file, _content)| file == name) {
+                plan.add(
+                    Owned(format!("remove unmanaged executable {name}")),
+                    user_elevate,
+                    Remove {
+                        path: Owned(user_directories.bin.join(name)),
+                        on_symlink: SymlinkHandling::Proceed,
+                        on_directory: DirectoryHandling::Bail,
+                        on_file: FileHandling::Proceed,
+                    },
+                );
+            }
         }
     }
 
