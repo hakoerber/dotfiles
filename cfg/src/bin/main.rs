@@ -1230,7 +1230,7 @@ fn copy_dir<'elevate: 'action, 'action>(
     makepkg_group: &Gid,
 ) -> Result<()> {
     let source_path =
-        Path::from_path(source.path()).ok_or_else(|| anyhow!("non utf-8 path in pkgbuiilds"))?;
+        Path::from_path(source.path()).ok_or_else(|| anyhow!("non utf-8 path in pkgbuilds"))?;
 
     plan.add(
         Owned(format!("create pkgbuild folder for {target}")),
@@ -1259,7 +1259,7 @@ fn copy_dir<'elevate: 'action, 'action>(
         }
 
         let path = root.join(
-            Path::from_path(file.path()).ok_or_else(|| anyhow!("non utf-8 path in pkgbuiilds"))?,
+            Path::from_path(file.path()).ok_or_else(|| anyhow!("non utf-8 path in pkgbuilds"))?,
         );
 
         plan.add(
@@ -1283,7 +1283,7 @@ fn copy_dir<'elevate: 'action, 'action>(
 
     for dir in source.dirs() {
         let path = root.join(
-            Path::from_path(dir.path()).ok_or_else(|| anyhow!("non utf-8 path in pkgbuiilds"))?,
+            Path::from_path(dir.path()).ok_or_else(|| anyhow!("non utf-8 path in pkgbuilds"))?,
         );
         copy_dir(plan, elevate, dir, root, &path, makepkg_user, makepkg_group)?;
     }
@@ -1538,7 +1538,7 @@ fn aur<'elevate: 'action, 'action>(
 
     for entry in PKGBUILDS.dirs() {
         let entry_path =
-            Path::from_path(entry.path()).ok_or_else(|| anyhow!("non utf-8 path in pkgbuiilds"))?;
+            Path::from_path(entry.path()).ok_or_else(|| anyhow!("non utf-8 path in pkgbuilds"))?;
 
         copy_dir(
             plan,
