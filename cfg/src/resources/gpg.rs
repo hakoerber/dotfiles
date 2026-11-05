@@ -10,6 +10,7 @@ pub struct GpgKey<'a> {
     pub trust: gpg::GpgTrust,
     pub fingerprint: gpg::GpgFingerprint,
     pub gnupg_directory: MaybeOwned<'a, Path>,
+    pub elevate_apply: &'a Elevate,
 }
 
 #[async_trait::async_trait]
@@ -25,6 +26,7 @@ impl<'change> Plannable<'change> for GpgKey<'change> {
             &self.fingerprint,
             self.gnupg_directory.as_ref(),
             elevate,
+            self.elevate_apply,
         ))
         .await?;
         match key {

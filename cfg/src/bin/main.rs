@@ -2599,10 +2599,15 @@ async fn root_setup<'elevate: 'action, 'action, 'pkgs>(
 async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     root: &'elevate Elevate,
-    user_elevate: &'elevate Elevate,
-    user: &'user UserConfig,
+    user: &'elevate UserContext,
     machine: &'machine MachineConfig,
 ) -> Result<()> {
+    let UserContext {
+        simplest_elevate: ref user_elevate,
+        ref strict_elevate,
+        config: ref user,
+    } = *user;
+
     let home = PathBuf::from("/home/").join(&user.name);
 
     plan.add(
@@ -2671,6 +2676,8 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
                 "/../files/gpgkeys/hannes@hkoerber.de.gpg.asc"
             )),
             gnupg_directory: Owned(home.join(".local/state/gnupg/")),
+            // run as the actual user, not using root
+            elevate_apply: strict_elevate,
             fingerprint: GpgFingerprint("973AE48D71B76735C4712B5BB5C002530C6A2053".to_owned()),
             trust: GpgTrust::Ultimately,
         },
@@ -2806,7 +2813,7 @@ fn user_firefox<'elevate: 'action, 'action, 'user, 'machine>(
 fn user_create_directories<'elevate: 'action, 'action, 'user, 'machine>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     user_elevate: &'elevate Elevate,
-    user: &'user UserConfig,
+    user: &'elevate UserConfig,
     user_directories: &UserDirectories,
 ) {
     plan.add(
@@ -3924,9 +3931,15 @@ struct UserConfig {
     firefox: FirefoxUserConfig,
 }
 
+struct UserContext {
+    simplest_elevate: Elevate,
+    strict_elevate: Elevate,
+    config: UserConfig,
+}
+
 struct Config {
     machine: MachineConfig,
-    users: Vec<(Elevate, UserConfig)>,
+    users: Vec<UserContext>,
 }
 
 fn configure_tracing(level: tracing::Level) -> impl tracing::Subscriber {
@@ -4167,17 +4180,23 @@ async fn main() -> Result<()> {
         )],
     }
     .into_iter()
-    .map(|user| {
-        (
-            match running_user.as_str() {
+    .map(|config| {
+        (UserContext {
+            simplest_elevate: match running_user.as_str() {
                 "root" => Elevate::No,
-                name if name == user.name => Elevate::No,
+                name if name == config.name => Elevate::No,
                 _other => Elevate::Sudo(ElevateTo::User {
-                    user: user.name.clone(),
+                    user: config.name.clone(),
                 }),
             },
-            user,
-        )
+            strict_elevate: match running_user.as_str() {
+                name if name == config.name => Elevate::No,
+                _other => Elevate::Sudo(ElevateTo::User {
+                    user: config.name.clone(),
+                }),
+            },
+            config,
+        })
     })
     .collect();
 
@@ -4188,9 +4207,7 @@ async fn main() -> Result<()> {
     Box::pin(root_setup(&mut plan, &root, &config, &PACKAGES)).await?;
 
     for user in &config.users {
-        let (ref user_elevate, ref user) = *user;
-
-        configure_user(&mut plan, &root, user_elevate, user, &config.machine).await?;
+        configure_user(&mut plan, &root, user, &config.machine).await?;
     }
 
     match args.hostname {
