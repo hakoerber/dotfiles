@@ -3060,9 +3060,6 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
     for (directory, mode) in [
         (".config/rofi", None),
         (".config/gtk-3.0", None),
-        (".config/gtk-3.0-overrides", None),
-        (".config/gtk-3.0-overrides/bigger-font/", None),
-        (".config/gtk-3.0-overrides/bigger-font/gtk-3.0", None),
         (".config/qt5ct", None),
         (".config/i3status-rust", None),
         (".config/i3status-rust/icons", None),
@@ -3331,13 +3328,6 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
             include_str!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
                 "/../gtk/gtk-3.0.ini.j2"
-            )),
-        ),
-        (
-            ".config/gtk-3.0-overrides/bigger-font/gtk-3.0/settings.ini",
-            include_str!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../gtk/gtk-3.0-bigger-font.ini.j2"
             )),
         ),
         (
@@ -3641,15 +3631,6 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             true,
         ),
         (
-            "firefox-gtk-override-bigger-font@.service",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../autostart/services/firefox-gtk-override-bigger-font@.service"
-            ))
-            .as_slice(),
-            machine.machine_type == MachineType::Tv,
-        ),
-        (
             "firefox@.service",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
@@ -3881,14 +3862,10 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
                 }
 
                 for profile in &user.firefox.profiles {
-                    out.push(if profile.bigger_font {
-                        Owned(format!(
-                            "Wants=firefox-gtk-override-bigger-font@{name}.service",
-                            name = profile.name
-                        ))
-                    } else {
-                        Owned(format!("Wants=firefox@{name}.service", name = profile.name))
-                    });
+                    out.push(Owned(format!(
+                        "Wants=firefox@{name}.service",
+                        name = profile.name
+                    )));
                 }
 
                 out
@@ -3987,7 +3964,6 @@ struct UserGpgConfig {
 struct FirefoxProfile {
     name: String,
     manage_css: bool,
-    bigger_font: bool,
     extensions: Vec<String>,
 }
 
@@ -4087,7 +4063,6 @@ fn private_user(
             profiles: vec![FirefoxProfile {
                 name: "default".to_owned(),
                 manage_css: true,
-                bigger_font: false,
                 extensions: vec![
                     "ublock-origin".to_owned(),
                     "passff".to_owned(),
@@ -4142,7 +4117,6 @@ fn main() -> Result<()> {
                 FirefoxProfile {
                     name: "default".to_owned(),
                     manage_css: true,
-                    bigger_font: false,
                     extensions: vec![
                         "ublock-origin".to_owned(),
                         "tree-style-tab".to_owned(),
@@ -4152,7 +4126,6 @@ fn main() -> Result<()> {
                 FirefoxProfile {
                     name: "meet".to_owned(),
                     manage_css: false,
-                    bigger_font: false,
                     extensions: vec!["ublock-origin".to_owned()],
                 },
             ],

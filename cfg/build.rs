@@ -108,9 +108,5 @@ fn main() {
     )
     .unwrap();
 
-    println!(
-        "cargo::rerun-if-changed={path}",
-        path = package_path.display()
-    );
     println!("cargo::rerun-if-changed=../pkgbuilds");
 }
