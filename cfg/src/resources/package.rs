@@ -92,18 +92,32 @@ impl<'change> Plannable<'change> for Packages<'change> {
 
         let mut set_reason = Vec::new();
 
-        for package in self.install.as_ref() {
-            if !explicitly_installed_packages(elevate)?
-                .iter()
-                .any(|s| s == package.as_ref())
-            {
-                set_reason.push(package.clone());
+        match self.reason {
+            InstallReason::Explicit => {
+                for package in self.install.as_ref() {
+                    if !explicitly_installed_packages(elevate)?
+                        .iter()
+                        .any(|s| s == package.as_ref())
+                    {
+                        set_reason.push(package.clone());
+                    }
+                }
+            }
+            InstallReason::Dependency => {
+                for package in self.install.as_ref() {
+                    if !packages_installed_as_dependencies(elevate)?
+                        .iter()
+                        .any(|s| s == package.as_ref())
+                    {
+                        set_reason.push(package.clone());
+                    }
+                }
             }
         }
 
         if !install.is_empty() || !set_reason.is_empty() {
             Ok(ChangeStatus::NeedsChange(Box::new(PackagePlan {
-                set_reason: (set_reason, self.reason),
+                set_reason,
                 args: *self,
                 install,
             })))
@@ -118,7 +132,7 @@ pub(crate) struct PackagePlan<'a> {
     // #[expect(unused, reason = "kept to have the same shape as other plans")]
     pub(crate) args: Packages<'a>,
     pub(crate) install: Vec<MaybeOwned<'a, str>>,
-    pub(crate) set_reason: (Vec<MaybeOwned<'a, str>>, InstallReason),
+    pub(crate) set_reason: Vec<MaybeOwned<'a, str>>,
 }
 
 impl Applyable for PackagePlan<'_> {
@@ -134,19 +148,18 @@ impl Applyable for PackagePlan<'_> {
             .check()?;
         }
 
-        if !self.set_reason.0.is_empty() {
-            let reason = self.set_reason.1;
+        if !self.set_reason.is_empty() {
             cmd::Process::run(
                 "pacman",
                 &vec![
                     "--database",
-                    match reason {
+                    match self.args.reason {
                         InstallReason::Explicit => "--asexplicit",
                         InstallReason::Dependency => "--asdeps",
                     },
                     "--",
                 ]
-                .tap_mut(|v| v.extend(self.set_reason.0.iter().map(|i| i.as_ref()))),
+                .tap_mut(|v| v.extend(self.set_reason.iter().map(|i| i.as_ref()))),
                 elevate,
                 None,
             )?
@@ -163,11 +176,11 @@ impl Reporter for PackagePlan<'_> {
         for install in &self.install {
             out.push(format!("install {name}", name = install.as_ref()));
         }
-        for package in &self.set_reason.0 {
+        for package in &self.set_reason {
             out.push(format!(
                 "set {name} as {message}",
                 name = package.as_ref(),
-                message = match self.set_reason.1 {
+                message = match self.args.reason {
                     InstallReason::Explicit => "explicitly installed",
                     InstallReason::Dependency => "installed as dependency",
                 }
