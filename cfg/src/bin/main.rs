@@ -248,6 +248,7 @@ const PACKAGES: PackageConfig = PackageConfig(&[
             "cargo-binstall",
             "cargo-machete",
             "rust-script",
+            "bacon",
         ],
     ),
     ("musescore", &["musescore"]),
