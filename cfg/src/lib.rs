@@ -341,7 +341,12 @@ impl<'a> Reports<'a> {
                     )
                     .unwrap();
                     for change in changes {
-                        writeln!(stdout, "    > {change}").unwrap();
+                        writeln!(
+                            stdout,
+                            "{reset}    > {change}",
+                            reset = "".fg::<colors::White>()
+                        )
+                        .unwrap();
                     }
                     action_printed = true;
                 }
