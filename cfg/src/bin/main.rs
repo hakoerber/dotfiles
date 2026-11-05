@@ -227,15 +227,7 @@ const PACKAGES: PackageConfig = PackageConfig(&[
     ("nodejs", &["nodejs-lts-jod", "npm", "yarn"]),
     // this needs to come *after* nodejs, otherwise dockerfile-language-server will pull
     // nodejs (non-LTS)
-    (
-        "docker",
-        &[
-            "docker",
-            "docker-compose",
-            "docker-buildx",
-            "dockerfile-language-server",
-        ],
-    ),
+    ("docker", &["dockerfile-language-server"]),
     ("xdg", &["xdg-utils"]),
     ("dunst", &["dunst"]),
     ("cloc", &["cloc"]),
@@ -1163,11 +1155,7 @@ fn services<'elevate: 'action, 'action>(
         );
     }
 
-    for service in [
-        "NetworkManager.service",
-        "docker.service",
-        "systemd-timesyncd.service",
-    ] {
+    for service in ["NetworkManager.service", "systemd-timesyncd.service"] {
         plan.add(
             Owned(format!("enable service {service}")),
             elevate,
@@ -2629,7 +2617,6 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
                 "libvirt",
                 "wheel",
                 "wireshark",
-                "docker",
                 "sudonopw",
                 "games",
                 "kvm",
