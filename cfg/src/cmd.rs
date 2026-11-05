@@ -1,7 +1,9 @@
 use std::{
     io::{self, Write},
-    process::{self, Stdio},
+    process::Stdio,
 };
+
+use tokio::{io::AsyncWriteExt as _, process};
 
 use anyhow::{Result, bail};
 use tap::Tap as _;
@@ -72,7 +74,7 @@ pub struct ProcessStatusUnknown {
 }
 
 impl Process {
-    pub(crate) fn run_bin(
+    pub(crate) async fn run_bin(
         cmd: &str,
         args: &[&str],
         elevate: &Elevate,
@@ -93,6 +95,61 @@ impl Process {
         tracing::debug!("running cmd {cmd} {args:?}");
 
         let mut cmd = process::Command::new(cmd)
+            .args(args)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .stdin(if stdin.is_some() {
+                Stdio::piped()
+            } else {
+                Stdio::null()
+            })
+            .spawn()?;
+
+        if let Some(data) = stdin {
+            tracing::debug!("writing {} bytes to stdin", data.len());
+            let mut stdin = cmd.stdin.take().expect("stdin is open");
+            stdin.write_all(data).await?;
+        }
+
+        let output = cmd.wait_with_output().await?;
+
+        tracing::debug!("received {output:?}");
+
+        Ok(ProcessRawStatusUnknown {
+            stdout: output.stdout,
+            stderr: output.stderr,
+            status: ExitStatus(
+                output
+                    .status
+                    .code()
+                    .expect("process to have exit code on stop")
+                    .try_into()
+                    .expect("exit code to be non-negative"),
+            ),
+        })
+    }
+
+    pub(crate) fn run_bin_sync(
+        cmd: &str,
+        args: &[&str],
+        elevate: &Elevate,
+        stdin: Option<&[u8]>,
+    ) -> io::Result<ProcessRawStatusUnknown> {
+        let (cmd, args) = match *elevate {
+            Elevate::Sudo(ref elevate_to) => match *elevate_to {
+                ElevateTo::Root => ("sudo", vec!["--"]),
+                ElevateTo::User { ref user } => ("sudo", vec!["-u", user, "--"]),
+            }
+            .tap_mut(|v| {
+                v.1.push(cmd);
+                v.1.extend_from_slice(args);
+            }),
+            Elevate::No => (cmd, args.to_vec()),
+        };
+
+        tracing::debug!("running cmd {cmd} {args:?}");
+
+        let mut cmd = std::process::Command::new(cmd)
             .args(args)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
@@ -127,7 +184,7 @@ impl Process {
         })
     }
 
-    pub fn run(
+    pub async fn run(
         cmd: &str,
         args: &[&str],
         elevate: &Elevate,
@@ -137,7 +194,26 @@ impl Process {
             stdout,
             stderr,
             status,
-        } = Self::run_bin(cmd, args, elevate, stdin)?;
+        } = Self::run_bin(cmd, args, elevate, stdin).await?;
+
+        Ok(ProcessStatusUnknown {
+            stdout: stdout.try_into()?,
+            stderr: stderr.try_into()?,
+            status,
+        })
+    }
+
+    pub fn run_sync(
+        cmd: &str,
+        args: &[&str],
+        elevate: &Elevate,
+        stdin: Option<&[u8]>,
+    ) -> Result<ProcessStatusUnknown> {
+        let ProcessRawStatusUnknown {
+            stdout,
+            stderr,
+            status,
+        } = Self::run_bin_sync(cmd, args, elevate, stdin)?;
 
         Ok(ProcessStatusUnknown {
             stdout: stdout.try_into()?,

@@ -1,4 +1,5 @@
 use anyhow::Result;
+use async_trait::async_trait;
 
 use crate::{maybeowned::MaybeOwned, user};
 
@@ -92,12 +93,16 @@ impl<'change> User<'change> {
     }
 }
 
+#[async_trait]
 impl<'change> Plannable<'change> for User<'change> {
-    fn plan<'elevate>(self: Box<Self>, elevate: &'elevate Elevate) -> Result<ChangeStatus<'change>>
+    async fn plan<'elevate>(
+        self: Box<Self>,
+        elevate: &'elevate Elevate,
+    ) -> Result<ChangeStatus<'change>>
     where
         'elevate: 'change,
     {
-        let user = user::find_user(self.name, elevate)?;
+        let user = user::find_user(self.name, elevate).await?;
 
         if let Some(user) = user {
             let diff = self.diff(&user);
@@ -128,8 +133,9 @@ pub(crate) struct UserPlan<'args> {
     pub(crate) change: UserChange<'args>,
 }
 
+#[async_trait::async_trait]
 impl Applyable for UserPlan<'_> {
-    fn apply(&self, elevate: &Elevate) -> Result<()> {
+    async fn apply(&self, elevate: &Elevate) -> Result<()> {
         match self.change {
             UserChange::Create => {
                 let mut args = vec![];
@@ -152,7 +158,9 @@ impl Applyable for UserPlan<'_> {
                 }
                 args.extend(["--", self.args.name]);
 
-                cmd::Process::run("useradd", &args, elevate, None)?.check()?;
+                cmd::Process::run("useradd", &args, elevate, None)
+                    .await?
+                    .check()?;
             }
             UserChange::Change {
                 existing: _,
@@ -164,7 +172,8 @@ impl Applyable for UserPlan<'_> {
                         &["--gid", new_primary_group, "--", self.args.name],
                         elevate,
                         None,
-                    )?
+                    )
+                    .await?
                     .check()?;
                 }
 
@@ -176,7 +185,8 @@ impl Applyable for UserPlan<'_> {
                                 &["--append", "--groups", group, "--", self.args.name],
                                 elevate,
                                 None,
-                            )?
+                            )
+                            .await?
                             .check()?;
                         }
                         UserGroupDiff::Remove(ref group) => {
@@ -185,7 +195,8 @@ impl Applyable for UserPlan<'_> {
                                 &["--remove", "--groups", &group.name, "--", self.args.name],
                                 elevate,
                                 None,
-                            )?
+                            )
+                            .await?
                             .check()?;
                         }
                     }
@@ -203,7 +214,8 @@ impl Applyable for UserPlan<'_> {
                         ],
                         elevate,
                         None,
-                    )?
+                    )
+                    .await?
                     .check()?;
                 }
 
@@ -213,7 +225,8 @@ impl Applyable for UserPlan<'_> {
                         &["--shell", new_shell, "--", self.args.name],
                         elevate,
                         None,
-                    )?
+                    )
+                    .await?
                     .check()?;
                 }
             }
@@ -276,12 +289,16 @@ pub struct Group<'change> {
     pub system: bool,
 }
 
+#[async_trait]
 impl<'change> Plannable<'change> for Group<'change> {
-    fn plan<'elevate>(self: Box<Self>, elevate: &'elevate Elevate) -> Result<ChangeStatus<'change>>
+    async fn plan<'elevate>(
+        self: Box<Self>,
+        elevate: &'elevate Elevate,
+    ) -> Result<ChangeStatus<'change>>
     where
         'elevate: 'change,
     {
-        let group = user::find_group(self.name, elevate)?;
+        let group = user::find_group(self.name, elevate).await?;
 
         if let Some(_group) = group {
             Ok(ChangeStatus::Clean)
@@ -303,8 +320,9 @@ pub(crate) struct GroupPlan<'elevate, 'args> {
     pub(crate) change: GroupChange,
 }
 
+#[async_trait]
 impl Applyable for GroupPlan<'_, '_> {
-    fn apply(&self, elevate: &Elevate) -> Result<()> {
+    async fn apply(&self, elevate: &Elevate) -> Result<()> {
         match self.change {
             GroupChange::Create => {
                 let mut args = vec![];
@@ -314,7 +332,9 @@ impl Applyable for GroupPlan<'_, '_> {
                 }
                 args.extend(["--", self.args.name]);
 
-                cmd::Process::run("groupadd", &args, elevate, None)?.check()?;
+                cmd::Process::run("groupadd", &args, elevate, None)
+                    .await?
+                    .check()?;
             }
         }
 

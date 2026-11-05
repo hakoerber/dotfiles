@@ -1,6 +1,7 @@
-use std::{ffi::OsString, fs, io::Write as _, os::unix::fs::PermissionsExt as _};
+use std::{ffi::OsString, io::Write as _, os::unix::fs::PermissionsExt as _};
 
 use anyhow::{Result, anyhow, bail};
+use tokio::fs;
 
 use super::{Elevate, Gid, MaybeOwned, Path, PathBuf, Reporter, Uid, cmd};
 
@@ -132,7 +133,7 @@ impl Reporter for FilePermissionChange {
     }
 }
 
-pub(crate) fn mv(from: &Path, to: &Path, elevate: &Elevate) -> Result<()> {
+pub(crate) async fn mv(from: &Path, to: &Path, elevate: &Elevate) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
             cmd::Process::run(
@@ -146,21 +147,25 @@ pub(crate) fn mv(from: &Path, to: &Path, elevate: &Elevate) -> Result<()> {
                 ],
                 elevate,
                 None,
-            )?
+            )
+            .await?
             .check()?;
         }
-        Elevate::No => fs::rename(from, to)?,
+        Elevate::No => fs::rename(from, to).await?,
     }
     Ok(())
 }
 
-pub(crate) fn create_directory(path: &Path, elevate: &Elevate) -> Result<()> {
+pub(crate) async fn create_directory(path: &Path, elevate: &Elevate) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
-            cmd::Process::run("mkdir", &["--", path.as_str()], elevate, None)?.check()?;
+            cmd::Process::run("mkdir", &["--", path.as_str()], elevate, None)
+                .await?
+                .check()?;
         }
-        Elevate::No => fs::create_dir(path)?,
+        Elevate::No => fs::create_dir(path).await?,
     }
+
     Ok(())
 }
 
@@ -176,13 +181,14 @@ pub(crate) struct Stat {
 }
 
 // elevate is irrelevant here, always using getent. std does not support getting file names
-pub(crate) fn stat(elevate: &Elevate, path: &Path) -> Result<Option<Stat>> {
+pub(crate) async fn stat(elevate: &Elevate, path: &Path) -> Result<Option<Stat>> {
     let output = cmd::Process::run(
         "stat",
         &["--format", "%U %G %a %f", "--", path.as_str()],
         elevate,
         None,
-    )?
+    )
+    .await?
     .unchecked();
 
     if output.status.success() {
@@ -232,12 +238,13 @@ pub(crate) fn stat(elevate: &Elevate, path: &Path) -> Result<Option<Stat>> {
     }
 }
 
-pub(crate) fn check_file_permissions(
+pub(crate) async fn check_file_permissions(
     elevate: &Elevate,
     path: &Path,
     perms: &FilePermissions,
 ) -> Result<Option<FilePermissionChange>> {
-    let existing = stat(elevate, path)?
+    let existing = stat(elevate, path)
+        .await?
         .ok_or_else(|| anyhow!("file not found"))?
         .permissions;
 
@@ -249,31 +256,33 @@ pub(crate) fn check_file_permissions(
 }
 
 // always using chown, fs::chown does not support names
-pub(crate) fn set_file_owner(elevate: &Elevate, path: &Path, uid: &Uid) -> Result<()> {
+pub(crate) async fn set_file_owner(elevate: &Elevate, path: &Path, uid: &Uid) -> Result<()> {
     cmd::Process::run(
         "chown",
         &[&uid.to_string(), "--", path.as_str()],
         elevate,
         None,
-    )?
+    )
+    .await?
     .check()?;
 
     Ok(())
 }
 
 // always using chown, fs::chown does not support names
-pub(crate) fn set_file_group(elevate: &Elevate, path: &Path, gid: &Gid) -> Result<()> {
+pub(crate) async fn set_file_group(elevate: &Elevate, path: &Path, gid: &Gid) -> Result<()> {
     cmd::Process::run(
         "chgrp",
         &[&gid.to_string(), "--", path.as_str()],
         elevate,
         None,
-    )?
+    )
+    .await?
     .check()?;
     Ok(())
 }
 
-pub(crate) fn set_file_mode(elevate: &Elevate, path: &Path, mode: FileMode) -> Result<()> {
+pub(crate) async fn set_file_mode(elevate: &Elevate, path: &Path, mode: FileMode) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
             cmd::Process::run(
@@ -281,56 +290,74 @@ pub(crate) fn set_file_mode(elevate: &Elevate, path: &Path, mode: FileMode) -> R
                 &[&mode.as_oct_string(), "--", path.as_str()],
                 elevate,
                 None,
-            )?
+            )
+            .await?
             .check()?;
         }
         Elevate::No => {
-            fs::set_permissions(path, fs::Permissions::from_mode(mode.0))?;
+            fs::set_permissions(path, std::fs::Permissions::from_mode(mode.0)).await?;
         }
     }
     Ok(())
 }
 
-pub(crate) fn remove_file(elevate: &Elevate, path: &Path) -> Result<()> {
+pub(crate) async fn remove_file(elevate: &Elevate, path: &Path) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
-            cmd::Process::run("rm", &["--", path.as_str()], elevate, None)?.check()?;
+            cmd::Process::run("rm", &["--", path.as_str()], elevate, None)
+                .await?
+                .check()?;
         }
         Elevate::No => {
-            fs::remove_file(path)?;
+            fs::remove_file(path).await?;
+        }
+    }
+    Ok(())
+}
+
+pub(crate) fn remove_file_sync(elevate: &Elevate, path: &Path) -> Result<()> {
+    match *elevate {
+        Elevate::Sudo(ref _elevate_to) => {
+            cmd::Process::run_sync("rm", &["--", path.as_str()], elevate, None)?.check()?;
+        }
+        Elevate::No => {
+            std::fs::remove_file(path)?;
         }
     }
     Ok(())
 }
 
 /// `remove_file` also works for symlinks and removes only the link itself
-pub(crate) fn remove_symlink(elevate: &Elevate, path: &Path) -> Result<()> {
-    remove_file(elevate, path)
+pub(crate) async fn remove_symlink(elevate: &Elevate, path: &Path) -> Result<()> {
+    remove_file(elevate, path).await
 }
 
-pub(crate) fn remove_recursive(elevate: &Elevate, path: &Path) -> Result<()> {
+pub(crate) async fn remove_recursive(elevate: &Elevate, path: &Path) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
-            cmd::Process::run("rm", &["--recursive", "--", path.as_str()], elevate, None)?
+            cmd::Process::run("rm", &["--recursive", "--", path.as_str()], elevate, None)
+                .await?
                 .check()?;
         }
         Elevate::No => {
-            fs::remove_dir_all(path)?;
+            fs::remove_dir_all(path).await?;
         }
     }
     Ok(())
 }
 
-pub(crate) fn try_read(elevate: &Elevate, path: &Path) -> Result<Option<Vec<u8>>> {
+pub(crate) async fn try_read(elevate: &Elevate, path: &Path) -> Result<Option<Vec<u8>>> {
     match *elevate {
-        Elevate::Sudo(ref _elevate_to) => match stat(elevate, path)? {
+        Elevate::Sudo(ref _elevate_to) => match stat(elevate, path).await? {
             Some(_stat) => {
-                let cat = cmd::Process::run_bin("cat", &[path.as_str()], elevate, None)?.check()?;
+                let cat = cmd::Process::run_bin("cat", &[path.as_str()], elevate, None)
+                    .await?
+                    .check()?;
                 Ok(Some(cat.stdout))
             }
             None => Ok(None),
         },
-        Elevate::No => match fs::read(path) {
+        Elevate::No => match fs::read(path).await {
             Ok(out) => Ok(Some(out)),
             Err(err) => {
                 if err.kind() == std::io::ErrorKind::NotFound {
@@ -343,19 +370,23 @@ pub(crate) fn try_read(elevate: &Elevate, path: &Path) -> Result<Option<Vec<u8>>
     }
 }
 
-pub(crate) fn read(elevate: &Elevate, path: &Path) -> Result<Vec<u8>> {
-    try_read(elevate, path).and_then(|content| content.ok_or_else(|| anyhow!("not found")))
+pub(crate) async fn read(elevate: &Elevate, path: &Path) -> Result<Vec<u8>> {
+    try_read(elevate, path)
+        .await
+        .and_then(|content| content.ok_or_else(|| anyhow!("not found")))
 }
 
-pub(crate) fn read_to_string(elevate: &Elevate, path: &Path) -> Result<String> {
-    let content = read(elevate, path)?;
+pub(crate) async fn read_to_string(elevate: &Elevate, path: &Path) -> Result<String> {
+    let content = read(elevate, path).await?;
     String::from_utf8(content).map_err(|_err| anyhow!("non utf-8 file content"))
 }
 
-pub(crate) fn write(path: &Path, input: &[u8], elevate: &Elevate) -> Result<()> {
+pub(crate) async fn write(path: &Path, input: &[u8], elevate: &Elevate) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
-            cmd::Process::run("dd", &[&format!("of={path}")], elevate, Some(input))?.check()?;
+            cmd::Process::run("dd", &[&format!("of={path}")], elevate, Some(input))
+                .await?
+                .check()?;
         }
         Elevate::No => {
             std::fs::OpenOptions::new()
@@ -367,8 +398,9 @@ pub(crate) fn write(path: &Path, input: &[u8], elevate: &Elevate) -> Result<()> 
     Ok(())
 }
 
-pub fn files_in_dir(elevate: &Elevate, path: &Path) -> Result<Vec<PathBuf>> {
+pub async fn files_in_dir(elevate: &Elevate, path: &Path) -> Result<Vec<PathBuf>> {
     use std::os::unix::ffi::OsStringExt as _;
+    use tokio_stream::{StreamExt as _, wrappers::ReadDirStream};
 
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => Ok(cmd::Process::run_bin(
@@ -384,39 +416,43 @@ pub fn files_in_dir(elevate: &Elevate, path: &Path) -> Result<Vec<PathBuf>> {
             ],
             elevate,
             None,
-        )?
+        )
+        .await?
         .check()?
         .stdout
         .split(|c| *c == 0)
         .map(|chunk| OsString::from_vec(chunk.to_vec()))
         .map(|s| PathBuf::try_from(s).map_err(|_err| anyhow!("non utf8 path")))
         .collect::<Result<_>>()?),
-        Elevate::No => Ok(std::fs::read_dir(path)?
-            .map(|entry| {
-                let entry = entry?;
-                let file_type = entry.file_type()?;
-                #[expect(
-                    clippy::filetype_is_file,
-                    reason = "we are really only interested in something file-y"
-                )]
-                if file_type.is_file() || file_type.is_symlink() {
-                    Ok(Some(
-                        PathBuf::try_from(
-                            entry
-                                .path()
-                                .file_name()
-                                .expect("read_dir() does not return paths with .. suffix")
-                                .to_owned(),
-                        )
-                        .map_err(|_err| anyhow!("non utf8 path"))?,
-                    ))
-                } else {
-                    Ok(None)
-                }
-            })
-            .collect::<Result<Vec<Option<PathBuf>>>>()?
-            .into_iter()
-            .flatten() // remove non-paths (`None`)
-            .collect()),
+        Elevate::No => {
+            Ok(ReadDirStream::new(fs::read_dir(path).await?)
+                .then(|entry| async {
+                    let entry = entry?;
+                    let file_type = entry.file_type().await?;
+                    #[expect(
+                        clippy::filetype_is_file,
+                        reason = "we are really only interested in something file-y"
+                    )]
+                    if file_type.is_file() || file_type.is_symlink() {
+                        Ok(Some(
+                            PathBuf::try_from(
+                                entry
+                                    .path()
+                                    .file_name()
+                                    .expect("read_dir() does not return paths with .. suffix")
+                                    .to_owned(),
+                            )
+                            .map_err(|_err| anyhow!("non utf8 path"))?,
+                        ))
+                    } else {
+                        Ok(None)
+                    }
+                })
+                .collect::<Result<Vec<Option<PathBuf>>>>()
+                .await?
+                .into_iter()
+                .flatten() // remove non-paths (`None`)
+                .collect())
+        }
     }
 }

@@ -1,4 +1,5 @@
 use anyhow::{Result, bail};
+use async_trait::async_trait;
 use serde::Serialize;
 
 use super::super::{Applyable, ChangeStatus, Elevate, Plannable, Reporter, cmd};
@@ -68,8 +69,12 @@ pub struct Service<'a> {
     pub state: ServiceState,
 }
 
+#[async_trait]
 impl<'change> Plannable<'change> for Service<'change> {
-    fn plan<'elevate>(self: Box<Self>, elevate: &'elevate Elevate) -> Result<ChangeStatus<'change>>
+    async fn plan<'elevate>(
+        self: Box<Self>,
+        elevate: &'elevate Elevate,
+    ) -> Result<ChangeStatus<'change>>
     where
         'elevate: 'change,
     {
@@ -79,7 +84,8 @@ impl<'change> Plannable<'change> for Service<'change> {
                 &["show", "-p", "ActiveState", "--", self.name],
                 elevate,
                 None,
-            )?
+            )
+            .await?
             .check()?;
             let Some(state) = systemctl.stdout.trim().strip_prefix("ActiveState=") else {
                 bail!(
@@ -99,7 +105,8 @@ impl<'change> Plannable<'change> for Service<'change> {
 
         let persistent_state = {
             let systemctl =
-                cmd::Process::run("systemctl", &["is-enabled", "--", self.name], elevate, None)?
+                cmd::Process::run("systemctl", &["is-enabled", "--", self.name], elevate, None)
+                    .await?
                     .unchecked();
 
             match systemctl.stdout.trim() {
@@ -142,8 +149,9 @@ pub(crate) struct ServicePlan<'a> {
     pub(crate) diff: ServiceStateDiff,
 }
 
+#[async_trait]
 impl Applyable for ServicePlan<'_> {
-    fn apply(&self, elevate: &Elevate) -> Result<()> {
+    async fn apply(&self, elevate: &Elevate) -> Result<()> {
         if let Some(persistent_state) = self.diff.persistent {
             match persistent_state {
                 ServiceStatePersistent::Enabled => {
@@ -153,7 +161,8 @@ impl Applyable for ServicePlan<'_> {
                             &["unmask", "--", self.args.name],
                             elevate,
                             None,
-                        )?
+                        )
+                        .await?
                         .check()?;
                     }
                     cmd::Process::run(
@@ -161,7 +170,8 @@ impl Applyable for ServicePlan<'_> {
                         &["enable", "--", self.args.name],
                         elevate,
                         None,
-                    )?
+                    )
+                    .await?
                     .check()?;
                 }
                 ServiceStatePersistent::Disabled => {
@@ -171,7 +181,8 @@ impl Applyable for ServicePlan<'_> {
                             &["unmask", "--", self.args.name],
                             elevate,
                             None,
-                        )?
+                        )
+                        .await?
                         .check()?;
                     }
                     cmd::Process::run(
@@ -179,11 +190,13 @@ impl Applyable for ServicePlan<'_> {
                         &["disable", "--", self.args.name],
                         elevate,
                         None,
-                    )?
+                    )
+                    .await?
                     .check()?;
                 }
                 ServiceStatePersistent::Masked => {
-                    cmd::Process::run("systemctl", &["mask", "--", self.args.name], elevate, None)?
+                    cmd::Process::run("systemctl", &["mask", "--", self.args.name], elevate, None)
+                        .await?
                         .check()?;
                 }
             }
@@ -193,16 +206,13 @@ impl Applyable for ServicePlan<'_> {
         if let Some(runtime_state) = self.diff.runtime {
             match runtime_state {
                 ServiceStateRuntime::Active => {
-                    cmd::Process::run(
-                        "systemctl",
-                        &["start", "--", self.args.name],
-                        elevate,
-                        None,
-                    )?
-                    .check()?;
+                    cmd::Process::run("systemctl", &["start", "--", self.args.name], elevate, None)
+                        .await?
+                        .check()?;
                 }
                 ServiceStateRuntime::Inactive => {
-                    cmd::Process::run("systemctl", &["stop", "--", self.args.name], elevate, None)?
+                    cmd::Process::run("systemctl", &["stop", "--", self.args.name], elevate, None)
+                        .await?
                         .check()?;
                 }
             }
@@ -239,13 +249,16 @@ pub struct RestartService<'a> {
     pub name: &'a str,
 }
 
+#[async_trait]
 impl<'change> Plannable<'change> for RestartService<'change> {
-    fn plan<'elevate>(self: Box<Self>, elevate: &'elevate Elevate) -> Result<ChangeStatus<'change>>
+    async fn plan<'elevate>(
+        self: Box<Self>,
+        _elevate: &'elevate Elevate,
+    ) -> Result<ChangeStatus<'change>>
     where
         'elevate: 'change,
     {
         Ok(ChangeStatus::NeedsChange(Box::new(RestartServicePlan {
-            elevate,
             args: *self,
         })))
     }
@@ -253,18 +266,19 @@ impl<'change> Plannable<'change> for RestartService<'change> {
 
 #[derive(Debug)]
 pub(crate) struct RestartServicePlan<'a> {
-    pub(crate) elevate: &'a Elevate,
     pub(crate) args: RestartService<'a>,
 }
 
+#[async_trait]
 impl Applyable for RestartServicePlan<'_> {
-    fn apply(&self, elevate: &Elevate) -> Result<()> {
+    async fn apply(&self, elevate: &Elevate) -> Result<()> {
         cmd::Process::run(
             "systemctl",
             &["restart", "--", self.args.name],
             elevate,
             None,
-        )?
+        )
+        .await?
         .check()?;
 
         Ok(())
@@ -280,33 +294,38 @@ impl Reporter for RestartServicePlan<'_> {
 #[derive(Debug)]
 pub struct DaemonReload;
 
+#[async_trait]
 impl<'change> Plannable<'change> for DaemonReload {
-    fn plan<'elevate>(self: Box<Self>, elevate: &'elevate Elevate) -> Result<ChangeStatus<'change>>
+    async fn plan<'elevate>(
+        self: Box<Self>,
+        _elevate: &'elevate Elevate,
+    ) -> Result<ChangeStatus<'change>>
     where
         'elevate: 'change,
     {
         Ok(ChangeStatus::NeedsChange(Box::new(DaemonReloadPlan {
-            elevate,
             args: *self,
         })))
     }
 }
 
 #[derive(Debug)]
-pub(crate) struct DaemonReloadPlan<'a> {
-    pub(crate) elevate: &'a Elevate,
+pub(crate) struct DaemonReloadPlan {
     pub(crate) args: DaemonReload,
 }
 
-impl Applyable for DaemonReloadPlan<'_> {
-    fn apply(&self, elevate: &Elevate) -> Result<()> {
-        cmd::Process::run("systemctl", &["daemon-reload"], elevate, None)?.check()?;
+#[async_trait]
+impl Applyable for DaemonReloadPlan {
+    async fn apply(&self, elevate: &Elevate) -> Result<()> {
+        cmd::Process::run("systemctl", &["daemon-reload"], elevate, None)
+            .await?
+            .check()?;
 
         Ok(())
     }
 }
 
-impl Reporter for DaemonReloadPlan<'_> {
+impl Reporter for DaemonReloadPlan {
     fn report(&self) -> Result<Vec<String>> {
         Ok(vec!["systemd reloaded".to_owned()])
     }
@@ -317,14 +336,19 @@ pub struct BootTarget {
     pub target: Target,
 }
 
+#[async_trait]
 impl<'change> Plannable<'change> for BootTarget {
-    fn plan<'elevate>(self: Box<Self>, elevate: &'elevate Elevate) -> Result<ChangeStatus<'change>>
+    async fn plan<'elevate>(
+        self: Box<Self>,
+        elevate: &'elevate Elevate,
+    ) -> Result<ChangeStatus<'change>>
     where
         'elevate: 'change,
     {
         let current_target = {
-            let systemctl =
-                cmd::Process::run("systemctl", &["get-default"], elevate, None)?.check()?;
+            let systemctl = cmd::Process::run("systemctl", &["get-default"], elevate, None)
+                .await?
+                .check()?;
             match systemctl.stdout.trim() {
                 "multi-user.target" => Target::MultiUser,
                 "graphical.target" => Target::Graphical,
@@ -352,14 +376,16 @@ pub(crate) struct BootTargetPlan {
     pub(crate) current_target: Target,
 }
 
+#[async_trait]
 impl Applyable for BootTargetPlan {
-    fn apply(&self, elevate: &Elevate) -> Result<()> {
+    async fn apply(&self, elevate: &Elevate) -> Result<()> {
         cmd::Process::run(
             "systemctl",
             &["set-default", "--", self.args.target.as_str()],
             elevate,
             None,
-        )?
+        )
+        .await?
         .check()?;
 
         Ok(())

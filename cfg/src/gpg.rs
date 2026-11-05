@@ -34,12 +34,12 @@ impl GpgTrust {
     }
 }
 
-pub(crate) fn get_gpg_key_trust(
+pub(crate) async fn get_gpg_key_trust(
     fingerprint: &GpgFingerprint,
     gnupg_directory: &Path,
     elevate: &Elevate,
 ) -> Result<Option<GpgTrust>> {
-    let status_file = Tempfile::new(elevate)?;
+    let status_file = Tempfile::new(elevate).await?;
 
     // only interested in the status file
     cmd::Process::run(
@@ -61,10 +61,12 @@ pub(crate) fn get_gpg_key_trust(
         ],
         elevate,
         None,
-    )?
+    )
+    .await?
     .unchecked();
 
-    let status = status_file.read_all()?;
+    // box it to make the future smaller (otherwise, it may be >50KiB)
+    let status = Box::pin(status_file.read_all()).await?;
     let status = String::from_utf8(status)?;
     let mut status_lines = status.lines();
 
@@ -113,7 +115,8 @@ pub(crate) fn get_gpg_key_trust(
             ],
             elevate,
             None,
-        )?
+        )
+        .await?
         .check()?;
 
         for line in gpg.stdout.lines() {
@@ -147,7 +150,7 @@ pub(crate) fn get_gpg_key_trust(
     }
 }
 
-pub(crate) fn trust_key(
+pub(crate) async fn trust_key(
     fingerprint: &GpgFingerprint,
     trust: GpgTrust,
     gnupg_directory: &Path,
@@ -173,13 +176,18 @@ pub(crate) fn trust_key(
             )
             .as_bytes(),
         ),
-    )?
+    )
+    .await?
     .check()?;
 
     Ok(())
 }
 
-pub(crate) fn import_key(content: &[u8], gnupg_directory: &Path, elevate: &Elevate) -> Result<()> {
+pub(crate) async fn import_key(
+    content: &[u8],
+    gnupg_directory: &Path,
+    elevate: &Elevate,
+) -> Result<()> {
     cmd::Process::run(
         "env",
         &[
@@ -192,7 +200,8 @@ pub(crate) fn import_key(content: &[u8], gnupg_directory: &Path, elevate: &Eleva
         ],
         elevate,
         Some(content),
-    )?
+    )
+    .await?
     .check()?;
 
     Ok(())
