@@ -8,8 +8,12 @@ use nonempty::NonEmpty;
 use tap::Tap as _;
 
 use crate::{
+    Path,
     maybeowned::MaybeOwned,
-    pkg::{list_explicitly_installed_packages, list_installed_packages},
+    pkg::{
+        get_package_version, list_explicitly_installed_packages, list_installed_packages,
+        list_packages_installed_as_dependencies,
+    },
 };
 
 use super::super::{Applyable, ChangeStatus, Elevate, Plannable, Reporter, cmd};
@@ -26,6 +30,14 @@ static EXPLICITLY_INSTALLED_PACKAGES: OnceLock<Vec<String>> = OnceLock::new();
 fn explicitly_installed_packages(elevate: &Elevate) -> Result<&Vec<String>> {
     let packages = EXPLICITLY_INSTALLED_PACKAGES
         .get_or_try_init(|| list_explicitly_installed_packages(elevate))?;
+    Ok(packages)
+}
+
+static PACKAGES_INSTALLED_AS_DEPENDENCIES: OnceLock<Vec<String>> = OnceLock::new();
+
+fn packages_installed_as_dependencies(elevate: &Elevate) -> Result<&Vec<String>> {
+    let packages = PACKAGES_INSTALLED_AS_DEPENDENCIES
+        .get_or_try_init(|| list_packages_installed_as_dependencies(elevate))?;
     Ok(packages)
 }
 
@@ -252,6 +264,163 @@ impl Reporter for PackageRemovePlan<'_> {
         for install in &self.remove {
             out.push(format!("remove {name}", name = install.as_ref()));
         }
+        Ok(out)
+    }
+}
+
+#[derive(Debug)]
+pub struct LocalPackage<'action> {
+    pub name: MaybeOwned<'action, str>,
+    pub path: MaybeOwned<'action, Path>,
+    pub version: MaybeOwned<'action, str>,
+    pub reason: InstallReason,
+}
+
+impl<'change> Plannable<'change> for LocalPackage<'change> {
+    fn plan<'elevate>(self: Box<Self>, elevate: &'elevate Elevate) -> Result<ChangeStatus<'change>>
+    where
+        'elevate: 'change,
+    {
+        let package_version = get_package_version(self.name.as_ref(), elevate)?;
+
+        match package_version {
+            Some(installed_version) => {
+                let set_reason = match self.reason {
+                    InstallReason::Explicit => !explicitly_installed_packages(elevate)?
+                        .iter()
+                        .any(|s| s == self.name.as_ref()),
+                    InstallReason::Dependency => !packages_installed_as_dependencies(elevate)?
+                        .iter()
+                        .any(|s| s == self.name.as_ref()),
+                };
+
+                if installed_version != self.version.as_ref() {
+                    Ok(ChangeStatus::NeedsChange(Box::new(LocalPackagePlan {
+                        change: LocalPackageChange {
+                            operation: Some(LocalPackageChangeOperation::ChangeVersion {
+                                to_version: self.version.clone(),
+                            }),
+                            set_reason,
+                        },
+                        args: *self,
+                    })))
+                } else if set_reason {
+                    Ok(ChangeStatus::NeedsChange(Box::new(LocalPackagePlan {
+                        args: *self,
+                        change: LocalPackageChange {
+                            operation: None,
+                            set_reason: true,
+                        },
+                    })))
+                } else {
+                    Ok(ChangeStatus::Clean)
+                }
+            }
+            None => Ok(ChangeStatus::NeedsChange(Box::new(LocalPackagePlan {
+                args: *self,
+                change: LocalPackageChange {
+                    operation: Some(LocalPackageChangeOperation::Install),
+                    set_reason: false,
+                },
+            }))),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub(crate) enum LocalPackageChangeOperation<'a> {
+    Install,
+    ChangeVersion { to_version: MaybeOwned<'a, str> },
+}
+
+#[derive(Debug)]
+pub(crate) struct LocalPackageChange<'a> {
+    operation: Option<LocalPackageChangeOperation<'a>>,
+    set_reason: bool,
+}
+
+#[derive(Debug)]
+pub(crate) struct LocalPackagePlan<'a> {
+    // #[expect(unused, reason = "kept to have the same shape as other plans")]
+    pub(crate) args: LocalPackage<'a>,
+    pub(crate) change: LocalPackageChange<'a>,
+}
+
+impl Applyable for LocalPackagePlan<'_> {
+    fn apply(&self, elevate: &Elevate) -> Result<()> {
+        match self.change.operation {
+            None => (),
+            Some(
+                LocalPackageChangeOperation::Install
+                | LocalPackageChangeOperation::ChangeVersion { to_version: _ },
+            ) => {
+                cmd::Process::run(
+                    "pacman",
+                    &[
+                        "--needed",
+                        "--noconfirm",
+                        "--upgrade",
+                        "--",
+                        self.args.path.as_ref().as_str(),
+                    ],
+                    elevate,
+                    None,
+                )?
+                .check()?;
+            }
+        }
+
+        if self.change.set_reason {
+            cmd::Process::run(
+                "pacman",
+                &[
+                    "--database",
+                    match self.args.reason {
+                        InstallReason::Explicit => "--asexplicit",
+                        InstallReason::Dependency => "--asdeps",
+                    },
+                    "--",
+                    self.args.name.as_ref(),
+                ],
+                elevate,
+                None,
+            )?
+            .check()?;
+        }
+
+        Ok(())
+    }
+}
+
+impl Reporter for LocalPackagePlan<'_> {
+    fn report(&self) -> Result<Vec<String>> {
+        let mut out = vec![];
+
+        match self.change.operation {
+            Some(LocalPackageChangeOperation::Install) => {
+                out.push(format!("install {name}", name = self.args.name.as_ref()));
+            }
+            Some(LocalPackageChangeOperation::ChangeVersion { ref to_version }) => {
+                out.push(format!(
+                    "change version of {name} to {version}",
+                    version = to_version.as_ref(),
+                    name = self.args.name.as_ref()
+                ));
+            }
+            None => (),
+        }
+
+        if self.change.set_reason {
+            out.push(format!(
+                "set {} as {}",
+                self.args.name.as_ref(),
+                match self.args.reason {
+                    InstallReason::Explicit => "explicitly installed",
+                    InstallReason::Dependency => "installed as dependency",
+                }
+            ));
+        }
+
         Ok(out)
     }
 }

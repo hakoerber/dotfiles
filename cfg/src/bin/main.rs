@@ -1,3 +1,7 @@
+#![expect(
+    clippy::large_include_file,
+    reason = "Everything necessary should be included in the binary (PKGBUILDS, locally built packages)"
+)]
 #![allow(unused, reason = "dev")]
 // required for `serde_json::json!()`
 #![recursion_limit = "256"]
@@ -11,6 +15,11 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 use cfg::prelude::*;
+
+static PKGBUILDS: include_dir::Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../pkgbuilds");
+
+static INCLUDED_PACKAGES: &[(&str, &str, &str, &[u8])] =
+    include!(concat!(env!("OUT_DIR"), "/packages.rs"));
 
 #[derive(Serialize)]
 enum Cpu {
@@ -32,8 +41,6 @@ enum Host {
     Dionysus,
     Hera,
 }
-
-static PKGBUILDS: include_dir::Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../pkgbuilds");
 
 use Host::{Ares, Dionysus, Hera, Neptune};
 
@@ -1415,6 +1422,7 @@ fn aur<'elevate: 'action, 'action>(
     let makepkg_home = Path::new("/var/lib/makepkg");
     let makepkg_build_directory = makepkg_home.join("build");
     let pkgbuild_directory = makepkg_home.join("pkgbuilds");
+    let included_packages_directory = makepkg_home.join("packages");
 
     plan.add(
         Ref("create build user"),
@@ -1428,6 +1436,53 @@ fn aur<'elevate: 'action, 'action>(
             system: true,
         }),
     )?;
+
+    plan.add(
+        Ref("create included packages directory"),
+        elevate,
+        Box::new(Directory {
+            path: Owned(included_packages_directory.clone()),
+            on_symlink: SymlinkHandling::Proceed,
+            on_file: FileHandling::Proceed,
+            permissions: FilePermissions {
+                owner: makepkg_user.clone(),
+                group: makepkg_group.clone(),
+                mode: FileMode(0o700),
+            },
+        }),
+    )?;
+
+    for &(name, version, filename, content) in INCLUDED_PACKAGES {
+        let package_path = included_packages_directory.join(filename);
+
+        plan.add(
+            Owned(format!("deploy included package {name}")),
+            elevate,
+            Box::new(File {
+                content: FileContent::Bytes(Ref(content)),
+                binary: true,
+                path: Owned(package_path.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: makepkg_user.clone(),
+                    group: makepkg_group.clone(),
+                    mode: FileMode(0o700),
+                },
+            }),
+        )?;
+
+        plan.add(
+            Owned(format!("install included package {name}")),
+            elevate,
+            Box::new(LocalPackage {
+                name: Ref(name),
+                path: Owned(package_path),
+                version: Ref(version),
+                reason: InstallReason::Explicit,
+            }),
+        )?;
+    }
 
     plan.add(
         Ref("create pkgbuild root directory"),
@@ -3559,10 +3614,6 @@ fn user_wallpaper<'elevate: 'action, 'action, 'user, 'machine>(
                 mode: FileMode(0o644),
             },
             binary: true,
-            #[expect(
-                clippy::large_include_file,
-                reason = "I want everything in a single binary"
-            )]
             content: FileContent::Bytes(Ref(include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
                 "/../wallpaper.jpg"

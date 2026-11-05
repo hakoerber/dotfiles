@@ -1,0 +1,32 @@
+# Maintainer: Hannes Körber <hannes@hkoerber.de>
+pkgname='workstation-mgr'
+pkgver=22
+pkgrel=1
+pkgdesc=''
+arch=('x86_64')
+depends=('glibc' 'gcc-libs')
+makedepends=('cargo')
+options=(!lto !debug)
+source=()
+sha256sums=()
+
+pkgver() {
+  cd "../.."
+  git log --oneline . | wc -l
+}
+
+prepare() {
+  export RUSTUP_TOOLCHAIN=stable
+  cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+}
+
+build() {
+  export RUSTUP_TOOLCHAIN=stable
+  export CARGO_TARGET_DIR=target
+  cargo build --frozen --release
+}
+
+package() {
+  install -Dm0755 -t "$pkgdir/usr/bin/" "target/release/${pkgname}"
+  install -Dm0755 -t "$pkgdir/usr/bin/" "target/release/workstation-client"
+}

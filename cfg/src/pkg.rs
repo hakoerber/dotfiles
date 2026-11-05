@@ -50,6 +50,17 @@ pub fn list_explicitly_installed_packages(elevate: &Elevate) -> Result<Vec<Strin
     .collect())
 }
 
+pub fn list_packages_installed_as_dependencies(elevate: &Elevate) -> Result<Vec<String>> {
+    Ok(
+        cmd::Process::run("pacman", &["--query", "--quiet", "--deps"], elevate, None)?
+            .check()?
+            .stdout
+            .lines()
+            .map(|line| line.to_owned())
+            .collect(),
+    )
+}
+
 pub fn list_orphaned_packages(elevate: &Elevate) -> Result<Vec<String>> {
     let pacman = cmd::Process::run(
         "pacman",

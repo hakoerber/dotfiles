@@ -13,7 +13,9 @@ pub mod prelude {
         Directory, DirectoryHandling, File, FileHandling, Remove, SymlinkHandling,
     };
     pub use super::gpg::GpgKey;
-    pub use super::package::{InstallReason, PackageDatabaseRefresh, PackageRemove, Packages};
+    pub use super::package::{
+        InstallReason, LocalPackage, PackageDatabaseRefresh, PackageRemove, Packages,
+    };
     pub use super::systemd::{
         BootTarget, DaemonReload, RestartService, Service, ServiceState, ServiceStatePersistent,
         ServiceStateRuntime, Target,
