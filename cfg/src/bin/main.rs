@@ -3054,7 +3054,6 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
         (".local/state/", None),
         (".local/state/gnupg/", Some(FileMode(0o700))),
         (".local/state/cargo/", None),
-        (".local/share/", None),
         (".local/share/applications", None),
         (".config/VSCodium/", None),
         (".config/VSCodium/User", None),
