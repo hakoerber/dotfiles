@@ -66,13 +66,13 @@ cmds.append('[con_mark="^_destination$"] swap container with mark _source')
 cmds.append('[con_mark="^_destination$"] focus')
 cmds.append("unmark _destination")
 
-# switch back to workspace that was originally active on target output
-if active_workspace_on_target_output["output"] != target_workspace["output"]:
-    cmds.append(f"workspace number {active_workspace_on_target_output['num']}")
-
 # remove mark on source, so focus stays there
 cmds.append('[con_mark="^_source$"] focus')
 cmds.append("unmark _source")
+
+# switch back to workspace that was originally active on target output
+if active_workspace_on_target_output["num"] != target_workspace["num"]:
+    cmds.append(f"workspace number {active_workspace_on_target_output['num']}")
 
 # switch back to original workspace
 cmds.append(f"workspace number {current_workspace['num']}")
