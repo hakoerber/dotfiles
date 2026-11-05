@@ -7,9 +7,11 @@ use super::super::{
 };
 
 #[derive(Debug)]
-#[expect(clippy::large_enum_variant, reason = "still acceptable")]
 pub(crate) enum FileChange {
     Create,
+    MetadataChange {
+        permission_change: FilePermissionChange,
+    },
     Changed {
         checksum_change: Option<ChecksumChange>,
         permission_change: Option<FilePermissionChange>,
@@ -68,6 +70,19 @@ impl Applyable for FileChangePlan<'_> {
                     &self.args.permissions,
                 )?;
             }
+            FileChange::MetadataChange {
+                ref permission_change,
+            } => {
+                if let Some(ref uid) = permission_change.diff.owner {
+                    fs::set_file_owner(elevate, self.args.path.as_ref(), uid)?;
+                }
+                if let Some(ref gid) = permission_change.diff.group {
+                    fs::set_file_group(elevate, self.args.path.as_ref(), gid)?;
+                }
+                if let Some(mode) = permission_change.diff.mode {
+                    fs::set_file_mode(elevate, self.args.path.as_ref(), mode)?;
+                }
+            }
             FileChange::Changed {
                 ref checksum_change,
                 ref permission_change,
@@ -125,6 +140,9 @@ impl Reporter for FileChangePlan<'_> {
             }
             FileChange::ReplaceSymlink => Ok(vec!["replacing symlink".to_owned()]),
             FileChange::ReplaceDirectory => Ok(vec!["replacing directory".to_owned()]),
+            FileChange::MetadataChange {
+                ref permission_change,
+            } => Ok(permission_change.report()?),
             FileChange::Changed {
                 ref existing_content,
                 ref checksum_change,
@@ -175,6 +193,7 @@ pub struct File<'args> {
     pub on_directory: DirectoryHandling,
     pub content: FileContent<'args>,
     pub binary: bool,
+    pub ignore_checksum_changes: bool,
 }
 
 impl<'args> Plannable<'args> for File<'args> {
@@ -187,32 +206,43 @@ impl<'args> Plannable<'args> for File<'args> {
         if let Some(stat) = stat {
             match stat.entry_type {
                 fs::EntryType::File => {
-                    let existing_content = fs::read(elevate, self.path.as_ref())?;
-
-                    let (checksum_from, checksum_to) = (
-                        checksum::checksum_from(self.content.to_bytes().as_ref()),
-                        checksum::checksum_from(&existing_content),
-                    );
-
-                    let content_changed = checksum_from != checksum_to;
-
                     let permission_change =
                         fs::check_file_permissions(elevate, self.path.as_ref(), &self.permissions)?;
 
-                    if content_changed || permission_change.is_some() {
-                        Ok(ChangeStatus::NeedsChange(Box::new(FileChangePlan {
-                            args: *self,
-                            change: FileChange::Changed {
-                                existing_content: RawFileContent::from(existing_content),
-                                checksum_change: content_changed.then_some(ChecksumChange {
-                                    from: checksum_from,
-                                    to: checksum_to,
-                                }),
-                                permission_change,
-                            },
-                        })))
+                    if self.ignore_checksum_changes {
+                        if let Some(permission_change) = permission_change {
+                            Ok(ChangeStatus::NeedsChange(Box::new(FileChangePlan {
+                                args: *self,
+                                change: FileChange::MetadataChange { permission_change },
+                            })))
+                        } else {
+                            Ok(ChangeStatus::Clean)
+                        }
                     } else {
-                        Ok(ChangeStatus::Clean)
+                        let existing_content = fs::read(elevate, self.path.as_ref())?;
+
+                        let (checksum_from, checksum_to) = (
+                            checksum::checksum_from(self.content.to_bytes().as_ref()),
+                            checksum::checksum_from(&existing_content),
+                        );
+
+                        let content_changed = checksum_from != checksum_to;
+
+                        if content_changed || permission_change.is_some() {
+                            Ok(ChangeStatus::NeedsChange(Box::new(FileChangePlan {
+                                args: *self,
+                                change: FileChange::Changed {
+                                    existing_content: RawFileContent::from(existing_content),
+                                    checksum_change: content_changed.then_some(ChecksumChange {
+                                        from: checksum_from,
+                                        to: checksum_to,
+                                    }),
+                                    permission_change,
+                                },
+                            })))
+                        } else {
+                            Ok(ChangeStatus::Clean)
+                        }
                     }
                 }
                 fs::EntryType::Directory => match self.on_directory {

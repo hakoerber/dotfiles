@@ -517,6 +517,7 @@ fn hera<'elevate: 'action, 'action>(
             on_symlink: SymlinkHandling::Proceed,
             on_directory: DirectoryHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: FileContent::Bytes(Owned(
                 textwrap::dedent(
                     r#"
@@ -543,6 +544,7 @@ fn hera<'elevate: 'action, 'action>(
             on_symlink: SymlinkHandling::Proceed,
             on_directory: DirectoryHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: FileContent::Bytes(Owned(
                 textwrap::dedent(
                     r#"
@@ -632,6 +634,7 @@ fn autoupdate<'elevate: 'action, 'action>(
             on_symlink: SymlinkHandling::Proceed,
             on_directory: DirectoryHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: FileContent::Bytes(Owned(
                 textwrap::dedent(
                     r#"
@@ -681,6 +684,7 @@ fn autoupdate<'elevate: 'action, 'action>(
             on_symlink: SymlinkHandling::Proceed,
             on_directory: DirectoryHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: FileContent::Bytes(Owned(
                 textwrap::dedent(
                     r#"
@@ -714,6 +718,7 @@ fn autoupdate<'elevate: 'action, 'action>(
             on_symlink: SymlinkHandling::Proceed,
             on_directory: DirectoryHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: FileContent::Bytes(Owned(
                 textwrap::dedent(
                     r#"
@@ -801,6 +806,7 @@ fn restic_backup<'elevate: 'action, 'action>(
             on_symlink: SymlinkHandling::Proceed,
             on_directory: DirectoryHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: FileContent::Bytes(Owned(
                 textwrap::dedent(
                     r#"
@@ -826,6 +832,7 @@ fn restic_backup<'elevate: 'action, 'action>(
             on_symlink: SymlinkHandling::Proceed,
             on_directory: DirectoryHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: FileContent::Bytes(Owned(
                 textwrap::dedent(
                     r#"
@@ -867,6 +874,7 @@ fn restic_backup<'elevate: 'action, 'action>(
             on_symlink: SymlinkHandling::Proceed,
             on_directory: DirectoryHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: FileContent::Bytes(Owned(
                 textwrap::dedent(
                     r#"
@@ -914,6 +922,7 @@ fn restic_backup<'elevate: 'action, 'action>(
             on_symlink: SymlinkHandling::Proceed,
             on_directory: DirectoryHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: FileContent::Bytes(Owned(
                 textwrap::dedent(
                     r#"
@@ -947,6 +956,7 @@ fn restic_backup<'elevate: 'action, 'action>(
             on_symlink: SymlinkHandling::Proceed,
             on_directory: DirectoryHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: FileContent::Bytes(Owned(
                 textwrap::dedent(
                     r#"
@@ -1044,6 +1054,7 @@ fn initrd<'name, 'elevate: 'action, 'action>(
             on_symlink: SymlinkHandling::Proceed,
             on_directory: DirectoryHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: FileContent::Bytes(Owned(
                 textwrap::dedent(&format!(
                     r#"
@@ -1119,6 +1130,7 @@ fn libvirt<'elevate: 'action, 'action>(
             on_directory: DirectoryHandling::Bail,
             on_symlink: SymlinkHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: Lines(Ref(&[Ref("LIBVIRTD_ARGS=")])),
         }),
     )?
@@ -1263,6 +1275,7 @@ fn copy_dir<'elevate: 'action, 'action>(
                 on_directory: DirectoryHandling::Bail,
                 on_symlink: SymlinkHandling::Proceed,
                 binary: true,
+                ignore_checksum_changes: false,
                 content: FileContent::Bytes(Owned(file.contents().to_vec())),
             }),
         );
@@ -1461,6 +1474,9 @@ fn aur<'elevate: 'action, 'action>(
             Box::new(File {
                 content: FileContent::Bytes(Ref(content)),
                 binary: true,
+                // checksum may change, the only thing that matters is the version, which is
+                // part of the filename
+                ignore_checksum_changes: true,
                 path: Owned(package_path.clone()),
                 on_symlink: SymlinkHandling::Proceed,
                 on_directory: DirectoryHandling::Bail,
@@ -1626,6 +1642,7 @@ fn aur<'elevate: 'action, 'action>(
                 on_directory: DirectoryHandling::Bail,
                 on_symlink: SymlinkHandling::Proceed,
                 binary: true,
+                ignore_checksum_changes: false,
                 content: FileContent::Bytes(Owned(
                     textwrap::dedent(&format!(
                         r#"
@@ -1651,6 +1668,7 @@ fn aur<'elevate: 'action, 'action>(
                     on_directory: DirectoryHandling::Bail,
                     on_symlink: SymlinkHandling::Proceed,
                     binary: true,
+                    ignore_checksum_changes: false,
                     content: FileContent::Bytes(Owned(preexec.clone().into_bytes())),
                 }),
             )?;
@@ -1669,6 +1687,7 @@ fn aur<'elevate: 'action, 'action>(
                 on_directory: DirectoryHandling::Bail,
                 on_symlink: SymlinkHandling::Proceed,
                 binary: true,
+                ignore_checksum_changes: false,
                 content: FileContent::Bytes(Owned(
                     textwrap::dedent(&format!(
                         r#"
@@ -1752,6 +1771,7 @@ fn aur<'elevate: 'action, 'action>(
                 on_directory: DirectoryHandling::Bail,
                 on_symlink: SymlinkHandling::Proceed,
                 binary: true,
+                ignore_checksum_changes: false,
                 content: FileContent::Bytes(Owned(
                     textwrap::dedent(&format!(
                         r#"
@@ -1848,6 +1868,7 @@ fn sudo<'elevate: 'action, 'action>(
             on_directory: DirectoryHandling::Bail,
             on_symlink: SymlinkHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: Lines(Owned(vec![Ref("%sudonopw ALL=(ALL) NOPASSWD: ALL")])),
         }),
     )?;
@@ -1865,6 +1886,7 @@ fn sudo<'elevate: 'action, 'action>(
             on_directory: DirectoryHandling::Bail,
             on_symlink: SymlinkHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: Lines(Owned(vec![Ref("permit nopass nolog setenv {PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin} :sudonopw")])),
         }),
     )?;
@@ -1903,6 +1925,7 @@ fn timesyncd<'elevate: 'action, 'action>(
             on_directory: DirectoryHandling::Bail,
             on_symlink: SymlinkHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: Lines(Owned(vec![
                 Ref("[Time]"),
                 Owned(format!("NTP={}", arch_ntp_servers.join(" "))),
@@ -1931,6 +1954,7 @@ fn reflector<'elevate: 'action, 'action>(
             on_directory: DirectoryHandling::Bail,
             on_symlink: SymlinkHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: Lines(Ref(&[
                 Ref("--save /etc/pacman.d/mirrorlist"),
                 Ref("--protocol https"),
@@ -1982,6 +2006,7 @@ fn pacman<'elevate: 'action, 'action>(
             on_symlink: SymlinkHandling::Proceed,
             on_directory: DirectoryHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: FileContent::Bytes(Owned(
                 textwrap::dedent(
                     r##"
@@ -2058,6 +2083,7 @@ fn pacman_cache_cleanup<'elevate: 'action, 'action>(
                 mode: FileMode(0o644),
             },
             binary: false,
+            ignore_checksum_changes: false,
             content: Lines(Ref(&[
                 Ref("[Service]"),
                 Ref("Type=oneshot"),
@@ -2080,6 +2106,7 @@ fn pacman_cache_cleanup<'elevate: 'action, 'action>(
             on_directory: DirectoryHandling::Bail,
             on_symlink: SymlinkHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: Lines(Ref(&[
                 Ref("[Timer]"),
                 Ref("OnCalendar=daily"),
@@ -2173,6 +2200,7 @@ fn hardware<'elevate: 'action, 'action>(
                     on_directory: DirectoryHandling::Bail,
                     on_symlink: SymlinkHandling::Proceed,
                     binary: false,
+                    ignore_checksum_changes: false,
                     content: Lines(Ref(&[
                         Ref(r#"Section "Device""#),
                         Ref(r#"    Identifier "AMD""#),
@@ -2280,6 +2308,7 @@ fn backlight<'elevate: 'action, 'action>(
             on_directory: DirectoryHandling::Bail,
             on_symlink: SymlinkHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: Lines(Ref(&[Ref(r#"ACTION=="add", SUBSYSTEM=="backlight", RUN+="/bin/chgrp video $sys$devpath/brightness", RUN+="/bin/chmod g+w $sys$devpath/brightness""#)])),
         }),
     )?;
@@ -2304,6 +2333,7 @@ fn kernel_modules<'elevate: 'action, 'action>(
             on_directory: DirectoryHandling::Bail,
             on_symlink: SymlinkHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: Lines(Ref(&[
                 // dirty flag
                 Ref("install esp4 /bin/false"),
@@ -2572,6 +2602,7 @@ fn firefox<'elevate: 'action, 'action>(
             on_directory: DirectoryHandling::Bail,
             on_symlink: SymlinkHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: FileContent::Bytes(Owned(serde_json::to_vec_pretty(&policies)?)),
         }),
     )?;
@@ -2791,6 +2822,7 @@ fn user_firefox<'elevate: 'action, 'action, 'user, 'machine>(
                     mode: FileMode(0o644),
                 },
             binary: false,
+            ignore_checksum_changes: false,
                 content: FileContent::Bytes(Owned(
                     textwrap::dedent(
                         r##"
@@ -2983,6 +3015,7 @@ fn user_spotify<'elevate: 'action, 'action, 'user, 'machine>(
                 mode: FileMode(0o644),
             },
             binary: false,
+            ignore_checksum_changes: false,
             content: FileContent::Lines(Ref(&[Ref("--audio-api=pulseaudio")])),
         }),
     )?;
@@ -3027,6 +3060,7 @@ fn user_autologin<'elevate: 'action, 'action, 'user, 'machine>(
             on_directory: DirectoryHandling::Bail,
             on_symlink: SymlinkHandling::Proceed,
             binary: false,
+            ignore_checksum_changes: false,
             content: Lines(Owned(vec![
                 Ref("[Service]"),
                 Ref("ExecStart="),
@@ -3293,6 +3327,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
                     mode: FileMode(0o644),
                 },
                 binary: false,
+                ignore_checksum_changes: false,
                 content: FileContent::Bytes(Ref(content)),
             }),
         )?;
@@ -3401,6 +3436,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
                     mode: FileMode(0o644),
                 },
                 binary: false,
+                ignore_checksum_changes: false,
                 content: FileContent::Bytes(Owned(template.into_bytes())),
             }),
         )?;
@@ -3462,6 +3498,7 @@ fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
                     mode: FileMode(0o755),
                 },
                 binary: false,
+                ignore_checksum_changes: false,
                 content: FileContent::Bytes(Ref(content)),
             }),
         )?;
@@ -3642,6 +3679,7 @@ fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
                     mode: FileMode(0o755),
                 },
                 binary: false,
+                ignore_checksum_changes: false,
                 content: FileContent::Bytes(Ref(content)),
             }),
         )?;
@@ -3669,6 +3707,7 @@ fn user_wallpaper<'elevate: 'action, 'action, 'user, 'machine>(
                 mode: FileMode(0o644),
             },
             binary: true,
+            ignore_checksum_changes: false,
             content: FileContent::Bytes(Ref(include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
                 "/../wallpaper.jpg"
@@ -3856,6 +3895,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
                         mode: FileMode(0o644),
                     },
                     binary: false,
+                    ignore_checksum_changes: false,
                     content: FileContent::Bytes(Ref(content)),
                 }),
             )?;
@@ -3886,6 +3926,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
                 mode: FileMode(0o644),
             },
             binary: false,
+            ignore_checksum_changes: false,
             content: FileContent::Lines(Owned({
                 let mut out = vec![
                     Ref("[Unit]"),
@@ -3969,6 +4010,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
                     mode: FileMode(0o644),
                 },
                 binary: false,
+                ignore_checksum_changes: false,
                 content: FileContent::Bytes(Ref(content)),
             }),
         )?;
