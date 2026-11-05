@@ -2162,31 +2162,6 @@ fn hardware<'elevate: 'action, 'action>(
             );
 
             plan.register_packages(amdgpu_packages);
-
-            plan.add(
-                "set AMDGPU options",
-                elevate,
-                File {
-                    path: Ref(Path::new("/etc/X11/xorg.conf.d/20-amdgpu.conf")),
-                    permissions: FilePermissions {
-                        owner: Uid::root(),
-                        group: Gid::root(),
-                        mode: FileMode(0o600),
-                    },
-                    on_directory: DirectoryHandling::Bail,
-                    on_symlink: SymlinkHandling::Proceed,
-                    binary: false,
-                    ignore_checksum_changes: false,
-                    content: Lines(Ref(&[
-                        Ref(r#"Section "Device""#),
-                        Ref(r#"    Identifier "AMD""#),
-                        Ref(r#"    Driver "amdgpu""#),
-                        Ref(r#"    Option "VariableRefresh" "true""#),
-                        Ref(r#"    Option "TearFree" "true""#),
-                        Ref(r#"EndSection"#),
-                    ])),
-                },
-            );
         }
         Gpu::Nvidia => {
             let nouveau_packages = &[
