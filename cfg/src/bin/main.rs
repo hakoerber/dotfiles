@@ -1385,6 +1385,10 @@ fn aur<'elevate: 'action, 'action>(
             preexec: None,
         },
         AurPackage {
+            name: "aws-session-manager-plugin",
+            preexec: None,
+        },
+        AurPackage {
             name: "portfolio-performance-bin",
             preexec: Some(textwrap::dedent(
                 r#"
