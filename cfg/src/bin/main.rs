@@ -2684,7 +2684,7 @@ fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
         Box::new(GpgKey {
             content: include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../gpgkeys/hannes@hkoerber.de.gpg.asc"
+                "/../files/gpgkeys/hannes@hkoerber.de.gpg.asc"
             )),
             gnupg_directory: Owned(home.join(".local/state/gnupg/")),
             fingerprint: GpgFingerprint("973AE48D71B76735C4712B5BB5C002530C6A2053".to_owned()),
@@ -3127,7 +3127,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
             ".local/share/applications/firefox.desktop",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../applications/firefox.desktop"
+                "/../files/desktop/firefox.desktop"
             ))
             .as_slice(),
         ),
@@ -3135,7 +3135,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
             ".config/alacritty/themes/monokai.toml",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../alacritty/themes/monokai.toml"
+                "/../files/alacritty/themes/monokai.toml"
             ))
             .as_slice(),
         ),
@@ -3143,19 +3143,23 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
             ".config/alacritty/themes/github_light.toml",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../alacritty/themes/github_light.toml"
+                "/../files/alacritty/themes/github_light.toml"
             ))
             .as_slice(),
         ),
         (
             ".local/state/cargo/config.toml",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../cargo/config.toml")).as_slice(),
+            include_bytes!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../files/cargo/config.toml"
+            ))
+            .as_slice(),
         ),
         (
             ".local/state/gnupg/dirmngr.conf",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../gnupg/dirmngr.conf"
+                "/../files/gnupg/dirmngr.conf"
             ))
             .as_slice(),
         ),
@@ -3163,7 +3167,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
             ".local/state/gnupg/scdaemon.conf",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../gnupg/scdaemon.conf"
+                "/../files/gnupg/scdaemon.conf"
             ))
             .as_slice(),
         ),
@@ -3171,7 +3175,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
             ".config/i3status-rust/themes/native.toml",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../i3status-rust/themes/native.toml"
+                "/../files/i3status-rust/themes/native.toml"
             ))
             .as_slice(),
         ),
@@ -3179,23 +3183,27 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
             ".config/i3status-rust/icons/awesome.toml",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../i3status-rust/icons/awesome.toml"
+                "/../files/i3status-rust/icons/awesome.toml"
             ))
             .as_slice(),
         ),
         (
             ".config/tmux/tmux.conf",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../tmux/tmux.conf")).as_slice(),
+            include_bytes!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../files/tmux/tmux.conf"
+            ))
+            .as_slice(),
         ),
         (
             ".zshenv",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../zsh/zshenv")).as_slice(),
+            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/zsh/zshenv")).as_slice(),
         ),
         (
             ".config/gammastep.conf",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../gammastep/gammastep.conf"
+                "/../files/gammastep/gammastep.conf"
             ))
             .as_slice(),
         ),
@@ -3203,7 +3211,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
             ".config/VSCodium/product.json",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../vscodium/product.json"
+                "/../files/vscodium/product.json"
             ))
             .as_slice(),
         ),
@@ -3211,7 +3219,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
             ".config/VSCodium/User/settings.json",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../vscodium/settings.json"
+                "/../files/vscodium/settings.json"
             ))
             .as_slice(),
         ),
@@ -3219,43 +3227,55 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
             ".config/VSCodium/User/keybindings.json",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../vscodium/keybindings.json"
+                "/../files/vscodium/keybindings.json"
             ))
             .as_slice(),
         ),
         (
             ".config/rofi/config",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../rofi/config")).as_slice(),
+            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/rofi/config")).as_slice(),
         ),
         (
             ".config/qt5ct/qt5ct.conf",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../qt/qt5ct.conf")).as_slice(),
+            include_bytes!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../files/qt/qt5ct.conf"
+            ))
+            .as_slice(),
         ),
         (
             ".config/helix/config.toml",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../helix/config.toml")).as_slice(),
+            include_bytes!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../files/helix/config.toml"
+            ))
+            .as_slice(),
         ),
         (
             ".config/helix/languages.toml",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../helix/languages.toml"
+                "/../files/helix/languages.toml"
             ))
             .as_slice(),
         ),
         (
             ".local/state/cargo/config.toml",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../cargo/config.toml")).as_slice(),
+            include_bytes!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../files/cargo/config.toml"
+            ))
+            .as_slice(),
         ),
         (
             ".config/git/ignore",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../git/ignore")).as_slice(),
+            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/git/ignore")).as_slice(),
         ),
         (
             ".config/sway/scripts/swap-from-workspace.py",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../sway/scripts/swap-from-workspace.py"
+                "/../files/sway/scripts/swap-from-workspace.py"
             ))
             .as_slice(),
         ),
@@ -3291,59 +3311,80 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
     for (path, template) in [
         (
             ".config/git/config",
-            include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../git/gitconfig.j2")),
+            include_str!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../files/git/gitconfig.j2"
+            )),
         ),
         (
             ".local/state/gnupg/gpg-agent.conf",
             include_str!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../gnupg/gpg-agent.conf.j2"
+                "/../files/gnupg/gpg-agent.conf.j2"
             )),
         ),
         (
             ".local/state/gnupg/gpg.conf",
-            include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../gnupg/gpg.conf.j2")),
+            include_str!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../files/gnupg/gpg.conf.j2"
+            )),
         ),
         (
             ".config/zsh/.zprofile",
-            include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../zsh/zprofile.j2")),
+            include_str!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../files/zsh/zprofile.j2"
+            )),
         ),
         (
             ".config/zsh/.zshrc",
-            include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../zsh/zshrc.j2")),
+            include_str!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../files/zsh/zshrc.j2"
+            )),
         ),
         (
             ".config/dunstrc",
-            include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../dunst/dunstrc.j2")),
+            include_str!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../files/dunst/dunstrc.j2"
+            )),
         ),
         (
             ".config/alacritty/config.toml",
             include_str!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../alacritty/alacritty.toml.j2"
+                "/../files/alacritty/alacritty.toml.j2"
             )),
         ),
         (
             ".config/gtk-3.0/settings.ini",
             include_str!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../gtk/gtk-3.0.ini.j2"
+                "/../files/gtk/gtk-3.0.ini.j2"
             )),
         ),
         (
             ".config/gtkrc-2.0",
-            include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../gtk/gtkrc-2.0.j2")),
+            include_str!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../files/gtk/gtkrc-2.0.j2"
+            )),
         ),
         (
             ".config/i3status-rust/config.toml",
             include_str!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../i3status-rust/config.toml.j2"
+                "/../files/i3status-rust/config.toml.j2"
             )),
         ),
         (
             ".config/sway/config",
-            include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../sway/config.j2")),
+            include_str!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../files/sway/config.j2"
+            )),
         ),
     ] {
         let template = tera::Tera::one_off(template, &template_context, false)?;
@@ -3379,19 +3420,23 @@ fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
             "fix-aoe2.sh",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../scripts/fix-aoe2.sh"
+                "/../files/scripts/fix-aoe2.sh"
             ))
             .as_slice(),
         ),
         (
             "garmin.sh",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../scripts/garmin.sh")).as_slice(),
+            include_bytes!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../files/scripts/garmin.sh"
+            ))
+            .as_slice(),
         ),
         (
             "install-gothic.sh",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../scripts/install-gothic.sh"
+                "/../files/scripts/install-gothic.sh"
             ))
             .as_slice(),
         ),
@@ -3399,7 +3444,7 @@ fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
             "install-gothic2.sh",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../scripts/install-gothic2.sh"
+                "/../files/scripts/install-gothic2.sh"
             ))
             .as_slice(),
         ),
@@ -3425,21 +3470,29 @@ fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
     for (bin, content) in [
         (
             "ascii",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../bin/ascii")).as_slice(),
+            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/ascii")).as_slice(),
         ),
         (
             "asciihex",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../bin/asciihex")).as_slice(),
+            include_bytes!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../files/bin/asciihex"
+            ))
+            .as_slice(),
         ),
         (
             "days-until",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../bin/days-until")).as_slice(),
+            include_bytes!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../files/bin/days-until"
+            ))
+            .as_slice(),
         ),
         (
             "firefox-default",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../bin/firefox-default"
+                "/../files/bin/firefox-default"
             ))
             .as_slice(),
         ),
@@ -3447,7 +3500,7 @@ fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
             "git-rewrite-author",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../bin/git-rewrite-author"
+                "/../files/bin/git-rewrite-author"
             ))
             .as_slice(),
         ),
@@ -3455,87 +3508,95 @@ fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
             "gpg-yubikey-rescan",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../bin/gpg-yubikey-rescan"
+                "/../files/bin/gpg-yubikey-rescan"
             ))
             .as_slice(),
         ),
         (
             "kw",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../bin/kw")).as_slice(),
+            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/kw")).as_slice(),
         ),
         (
             "markdown-to-pdf",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../bin/markdown-to-pdf"
+                "/../files/bin/markdown-to-pdf"
             ))
             .as_slice(),
         ),
         (
             "mousespam",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../bin/mousespam")).as_slice(),
+            include_bytes!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../files/bin/mousespam"
+            ))
+            .as_slice(),
         ),
         (
             "mousespam-toggle",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../bin/mousespam-toggle"
+                "/../files/bin/mousespam-toggle"
             ))
             .as_slice(),
         ),
         (
             "nato",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../bin/nato")).as_slice(),
+            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/nato")).as_slice(),
         ),
         (
             "natode",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../bin/natode")).as_slice(),
+            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/natode")).as_slice(),
         ),
         (
             "notify",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../bin/notify")).as_slice(),
+            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/notify")).as_slice(),
         ),
         (
             "pacman-remove-orphans",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../bin/pacman-remove-orphans"
+                "/../files/bin/pacman-remove-orphans"
             ))
             .as_slice(),
         ),
         (
             "paselect",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../bin/paselect")).as_slice(),
+            include_bytes!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../files/bin/paselect"
+            ))
+            .as_slice(),
         ),
         (
             "pass",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../bin/pass")).as_slice(),
+            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/pass")).as_slice(),
         ),
         (
             "pf",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../bin/pf")).as_slice(),
+            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/pf")).as_slice(),
         ),
         (
             "pprint",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../bin/pprint")).as_slice(),
+            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/pprint")).as_slice(),
         ),
         (
             "pw",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../bin/pw")).as_slice(),
+            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/pw")).as_slice(),
         ),
         (
             "qr",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../bin/qr")).as_slice(),
+            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/qr")).as_slice(),
         ),
         (
             "randmac",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../bin/randmac")).as_slice(),
+            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/randmac")).as_slice(),
         ),
         (
             "split-multiyaml-to-json",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../bin/split-multiyaml-to-json"
+                "/../files/bin/split-multiyaml-to-json"
             ))
             .as_slice(),
         ),
@@ -3543,7 +3604,7 @@ fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
             "switch-color-mode",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../bin/switch-color-mode"
+                "/../files/bin/switch-color-mode"
             ))
             .as_slice(),
         ),
@@ -3551,17 +3612,21 @@ fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
             "terraform-get-targets",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../bin/terraform-get-targets"
+                "/../files/bin/terraform-get-targets"
             ))
             .as_slice(),
         ),
         (
             "unascii",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../bin/unascii")).as_slice(),
+            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/bin/unascii")).as_slice(),
         ),
         (
             "yaml2json",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../bin/yaml2json")).as_slice(),
+            include_bytes!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../files/bin/yaml2json"
+            ))
+            .as_slice(),
         ),
     ] {
         plan.add(
@@ -3625,7 +3690,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             "dunst.service",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../autostart/services/dunst.service"
+                "/../files/autostart/services/dunst.service"
             ))
             .as_slice(),
             true,
@@ -3634,7 +3699,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             "firefox@.service",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../autostart/services/firefox@.service"
+                "/../files/autostart/services/firefox@.service"
             ))
             .as_slice(),
             true,
@@ -3643,7 +3708,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             "gammastep.service",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../autostart/services/gammastep.service"
+                "/../files/autostart/services/gammastep.service"
             ))
             .as_slice(),
             machine.machine_type != MachineType::Tv,
@@ -3652,7 +3717,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             "gnome-keyring.service",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../autostart/services/gnome-keyring.service"
+                "/../files/autostart/services/gnome-keyring.service"
             ))
             .as_slice(),
             true,
@@ -3661,7 +3726,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             "gpg-agent.service",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../autostart/services/gpg-agent.service"
+                "/../files/autostart/services/gpg-agent.service"
             ))
             .as_slice(),
             user.gpg.as_ref().is_some_and(|gpg| gpg.agent_enabled),
@@ -3670,7 +3735,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             "kdeconnect.service",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../autostart/services/kdeconnect.service"
+                "/../files/autostart/services/kdeconnect.service"
             ))
             .as_slice(),
             true,
@@ -3679,7 +3744,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             "keepassxc.service",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../autostart/services/keepassxc.service"
+                "/../files/autostart/services/keepassxc.service"
             ))
             .as_slice(),
             user.keepassxc.enabled(),
@@ -3688,7 +3753,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             "laptop-lid.service",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../autostart/services/laptop-lid.service"
+                "/../files/autostart/services/laptop-lid.service"
             ))
             .as_slice(),
             machine.machine_type == Laptop,
@@ -3697,7 +3762,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             "nextcloud.service",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../autostart/services/nextcloud.service"
+                "/../files/autostart/services/nextcloud.service"
             ))
             .as_slice(),
             user.nextcloud.enabled(),
@@ -3706,7 +3771,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             "nm-sidebar.service",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../autostart/services/nm-sidebar.service"
+                "/../files/autostart/services/nm-sidebar.service"
             ))
             .as_slice(),
             true,
@@ -3715,7 +3780,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             "screencfg.service",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../autostart/services/screencfg.service"
+                "/../files/autostart/services/screencfg.service"
             ))
             .as_slice(),
             true,
@@ -3724,7 +3789,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             "spotify.service",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../autostart/services/spotify.service"
+                "/../files/autostart/services/spotify.service"
             ))
             .as_slice(),
             true,
@@ -3733,7 +3798,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             "steam.service",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../autostart/services/steam.service"
+                "/../files/autostart/services/steam.service"
             ))
             .as_slice(),
             user.steam.enabled(),
@@ -3742,7 +3807,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             "sway.service",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../autostart/services/sway.service"
+                "/../files/autostart/services/sway.service"
             ))
             .as_slice(),
             true,
@@ -3751,7 +3816,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             "windowmanager.target",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../autostart/services/windowmanager.target"
+                "/../files/autostart/services/windowmanager.target"
             ))
             .as_slice(),
             true,
@@ -3760,7 +3825,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             "workstation-mgr.service",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../autostart/services/workstation-mgr.service"
+                "/../files/autostart/services/workstation-mgr.service"
             ))
             .as_slice(),
             true,
@@ -3769,7 +3834,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             "yubikey-touch-detector.service",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../autostart/services/yubikey-touch-detector.service"
+                "/../files/autostart/services/yubikey-touch-detector.service"
             ))
             .as_slice(),
             user.gpg.as_ref().is_some_and(|gpg| gpg.agent_enabled),
@@ -3878,7 +3943,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             "color-theme-dark.service",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../services/color-theme-dark.service"
+                "/../files/services/color-theme-dark.service"
             ))
             .as_slice(),
         ),
@@ -3886,7 +3951,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
             "color-theme-light.service",
             include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../services/color-theme-light.service"
+                "/../files/services/color-theme-light.service"
             ))
             .as_slice(),
         ),

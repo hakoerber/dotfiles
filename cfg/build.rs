@@ -109,4 +109,5 @@ fn main() {
     .unwrap();
 
     println!("cargo::rerun-if-changed=../pkgbuilds");
+    println!("cargo::rerun-if-changed=../files");
 }
