@@ -144,18 +144,21 @@ impl Reporter for FileChangePlan<'_> {
 
                     let new_content = self.args.content.to_raw();
 
-                    let diff = diffy::create_patch_bytes(
-                        existing_content.as_bytes(),
-                        new_content.as_bytes(),
-                    );
+                    if !self.args.binary {
+                        let diff = diffy::create_patch_bytes(
+                            existing_content.as_bytes(),
+                            new_content.as_bytes(),
+                        );
 
-                    let formatter = diffy::PatchFormatter::new().with_color();
-                    let mut buffer = Vec::<u8>::new();
-                    formatter.write_patch_into(&diff, &mut buffer)?;
+                        let formatter = diffy::PatchFormatter::new().with_color();
+                        let mut buffer = Vec::<u8>::new();
+                        formatter.write_patch_into(&diff, &mut buffer)?;
 
-                    let diff =
-                        String::from_utf8(buffer).map_err(|_err| anyhow!("non utf-8 patch"))?;
-                    out.extend(diff.lines().map(|s| s.to_owned()).collect::<Vec<String>>());
+                        let diff = String::from_utf8(buffer).map_err(|_err| {
+                            anyhow!("non utf-8 patch in {}", self.args.path.as_ref())
+                        })?;
+                        out.extend(diff.lines().map(|s| s.to_owned()).collect::<Vec<String>>());
+                    }
                 }
 
                 Ok(out)
