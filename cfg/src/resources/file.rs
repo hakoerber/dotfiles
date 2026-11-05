@@ -115,8 +115,9 @@ impl Reporter for FileChangePlan<'_> {
                     let mut buffer = Vec::<u8>::new();
                     formatter.write_patch_into(&diff, &mut buffer)?;
 
-                    let diff =
-                        String::from_utf8(buffer).map_err(|_err| anyhow!("non utf-8 patch"))?;
+                    let diff = String::from_utf8(buffer).map_err(|_err| {
+                        anyhow!("non utf-8 patch in {}", self.args.path.as_ref())
+                    })?;
                     out.extend(diff.lines().map(|s| s.to_owned()).collect::<Vec<String>>());
                 }
 
