@@ -40,13 +40,26 @@ pub async fn get_package_version(name: &str, elevate: &Elevate) -> Result<Option
 }
 
 pub async fn resolve_installed_package(elevate: &Elevate, name: &str) -> Result<Option<String>> {
-    Ok(
-        cmd::Process::run("pacman", &["--query", "--quiet", name], elevate, None)
+    // resolve until we are at the root, i.e. when the package name does not change any more
+    let mut name = name.to_owned();
+    loop {
+        let resolved = cmd::Process::run("pacman", &["--query", "--quiet", &name], elevate, None)
             .await?
             .check()
             .ok()
-            .map(|output| output.stdout.trim().to_owned()),
-    )
+            .map(|output| output.stdout.trim().to_owned());
+
+        if let Some(resolved) = resolved {
+            if name == resolved {
+                break Ok(Some(resolved));
+            } else {
+                name = resolved;
+                continue;
+            }
+        } else {
+            break Ok(None);
+        }
+    }
 }
 
 pub async fn list_explicitly_installed_packages(elevate: &Elevate) -> Result<Vec<String>> {
