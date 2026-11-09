@@ -2324,27 +2324,29 @@ fn journald<'elevate: 'action, 'action>(
     });
 }
 
-fn hardware_switches<'elevate: 'action, 'action>(
+fn logind<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
 ) {
     plan.add(
-        "handle lid switch",
+        "configure logind.conf",
         elevate,
-        LineInFile {
-            path: Path::new("/etc/systemd/logind.conf"),
-            line: Ref("HandleLidSwitch=ignore"),
-            regex: Regex::new(r#"^#?HandleLidSwitch=.*$"#).expect("regex to be valid"),
-        },
-    );
-
-    plan.add(
-        "handle power key",
-        elevate,
-        LineInFile {
-            path: Path::new("/etc/systemd/logind.conf"),
-            line: Ref("HandlePowerKey=suspend"),
-            regex: Regex::new(r#"^#?HandlePowerKey=.*$"#).expect("regex to be valid"),
+        File {
+            path: Ref(Path::new("/etc/systemd/logind.conf")),
+            permissions: FilePermissions {
+                owner: Uid::root(),
+                group: Gid::root(),
+                mode: FileMode(0o600),
+            },
+            on_directory: DirectoryHandling::Bail,
+            on_symlink: SymlinkHandling::Proceed,
+            binary: false,
+            ignore_checksum_changes: false,
+            content: Lines(Ref(&[
+                Ref("[Login]"),
+                Ref("HandlePowerKey=suspend"),
+                Ref("HandleLidSwitch=ignore"),
+            ])),
         },
     );
 }
@@ -2586,7 +2588,7 @@ async fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     timesyncd(plan, elevate);
     sudo(plan, elevate);
     hardware(plan, elevate, config);
-    hardware_switches(plan, elevate);
+    logind(plan, elevate);
     journald(plan, elevate);
     kernel_modules(plan, elevate);
     backlight(plan, elevate);
