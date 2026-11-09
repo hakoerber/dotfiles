@@ -2,22 +2,17 @@ use anyhow::Result;
 use async_once_cell::OnceCell;
 use tap::Tap as _;
 
-use crate::{
-    Path,
+use super::super::{
+    Applyable, ChangeStatus, Elevate, Path, Plannable, Reporter, cmd,
     maybeowned::MaybeOwned,
-    pkg::{
-        get_package_version, list_explicitly_installed_packages, list_installed_packages,
-        list_packages_installed_as_dependencies,
-    },
+    pkg::{self, InstallReason},
 };
-
-use super::super::{Applyable, ChangeStatus, Elevate, Plannable, Reporter, cmd};
 
 static INSTALLED_PACKAGES: OnceCell<Vec<String>> = OnceCell::new();
 
 async fn installed_packages(elevate: &Elevate) -> Result<&Vec<String>> {
     let packages = INSTALLED_PACKAGES
-        .get_or_try_init(async { list_installed_packages(elevate).await })
+        .get_or_try_init(async { pkg::list_installed_packages(elevate).await })
         .await?;
     Ok(packages)
 }
@@ -26,7 +21,7 @@ static EXPLICITLY_INSTALLED_PACKAGES: OnceCell<Vec<String>> = OnceCell::new();
 
 async fn explicitly_installed_packages(elevate: &Elevate) -> Result<&Vec<String>> {
     let packages = EXPLICITLY_INSTALLED_PACKAGES
-        .get_or_try_init(async { list_explicitly_installed_packages(elevate).await })
+        .get_or_try_init(async { pkg::list_explicitly_installed_packages(elevate).await })
         .await?;
     Ok(packages)
 }
@@ -35,7 +30,7 @@ static PACKAGES_INSTALLED_AS_DEPENDENCIES: OnceCell<Vec<String>> = OnceCell::new
 
 async fn packages_installed_as_dependencies(elevate: &Elevate) -> Result<&Vec<String>> {
     let packages = PACKAGES_INSTALLED_AS_DEPENDENCIES
-        .get_or_try_init(async { list_packages_installed_as_dependencies(elevate).await })
+        .get_or_try_init(async { pkg::list_packages_installed_as_dependencies(elevate).await })
         .await?;
     Ok(packages)
 }
@@ -78,13 +73,6 @@ impl Reporter for PackageDatabaseRefreshPlan<'_> {
     fn report(&self) -> Result<Vec<String>> {
         Ok(vec!["package database refresh".to_owned()])
     }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum InstallReason {
-    Explicit,
-    Dependency,
-    DependencyIfInstalling,
 }
 
 #[derive(Debug)]
@@ -145,7 +133,7 @@ impl<'change> Plannable<'change> for Packages<'change> {
         }
 
         if !install.is_empty() || !set_reason.is_empty() {
-            Ok(ChangeStatus::NeedsChange(Box::new(PackagePlan {
+            Ok(ChangeStatus::NeedsChange(Box::new(PackagesPlan {
                 set_reason,
                 args: *self,
                 install,
@@ -157,7 +145,7 @@ impl<'change> Plannable<'change> for Packages<'change> {
 }
 
 #[derive(Debug)]
-pub(crate) struct PackagePlan<'a> {
+pub(crate) struct PackagesPlan<'a> {
     // #[expect(unused, reason = "kept to have the same shape as other plans")]
     pub(crate) args: Packages<'a>,
     pub(crate) install: Vec<MaybeOwned<'a, str>>,
@@ -165,7 +153,7 @@ pub(crate) struct PackagePlan<'a> {
 }
 
 #[async_trait::async_trait]
-impl Applyable for PackagePlan<'_> {
+impl Applyable for PackagesPlan<'_> {
     async fn apply(&self, elevate: &Elevate) -> Result<()> {
         if !self.install.is_empty() {
             cmd::Process::run(
@@ -204,7 +192,7 @@ impl Applyable for PackagePlan<'_> {
     }
 }
 
-impl Reporter for PackagePlan<'_> {
+impl Reporter for PackagesPlan<'_> {
     fn report(&self) -> Result<Vec<String>> {
         let mut out = vec![];
         for install in &self.install {
@@ -315,7 +303,7 @@ impl<'change> Plannable<'change> for LocalPackage<'change> {
     where
         'elevate: 'change,
     {
-        let package_version = get_package_version(self.name.as_ref(), elevate).await?;
+        let package_version = pkg::get_package_version(self.name.as_ref(), elevate).await?;
 
         match package_version {
             Some(installed_version) => {
@@ -464,5 +452,169 @@ impl Reporter for LocalPackagePlan<'_> {
         }
 
         Ok(out)
+    }
+}
+
+#[derive(Debug)]
+pub struct SinglePackage<'action> {
+    pub package: MaybeOwned<'action, str>,
+    pub reason: InstallReason,
+}
+
+#[async_trait::async_trait]
+impl<'change> Plannable<'change> for SinglePackage<'change> {
+    async fn plan<'elevate>(
+        self: Box<Self>,
+        elevate: &'elevate Elevate,
+    ) -> Result<ChangeStatus<'change>>
+    where
+        'elevate: 'change,
+    {
+        if !installed_packages(elevate)
+            .await?
+            .iter()
+            .any(|s| s == self.package.as_ref())
+        {
+            Ok(ChangeStatus::NeedsChange(Box::new(SinglePackagePlan {
+                args: *self,
+                action: SinglePackagePlanAction::Install,
+            })))
+        } else {
+            match self.reason {
+                InstallReason::Explicit => {
+                    if !explicitly_installed_packages(elevate)
+                        .await?
+                        .iter()
+                        .any(|s| s == self.package.as_ref())
+                    {
+                        Ok(ChangeStatus::NeedsChange(Box::new(SinglePackagePlan {
+                            args: *self,
+                            action: SinglePackagePlanAction::SetReason,
+                        })))
+                    } else {
+                        Ok(ChangeStatus::Clean)
+                    }
+                }
+                InstallReason::Dependency => {
+                    if !packages_installed_as_dependencies(elevate)
+                        .await?
+                        .iter()
+                        .any(|s| s == self.package.as_ref())
+                    {
+                        Ok(ChangeStatus::NeedsChange(Box::new(SinglePackagePlan {
+                            args: *self,
+                            action: SinglePackagePlanAction::SetReason,
+                        })))
+                    } else {
+                        Ok(ChangeStatus::Clean)
+                    }
+                }
+                InstallReason::DependencyIfInstalling => {
+                    // in this case, we retain the current setting
+                    Ok(ChangeStatus::Clean)
+                }
+            }
+        }
+    }
+}
+
+#[derive(Debug)]
+pub(crate) enum SinglePackagePlanAction {
+    Install,
+    SetReason,
+}
+
+#[derive(Debug)]
+pub(crate) struct SinglePackagePlan<'a> {
+    // #[expect(unused, reason = "kept to have the same shape as other plans")]
+    pub(crate) args: SinglePackage<'a>,
+    pub(crate) action: SinglePackagePlanAction,
+}
+
+#[async_trait::async_trait]
+impl Applyable for SinglePackagePlan<'_> {
+    async fn apply(&self, elevate: &Elevate) -> Result<()> {
+        // Resolve the package before installing. another package that was installed in the
+        // meantime may "provide" it. That cannot be seen during planning.
+        let resolved = pkg::resolve_installed_package(elevate, self.args.package.as_ref()).await?;
+
+        let name = resolved
+            .as_deref()
+            .unwrap_or_else(|| self.args.package.as_ref());
+
+        match self.action {
+            SinglePackagePlanAction::Install => {
+                cmd::Process::run(
+                    "pacman",
+                    &["--needed", "--noconfirm", "--sync", "--", name],
+                    elevate,
+                    None,
+                )
+                .await?
+                .check()?;
+
+                // Explicitly set the reason again, as the resolved package have been installed as a
+                // dependency in the mean time. Note that this can only "upgrade" the reason (from
+                // `Dependency` to `Explicit`). Never downgrade.
+                let reason = pkg::get_install_reason(elevate, name)
+                    .await?
+                    .expect("installed package has an install reason");
+
+                if reason == InstallReason::Dependency
+                    && self.args.reason == InstallReason::Explicit
+                {
+                    cmd::Process::run(
+                        "pacman",
+                        &["--database", "--asexplicit", "--", name],
+                        elevate,
+                        None,
+                    )
+                    .await?
+                    .check()?;
+                }
+            }
+            SinglePackagePlanAction::SetReason => {
+                cmd::Process::run(
+                    "pacman",
+                    &[
+                        "--database",
+                        match self.args.reason {
+                            InstallReason::Explicit => "--asexplicit",
+                            InstallReason::Dependency | InstallReason::DependencyIfInstalling => {
+                                "--asdeps"
+                            }
+                        },
+                        "--",
+                        name,
+                    ],
+                    elevate,
+                    None,
+                )
+                .await?
+                .check()?;
+            }
+        }
+
+        Ok(())
+    }
+}
+
+impl Reporter for SinglePackagePlan<'_> {
+    fn report(&self) -> Result<Vec<String>> {
+        match self.action {
+            SinglePackagePlanAction::Install => Ok(vec![format!(
+                "install {name}",
+                name = self.args.package.as_ref()
+            )]),
+            SinglePackagePlanAction::SetReason => Ok(vec![format!(
+                "set {name} as {message}",
+                name = self.args.package.as_ref(),
+                message = match self.args.reason {
+                    InstallReason::Explicit => "explicitly installed",
+                    InstallReason::Dependency | InstallReason::DependencyIfInstalling =>
+                        "installed as dependency",
+                }
+            )]),
+        }
     }
 }

@@ -37,7 +37,7 @@ pub mod prelude {
     pub use super::gpg::{GpgFingerprint, GpgTrust};
     pub use super::maybeowned::MaybeOwned::{self, Owned, Ref};
     pub use super::pkg::{
-        check_installed, get_package_version, list_explicitly_installed_packages,
+        InstallReason, check_installed, get_package_version, list_explicitly_installed_packages,
         list_orphaned_packages, resolve_installed_package,
     };
     pub use super::resources::prelude::*;

@@ -14,7 +14,7 @@ pub mod prelude {
     };
     pub use super::gpg::GpgKey;
     pub use super::package::{
-        InstallReason, LocalPackage, PackageDatabaseRefresh, PackageRemove, Packages,
+        LocalPackage, PackageDatabaseRefresh, PackageRemove, Packages, SinglePackage,
     };
     pub use super::systemd::{
         BootTarget, DaemonReload, RestartService, Service, ServiceState, ServiceStatePersistent,

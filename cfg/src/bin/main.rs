@@ -1556,8 +1556,8 @@ async fn aur<'elevate: 'action, 'action>(
                             format!("install {} {} for {}", name, depend, aur_package.name)
                         }),
                         elevate,
-                        Packages {
-                            install: Owned(vec![Owned(resolved_name.clone())]),
+                        SinglePackage {
+                            package: Owned(resolved_name.clone()),
                             reason,
                         },
                     );
@@ -1570,8 +1570,8 @@ async fn aur<'elevate: 'action, 'action>(
                             name, depend, aur_package.name
                         )),
                         elevate,
-                        Packages {
-                            install: Owned(vec![Owned(depend.clone())]),
+                        SinglePackage {
+                            package: Owned(depend.clone()),
                             reason,
                         },
                     );

@@ -2,6 +2,13 @@ use anyhow::{Result, anyhow};
 
 use super::{Elevate, cmd};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum InstallReason {
+    Explicit,
+    Dependency,
+    DependencyIfInstalling,
+}
+
 pub async fn list_installed_packages(elevate: &Elevate) -> Result<Vec<String>> {
     Ok(
         cmd::Process::run("pacman", &["--query", "--quiet"], elevate, None)
@@ -54,7 +61,6 @@ pub async fn resolve_installed_package(elevate: &Elevate, name: &str) -> Result<
                 break Ok(Some(resolved));
             } else {
                 name = resolved;
-                continue;
             }
         } else {
             break Ok(None);
@@ -107,5 +113,37 @@ pub async fn list_orphaned_packages(elevate: &Elevate) -> Result<Vec<String>> {
         Err(anyhow!(
             "invalid pacman output for orphaned packages {pacman:?}"
         ))
+    }
+}
+
+pub async fn is_installed(elevate: &Elevate, name: &str) -> Result<bool> {
+    Ok(
+        cmd::Process::run("pacman", &["--query", "--quiet", name], elevate, None)
+            .await?
+            .unchecked()
+            .status
+            .success(),
+    )
+}
+
+pub async fn get_install_reason(elevate: &Elevate, name: &str) -> Result<Option<InstallReason>> {
+    if is_installed(elevate, name).await? {
+        if cmd::Process::run(
+            "pacman",
+            &["--query", "--quiet", "--explicit", name],
+            elevate,
+            None,
+        )
+        .await?
+        .unchecked()
+        .status
+        .success()
+        {
+            Ok(Some(InstallReason::Explicit))
+        } else {
+            Ok(Some(InstallReason::Dependency))
+        }
+    } else {
+        Ok(None)
     }
 }
