@@ -17,8 +17,6 @@ use serde::Serialize;
 
 use cfg::prelude::*;
 
-static PKGBUILDS: include_dir::Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../pkgbuilds");
-
 static BINS: include_dir::Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../files/bin");
 
 static SCRIPTS: include_dir::Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../files/scripts");
@@ -1186,244 +1184,22 @@ fn services<'elevate: 'action, 'action>(
     }
 }
 
-fn copy_dir<'elevate: 'action, 'action>(
+fn aur<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
-    source: &include_dir::Dir,
-    root: &Path,
-    target: &Path,
-    makepkg_user: &Uid,
-    makepkg_group: &Gid,
-) -> Result<()> {
-    plan.add(
-        Owned(format!("create pkgbuild folder for {target}")),
-        elevate,
-        Directory {
-            path: Owned(target.to_owned()),
-            on_symlink: SymlinkHandling::Proceed,
-            on_file: FileHandling::Proceed,
-            permissions: FilePermissions {
-                owner: makepkg_user.clone(),
-                group: makepkg_group.clone(),
-                mode: FileMode(0o700),
-            },
-        },
-    );
-
-    for file in source.files() {
-        if file
-            .path()
-            .file_name()
-            .expect("file has a filename")
-            .to_string_lossy()
-            .starts_with('.')
-        {
-            continue;
-        }
-
-        let path = root.join(
-            Path::from_path(file.path()).ok_or_else(|| anyhow!("non utf-8 path in pkgbuilds"))?,
-        );
-
-        plan.add(
-            Owned(format!("copy pkgbuild file {path}")),
-            elevate,
-            File {
-                path: Owned(target.join(path)),
-                permissions: FilePermissions {
-                    owner: makepkg_user.clone(),
-                    group: makepkg_group.clone(),
-                    mode: FileMode(0o600),
-                },
-                on_directory: DirectoryHandling::Bail,
-                on_symlink: SymlinkHandling::Proceed,
-                binary: true,
-                ignore_checksum_changes: false,
-                content: FileContent::Bytes(Owned(file.contents().to_vec())),
-            },
-        );
-    }
-
-    for dir in source.dirs() {
-        let path = root.join(
-            Path::from_path(dir.path()).ok_or_else(|| anyhow!("non utf-8 path in pkgbuilds"))?,
-        );
-        copy_dir(plan, elevate, dir, root, &path, makepkg_user, makepkg_group)?;
-    }
-
-    Ok(())
-}
-
-#[derive(Debug)]
-struct Pkgbuild {
-    pkgname: String,
-    pkgver: String,
-    pkgrel: String,
-    epoch: Option<String>,
-    depends: Vec<String>,
-    makedepends: Vec<String>,
-    checkdepends: Vec<String>,
-}
-
-impl Pkgbuild {
-    fn extract_packages(line: &str) -> Vec<String> {
-        if line.is_empty() {
-            vec![]
-        } else {
-            line.split(' ').map(|s|
-                    // remove all trailing version specifiers
-                    match s.split_once(|c|
-                        !matches!(c, 'A'..='Z' | 'a'..='z' | '0'..='9' | '@'|'.'|'_'| '+'| '-')
-                    ) {
-                        Some((name, _rest)) => name.to_owned(),
-                        None => s.to_owned(),
-                    }
-
-                ).collect()
-        }
-    }
-
-    async fn read(elevate: &Elevate, data: &[u8]) -> Result<Self> {
-        let source = Process::run(
-            "sh",
-            &[
-                "-c",
-                r#"
-                    source /dev/stdin ;
-                    printf '%s\n' "${pkgname}";
-                    printf '%s\n' "${pkgver}";
-                    printf '%s\n' "${pkgrel}";
-                    printf '%s\n' "${epoch}";
-                    printf '%s\n' "${depends[*]}";
-                    printf '%s\n' "${makedepends[*]}" ;
-                    printf '%s\n' "${checkdepends[*]}"
-                "#,
-            ],
-            elevate,
-            Some(data),
-        )
-        .await?
-        .check()?;
-
-        let lines = source.stdout.lines().collect::<Vec<_>>();
-
-        let lines: [&str; 7] = lines
-            .try_into()
-            .map_err(|_err| anyhow!("source returned invalid data"))?;
-
-        Ok(Self {
-            pkgname: lines[0].to_owned(),
-            pkgver: lines[1].to_owned(),
-            pkgrel: lines[2].to_owned(),
-            epoch: {
-                let line = lines[3];
-                (!line.is_empty()).then(|| line.to_owned())
-            },
-            depends: Self::extract_packages(lines[4]),
-            makedepends: Self::extract_packages(lines[5]),
-            checkdepends: Self::extract_packages(lines[6]),
-        })
-    }
-}
-
-async fn aur<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
-    elevate: &'elevate Elevate,
-) -> Result<()> {
-    #[derive(Debug)]
-    struct AurPackage {
-        name: &'static str,
-        preexec: Option<String>,
-    }
-
-    let aur_packages = &[
-        AurPackage {
-            name: "nodejs-intelephense",
-            preexec: None,
-        },
-        AurPackage {
-            name: "terraform-ls-bin",
-            preexec: None,
-        },
-        AurPackage {
-            name: "grm",
-            preexec: None,
-        },
-        AurPackage {
-            name: "screencfg",
-            preexec: None,
-        },
-        AurPackage {
-            name: "slack-desktop",
-            preexec: None,
-        },
-        AurPackage {
-            name: "claude-code",
-            preexec: None,
-        },
-        AurPackage {
-            name: "cargo-lambda-bin",
-            preexec: None,
-        },
-        AurPackage {
-            name: "nm-sidebar",
-            preexec: None,
-        },
-        AurPackage {
-            name: "aws-session-manager-plugin",
-            preexec: None,
-        },
-        AurPackage {
-            name: "portfolio-performance-bin",
-            preexec: Some(textwrap::dedent(
-                r#"
-                source ./env
-                curl -sSf --proto '=https' https://keys.openpgp.org/vks/v1/by-fingerprint/E46E6F8FF02E4C83569084589239277F560C95AC | gpg --import -
-                "#,
-            )),
-        },
-        AurPackage {
-            name: "spotify",
-            preexec: Some(textwrap::dedent(
-                r#"
-                source ./env
-                curl -sSf --proto '=https' https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.gpg | gpg --import -
-                "#,
-            )),
-        },
-    ];
-
-    let makepkg_user = Uid::from("makepkg".to_owned());
-    let makepkg_group = Gid::from("makepkg".to_owned());
-
-    let makepkg_home = Path::new("/var/lib/makepkg");
-    let makepkg_build_directory = makepkg_home.join("build");
-    let pkgbuild_directory = makepkg_home.join("pkgbuilds");
-    let included_packages_directory = makepkg_home.join("packages");
-
-    plan.add(
-        Ref("create build user"),
-        elevate,
-        User {
-            name: "makepkg",
-            home: Ref(makepkg_home),
-            primary_group: PrimaryGroupConfig::Automatic,
-            additional_groups: &[],
-            shell: "/bin/bash",
-            system: true,
-        },
-    );
+) {
+    let included_packages_directory = Path::new("/var/lib/packages");
 
     plan.add(
         Ref("create included packages directory"),
         elevate,
         Directory {
-            path: Owned(included_packages_directory.clone()),
+            path: Owned(included_packages_directory.to_owned()),
             on_symlink: SymlinkHandling::Proceed,
             on_file: FileHandling::Proceed,
             permissions: FilePermissions {
-                owner: makepkg_user.clone(),
-                group: makepkg_group.clone(),
+                owner: Uid::root(),
+                group: Gid::root(),
                 mode: FileMode(0o700),
             },
         },
@@ -1445,9 +1221,9 @@ async fn aur<'elevate: 'action, 'action>(
                 on_symlink: SymlinkHandling::Proceed,
                 on_directory: DirectoryHandling::Bail,
                 permissions: FilePermissions {
-                    owner: makepkg_user.clone(),
-                    group: makepkg_group.clone(),
-                    mode: FileMode(0o700),
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o600),
                 },
             },
         );
@@ -1462,356 +1238,9 @@ async fn aur<'elevate: 'action, 'action>(
                 reason: InstallReason::Explicit,
             },
         );
+
+        plan.register_packages(&[Ref(name)]);
     }
-
-    plan.add(
-        Ref("create pkgbuild root directory"),
-        elevate,
-        Directory {
-            path: Owned(pkgbuild_directory.clone()),
-            on_symlink: SymlinkHandling::Proceed,
-            on_file: FileHandling::Proceed,
-            permissions: FilePermissions {
-                owner: makepkg_user.clone(),
-                group: makepkg_group.clone(),
-                mode: FileMode(0o700),
-            },
-        },
-    );
-
-    plan.add(
-        Ref("create build directory"),
-        elevate,
-        Directory {
-            path: Owned(makepkg_build_directory.clone()),
-            on_symlink: SymlinkHandling::Proceed,
-            on_file: FileHandling::Proceed,
-            permissions: FilePermissions {
-                owner: makepkg_user.clone(),
-                group: makepkg_group.clone(),
-                mode: FileMode(0o700),
-            },
-        },
-    );
-
-    PKGBUILDS
-        .files()
-        .next()
-        .is_none()
-        .ok_or_else(|| anyhow!("files in root of pkgbuilds"))?;
-
-    for entry in PKGBUILDS.dirs() {
-        let entry_path =
-            Path::from_path(entry.path()).ok_or_else(|| anyhow!("non utf-8 path in pkgbuilds"))?;
-
-        copy_dir(
-            plan,
-            elevate,
-            entry,
-            &pkgbuild_directory,
-            &pkgbuild_directory.join(entry_path),
-            &makepkg_user,
-            &makepkg_group,
-        )?;
-    }
-
-    for aur_package in aur_packages {
-        let pkgbuild = PKGBUILDS
-            .get_file(format!("{name}/PKGBUILD", name = aur_package.name))
-            .ok_or_else(|| anyhow!("PKGBUILD for {} not found", aur_package.name))?;
-
-        let pkgbuild = Pkgbuild::read(elevate, pkgbuild.contents()).await?;
-
-        for (name, list, reason) in [
-            (
-                "depend",
-                &pkgbuild.depends,
-                InstallReason::DependencyIfInstalling, // if it's explicitly installed, keep it as-is
-            ),
-            (
-                "makedepend",
-                &pkgbuild.makedepends,
-                InstallReason::Explicit, // install explicitly because it's not a dependency of the package but should still be installed
-            ),
-            (
-                "checkdepend",
-                &pkgbuild.checkdepends,
-                InstallReason::Explicit,
-            ),
-        ] {
-            for depend in list {
-                // We need to resolve each dependency against the pacman database. it may be a package alias that
-                // is provided by some package. E.g. "cargo" is provded by "rustup". So we need to resolve "cargo",
-                // receive "rustup", and ensure this is installed., and ensure this is installed.
-                let package = if let Some(resolved_name) =
-                    resolve_installed_package(elevate, depend).await?
-                {
-                    plan.add(
-                        Owned(if resolved_name != *depend {
-                            format!(
-                                "install {} {} (resolved for {}) for {}",
-                                name, resolved_name, depend, aur_package.name
-                            )
-                        } else {
-                            format!("install {} {} for {}", name, depend, aur_package.name)
-                        }),
-                        elevate,
-                        SinglePackage {
-                            package: Owned(resolved_name.clone()),
-                            reason,
-                        },
-                    );
-
-                    resolved_name
-                } else {
-                    plan.add(
-                        Owned(format!(
-                            "install {} {} for {}",
-                            name, depend, aur_package.name
-                        )),
-                        elevate,
-                        SinglePackage {
-                            package: Owned(depend.clone()),
-                            reason,
-                        },
-                    );
-
-                    depend.clone()
-                };
-
-                plan.register_packages(&[Owned(package)]);
-            }
-        }
-
-        let build_directory = makepkg_build_directory.join(aur_package.name);
-
-        plan.add(
-            Owned(format!("create build directory for {}", aur_package.name)),
-            elevate,
-            Directory {
-                path: Owned(build_directory.clone()),
-                on_symlink: SymlinkHandling::Proceed,
-                on_file: FileHandling::Proceed,
-                permissions: FilePermissions {
-                    owner: makepkg_user.clone(),
-                    group: makepkg_group.clone(),
-                    mode: FileMode(0o700),
-                },
-            },
-        );
-
-        let gnupg_directory = build_directory.join("gnupg");
-
-        plan.add(
-            Owned(format!("create gpg directory for {}", aur_package.name)),
-            elevate,
-            Directory {
-                path: Owned(gnupg_directory.clone()),
-                on_symlink: SymlinkHandling::Proceed,
-                on_file: FileHandling::Proceed,
-                permissions: FilePermissions {
-                    owner: makepkg_user.clone(),
-                    group: makepkg_group.clone(),
-                    mode: FileMode(0o700),
-                },
-            },
-        );
-
-        plan.add(
-            Owned(format!("create env file for {}", aur_package.name)),
-            elevate,
-            File {
-                path: Owned(build_directory.join("env")),
-                permissions: FilePermissions {
-                    owner: makepkg_user.clone(),
-                    group: makepkg_group.clone(),
-                    mode: FileMode(0o600),
-                },
-                on_directory: DirectoryHandling::Bail,
-                on_symlink: SymlinkHandling::Proceed,
-                binary: true,
-                ignore_checksum_changes: false,
-                content: FileContent::Bytes(Owned(
-                    textwrap::dedent(&format!(
-                        r#"
-                        export GNUPGHOME="{gnupg_directory}"
-                        "#,
-                    ))
-                    .into_bytes(),
-                )),
-            },
-        );
-
-        if let Some(ref preexec) = aur_package.preexec {
-            plan.add(
-                Owned(format!("create preexec script for {}", aur_package.name)),
-                elevate,
-                File {
-                    path: Owned(build_directory.join("preexec")),
-                    permissions: FilePermissions {
-                        owner: makepkg_user.clone(),
-                        group: makepkg_group.clone(),
-                        mode: FileMode(0o700),
-                    },
-                    on_directory: DirectoryHandling::Bail,
-                    on_symlink: SymlinkHandling::Proceed,
-                    binary: true,
-                    ignore_checksum_changes: false,
-                    content: FileContent::Bytes(Owned(preexec.clone().into_bytes())),
-                },
-            );
-        }
-
-        plan.add(
-            Owned(format!("create build script for {}", aur_package.name)),
-            elevate,
-            File {
-                path: Owned(build_directory.join("build.sh")),
-                permissions: FilePermissions {
-                    owner: makepkg_user.clone(),
-                    group: makepkg_group.clone(),
-                    mode: FileMode(0o700),
-                },
-                on_directory: DirectoryHandling::Bail,
-                on_symlink: SymlinkHandling::Proceed,
-                binary: true,
-                ignore_checksum_changes: false,
-                content: FileContent::Bytes(Owned(
-                    textwrap::dedent(&format!(
-                        r#"
-                        #!/usr/bin/env bash
-
-                        set -x
-
-                        cd /var/lib/makepkg/build/{name}/
-
-                        if [[ -e ./preexec ]] ; then
-                            sh ./preexec || exit 1
-                        fi
-
-                        source /var/lib/makepkg/build/{name}/env
-
-                        export PKGEXT='.pkg.tar'
-                        export BUILDDIR=/var/lib/makepkg/build/{name}/build/
-                        export SRCDEST=/var/lib/makepkg/build/{name}/src/
-                        export PKGDEST=/var/lib/makepkg/build/{name}/
-
-                        cd /var/lib/makepkg/pkgbuilds/{name}/
-
-                        source ./PKGBUILD
-
-                        for a in "${{arch[@]}}" ; do
-                          if [[ "${{a}}" == "any" ]] ; then
-                            arch="any"
-                            break
-                          fi
-                          if [[ "${{a}}" == "x86_64" ]] ; then
-                            arch="x86_64"
-                            break
-                          fi
-                        done
-
-                        if [[ ! "${{arch}}" ]] ; then
-                          printf 'unsupported arch\n' >&2
-                          exit 1
-                        fi
-
-                        if [[ "${{epoch}}" ]] ; then
-                          version="${{epoch}}:${{pkgver}}-${{pkgrel}}"
-                        else
-                          version="${{pkgver}}-${{pkgrel}}"
-                        fi
-
-                        filename="${{PKGDEST%/}}/${{pkgname}}-${{version}}-${{arch}}${{PKGEXT}}"
-
-                        if [[ ! -e "${{filename}}" ]] ; then
-                          makepkg \
-                            --clean \
-                            --nosign || exit 1
-                        fi
-
-                        printf '%s' "${{filename}}" > /var/lib/makepkg/build/{name}/pkgname
-
-                        rm -rf "${{BUILDDIR}}"
-                        rm -rf "${{SRCDEST}}"
-                        "#,
-                        name = aur_package.name,
-                    ))
-                    .trim()
-                    .to_owned()
-                    .into_bytes(),
-                )),
-            },
-        );
-
-        let install_script = build_directory.join("install.sh");
-
-        plan.add(
-            Owned(format!("create install script for {}", aur_package.name)),
-            elevate,
-            File {
-                path: Owned(install_script.clone()),
-                permissions: FilePermissions {
-                    owner: makepkg_user.clone(),
-                    group: makepkg_group.clone(),
-                    mode: FileMode(0o700),
-                },
-                on_directory: DirectoryHandling::Bail,
-                on_symlink: SymlinkHandling::Proceed,
-                binary: true,
-                ignore_checksum_changes: false,
-                content: FileContent::Bytes(Owned(
-                    textwrap::dedent(&format!(
-                        r#"
-                        #!/usr/bin/env bash
-
-                        sudo -u makepkg -g makepkg /var/lib/makepkg/build/{name}/build.sh || exit 1
-
-                        filename="$(</var/lib/makepkg/build/{name}/pkgname)"
-
-                        pacman --upgrade --needed --noconfirm "$filename" || exit 1
-                        "#,
-                        name = aur_package.name,
-                    ))
-                    .trim()
-                    .to_owned()
-                    .into_bytes(),
-                )),
-            },
-        );
-
-        let version = get_package_version(aur_package.name, elevate).await?;
-
-        if !version.is_some_and(|version| {
-            version
-                == match pkgbuild.epoch {
-                    None => format!(
-                        "{pkgver}-{pkgrel}",
-                        pkgver = pkgbuild.pkgver,
-                        pkgrel = pkgbuild.pkgrel
-                    ),
-                    Some(epoch) => format!(
-                        "{epoch}:{pkgver}-{pkgrel}",
-                        pkgver = pkgbuild.pkgver,
-                        pkgrel = pkgbuild.pkgrel
-                    ),
-                }
-        }) {
-            plan.add(
-                Owned(format!("build aur package {}", aur_package.name)),
-                elevate,
-                Command {
-                    cmd: Owned(install_script.into_string()),
-                    args: &[],
-                    check_command: None,
-                },
-            );
-        }
-
-        plan.register_packages(&[Owned(aur_package.name.to_owned())]);
-    }
-
-    Ok(())
 }
 
 fn boot_target<'elevate: 'action, 'action>(
@@ -2570,12 +1999,12 @@ struct UserDirectories {
     data: PathBuf,
 }
 
-async fn root_setup<'elevate: 'action, 'action, 'pkgs>(
+fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     plan: &mut Plan<'_, 'elevate, 'pkgs, 'action>,
     elevate: &'elevate Elevate,
     config: &Config,
     packages: &'pkgs PackageConfig,
-) -> Result<()> {
+) {
     pacman(plan, elevate);
     pacman_cache_cleanup(plan, elevate);
     install_packages(plan, elevate, packages);
@@ -2584,7 +2013,7 @@ async fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     libvirt(plan, elevate);
     services(plan, elevate);
     boot_target(plan, elevate, config);
-    Box::pin(aur(plan, elevate)).await?;
+    aur(plan, elevate);
     timesyncd(plan, elevate);
     sudo(plan, elevate);
     hardware(plan, elevate, config);
@@ -2593,7 +2022,6 @@ async fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     kernel_modules(plan, elevate);
     backlight(plan, elevate);
     firefox(plan, elevate);
-    Ok(())
 }
 
 async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
@@ -4202,7 +3630,7 @@ async fn main() -> Result<()> {
 
     let mut plan = Plan::new();
 
-    Box::pin(root_setup(&mut plan, &root, &config, &PACKAGES)).await?;
+    root_setup(&mut plan, &root, &config, &PACKAGES);
 
     for user in &config.users {
         configure_user(&mut plan, &root, user, &config.machine).await?;
