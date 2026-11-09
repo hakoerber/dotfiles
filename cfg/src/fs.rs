@@ -430,7 +430,7 @@ pub async fn files_in_dir(elevate: &Elevate, path: &Path) -> Result<Option<Vec<P
                             "-type",
                             "f",
                             "-printf",
-                            "%f\0",
+                            "%f\\0",
                         ],
                         elevate,
                         None,
@@ -439,6 +439,7 @@ pub async fn files_in_dir(elevate: &Elevate, path: &Path) -> Result<Option<Vec<P
                     .check()?
                     .stdout
                     .split(|c| *c == 0)
+                    .filter(|c| !c.is_empty())
                     .map(|chunk| OsString::from_vec(chunk.to_vec()))
                     .map(|s| PathBuf::try_from(s).map_err(|_err| anyhow!("non utf8 path")))
                     .collect::<Result<_>>()?,
