@@ -11,7 +11,7 @@ path = "src/bin/main.rs"
 tempfile = { version = "3", default-features = false }
 
 [dependencies]
-clap = { version = "4.6", default-features = false, features = [
+clap = { version = "4", default-features = false, features = [
   "std",
   "derive",
   "color",
