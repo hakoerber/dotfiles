@@ -62,7 +62,7 @@ pub(crate) async fn get_gpg_key_trust(
                 &fingerprint.0,
             ],
             elevate_user,
-            None,
+            cmd::Stdin::Closed,
         )
         .await?
         .unchecked();
@@ -116,7 +116,7 @@ pub(crate) async fn get_gpg_key_trust(
                     "--export-ownertrust",
                 ],
                 elevate_user,
-                None,
+                cmd::Stdin::Closed,
             )
             .await?
             .check()?;
@@ -172,7 +172,7 @@ pub(crate) async fn trust_key(
             "--import-ownertrust",
         ],
         elevate,
-        Some(
+        cmd::Stdin::Write(
             format!(
                 // trailing newline is important!
                 "{fingerprint}:{trust}:\n",
@@ -204,7 +204,7 @@ pub(crate) async fn import_key(
             "--import",
         ],
         elevate,
-        Some(content),
+        cmd::Stdin::Write(content),
     )
     .await?
     .check()?;

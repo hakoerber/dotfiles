@@ -158,7 +158,7 @@ impl Applyable for UserPlan<'_> {
                 }
                 args.extend(["--", self.args.name]);
 
-                cmd::Process::run("useradd", &args, elevate, None)
+                cmd::Process::run("useradd", &args, elevate, cmd::Stdin::Closed)
                     .await?
                     .check()?;
             }
@@ -171,7 +171,7 @@ impl Applyable for UserPlan<'_> {
                         "usermod",
                         &["--gid", new_primary_group, "--", self.args.name],
                         elevate,
-                        None,
+                        cmd::Stdin::Closed,
                     )
                     .await?
                     .check()?;
@@ -184,7 +184,7 @@ impl Applyable for UserPlan<'_> {
                                 "usermod",
                                 &["--append", "--groups", group, "--", self.args.name],
                                 elevate,
-                                None,
+                                cmd::Stdin::Closed,
                             )
                             .await?
                             .check()?;
@@ -194,7 +194,7 @@ impl Applyable for UserPlan<'_> {
                                 "usermod",
                                 &["--remove", "--groups", &group.name, "--", self.args.name],
                                 elevate,
-                                None,
+                                cmd::Stdin::Closed,
                             )
                             .await?
                             .check()?;
@@ -213,7 +213,7 @@ impl Applyable for UserPlan<'_> {
                             self.args.name,
                         ],
                         elevate,
-                        None,
+                        cmd::Stdin::Closed,
                     )
                     .await?
                     .check()?;
@@ -224,7 +224,7 @@ impl Applyable for UserPlan<'_> {
                         "usermod",
                         &["--shell", new_shell, "--", self.args.name],
                         elevate,
-                        None,
+                        cmd::Stdin::Closed,
                     )
                     .await?
                     .check()?;
@@ -332,7 +332,7 @@ impl Applyable for GroupPlan<'_, '_> {
                 }
                 args.extend(["--", self.args.name]);
 
-                cmd::Process::run("groupadd", &args, elevate, None)
+                cmd::Process::run("groupadd", &args, elevate, cmd::Stdin::Closed)
                     .await?
                     .check()?;
             }

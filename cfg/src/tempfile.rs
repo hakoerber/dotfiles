@@ -9,7 +9,7 @@ use super::{Elevate, PathBuf, cmd, fs};
 
 #[must_use]
 #[derive(Debug)]
-pub(crate) struct Tempfile<'elevate> {
+pub struct Tempfile<'elevate> {
     path: Option<PathBuf>,
     elevate: &'elevate Elevate,
 }
@@ -23,14 +23,19 @@ impl Drop for Tempfile<'_> {
 }
 
 impl<'a> Tempfile<'a> {
-    pub(crate) async fn new(elevate: &'a Elevate) -> Result<Self> {
+    pub async fn new(elevate: &'a Elevate) -> Result<Self> {
         let tmpfile = PathBuf::from(
-            cmd::Process::run("mktemp", &["--tmpdir=/var/tmp"], elevate, None)
-                .await?
-                .check()?
-                .stdout
-                .trim()
-                .to_owned(),
+            cmd::Process::run(
+                "mktemp",
+                &["--tmpdir=/var/tmp"],
+                elevate,
+                cmd::Stdin::Closed,
+            )
+            .await?
+            .check()?
+            .stdout
+            .trim()
+            .to_owned(),
         );
 
         Ok(Self {
@@ -39,7 +44,7 @@ impl<'a> Tempfile<'a> {
         })
     }
 
-    pub(crate) async fn write(&self, input: &[u8]) -> Result<()> {
+    pub async fn write(&self, input: &[u8]) -> Result<()> {
         fs::write(
             self.path.as_ref().expect("writing to closed tempfile"),
             input,
@@ -49,7 +54,7 @@ impl<'a> Tempfile<'a> {
         Ok(())
     }
 
-    pub(crate) fn path(&self) -> &Path {
+    pub fn path(&self) -> &Path {
         self.path
             .as_ref()
             .expect("getting path of removed tempfile")
@@ -63,14 +68,14 @@ impl<'a> Tempfile<'a> {
         .await
     }
 
-    pub(crate) async fn read_all(self) -> Result<Vec<u8>> {
+    pub async fn read_all(self) -> Result<Vec<u8>> {
         let path = self.path.as_ref().expect("saving a removed tempfile");
         let content = fs::read(self.elevate, path).await?;
         self.remove().await?;
         Ok(content)
     }
 
-    pub(crate) async fn save_as(mut self, to: &Path) -> Result<()> {
+    pub async fn save_as(mut self, to: &Path) -> Result<()> {
         let path = self.path.take().expect("saving a removed tempfile");
         fs::mv(&path, to, self.elevate).await?;
         Ok(())

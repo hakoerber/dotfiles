@@ -24,9 +24,14 @@ impl<'change> Plannable<'change> for Command<'change> {
         'elevate: 'change,
     {
         let needs_execution = if let Some(ref script) = self.check_command {
-            let command = cmd::Process::run("sh", &[], elevate, Some(script.content.as_ref()))
-                .await?
-                .unchecked();
+            let command = cmd::Process::run(
+                "sh",
+                &[],
+                elevate,
+                cmd::Stdin::Write(script.content.as_ref()),
+            )
+            .await?
+            .unchecked();
             match command.status.code() {
                 0 => false,
                 123 => true,
@@ -58,9 +63,14 @@ pub(crate) struct CommandPlan<'a> {
 #[async_trait::async_trait]
 impl Applyable for CommandPlan<'_> {
     async fn apply(&self, elevate: &Elevate) -> Result<()> {
-        cmd::Process::run(self.args.cmd.as_ref(), self.args.args, elevate, None)
-            .await?
-            .check()?;
+        cmd::Process::run(
+            self.args.cmd.as_ref(),
+            self.args.args,
+            elevate,
+            cmd::Stdin::Closed,
+        )
+        .await?
+        .check()?;
 
         Ok(())
     }

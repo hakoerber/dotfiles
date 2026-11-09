@@ -10,29 +10,35 @@ pub enum InstallReason {
 }
 
 pub async fn list_installed_packages(elevate: &Elevate) -> Result<Vec<String>> {
-    Ok(
-        cmd::Process::run("pacman", &["--query", "--quiet"], elevate, None)
-            .await?
-            .check()?
-            .stdout
-            .lines()
-            .map(|line| line.to_owned())
-            .collect(),
+    Ok(cmd::Process::run(
+        "pacman",
+        &["--query", "--quiet"],
+        elevate,
+        cmd::Stdin::Closed,
     )
+    .await?
+    .check()?
+    .stdout
+    .lines()
+    .map(|line| line.to_owned())
+    .collect())
 }
 
 pub async fn check_installed(name: &str, elevate: &Elevate) -> Result<bool> {
-    Ok(
-        cmd::Process::run("pacman", &["--query", "--quiet", name], elevate, None)
-            .await?
-            .unchecked()
-            .status
-            .success(),
+    Ok(cmd::Process::run(
+        "pacman",
+        &["--query", "--quiet", name],
+        elevate,
+        cmd::Stdin::Closed,
     )
+    .await?
+    .unchecked()
+    .status
+    .success())
 }
 
 pub async fn get_package_version(name: &str, elevate: &Elevate) -> Result<Option<String>> {
-    cmd::Process::run("pacman", &["--query", name], elevate, None)
+    cmd::Process::run("pacman", &["--query", name], elevate, cmd::Stdin::Closed)
         .await?
         .check()
         .ok()
@@ -50,11 +56,16 @@ pub async fn resolve_installed_package(elevate: &Elevate, name: &str) -> Result<
     // resolve until we are at the root, i.e. when the package name does not change any more
     let mut name = name.to_owned();
     loop {
-        let resolved = cmd::Process::run("pacman", &["--query", "--quiet", &name], elevate, None)
-            .await?
-            .check()
-            .ok()
-            .map(|output| output.stdout.trim().to_owned());
+        let resolved = cmd::Process::run(
+            "pacman",
+            &["--query", "--quiet", &name],
+            elevate,
+            cmd::Stdin::Closed,
+        )
+        .await?
+        .check()
+        .ok()
+        .map(|output| output.stdout.trim().to_owned());
 
         if let Some(resolved) = resolved {
             if name == resolved {
@@ -73,7 +84,7 @@ pub async fn list_explicitly_installed_packages(elevate: &Elevate) -> Result<Vec
         "pacman",
         &["--query", "--quiet", "--explicit"],
         elevate,
-        None,
+        cmd::Stdin::Closed,
     )
     .await?
     .check()?
@@ -90,7 +101,7 @@ pub async fn list_explicitly_installed_packages_that_are_not_required(
         "pacman",
         &["--query", "--quiet", "--explicit", "--unrequired"],
         elevate,
-        None,
+        cmd::Stdin::Closed,
     )
     .await?
     .check()?
@@ -101,15 +112,18 @@ pub async fn list_explicitly_installed_packages_that_are_not_required(
 }
 
 pub async fn list_packages_installed_as_dependencies(elevate: &Elevate) -> Result<Vec<String>> {
-    Ok(
-        cmd::Process::run("pacman", &["--query", "--quiet", "--deps"], elevate, None)
-            .await?
-            .check()?
-            .stdout
-            .lines()
-            .map(|line| line.to_owned())
-            .collect(),
+    Ok(cmd::Process::run(
+        "pacman",
+        &["--query", "--quiet", "--deps"],
+        elevate,
+        cmd::Stdin::Closed,
     )
+    .await?
+    .check()?
+    .stdout
+    .lines()
+    .map(|line| line.to_owned())
+    .collect())
 }
 
 pub async fn list_orphaned_packages(elevate: &Elevate) -> Result<Vec<String>> {
@@ -117,7 +131,7 @@ pub async fn list_orphaned_packages(elevate: &Elevate) -> Result<Vec<String>> {
         "pacman",
         &["--query", "--quiet", "--deps", "--unrequired"],
         elevate,
-        None,
+        cmd::Stdin::Closed,
     )
     .await?
     .unchecked();
@@ -134,13 +148,16 @@ pub async fn list_orphaned_packages(elevate: &Elevate) -> Result<Vec<String>> {
 }
 
 pub async fn is_installed(elevate: &Elevate, name: &str) -> Result<bool> {
-    Ok(
-        cmd::Process::run("pacman", &["--query", "--quiet", name], elevate, None)
-            .await?
-            .unchecked()
-            .status
-            .success(),
+    Ok(cmd::Process::run(
+        "pacman",
+        &["--query", "--quiet", name],
+        elevate,
+        cmd::Stdin::Closed,
     )
+    .await?
+    .unchecked()
+    .status
+    .success())
 }
 
 pub async fn get_install_reason(elevate: &Elevate, name: &str) -> Result<Option<InstallReason>> {
@@ -149,7 +166,7 @@ pub async fn get_install_reason(elevate: &Elevate, name: &str) -> Result<Option<
             "pacman",
             &["--query", "--quiet", "--explicit", name],
             elevate,
-            None,
+            cmd::Stdin::Closed,
         )
         .await?
         .unchecked()

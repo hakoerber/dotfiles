@@ -118,7 +118,7 @@ impl<'change> Plannable<'change> for Service<'change> {
                     self.name,
                 ],
                 elevate,
-                None,
+                cmd::Stdin::Closed,
             )
             .await?
             .check()?;
@@ -171,10 +171,14 @@ impl<'change> Plannable<'change> for Service<'change> {
         };
 
         let persistent_state = {
-            let systemctl =
-                cmd::Process::run("systemctl", &["is-enabled", "--", self.name], elevate, None)
-                    .await?
-                    .unchecked();
+            let systemctl = cmd::Process::run(
+                "systemctl",
+                &["is-enabled", "--", self.name],
+                elevate,
+                cmd::Stdin::Closed,
+            )
+            .await?
+            .unchecked();
 
             match systemctl.stdout.trim() {
                 "enabled" => ServiceStatePersistent::Enabled,
@@ -227,7 +231,7 @@ impl Applyable for ServicePlan<'_> {
                             "systemctl",
                             &["unmask", "--", self.args.name],
                             elevate,
-                            None,
+                            cmd::Stdin::Closed,
                         )
                         .await?
                         .check()?;
@@ -236,7 +240,7 @@ impl Applyable for ServicePlan<'_> {
                         "systemctl",
                         &["enable", "--", self.args.name],
                         elevate,
-                        None,
+                        cmd::Stdin::Closed,
                     )
                     .await?
                     .check()?;
@@ -247,7 +251,7 @@ impl Applyable for ServicePlan<'_> {
                             "systemctl",
                             &["unmask", "--", self.args.name],
                             elevate,
-                            None,
+                            cmd::Stdin::Closed,
                         )
                         .await?
                         .check()?;
@@ -256,15 +260,20 @@ impl Applyable for ServicePlan<'_> {
                         "systemctl",
                         &["disable", "--", self.args.name],
                         elevate,
-                        None,
+                        cmd::Stdin::Closed,
                     )
                     .await?
                     .check()?;
                 }
                 ServiceStatePersistent::Masked => {
-                    cmd::Process::run("systemctl", &["mask", "--", self.args.name], elevate, None)
-                        .await?
-                        .check()?;
+                    cmd::Process::run(
+                        "systemctl",
+                        &["mask", "--", self.args.name],
+                        elevate,
+                        cmd::Stdin::Closed,
+                    )
+                    .await?
+                    .check()?;
                 }
             }
         }
@@ -273,14 +282,24 @@ impl Applyable for ServicePlan<'_> {
         if let Some(runtime_state) = self.diff.runtime {
             match runtime_state {
                 ServiceStateRuntime::Active => {
-                    cmd::Process::run("systemctl", &["start", "--", self.args.name], elevate, None)
-                        .await?
-                        .check()?;
+                    cmd::Process::run(
+                        "systemctl",
+                        &["start", "--", self.args.name],
+                        elevate,
+                        cmd::Stdin::Closed,
+                    )
+                    .await?
+                    .check()?;
                 }
                 ServiceStateRuntime::Inactive => {
-                    cmd::Process::run("systemctl", &["stop", "--", self.args.name], elevate, None)
-                        .await?
-                        .check()?;
+                    cmd::Process::run(
+                        "systemctl",
+                        &["stop", "--", self.args.name],
+                        elevate,
+                        cmd::Stdin::Closed,
+                    )
+                    .await?
+                    .check()?;
                 }
             }
         }
@@ -343,7 +362,7 @@ impl Applyable for RestartServicePlan<'_> {
             "systemctl",
             &["restart", "--", self.args.name],
             elevate,
-            None,
+            cmd::Stdin::Closed,
         )
         .await?
         .check()?;
@@ -384,7 +403,7 @@ pub(crate) struct DaemonReloadPlan {
 #[async_trait]
 impl Applyable for DaemonReloadPlan {
     async fn apply(&self, elevate: &Elevate) -> Result<()> {
-        cmd::Process::run("systemctl", &["daemon-reload"], elevate, None)
+        cmd::Process::run("systemctl", &["daemon-reload"], elevate, cmd::Stdin::Closed)
             .await?
             .check()?;
 
@@ -413,9 +432,10 @@ impl<'change> Plannable<'change> for BootTarget {
         'elevate: 'change,
     {
         let current_target = {
-            let systemctl = cmd::Process::run("systemctl", &["get-default"], elevate, None)
-                .await?
-                .check()?;
+            let systemctl =
+                cmd::Process::run("systemctl", &["get-default"], elevate, cmd::Stdin::Closed)
+                    .await?
+                    .check()?;
             match systemctl.stdout.trim() {
                 "multi-user.target" => Target::MultiUser,
                 "graphical.target" => Target::Graphical,
@@ -450,7 +470,7 @@ impl Applyable for BootTargetPlan {
             "systemctl",
             &["set-default", "--", self.args.target.as_str()],
             elevate,
-            None,
+            cmd::Stdin::Closed,
         )
         .await?
         .check()?;

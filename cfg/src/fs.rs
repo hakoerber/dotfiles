@@ -146,7 +146,7 @@ pub(crate) async fn mv(from: &Path, to: &Path, elevate: &Elevate) -> Result<()> 
                     to.as_str(),
                 ],
                 elevate,
-                None,
+                cmd::Stdin::Closed,
             )
             .await?
             .check()?;
@@ -159,7 +159,7 @@ pub(crate) async fn mv(from: &Path, to: &Path, elevate: &Elevate) -> Result<()> 
 pub(crate) async fn create_directory(path: &Path, elevate: &Elevate) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
-            cmd::Process::run("mkdir", &["--", path.as_str()], elevate, None)
+            cmd::Process::run("mkdir", &["--", path.as_str()], elevate, cmd::Stdin::Closed)
                 .await?
                 .check()?;
         }
@@ -186,7 +186,7 @@ pub(crate) async fn stat(elevate: &Elevate, path: &Path) -> Result<Option<Stat>>
         "stat",
         &["--format", "%U %G %a %f", "--", path.as_str()],
         elevate,
-        None,
+        cmd::Stdin::Closed,
     )
     .await?
     .unchecked();
@@ -261,7 +261,7 @@ pub(crate) async fn set_file_owner(elevate: &Elevate, path: &Path, uid: &Uid) ->
         "chown",
         &[&uid.to_string(), "--", path.as_str()],
         elevate,
-        None,
+        cmd::Stdin::Closed,
     )
     .await?
     .check()?;
@@ -275,7 +275,7 @@ pub(crate) async fn set_file_group(elevate: &Elevate, path: &Path, gid: &Gid) ->
         "chgrp",
         &[&gid.to_string(), "--", path.as_str()],
         elevate,
-        None,
+        cmd::Stdin::Closed,
     )
     .await?
     .check()?;
@@ -289,7 +289,7 @@ pub(crate) async fn set_file_mode(elevate: &Elevate, path: &Path, mode: FileMode
                 "chmod",
                 &[&mode.as_oct_string(), "--", path.as_str()],
                 elevate,
-                None,
+                cmd::Stdin::Closed,
             )
             .await?
             .check()?;
@@ -304,7 +304,7 @@ pub(crate) async fn set_file_mode(elevate: &Elevate, path: &Path, mode: FileMode
 pub(crate) async fn remove_file(elevate: &Elevate, path: &Path) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
-            cmd::Process::run("rm", &["--", path.as_str()], elevate, None)
+            cmd::Process::run("rm", &["--", path.as_str()], elevate, cmd::Stdin::Closed)
                 .await?
                 .check()?;
         }
@@ -318,7 +318,8 @@ pub(crate) async fn remove_file(elevate: &Elevate, path: &Path) -> Result<()> {
 pub(crate) fn remove_file_sync(elevate: &Elevate, path: &Path) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
-            cmd::Process::run_sync("rm", &["--", path.as_str()], elevate, None)?.check()?;
+            cmd::Process::run_sync("rm", &["--", path.as_str()], elevate, &cmd::Stdin::Closed)?
+                .check()?;
         }
         Elevate::No => {
             std::fs::remove_file(path)?;
@@ -335,9 +336,14 @@ pub(crate) async fn remove_symlink(elevate: &Elevate, path: &Path) -> Result<()>
 pub(crate) async fn remove_recursive(elevate: &Elevate, path: &Path) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
-            cmd::Process::run("rm", &["--recursive", "--", path.as_str()], elevate, None)
-                .await?
-                .check()?;
+            cmd::Process::run(
+                "rm",
+                &["--recursive", "--", path.as_str()],
+                elevate,
+                cmd::Stdin::Closed,
+            )
+            .await?
+            .check()?;
         }
         Elevate::No => {
             fs::remove_dir_all(path).await?;
@@ -350,9 +356,10 @@ pub(crate) async fn try_read(elevate: &Elevate, path: &Path) -> Result<Option<Ve
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => match stat(elevate, path).await? {
             Some(_stat) => {
-                let cat = cmd::Process::run_bin("cat", &[path.as_str()], elevate, None)
-                    .await?
-                    .check()?;
+                let cat =
+                    cmd::Process::run_bin("cat", &[path.as_str()], elevate, cmd::Stdin::Closed)
+                        .await?
+                        .check()?;
                 Ok(Some(cat.stdout))
             }
             None => Ok(None),
@@ -384,9 +391,14 @@ pub(crate) async fn read_to_string(elevate: &Elevate, path: &Path) -> Result<Str
 pub(crate) async fn write(path: &Path, input: &[u8], elevate: &Elevate) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
-            cmd::Process::run("dd", &[&format!("of={path}")], elevate, Some(input))
-                .await?
-                .check()?;
+            cmd::Process::run(
+                "dd",
+                &[&format!("of={path}")],
+                elevate,
+                cmd::Stdin::Write(input),
+            )
+            .await?
+            .check()?;
         }
         Elevate::No => {
             std::fs::OpenOptions::new()
@@ -402,7 +414,7 @@ pub async fn exists(elevate: &Elevate, path: &Path) -> Result<bool> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
             Ok(
-                cmd::Process::run("test", &["-d", path.as_str()], elevate, None)
+                cmd::Process::run("test", &["-d", path.as_str()], elevate, cmd::Stdin::Closed)
                     .await?
                     .unchecked()
                     .status
@@ -433,7 +445,7 @@ pub async fn files_in_dir(elevate: &Elevate, path: &Path) -> Result<Option<Vec<P
                             "%f\\0",
                         ],
                         elevate,
-                        None,
+                        cmd::Stdin::Closed,
                     )
                     .await?
                     .check()?

@@ -62,9 +62,14 @@ pub(crate) struct PackageDatabaseRefreshPlan<'a> {
 #[async_trait::async_trait]
 impl Applyable for PackageDatabaseRefreshPlan<'_> {
     async fn apply(&self, elevate: &Elevate) -> Result<()> {
-        cmd::Process::run("pacman", &["--sync", "--refresh"], elevate, None)
-            .await?
-            .check()?;
+        cmd::Process::run(
+            "pacman",
+            &["--sync", "--refresh"],
+            elevate,
+            cmd::Stdin::Closed,
+        )
+        .await?
+        .check()?;
         Ok(())
     }
 }
@@ -161,7 +166,7 @@ impl Applyable for PackagesPlan<'_> {
                 &vec!["--needed", "--noconfirm", "--sync", "--"]
                     .tap_mut(|v| v.extend(self.install.iter().map(|i| i.as_ref()))),
                 elevate,
-                None,
+                cmd::Stdin::Closed,
             )
             .await?
             .check()?;
@@ -182,7 +187,7 @@ impl Applyable for PackagesPlan<'_> {
                 ]
                 .tap_mut(|v| v.extend(self.set_reason.iter().map(|i| i.as_ref()))),
                 elevate,
-                None,
+                cmd::Stdin::Closed,
             )
             .await?
             .check()?;
@@ -266,7 +271,7 @@ impl Applyable for PackageRemovePlan<'_> {
                 &vec!["--remove", "--noconfirm", "--"]
                     .tap_mut(|v| v.extend(self.remove.iter().map(|i| i.as_ref()))),
                 elevate,
-                None,
+                cmd::Stdin::Closed,
             )
             .await?
             .check()?;
@@ -390,7 +395,7 @@ impl Applyable for LocalPackagePlan<'_> {
                         self.args.path.as_ref().as_str(),
                     ],
                     elevate,
-                    None,
+                    cmd::Stdin::Closed,
                 )
                 .await?
                 .check()?;
@@ -411,7 +416,7 @@ impl Applyable for LocalPackagePlan<'_> {
                     self.args.name.as_ref(),
                 ],
                 elevate,
-                None,
+                cmd::Stdin::Closed,
             )
             .await?
             .check()?;
@@ -548,7 +553,7 @@ impl Applyable for SinglePackagePlan<'_> {
                     "pacman",
                     &["--needed", "--noconfirm", "--sync", "--", name],
                     elevate,
-                    None,
+                    cmd::Stdin::Closed,
                 )
                 .await?
                 .check()?;
@@ -567,7 +572,7 @@ impl Applyable for SinglePackagePlan<'_> {
                         "pacman",
                         &["--database", "--asexplicit", "--", name],
                         elevate,
-                        None,
+                        cmd::Stdin::Closed,
                     )
                     .await?
                     .check()?;
@@ -588,7 +593,7 @@ impl Applyable for SinglePackagePlan<'_> {
                         name,
                     ],
                     elevate,
-                    None,
+                    cmd::Stdin::Closed,
                 )
                 .await?
                 .check()?;

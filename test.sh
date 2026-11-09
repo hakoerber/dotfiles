@@ -156,8 +156,7 @@ EOF
         -T \
         -V SHARE \
         -o "${tmpdir}/share.iso" \
-        ./cfg/target/release/cfg \
-        ./install_scripts
+        ./cfg/target/release/cfg
 
     qemu-img create \
         -f qcow2 \
@@ -195,7 +194,7 @@ EOF
 
       if [[ "${lukscfg}" == "luks" ]] ; then
           printf 'lukspw\nlukspw\nrootpw\nrootpw\n' | \
-            /share/"${hostname}".sh
+            /share/cfg --hostname "${hostname}" bootstrap --i-am-sure
 
           mount /dev/mapper/vgbase-root /mnt
           if [[ "${homecfg}" == "separate" ]] ; then
@@ -203,7 +202,7 @@ EOF
           fi
       else
           printf 'rootpw\nrootpw\n' | \
-            /share/"${hostname}".sh
+            /share/cfg --hostname "${hostname}" bootstrap --i-am-sure
           mount /dev/disk/by-partlabel/root /mnt
           if [[ "${homecfg}" == "separate" ]] ; then
               mount /dev/disk/by-partlabel/home /mnt/home

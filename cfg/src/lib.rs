@@ -29,7 +29,7 @@ use owo_colors::colors;
 use tempfile::Tempfile;
 
 pub mod prelude {
-    pub use super::cmd::Process;
+    pub use super::cmd::{Process, Stdin};
     pub use super::fs::{
         FileContent::{self, Lines},
         FileMode, FilePermissions, files_in_dir,
@@ -42,6 +42,7 @@ pub mod prelude {
         resolve_installed_package,
     };
     pub use super::resources::prelude::*;
+    pub use super::tempfile::Tempfile;
     pub use super::{Elevate, ElevateTo, Gid, Path, PathBuf, Plan, ReportConfig, Resource, Uid};
 }
 

@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 set -o xtrace
 set -o nounset
 set -o errexit
@@ -115,7 +113,7 @@ cat << 'EOF' > /root/.bash_profile
             sleep 5
         done
         rm -rf /etc/systemd/system/getty@tty1.service.d/
-        if /usr/local/bin/cfg --hostname hera --only-changed ; then
+        if /usr/local/bin/cfg --hostname hera deploy --only-changed ; then
             rm -f /mnt/usr/local/bin/cfg
             rm -f /root/.bash_profile
             reboot

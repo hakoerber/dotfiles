@@ -28,6 +28,31 @@ impl ExitStatus {
 }
 
 #[derive(Debug)]
+pub struct ProcessForegroundStatusUnknown {
+    status: ExitStatus,
+}
+
+impl ProcessForegroundStatusUnknown {
+    pub fn check(self) -> Result<ProcessForeground> {
+        if self.status.failed() {
+            bail!("process failed {self:?}")
+        }
+        Ok(self.unchecked())
+    }
+
+    pub fn unchecked(self) -> ProcessForeground {
+        ProcessForeground {
+            status: self.status,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct ProcessForeground {
+    pub(crate) status: ExitStatus,
+}
+
+#[derive(Debug)]
 pub(crate) struct ProcessRawStatusUnknown {
     stdout: Vec<u8>,
     stderr: Vec<u8>,
@@ -73,12 +98,18 @@ pub struct ProcessStatusUnknown {
     status: ExitStatus,
 }
 
+pub enum Stdin<'a> {
+    Closed,
+    Write(&'a [u8]),
+    Open,
+}
+
 impl Process {
     pub(crate) async fn run_bin(
         cmd: &str,
         args: &[&str],
         elevate: &Elevate,
-        stdin: Option<&[u8]>,
+        stdin: Stdin<'_>,
     ) -> io::Result<ProcessRawStatusUnknown> {
         let (cmd, args) = match *elevate {
             Elevate::Sudo(ref elevate_to) => match *elevate_to {
@@ -98,14 +129,14 @@ impl Process {
             .args(args)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
-            .stdin(if stdin.is_some() {
-                Stdio::piped()
-            } else {
-                Stdio::null()
+            .stdin(match stdin {
+                Stdin::Closed => Stdio::null(),
+                Stdin::Write(_items) => Stdio::piped(),
+                Stdin::Open => Stdio::inherit(),
             })
             .spawn()?;
 
-        if let Some(data) = stdin {
+        if let Stdin::Write(data) = stdin {
             tracing::debug!("writing {} bytes to stdin", data.len());
             let mut stdin = cmd.stdin.take().expect("stdin is open");
             stdin.write_all(data).await?;
@@ -133,7 +164,7 @@ impl Process {
         cmd: &str,
         args: &[&str],
         elevate: &Elevate,
-        stdin: Option<&[u8]>,
+        stdin: &Stdin<'_>,
     ) -> io::Result<ProcessRawStatusUnknown> {
         let (cmd, args) = match *elevate {
             Elevate::Sudo(ref elevate_to) => match *elevate_to {
@@ -153,14 +184,14 @@ impl Process {
             .args(args)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
-            .stdin(if stdin.is_some() {
-                Stdio::piped()
-            } else {
-                Stdio::null()
+            .stdin(match *stdin {
+                Stdin::Closed => Stdio::null(),
+                Stdin::Write(_items) => Stdio::piped(),
+                Stdin::Open => Stdio::inherit(),
             })
             .spawn()?;
 
-        if let Some(data) = stdin {
+        if let Stdin::Write(data) = *stdin {
             tracing::debug!("writing {} bytes to stdin", data.len());
             let mut stdin = cmd.stdin.take().expect("stdin is open");
             stdin.write_all(data)?;
@@ -188,7 +219,7 @@ impl Process {
         cmd: &str,
         args: &[&str],
         elevate: &Elevate,
-        stdin: Option<&[u8]>,
+        stdin: Stdin<'_>,
     ) -> Result<ProcessStatusUnknown> {
         let ProcessRawStatusUnknown {
             stdout,
@@ -207,7 +238,7 @@ impl Process {
         cmd: &str,
         args: &[&str],
         elevate: &Elevate,
-        stdin: Option<&[u8]>,
+        stdin: &Stdin<'_>,
     ) -> Result<ProcessStatusUnknown> {
         let ProcessRawStatusUnknown {
             stdout,
@@ -219,6 +250,56 @@ impl Process {
             stdout: stdout.try_into()?,
             stderr: stderr.try_into()?,
             status,
+        })
+    }
+
+    pub fn run_in_foreground(
+        cmd: &str,
+        args: &[&str],
+        elevate: &Elevate,
+        stdin: &Stdin<'_>,
+    ) -> Result<ProcessForegroundStatusUnknown> {
+        let (cmd, args) = match *elevate {
+            Elevate::Sudo(ref elevate_to) => match *elevate_to {
+                ElevateTo::Root => ("sudo", vec!["--"]),
+                ElevateTo::User { ref user } => ("sudo", vec!["-u", user, "--"]),
+            }
+            .tap_mut(|v| {
+                v.1.push(cmd);
+                v.1.extend_from_slice(args);
+            }),
+            Elevate::No => (cmd, args.to_vec()),
+        };
+
+        tracing::debug!("running cmd {cmd} {args:?}");
+
+        let mut cmd = std::process::Command::new(cmd)
+            .args(args)
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .stdin(match *stdin {
+                Stdin::Closed => Stdio::null(),
+                Stdin::Write(_items) => Stdio::piped(),
+                Stdin::Open => Stdio::inherit(),
+            })
+            .spawn()?;
+
+        if let Stdin::Write(data) = *stdin {
+            tracing::debug!("writing {} bytes to stdin", data.len());
+            let mut stdin = cmd.stdin.take().expect("stdin is open");
+            stdin.write_all(data)?;
+        }
+
+        let output = cmd.wait()?;
+
+        Ok(ProcessForegroundStatusUnknown {
+            status: ExitStatus(
+                output
+                    .code()
+                    .expect("process to have exit code on stop")
+                    .try_into()
+                    .expect("exit code to be non-negative"),
+            ),
         })
     }
 }
