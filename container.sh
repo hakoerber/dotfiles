@@ -5,8 +5,8 @@ set -o errexit
 
 CONTAINER=."/base"
 
-cargo build --manifest-path=./cfg/Cargo.toml --release --target=x86_64-unknown-linux-musl
-cp -f ./cfg/target/x86_64-unknown-linux-musl/release/cfg ./run
+cargo build --manifest-path=./cfg/Cargo.toml --release
+cp -f ./cfg/target/release/cfg ./run
 
 sudo rm -rf "${CONTAINER}"
 mkdir "${CONTAINER}"
