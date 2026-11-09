@@ -420,6 +420,7 @@ const PACKAGES: PackageConfig = PackageConfig(&[
     ("i3status-rust", &["i3status-rust"]),
     ("mousepad", &["mousepad"]),
     ("graphviz", &["graphviz", "xdot"]),
+    ("wireguard", &["wireguard-tools"]),
 ]);
 
 fn hera<'elevate: 'action, 'action>(
