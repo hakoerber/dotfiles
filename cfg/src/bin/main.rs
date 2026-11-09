@@ -587,7 +587,8 @@ async fn unmanaged_packages<'elevate: 'action, 'action>(
         .map(|s| s.to_owned())
         .collect::<Vec<String>>();
 
-    let explicitly_installed_packages = list_explicitly_installed_packages(elevate).await?;
+    let explicitly_installed_packages =
+        list_explicitly_installed_packages_that_are_not_required(elevate).await?;
 
     for installed_package in explicitly_installed_packages {
         if !managed_packages.contains(&installed_package)

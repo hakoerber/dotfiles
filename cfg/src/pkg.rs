@@ -83,6 +83,23 @@ pub async fn list_explicitly_installed_packages(elevate: &Elevate) -> Result<Vec
     .collect())
 }
 
+pub async fn list_explicitly_installed_packages_that_are_not_required(
+    elevate: &Elevate,
+) -> Result<Vec<String>> {
+    Ok(cmd::Process::run(
+        "pacman",
+        &["--query", "--quiet", "--explicit", "--unrequired"],
+        elevate,
+        None,
+    )
+    .await?
+    .check()?
+    .stdout
+    .lines()
+    .map(|line| line.to_owned())
+    .collect())
+}
+
 pub async fn list_packages_installed_as_dependencies(elevate: &Elevate) -> Result<Vec<String>> {
     Ok(
         cmd::Process::run("pacman", &["--query", "--quiet", "--deps"], elevate, None)

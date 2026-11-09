@@ -38,7 +38,8 @@ pub mod prelude {
     pub use super::maybeowned::MaybeOwned::{self, Owned, Ref};
     pub use super::pkg::{
         InstallReason, check_installed, get_package_version, list_explicitly_installed_packages,
-        list_orphaned_packages, resolve_installed_package,
+        list_explicitly_installed_packages_that_are_not_required, list_orphaned_packages,
+        resolve_installed_package,
     };
     pub use super::resources::prelude::*;
     pub use super::{Elevate, ElevateTo, Gid, Path, PathBuf, Plan, ReportConfig, Resource, Uid};
