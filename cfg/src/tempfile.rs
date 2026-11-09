@@ -2,8 +2,6 @@
 //! pipeline, but this looks like it's not easily possible. Maybe have a ref
 //! inside each struct that implements `Drop`?
 
-use std::future::AsyncDrop;
-
 use anyhow::Result;
 use camino::Utf8Path as Path;
 
@@ -14,16 +12,6 @@ use super::{Elevate, PathBuf, cmd, fs};
 pub(crate) struct Tempfile<'elevate> {
     path: Option<PathBuf>,
     elevate: &'elevate Elevate,
-}
-
-impl AsyncDrop for Tempfile<'_> {
-    async fn drop(self: std::pin::Pin<&mut Self>) {
-        if let Some(ref path) = self.path {
-            fs::remove_file(self.elevate, path)
-                .await
-                .expect("cleanup failed");
-        }
-    }
 }
 
 impl Drop for Tempfile<'_> {

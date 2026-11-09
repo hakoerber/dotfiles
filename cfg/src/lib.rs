@@ -1,7 +1,5 @@
 #![allow(unused, reason = "dev")]
 #![deny(unused_must_use)]
-#![allow(incomplete_features, reason = "trying async drop")]
-#![feature(async_drop)]
 
 use std::{
     fmt,

@@ -6,8 +6,6 @@
 #![deny(unused_must_use)]
 // required for `serde_json::json!()`
 #![recursion_limit = "256"]
-#![allow(incomplete_features, reason = "trying async drop")]
-#![feature(async_drop)]
 
 use std::env;
 
