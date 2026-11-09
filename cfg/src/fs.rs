@@ -409,10 +409,7 @@ pub async fn exists(elevate: &Elevate, path: &Path) -> Result<bool> {
                     .success(),
             )
         }
-        // `try_exists()` may return `Err(_)`` if there are not enough rights to check the target. This
-        // happens e.g. on use creation, when the home directory does not exist yet. So we just swallow
-        // the error and return `Ok(false)`` on these occasions.
-        Elevate::No => Ok(fs::try_exists(path).await.unwrap_or(false)),
+        Elevate::No => Ok(fs::try_exists(path).await?),
     }
 }
 

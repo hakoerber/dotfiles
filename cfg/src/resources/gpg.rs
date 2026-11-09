@@ -70,14 +70,14 @@ impl Applyable for GpgPlan<'_> {
                 gpg::import_key(
                     self.args.content,
                     self.args.gnupg_directory.as_ref(),
-                    elevate,
+                    self.args.elevate_apply,
                 )
                 .await?;
                 gpg::trust_key(
                     &self.args.fingerprint,
                     self.args.trust,
                     self.args.gnupg_directory.as_ref(),
-                    elevate,
+                    self.args.elevate_apply,
                 )
                 .await?;
             }
@@ -86,7 +86,7 @@ impl Applyable for GpgPlan<'_> {
                     &self.args.fingerprint,
                     self.args.trust,
                     self.args.gnupg_directory.as_ref(),
-                    elevate,
+                    self.args.elevate_apply,
                 )
                 .await?;
             }
