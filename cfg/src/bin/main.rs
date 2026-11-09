@@ -585,41 +585,6 @@ async fn orphans<'elevate: 'action, 'action>(
     Ok(())
 }
 
-async fn unmanaged_packages<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
-    elevate: &'elevate Elevate,
-) -> Result<()> {
-    let managed_packages = plan.managed_packages();
-
-    let protected = [
-        "base", // virtual package, would not hurt, but it's weird if its not installed
-    ];
-
-    let managed_packages = managed_packages
-        .iter()
-        .map(|s| s.to_owned())
-        .collect::<Vec<String>>();
-
-    let explicitly_installed_packages =
-        list_explicitly_installed_packages_that_are_not_required(elevate).await?;
-
-    for installed_package in explicitly_installed_packages {
-        if !managed_packages.contains(&installed_package)
-            && !protected.contains(&installed_package.as_str())
-        {
-            plan.add(
-                Owned(format!("remove unmanaged package {installed_package}")),
-                elevate,
-                PackageRemove {
-                    remove: Owned(vec![Owned(installed_package)]),
-                },
-            );
-        }
-    }
-
-    Ok(())
-}
-
 fn autoupdate<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
@@ -3666,7 +3631,6 @@ async fn main() -> Result<()> {
                 Ares | Neptune => (),
             }
 
-            unmanaged_packages(&mut plan, &root).await?;
             orphans(&mut plan, &root).await?;
 
             let plan_finished = plan.finish().await?;
