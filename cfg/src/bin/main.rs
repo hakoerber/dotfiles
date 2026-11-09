@@ -580,7 +580,6 @@ async fn unmanaged_packages<'elevate: 'action, 'action>(
 
     let protected = [
         "base", // virtual package, would not hurt, but it's weird if its not installed
-        "workstation-mgr",
     ];
 
     let managed_packages = managed_packages
