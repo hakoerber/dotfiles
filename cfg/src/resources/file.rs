@@ -521,16 +521,22 @@ impl<'args> Plannable<'args> for Remove<'args> {
             Some(stat) => Ok(ChangeStatus::NeedsChange(Box::new(RemovePlan {
                 change: match stat.entry_type {
                     fs::EntryType::File => match self.on_file {
-                        FileHandling::Bail => bail!("refusing to remove file"),
+                        FileHandling::Bail => {
+                            bail!("refusing to remove file {}", self.path.as_ref())
+                        }
                         FileHandling::Proceed => RemoveChange::File,
                     },
 
                     fs::EntryType::Directory => match self.on_directory {
-                        DirectoryHandling::Bail => bail!("refusing to remove directory"),
+                        DirectoryHandling::Bail => {
+                            bail!("refusing to remove directory {}", self.path.as_ref())
+                        }
                         DirectoryHandling::Proceed => RemoveChange::Directory,
                     },
                     fs::EntryType::Symlink => match self.on_symlink {
-                        SymlinkHandling::Bail => bail!("refusing to remove symlink"),
+                        SymlinkHandling::Bail => {
+                            bail!("refusing to remove symlink {}", self.path.as_ref())
+                        }
                         SymlinkHandling::Proceed => RemoveChange::Symlink,
                     },
                 },
