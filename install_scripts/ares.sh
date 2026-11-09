@@ -121,7 +121,7 @@ cat << 'EOF' > /root/.bash_profile
         done
         rm -rf /etc/systemd/system/getty@tty1.service.d/
         if /usr/local/bin/cfg --hostname ares deploy --only-changed ; then
-            rm -f /mnt/usr/local/bin/cfg
+            rm -f /usr/local/bin/cfg
             rm -f /root/.bash_profile
             reboot
         fi
