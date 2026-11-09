@@ -69,7 +69,7 @@ impl ServiceState {
                 }
             },
 
-            persistent: (self.persistent != other.persistent).then_some(other.persistent),
+            persistent: (self.persistent != other.persistent).then_some(self.persistent),
         }
     }
 }
