@@ -3407,7 +3407,7 @@ async fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
         .entries()
         .iter()
         .map(|entry| match *entry {
-            DirEntry::Dir(ref d) => Err(anyhow!("subdirectories in scripts not supported")),
+            DirEntry::Dir(ref _d) => Err(anyhow!("subdirectories in scripts not supported")),
             DirEntry::File(ref file) => {
                 let path = Path::from_path(file.path())
                     .ok_or_else(|| anyhow!("non utf-8 path in scripts"))?;
@@ -3462,7 +3462,7 @@ async fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
         .entries()
         .iter()
         .map(|entry| match *entry {
-            DirEntry::Dir(ref d) => Err(anyhow!("subdirectories in bin not supported")),
+            DirEntry::Dir(ref _d) => Err(anyhow!("subdirectories in bin not supported")),
             DirEntry::File(ref file) => {
                 let path =
                     Path::from_path(file.path()).ok_or_else(|| anyhow!("non utf-8 path in bin"))?;
@@ -4180,23 +4180,21 @@ async fn main() -> Result<()> {
         )],
     }
     .into_iter()
-    .map(|config| {
-        (UserContext {
-            simplest_elevate: match running_user.as_str() {
-                "root" => Elevate::No,
-                name if name == config.name => Elevate::No,
-                _other => Elevate::Sudo(ElevateTo::User {
-                    user: config.name.clone(),
-                }),
-            },
-            strict_elevate: match running_user.as_str() {
-                name if name == config.name => Elevate::No,
-                _other => Elevate::Sudo(ElevateTo::User {
-                    user: config.name.clone(),
-                }),
-            },
-            config,
-        })
+    .map(|config| UserContext {
+        simplest_elevate: match running_user.as_str() {
+            "root" => Elevate::No,
+            name if name == config.name => Elevate::No,
+            _other => Elevate::Sudo(ElevateTo::User {
+                user: config.name.clone(),
+            }),
+        },
+        strict_elevate: match running_user.as_str() {
+            name if name == config.name => Elevate::No,
+            _other => Elevate::Sudo(ElevateTo::User {
+                user: config.name.clone(),
+            }),
+        },
+        config,
     })
     .collect();
 
