@@ -11,8 +11,8 @@ trap cleanup EXIT
 ISO_MIRROR="https://ftp.fau.de/archlinux/iso/latest/"
 ISO_MIRROR="https://ftp.acc.umu.se/mirror/archlinux/iso/latest/"
 
-iso_dir="${XDG_DATA_HOME}/arch-iso/"
-iso_path="${iso_dir}/archlinux-x86_64.iso"
+iso_dir="$(readlink --canonicalize "${XDG_DATA_HOME}/arch-iso/")"
+iso_path="$(readlink --canonicalize "${iso_dir}/archlinux-x86_64.iso")"
 
 cleanup() {
     rm -rf "${tmpdir}"
@@ -154,9 +154,10 @@ EOF
         -J \
         -R \
         -T \
-        -V REPO \
-        -o "${tmpdir}/repo.iso" \
-        .
+        -V SHARE \
+        -o "${tmpdir}/share.iso" \
+        ./cfg/target/release/cfg \
+        ./install_scripts
 
     qemu-img create \
         -f qcow2 \
@@ -167,7 +168,7 @@ EOF
         "-cdrom" "${iso_path}"
         "-boot" "order=d"
 
-        "-drive" "file=${tmpdir}/repo.iso,format=raw,if=virtio,media=cdrom"
+        "-drive" "file=${tmpdir}/share.iso,format=raw,if=virtio,media=cdrom"
         "-drive" "file=${tmpdir}/userdata.img,format=raw,if=virtio,media=cdrom"
 
         "-fsdev" "local,id=pacman-cache,path=share,path=/var/cache/pacman/pkg/,readonly=on,security_model=none"
@@ -178,7 +179,9 @@ EOF
     wait_for_ssh
 
     # shellcheck disable=SC2087
-    ssh -tt "${sshopts[@]}" << EOF || true
+    ssh -tt "${sshopts[@]}" /bin/bash << EOF || true
+      set -o errexit
+
       mkdir /var/cache/pacman-cache-host
       mount -t 9p -o trans=virtio,version=9p2000.L,ro pacman-cache /var/cache/pacman-cache-host
 
@@ -187,12 +190,12 @@ EOF
       # Pacman will always use the first directory with write access for downloads
       sed -i 's/^#\?\(CacheDir.*\)/\1\nCacheDir = \/var\/cache\/pacman-cache-host\//' /etc/pacman.conf
 
-      mkdir /repo/
-      mount /dev/disk/by-label/REPO /repo/
+      mkdir /share/
+      mount /dev/disk/by-label/SHARE /share/
 
       if [[ "${lukscfg}" == "luks" ]] ; then
           printf 'lukspw\nlukspw\nrootpw\nrootpw\n' | \
-            /repo/install_scripts/"${hostname}".sh
+            /share/"${hostname}".sh
 
           mount /dev/mapper/vgbase-root /mnt
           if [[ "${homecfg}" == "separate" ]] ; then
@@ -200,13 +203,12 @@ EOF
           fi
       else
           printf 'rootpw\nrootpw\n' | \
-            /repo/install_scripts/"${hostname}".sh
+            /share/"${hostname}".sh
           mount /dev/disk/by-partlabel/root /mnt
           if [[ "${homecfg}" == "separate" ]] ; then
               mount /dev/disk/by-partlabel/home /mnt/home
           fi
       fi
-
 
       cat << SPECIALS > /tmp/specials.sh
         if [[ "\\\$(tty)" == "/dev/tty1" ]] ; then
@@ -224,7 +226,7 @@ SPECIALS
 
       cat /tmp/specials.sh /tmp/rest.sh > /mnt/root/.bash_profile
 
-      rsync -rl /repo/ /mnt/var/lib/dotfiles/
+      cp /share/cfg /mnt/usr/local/bin/cfg
 
       umount --recursive /mnt
 
@@ -277,6 +279,8 @@ else
 fi
 
 download_iso
+
+cargo build --manifest-path=./cfg/Cargo.toml --release
 
 for hostname in "${machines[@]}"; do
     IFS='|' read -r -a cfg <<< "${machinecfg[${hostname}]}"

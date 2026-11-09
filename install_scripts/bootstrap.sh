@@ -6,10 +6,8 @@ set -o errexit
 host="${1}"
 shift
 
-pacman -Sy --noconfirm git # yes its a partial upgrade, but thats just the live cd
-
 cd /root
-git clone --recursive https://code.hkoerber.de/hannes/dotfiles.git
+curl --proto '=https' --tlsv1.2 --fail --output cfg https://de-hkoerber-public.s3.eu-central-1.amazonaws.com/configure
 
 ./dotfiles/install_scripts/"${host}".sh
 

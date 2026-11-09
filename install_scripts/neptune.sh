@@ -111,10 +111,8 @@ mkdir /etc/systemd/system/getty@tty1.service.d/
 cat << EOF > /etc/systemd/system/getty@tty1.service.d/autologin.conf
 [Service]
 ExecStart=
-ExecStart=-/sbin/agetty -o '-p -f -- \\u' --noclear --autologin root %I $TERM
+ExecStart=-/sbin/agetty -o '-p -f -- \\u' --noclear --autologin root %I \$TERM
 EOF
-# ExecStartPost=/bin/rm /etc/systemd/system/getty@tty1.service.d/autologin.conf
-# ExecStartPost=/bin/rmdir /etc/systemd/system/getty@tty1.service.d/
 
 # Run
 cat << 'EOF' > /root/.bash_profile
@@ -124,7 +122,8 @@ cat << 'EOF' > /root/.bash_profile
             sleep 5
         done
         rm -rf /etc/systemd/system/getty@tty1.service.d/
-        if /var/lib/dotfiles/install.sh ; then
+        if /usr/local/bin/cfg --hostname neptune --only-changed ; then
+            rm -f /mnt/usr/local/bin/cfg
             rm -f /root/.bash_profile
             reboot
         fi
