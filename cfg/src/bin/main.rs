@@ -3952,13 +3952,42 @@ async fn main() -> Result<()> {
                 // removed packages may produce orphans, so we apply this until there is nothing more
                 // to remove
                 loop {
-                    let mut cleanup_plan = Plan::new();
+                    let mut unmanaged_package_plan = Plan::new();
                     let managed_packages = plan_approved.managed_packages();
 
-                    unmanaged_packages(managed_packages, &mut cleanup_plan, &root).await?;
-                    orphans(&mut cleanup_plan, &root).await?;
+                    unmanaged_packages(managed_packages, &mut unmanaged_package_plan, &root)
+                        .await?;
 
-                    let cleanup_plan_finished = match cleanup_plan.finish().await? {
+                    let cleanup_plan_finished = match unmanaged_package_plan.finish().await? {
+                        FinishResult::AssertionsFailed { report } => {
+                            unreachable!("removal plan does not contain assertions")
+                        }
+                        FinishResult::Success(plan) => plan,
+                    };
+
+                    let cleanup_report = cleanup_plan_finished.report()?;
+
+                    // it's only package remove resources anyway, will always be changed
+                    cleanup_report.print(&ReportConfig::All);
+
+                    let has_changes = cleanup_report.has_changes();
+
+                    let cleanup_plan_approved = cleanup_plan_finished.approve();
+
+                    if !dry_run && has_changes {
+                        cleanup_plan_approved.apply().await?;
+                    } else {
+                        break;
+                    }
+                }
+
+                loop {
+                    let mut orphaned_package_plan = Plan::new();
+                    let managed_packages = plan_approved.managed_packages();
+
+                    orphans(&mut orphaned_package_plan, &root).await?;
+
+                    let cleanup_plan_finished = match orphaned_package_plan.finish().await? {
                         FinishResult::AssertionsFailed { report } => {
                             unreachable!("removal plan does not contain assertions")
                         }
