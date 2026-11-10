@@ -9,7 +9,7 @@
 
 use std::{env, net::Ipv4Addr};
 
-use anyhow::{Result, anyhow};
+use anyhow::{Result, anyhow, bail};
 use clap::{Parser, Subcommand, ValueEnum};
 use dedent::dedent;
 use include_dir::{DirEntry, include_dir};
@@ -1185,24 +1185,6 @@ fn services<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
-    #[expect(
-        clippy::single_element_loop,
-        reason = "consistency with enabled services"
-    )]
-    for service in ["sshd.service"] {
-        plan.add(
-            Owned(format!("disable service {service}")),
-            elevate,
-            Service {
-                name: service,
-                state: ServiceState {
-                    runtime: ServiceStateRuntime::Inactive,
-                    persistent: ServiceStatePersistent::Disabled,
-                },
-            },
-        );
-    }
-
     for service in ["NetworkManager.service", "systemd-timesyncd.service"] {
         plan.add(
             Owned(format!("enable service {service}")),
@@ -1543,6 +1525,111 @@ fn wireguard<'elevate: 'action, 'action>(
         elevate,
         Service {
             name: "wg-quick@wg0.service",
+            state: ServiceState {
+                runtime: ServiceStateRuntime::Active,
+                persistent: ServiceStatePersistent::Enabled,
+            },
+        },
+    );
+
+    Ok(())
+}
+
+fn sshd<'elevate: 'action, 'action>(
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    elevate: &'elevate Elevate,
+) -> Result<()> {
+    plan.add(
+        Ref("add ssh group"),
+        elevate,
+        Group {
+            name: "ssh",
+            system: true,
+        },
+    );
+
+    let path = Path::new("/etc/ssh/sshd_config");
+    let permissions = FilePermissions {
+        owner: Uid::root(),
+        group: Gid::root(),
+        mode: FileMode(0o644),
+    };
+    match plan.secrets() {
+        SecretsWorkflow::None => bail!("missing secrets"),
+        SecretsWorkflow::AssumeExisting => plan.assert(
+            "assert wireguard config exists",
+            elevate,
+            AssertFile {
+                path: Ref(path),
+                permissions,
+            },
+        ),
+        SecretsWorkflow::Secrets(secrets) => {
+            let mut context = tera::Context::new();
+            context.insert("address", &secrets.wireguard.address.access());
+            let template = tera::Tera::one_off(
+                &dedent!(
+                    r#"
+                        AddressFamily inet
+                        ListenAddress 127.0.0.1
+                        ListenAddress {{ address }}
+                        Port 22
+
+                        UsePAM yes
+
+                        PrintMotd no
+
+                        AllowGroups ssh
+
+                        AuthenticationMethods publickey
+
+                        AuthorizedKeysFile .ssh/authorized_keys
+
+                        DisableForwarding yes
+
+                        PubkeyAuthentication yes
+                        PasswordAuthentication no
+                        GSSAPIAuthentication no
+                        HostbasedAuthentication no
+                        KerberosAuthentication no
+                        KbdInteractiveAuthentication no
+
+                        PermitRootLogin no
+                "#
+                ),
+                &context,
+                false,
+            )?;
+
+            plan.add(
+                "configure sshd",
+                elevate,
+                File {
+                    path: Ref(path),
+                    permissions,
+                    on_directory: DirectoryHandling::Bail,
+                    on_symlink: SymlinkHandling::Bail,
+                    binary: false,
+                    secret: false,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Bytes(Owned(template.into_bytes())),
+                },
+            )
+            .on_change(|| {
+                Resource::new(
+                    Ref("restart sshd"),
+                    elevate,
+                    RestartService { name: "sshd" },
+                )
+            });
+        }
+    }
+
+    plan.add(
+        "enable sshd",
+        elevate,
+        Service {
+            name: "sshd.service",
             state: ServiceState {
                 runtime: ServiceStateRuntime::Active,
                 persistent: ServiceStatePersistent::Enabled,
@@ -2256,6 +2343,7 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     initrd(plan, elevate, config);
     libvirt(plan, elevate);
     services(plan, elevate);
+    sshd(plan, elevate)?;
     boot_target(plan, elevate, config);
     timesyncd(plan, elevate);
     sudo(plan, elevate);
@@ -2300,6 +2388,7 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
                 "games",
                 "kvm",
                 "video",
+                "ssh",
             ],
             shell: "/usr/bin/zsh",
             system: false,
