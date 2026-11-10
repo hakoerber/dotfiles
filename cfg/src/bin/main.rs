@@ -222,6 +222,7 @@ const PACKAGES: PackageConfig = PackageConfig(&[
         &["zsh", "zsh-syntax-highlighting", "zsh-completions"],
     ),
     ("zathura", &["zathura", "zathura-pdf-poppler"]),
+    ("nftables", &["iptables-legacy", "nftables"]),
     ("pdf", &["ghostscript", "enscript"]),
     (
         "pandoc",
@@ -238,7 +239,6 @@ const PACKAGES: PackageConfig = PackageConfig(&[
             "virt-manager",
             "libvirt",
             "dnsmasq",
-            "iptables",
             "dmidecode",
             "virt-install",
             "virt-viewer",
@@ -295,7 +295,6 @@ const PACKAGES: PackageConfig = PackageConfig(&[
     ("net-tools", &["net-tools"]),
     ("ntfs", &["ntfs-3g"]),
     ("lsof", &["lsof"]),
-    ("iptables", &["iptables"]),
     ("pwgen", &["pwgen"]),
     (
         "gpg",
@@ -1553,6 +1552,70 @@ fn wireguard<'elevate: 'action, 'action>(
     Ok(())
 }
 
+fn iptables<'elevate: 'action, 'action>(
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    elevate: &'elevate Elevate,
+) {
+    plan.add(
+        "configure iptables",
+        elevate,
+        File {
+            path: Ref(Path::new("/etc/iptables/iptables.rules")),
+            permissions: FilePermissions {
+                owner: Uid::root(),
+                group: Gid::root(),
+                mode: FileMode(0o644),
+            },
+            on_directory: DirectoryHandling::Bail,
+            on_symlink: SymlinkHandling::Bail,
+            binary: false,
+            secret: false,
+            ignore_checksum_changes: false,
+            content: FileContent::Bytes(Ref(concat!(
+                dedent!(
+                    r#"
+                    *filter
+                    :INPUT DROP [0:0]
+                    :FORWARD DROP [0:0]
+                    :OUTPUT ACCEPT [0:0]
+                    -A INPUT -p icmp -j ACCEPT
+                    -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+                    -A INPUT -i lo -j ACCEPT
+                    -A INPUT -i wg0 -p tcp --dport 22 -j ACCEPT
+                    -A INPUT -p tcp -j REJECT --reject-with tcp-reset
+                    -A INPUT -p udp -j REJECT --reject-with icmp-port-unreachable
+                    -A INPUT -j REJECT --reject-with icmp-proto-unreachable
+                    COMMIT
+                "#
+                ),
+                "\n"
+            )
+            .as_bytes())),
+        },
+    )
+    .on_change(|| {
+        Resource::new(
+            Ref("restart iptables"),
+            elevate,
+            RestartService {
+                name: "iptables.service",
+            },
+        )
+    });
+
+    plan.add(
+        "enable iptables",
+        elevate,
+        Service {
+            name: "iptables.service",
+            state: ServiceState {
+                runtime: ServiceStateRuntime::Active,
+                persistent: ServiceStatePersistent::Enabled,
+            },
+        },
+    );
+}
+
 fn pacman<'plan, 'elevate: 'action, 'action>(
     plan: &'plan mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
@@ -2181,6 +2244,7 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     logind(plan, elevate);
     journald(plan, elevate);
     wireguard(plan, elevate)?;
+    iptables(plan, elevate);
     kernel_modules(plan, elevate);
     backlight(plan, elevate);
     firefox(plan, elevate);
