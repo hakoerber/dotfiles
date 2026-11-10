@@ -7,7 +7,7 @@
 // required for `serde_json::json!()`
 #![recursion_limit = "256"]
 
-use std::{env, net::Ipv4Addr, process};
+use std::{env, io, net::Ipv4Addr, process};
 
 use anyhow::{Result, anyhow, bail};
 use clap::{Parser, Subcommand, ValueEnum};
@@ -127,13 +127,8 @@ struct Secrets {
 }
 
 impl Secrets {
-    async fn load_from_command(command: String) -> Result<Self> {
-        let output = Process::run("sh", &["-c", &command], &Elevate::No, Stdin::Closed)
-            .await?
-            .check()?
-            .stdout;
-
-        Ok(serde_json::from_str(&output)?)
+    fn load_from(reader: impl io::Read) -> Result<Self> {
+        Ok(serde_json::from_reader(reader)?)
     }
 }
 
@@ -150,7 +145,7 @@ enum Action {
         clean_packages: bool,
 
         #[arg(long)]
-        secrets_command: Option<String>,
+        secrets_stdin: bool,
     },
     Bootstrap {
         #[arg(long)]
@@ -3934,7 +3929,7 @@ async fn main() -> MainResult {
                 dry_run,
                 only_changed,
                 clean_packages,
-                secrets_command,
+                secrets_stdin,
             } => {
                 let root = match running_user.as_str() {
                     "root" => Elevate::No,
@@ -4113,9 +4108,10 @@ async fn main() -> MainResult {
 
                 let config = Config { machine, users };
 
-                let secrets = match secrets_command {
-                    Some(command) => Some(Secrets::load_from_command(command).await?),
-                    None => None,
+                let secrets = if secrets_stdin {
+                    Some(Secrets::load_from(io::stdin())?)
+                } else {
+                    None
                 };
 
                 let mut plan = Plan::new();

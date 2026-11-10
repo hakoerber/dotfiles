@@ -113,7 +113,7 @@ cat << 'EOF' > /root/.bash_profile
             sleep 5
         done
         rm -rf /etc/systemd/system/getty@tty1.service.d/
-        if /usr/local/bin/cfg --hostname hera deploy --only-changed --secrets-command "cat /usr/local/share/secrets.json" ; then
+        if /usr/local/bin/cfg --hostname hera deploy --only-changed --secrets-stdin < /usr/local/share/secrets.json ; then
             rm -f /usr/local/bin/cfg
             rm -f /root/.bash_profile
             reboot
