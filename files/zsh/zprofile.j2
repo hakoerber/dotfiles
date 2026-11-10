@@ -135,8 +135,12 @@ for env in "${systemd_envs[@]}" ; do
     systemctl --user import-environment "${env}"
 done
 
-if (( $XDG_VTNR == {{ user.vt }} )) ; then
-    systemctl --user start windowmanager.target
-else
-    tmux new-session -A -s tmux-tty-$XDG_VTNR
+if [[ -n "${XDG_VTNR}" ]] ; then
+    if (( $XDG_VTNR == {{ user.vt }} )) ; then
+        systemctl --user start windowmanager.target
+    else
+        tmux new-session -A -s "tmux-tty-${XDG_VTNR}"
+    fi
+elif [[ -n "${SSH_CONNECTION}" ]] ; then
+    tmux new-session -A -s ssh
 fi
