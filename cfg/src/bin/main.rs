@@ -477,7 +477,6 @@ const PACKAGES: PackageConfig = PackageConfig(&[
     ("xpath", &["perl-xml-xpath"]),
     ("apache", &["apache"]),
     ("xfce4-screenshooter", &["xfce4-screenshooter"]),
-    ("picom", &["picom"]),
     ("fuseiso", &["fuseiso"]),
     ("7zip", &["7zip"]),
     ("unrar", &["unrar"]),
