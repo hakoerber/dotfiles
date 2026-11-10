@@ -42,7 +42,10 @@ pub mod prelude {
     };
     pub use super::resources::prelude::*;
     pub use super::tempfile::Tempfile;
-    pub use super::{Elevate, ElevateTo, Gid, Path, PathBuf, Plan, ReportConfig, Resource, Uid};
+    pub use super::{
+        Elevate, ElevateTo, FinishResult, Gid, Path, PathBuf, Plan, ReportConfig, Resource,
+        Uid,
+    };
 }
 
 #[derive(Eq, PartialEq, Debug)]
@@ -71,6 +74,12 @@ impl ChangeStatus<'_> {
     fn changed(&self) -> bool {
         matches!(self, Self::NeedsChange(_))
     }
+}
+
+#[derive(Debug)]
+pub enum AssertionResult {
+    Success,
+    Failed(AssertionFailureReport),
 }
 
 enum Trigger<'name, 'elevate, 'action> {
@@ -168,6 +177,13 @@ impl<'name, 'elevate, 'action> BlockAddWithElevate<'_, 'name, 'elevate, 'action>
 
         NodePlanRef { node: resource_ref }
     }
+}
+
+#[derive(Debug)]
+pub struct Assertion<'name, 'elevate, 'assert> {
+    name: MaybeOwned<'name, str>,
+    elevate: &'elevate Elevate,
+    assert: Box<dyn Assertable<'assert> + Send + 'assert>,
 }
 
 #[derive(Debug)]
@@ -304,6 +320,16 @@ pub trait Applyable: Reporter + fmt::Debug {
     async fn apply(&self, elevate: &Elevate) -> Result<()>;
 }
 
+#[async_trait::async_trait]
+pub trait Assertable<'assert>: fmt::Debug {
+    async fn assert<'elevate>(
+        self: Box<Self>,
+        elevate: &'elevate Elevate,
+    ) -> Result<AssertionResult>
+    where
+        'elevate: 'assert;
+}
+
 #[derive(Debug)]
 struct ChecksumChange {
     from: Checksum,
@@ -388,8 +414,23 @@ impl<'name, 'elevate, 'pkgs, 'action> PlanAddWithElevate<'_, 'name, 'elevate, 'p
 }
 
 #[derive(Debug)]
-pub struct Plan<'name, 'elevate, 'pkgs, 'action> {
+pub struct AssertionFailure<'name> {
+    name: MaybeOwned<'name, str>,
+    report: AssertionFailureReport,
+}
+
+pub enum FinishResult<'name, 'elevate, 'pkgs, 'action> {
+    AssertionsFailed { report: AssertionReports<'name> },
+    Success(PlanFinished<'name, 'elevate, 'pkgs, 'action>),
+}
+
+#[derive(Debug)]
+pub struct Plan<'name, 'elevate, 'pkgs, 'action, 'secrets, S>
+where
+    S: fmt::Debug,
+{
     nodes: Vec<Node<'name, 'elevate, 'action>>,
+    assertions: Vec<Assertion<'name, 'elevate, 'action>>,
     managed_packages: Vec<MaybeOwned<'pkgs, str>>,
 }
 
@@ -401,6 +442,7 @@ where
         Self {
             nodes: vec![],
             managed_packages: vec![],
+            assertions: vec![],
         }
     }
 
@@ -414,6 +456,20 @@ where
         };
 
         f(plan)
+    }
+
+    pub fn assert<'plan>(
+        &'plan mut self,
+        name: impl Into<MaybeOwned<'name, str>>,
+        elevate: &'elevate Elevate,
+        assertion: impl Assertable<'action> + Send + 'action,
+    ) {
+        let assertion = Assertion {
+            name: name.into(),
+            elevate,
+            assert: Box::new(assertion),
+        };
+        self.assertions.push(assertion);
     }
 
     pub fn add<'plan>(
@@ -459,18 +515,36 @@ where
         self.managed_packages.extend_from_slice(packages);
     }
 
-    pub async fn finish(self) -> Result<PlanFinished<'name, 'elevate, 'pkgs, 'action>> {
-        if cfg!(true) {
+    pub async fn finish(self) -> Result<FinishResult<'name, 'elevate, 'pkgs, 'action>> {
+        let mut assertion_failures = vec![];
+        for assertion in self.assertions {
+            let assert_result = assertion.assert.assert(assertion.elevate).await?;
+            match assert_result {
+                AssertionResult::Success => (),
+                AssertionResult::Failed(report) => {
+                    assertion_failures.push(AssertionFailure {
+                        name: assertion.name,
+                        report,
+                    });
+                }
+            }
+        }
+
+        if !assertion_failures.is_empty() {
+            Ok(FinishResult::AssertionsFailed {
+                report: AssertionReports { assertion_failures },
+            })
+        } else if cfg!(true) {
             let mut actions = vec![];
 
             for node in self.nodes {
                 actions.extend(resolve_node(node).await?);
             }
 
-            Ok(PlanFinished {
+            Ok(FinishResult::Success(PlanFinished {
                 nodes: actions,
                 managed_packages: self.managed_packages,
-            })
+            }))
         } else {
             let results = Arc::new(Mutex::new(vec![]));
             let errors = Arc::new(Mutex::new(vec![]));
@@ -505,10 +579,10 @@ where
                 // flatten the outer (all tasks) and inner (per task) vecs
                 let actions = actions.into_iter().flatten().collect();
 
-                Ok(PlanFinished {
+                Ok(FinishResult::Success(PlanFinished {
                     nodes: actions,
                     managed_packages: self.managed_packages,
-                })
+                }))
             }
         }
     }
@@ -611,6 +685,43 @@ impl StatusReport {
 struct Report<'name> {
     name: &'name MaybeOwned<'name, str>,
     status: StatusReport,
+}
+
+#[derive(Debug)]
+pub struct AssertionFailureReport {
+    reason: Vec<String>,
+}
+
+#[must_use]
+pub struct AssertionReports<'name> {
+    assertion_failures: Vec<AssertionFailure<'name>>,
+}
+
+#[expect(clippy::unwrap_used, reason = "stdout writing should never fail")]
+impl AssertionReports<'_> {
+    pub fn print(&self) {
+        let mut stdout = io::stdout();
+
+        writeln!(stdout, "{}", "Assertions failed".fg::<colors::Red>()).unwrap();
+
+        for failure in &self.assertion_failures {
+            match failure.report.reason[..] {
+                [ref single_line] => writeln!(
+                    stdout,
+                    "{}: {}",
+                    failure.name.as_ref().fg::<colors::Red>(),
+                    single_line
+                )
+                .unwrap(),
+                ref lines => {
+                    writeln!(stdout, "{}", failure.name.as_ref().fg::<colors::Red>()).unwrap();
+                    for line in lines {
+                        writeln!(stdout, "    {line}").unwrap();
+                    }
+                }
+            }
+        }
+    }
 }
 
 #[must_use]

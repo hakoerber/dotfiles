@@ -3687,7 +3687,13 @@ async fn main() -> Result<()> {
                 Ares | Neptune => (),
             }
 
-            let plan_finished = plan.finish().await?;
+            let plan_finished = match plan.finish().await? {
+                FinishResult::AssertionsFailed { report } => {
+                    report.print();
+                    return Ok(());
+                }
+                FinishResult::Success(plan) => plan,
+            };
 
             let report = plan_finished.report()?;
             report.print(&if only_changed {
@@ -3714,7 +3720,13 @@ async fn main() -> Result<()> {
                     unmanaged_packages(managed_packages, &mut cleanup_plan, &root).await?;
                     orphans(&mut cleanup_plan, &root).await?;
 
-                    let cleanup_plan_finished = cleanup_plan.finish().await?;
+                    let cleanup_plan_finished = match cleanup_plan.finish().await? {
+                        FinishResult::AssertionsFailed { report } => {
+                            unreachable!("removal plan does not contain assertions")
+                        }
+                        FinishResult::Success(plan) => plan,
+                    };
+
                     let cleanup_report = cleanup_plan_finished.report()?;
 
                     // it's only package remove resources anyway, will always be changed
