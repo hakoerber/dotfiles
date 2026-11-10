@@ -3768,24 +3768,9 @@ async fn unmanaged_packages<'elevate: 'action, 'action, 'pkgs>(
             plan.add(
                 Owned(format!("remove unmanaged package {installed_package}")),
                 elevate,
-                PackageRemove {
-                    remove: Owned(vec![Owned(installed_package)]),
-                },
-            );
-        }
-    }
-
-    let explicitly_installed_packages = list_explicitly_installed_packages(elevate).await?;
-
-    for installed_package in explicitly_installed_packages {
-        if !managed_packages.contains(&installed_package)
-            && !protected.contains(&installed_package.as_str())
-        {
-            plan.add(
-                Owned(format!("remove orphaned package {installed_package}")),
-                elevate,
-                PackageRemove {
-                    remove: Owned(vec![Owned(installed_package)]),
+                SinglePackage {
+                    package: Owned(installed_package),
+                    reason: InstallReason::Dependency,
                 },
             );
         }
@@ -4055,8 +4040,14 @@ async fn main() -> Result<()> {
             }
 
             if !dry_run && clean_packages {
-                // removed packages may produce orphans, so we apply this until there is nothing more
-                // to remove
+                // Removed packages may produce orphans, so we apply this until there
+                // is nothing more to remove
+                //
+                // We also do not remove unmanaged packages immediately, but just mark
+                // them as "installed as dependency". It can happen that a package is
+                // installed explicitly while *also* being a dependency of another package.
+                // We cannot rip it out immedaitely, but mark is as dependency and then
+                // wait for orphan removal to get rid of it.
                 loop {
                     let mut unmanaged_package_plan = Plan::new();
                     let managed_packages = plan_approved.managed_packages();
@@ -4089,7 +4080,6 @@ async fn main() -> Result<()> {
 
                 loop {
                     let mut orphaned_package_plan = Plan::new();
-                    let managed_packages = plan_approved.managed_packages();
 
                     orphans(&mut orphaned_package_plan, &root).await?;
 
