@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -o nounset
+set -o errexit
+
+FOLDER="${1?usage}" ; shift
+DELAY_SECONDS="${1?usage}" ; shift
+
+find "${FOLDER}" \
+  -type f \
+  -a \( -true \
+    -o -name '*.jpeg' \
+    -o -name '*.jpg' \
+    -o -name '*.png' \
+    -o -name '*.webp'  \
+  \) | shuf | imv -f -t "${DELAY_SECONDS}"
