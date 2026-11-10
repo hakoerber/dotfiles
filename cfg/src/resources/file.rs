@@ -130,7 +130,9 @@ impl Reporter for FileChangePlan<'_> {
 
                 let new_content = self.args.content.to_raw();
 
-                if !self.args.binary {
+                if self.args.secret {
+                    out.push("diff suppressed due to secrets".to_owned());
+                } else if !self.args.binary {
                     let diff = diffy::create_patch_bytes(&[], new_content.as_bytes());
 
                     let formatter = diffy::PatchFormatter::new().with_color();
@@ -169,7 +171,9 @@ impl Reporter for FileChangePlan<'_> {
 
                     let new_content = self.args.content.to_raw();
 
-                    if !self.args.binary {
+                    if self.args.secret {
+                        out.push("diff suppressed due to secrets".to_owned());
+                    } else if !self.args.binary {
                         let diff = diffy::create_patch_bytes(
                             existing_content.as_bytes(),
                             new_content.as_bytes(),
@@ -199,6 +203,7 @@ pub struct File<'args> {
     pub on_symlink: SymlinkHandling,
     pub on_directory: DirectoryHandling,
     pub content: FileContent<'args>,
+    pub secret: bool,
     pub binary: bool,
     pub ignore_checksum_changes: bool,
 }
