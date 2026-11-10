@@ -3934,11 +3934,14 @@ async fn main() -> Result<()> {
             };
 
             let report = plan_finished.report()?;
-            report.print(&if only_changed {
-                ReportConfig::OnlyChanged
-            } else {
-                ReportConfig::All
-            });
+            report.print(
+                &if only_changed {
+                    ReportConfig::OnlyChanged
+                } else {
+                    ReportConfig::All
+                },
+                true,
+            );
 
             let has_changes = report.has_changes();
 
@@ -3948,7 +3951,7 @@ async fn main() -> Result<()> {
                 plan_approved.apply().await?;
             }
 
-            if clean_packages {
+            if !dry_run && clean_packages {
                 // removed packages may produce orphans, so we apply this until there is nothing more
                 // to remove
                 loop {
@@ -3968,7 +3971,7 @@ async fn main() -> Result<()> {
                     let cleanup_report = cleanup_plan_finished.report()?;
 
                     // it's only package remove resources anyway, will always be changed
-                    cleanup_report.print(&ReportConfig::All);
+                    cleanup_report.print(&ReportConfig::All, false);
 
                     let has_changes = cleanup_report.has_changes();
 
@@ -3997,7 +4000,7 @@ async fn main() -> Result<()> {
                     let cleanup_report = cleanup_plan_finished.report()?;
 
                     // it's only package remove resources anyway, will always be changed
-                    cleanup_report.print(&ReportConfig::All);
+                    cleanup_report.print(&ReportConfig::All, false);
 
                     let has_changes = cleanup_report.has_changes();
 

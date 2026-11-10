@@ -905,7 +905,7 @@ fn print_node(
 
 #[expect(clippy::unwrap_used, reason = "stdout writing should never fail")]
 impl<'a> Reports<'a> {
-    pub fn print(&'a self, config: &ReportConfig) {
+    pub fn print(&'a self, config: &ReportConfig, summary: bool) {
         let mut stdout = io::stdout();
 
         let mut action_printed = false;
@@ -942,47 +942,50 @@ impl<'a> Reports<'a> {
             ) || action_printed;
         }
 
-        if action_printed {
-            writeln!(stdout).unwrap();
-        }
+        if summary {
+            if action_printed {
+                writeln!(stdout).unwrap();
+            }
 
-        match self.changes {
-            0 => {
-                write!(stdout, "{}, ", "Nothing to do".fg::<colors::Green>()).unwrap();
-                match self.all {
-                    0 => write!(stdout, "no resources defined").unwrap(),
-                    all => {
-                        write!(stdout, "{all} ").unwrap();
-                        match all {
-                            1 => write!(stdout, "resource").unwrap(),
-                            _ => write!(stdout, "resources").unwrap(),
+            match self.changes {
+                0 => {
+                    write!(stdout, "{}, ", "Nothing to do".fg::<colors::Green>()).unwrap();
+                    match self.all {
+                        0 => write!(stdout, "no resources defined").unwrap(),
+                        all => {
+                            write!(stdout, "{all} ").unwrap();
+                            match all {
+                                1 => write!(stdout, "resource").unwrap(),
+                                _ => write!(stdout, "resources").unwrap(),
+                            }
+                            write!(stdout, " clean").unwrap();
                         }
-                        write!(stdout, " clean").unwrap();
                     }
                 }
-            }
-            changes => {
-                write!(stdout, "{}", format!("{changes} ").fg::<colors::Yellow>()).unwrap();
-                match changes {
-                    1 => write!(stdout, "{}", "resource ".fg::<colors::Yellow>()).unwrap(),
-                    _ => write!(stdout, "{}", "resources ".fg::<colors::Yellow>()).unwrap(),
-                }
-                let unchanged = self.all.checked_sub(self.changes).expect("all >= changed");
-                write!(
-                    stdout,
-                    "{} ({unchanged} ",
-                    "to change".fg::<colors::Yellow>()
-                )
-                .unwrap();
-                match unchanged {
-                    1 => write!(stdout, "resource").unwrap(),
-                    _ => write!(stdout, "resources").unwrap(),
-                }
+                changes => {
+                    write!(stdout, "{}", format!("{changes} ").fg::<colors::Yellow>()).unwrap();
+                    match changes {
+                        1 => write!(stdout, "{}", "resource ".fg::<colors::Yellow>()).unwrap(),
+                        _ => write!(stdout, "{}", "resources ".fg::<colors::Yellow>()).unwrap(),
+                    }
+                    let unchanged = self.all.checked_sub(self.changes).expect("all >= changed");
+                    write!(
+                        stdout,
+                        "{} ({unchanged} ",
+                        "to change".fg::<colors::Yellow>()
+                    )
+                    .unwrap();
+                    match unchanged {
+                        1 => write!(stdout, "resource").unwrap(),
+                        _ => write!(stdout, "resources").unwrap(),
+                    }
 
-                write!(stdout, " clean)").unwrap();
+                    write!(stdout, " clean)").unwrap();
+                }
             }
+
+            writeln!(stdout).unwrap();
         }
-        writeln!(stdout).unwrap();
     }
 
     pub fn has_changes(&self) -> bool {
