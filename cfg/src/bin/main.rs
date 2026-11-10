@@ -25,6 +25,8 @@ static SCRIPTS: include_dir::Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../file
 static INCLUDED_PACKAGES: &[(&str, &str, &str, &[u8])] =
     include!(concat!(env!("OUT_DIR"), "/packages.rs"));
 
+const MY_SSH_PUBKEY: &str = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCxOtVxz3vRL7SUZVO899RUcg9BiDuZfPUfsd9v3AHOwNvSVsLObqq0QgwajmTML9nRZzX7kc7RmFtXZ5ypMkyEJ9p14rYXKYKhLqEM4Paz0lUagQhy0sdYijtayNsM5luU3yk6a4F/PkanprDGEEtJPMLCwpDODTwlE7THvFtJXLnYeFtF2DJKnUcP6E9MWGYM1zYdrmf43pxWg2YXFjoyLEkOy6TVjjqwz+tKa6+4YRqFWNyXcEWqI2ZLqHRzZTvu+46gsnR+8HcLpov3ij/Mr0jYSJ4vqMGz1yfKnrsKZUp0IhvlPYbGjdcL17xYame2UroPS8AzWWegyqeEFh54qmCrFVw/uwErcWcUJX3KEijrc48DYZUBK09vnFFcXIYR/cfFWpTGhnqlwp/EAaBeR3zr6hS6lL+XluMIjHHkwT/eD3YydEwABjbJwBJp5PdYR4M/bSHuOoCH6d/U36OpkwwekyYKWvEoxxPSJIWCy1ApILQZmWuctIFc8SQfSXfRifPEDBnL9hNzzX00beDYmS6cPIP0TIqa9fdL1AeO68Tk7o67f2cCE11QTH7FI9JjhuQ/M4dO8jUw7kmtGCKdReNIuYYU3xZB4wdFHs/5UxROCwEZnv+3uWAgHbgc14XLWunN9P9msOxYLHPVJK/XcdhHvWSmQdNq4ajry/H+kQ==";
+
 #[derive(Serialize)]
 enum Cpu {
     Intel,
@@ -2339,6 +2341,41 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
     user_services(plan, user_elevate, user, &user_directories, machine);
     user_spotify(plan, user_elevate, user, &user_directories);
     user_firefox(plan, user_elevate, user, &home);
+
+    let ssh_directory = home.join(".ssh");
+    plan.add(
+        "create ~/.ssh directory",
+        user_elevate,
+        Directory {
+            path: Owned(ssh_directory.clone()),
+            on_symlink: SymlinkHandling::Proceed,
+            on_file: FileHandling::Proceed,
+            permissions: FilePermissions {
+                owner: Uid::from(user.name.clone()),
+                group: Gid::from(user.name.clone()),
+                mode: FileMode(0o700),
+            },
+        },
+    );
+
+    plan.add(
+        "manage user authorized keys",
+        user_elevate,
+        File {
+            path: Owned(ssh_directory.join("authorized_keys")),
+            permissions: FilePermissions {
+                owner: Uid::root(),
+                group: Gid::root(),
+                mode: FileMode(0o644),
+            },
+            on_directory: DirectoryHandling::Bail,
+            on_symlink: SymlinkHandling::Proceed,
+            binary: false,
+            secret: false,
+            ignore_checksum_changes: false,
+            content: FileContent::Lines(Ref(&[Ref(MY_SSH_PUBKEY)])),
+        },
+    );
 
     plan.add(
         "import my gpg key",
