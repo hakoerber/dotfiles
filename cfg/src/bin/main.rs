@@ -224,7 +224,6 @@ const PACKAGES: PackageConfig = PackageConfig(&[
         &["zsh", "zsh-syntax-highlighting", "zsh-completions"],
     ),
     ("zathura", &["zathura", "zathura-pdf-poppler"]),
-    ("nftables", &["iptables-legacy", "nftables"]),
     ("pdf", &["ghostscript", "enscript"]),
     (
         "pandoc",
@@ -1643,6 +1642,28 @@ fn iptables<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
+    plan.add(
+        Ref("install nftables"),
+        elevate,
+        SinglePackage {
+            package: Ref("nftables"),
+            reason: InstallReason::Explicit,
+            force: false,
+        },
+    );
+
+    plan.add(
+        Ref("install iptables-legacy"),
+        elevate,
+        SinglePackage {
+            package: Ref("iptables-legacy"),
+            reason: InstallReason::Explicit,
+            // conflicts with `iptables`, which is already present as
+            // it's part of `base`
+            force: true,
+        },
+    );
+
     plan.add(
         "configure iptables",
         elevate,
@@ -3859,6 +3880,7 @@ async fn unmanaged_packages<'elevate: 'action, 'action, 'pkgs>(
                 SinglePackage {
                     package: Owned(installed_package),
                     reason: InstallReason::Dependency,
+                    force: false,
                 },
             );
         }

@@ -464,6 +464,7 @@ impl Reporter for LocalPackagePlan<'_> {
 pub struct SinglePackage<'action> {
     pub package: MaybeOwned<'action, str>,
     pub reason: InstallReason,
+    pub force: bool,
 }
 
 #[async_trait::async_trait]
@@ -549,14 +550,31 @@ impl Applyable for SinglePackagePlan<'_> {
 
         match self.action {
             SinglePackagePlanAction::Install => {
-                cmd::Process::run(
-                    "pacman",
-                    &["--needed", "--noconfirm", "--sync", "--", name],
-                    elevate,
-                    cmd::Stdin::Closed,
-                )
-                .await?
-                .check()?;
+                if self.args.force {
+                    // This is super hacky. There is no way to force pacman to replace an existing package.
+                    // `--noconfirm` is not enough. So we have to disable batch processing and "answer" the
+                    // questions manually. For that, we need to answer "yes" to two questions:
+                    //
+                    // * "Remove $conflicting_package?"
+                    // * "Proceed with installation?"
+                    cmd::Process::run(
+                        "pacman",
+                        &["--needed", "--sync", "--", name],
+                        elevate,
+                        cmd::Stdin::Write(b"yes\nyes\n"),
+                    )
+                    .await?
+                    .check()?;
+                } else {
+                    cmd::Process::run(
+                        "pacman",
+                        &["--needed", "--noconfirm", "--sync", "--", name],
+                        elevate,
+                        cmd::Stdin::Closed,
+                    )
+                    .await?
+                    .check()?;
+                }
 
                 // Explicitly set the reason again, as the resolved package have been installed as a
                 // dependency in the mean time. Note that this can only "upgrade" the reason (from
