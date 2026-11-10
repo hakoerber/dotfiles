@@ -7,13 +7,13 @@
 // required for `serde_json::json!()`
 #![recursion_limit = "256"]
 
-use std::env;
+use std::{env, net::Ipv4Addr};
 
 use anyhow::{Result, anyhow};
 use clap::{Parser, Subcommand, ValueEnum};
 use include_dir::{DirEntry, include_dir};
 use regex::Regex;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use cfg::prelude::*;
 
@@ -47,6 +47,93 @@ enum Host {
 
 use Host::{Ares, Dionysus, Hera, Neptune};
 
+#[derive(Deserialize)]
+struct Secret<T>(T);
+
+impl<T> std::fmt::Debug for Secret<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("[redacted]").finish()
+    }
+}
+
+impl<T> Secret<T> {
+    fn access(&self) -> &T {
+        &self.0
+    }
+}
+
+#[derive(Deserialize)]
+struct WireguardPubkey(String);
+
+impl WireguardPubkey {
+    fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+#[derive(Deserialize)]
+struct WireguardPrivkey(String);
+
+impl WireguardPrivkey {
+    fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+#[derive(Deserialize)]
+struct WireguardPsk(String);
+
+impl WireguardPsk {
+    fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+#[derive(Deserialize)]
+struct Domain(String);
+
+impl Domain {
+    fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+#[derive(Deserialize)]
+struct Port(u16);
+
+impl Port {
+    fn as_inner(&self) -> u16 {
+        self.0
+    }
+}
+
+#[derive(Debug, Deserialize)]
+struct WireguardSecrets {
+    address: Secret<Ipv4Addr>,
+    privkey: Secret<WireguardPrivkey>,
+    psk: Secret<WireguardPsk>,
+    server_pubkey: Secret<WireguardPubkey>,
+    server_ip: Secret<Ipv4Addr>,
+    server_endpoint_domain: Secret<Domain>,
+    server_endpoint_port: Secret<Port>,
+}
+
+#[derive(Debug, Deserialize)]
+struct Secrets {
+    wireguard: WireguardSecrets,
+}
+
+impl Secrets {
+    async fn load_from_command(command: String) -> Result<Self> {
+        let output = Process::run("sh", &["-c", &command], &Elevate::No, Stdin::Closed)
+            .await?
+            .check()?
+            .stdout;
+
+        Ok(serde_json::from_str(&output)?)
+    }
+}
+
 #[derive(Subcommand)]
 enum Action {
     Deploy {
@@ -58,6 +145,9 @@ enum Action {
 
         #[arg(long)]
         clean_packages: bool,
+
+        #[arg(long)]
+        secrets_command: Option<String>,
     },
     Bootstrap {
         #[arg(long)]
@@ -440,8 +530,8 @@ const PACKAGES: PackageConfig = PackageConfig(&[
     ("pkgbuilds-nm-sidebar", &["meson", "ninja"]),
 ]);
 
-fn hera<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+fn hera<'elevate: 'action, 'action, 'secrets>(
+    plan: &mut Plan<'_, 'elevate, '_, 'action, 'secrets, Secrets>,
     elevate: &'elevate Elevate,
 ) {
     let packages = &[
@@ -573,7 +663,7 @@ fn hera<'elevate: 'action, 'action>(
 }
 
 fn autoupdate<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
     plan.add(
@@ -715,7 +805,7 @@ fn autoupdate<'elevate: 'action, 'action>(
 }
 
 fn restic_backup<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
     plan.add(
@@ -949,7 +1039,7 @@ fn restic_backup<'elevate: 'action, 'action>(
 }
 
 fn initrd<'name, 'elevate: 'action, 'action>(
-    plan: &mut Plan<'name, 'elevate, '_, 'action>,
+    plan: &mut Plan<'name, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
     config: &Config,
 ) {
@@ -1028,7 +1118,7 @@ fn initrd<'name, 'elevate: 'action, 'action>(
 }
 
 fn libvirt<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
     for socket in [
@@ -1105,7 +1195,7 @@ fn libvirt<'elevate: 'action, 'action>(
 }
 
 fn services<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
     #[expect(
@@ -1160,7 +1250,7 @@ fn services<'elevate: 'action, 'action>(
 }
 
 fn aur<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
     let included_packages_directory = Path::new("/var/lib/packages");
@@ -1220,7 +1310,7 @@ fn aur<'elevate: 'action, 'action>(
 }
 
 fn boot_target<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
     config: &Config,
 ) {
@@ -1234,7 +1324,7 @@ fn boot_target<'elevate: 'action, 'action>(
 }
 
 fn sudo<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
     plan.add(
@@ -1286,7 +1376,7 @@ fn sudo<'elevate: 'action, 'action>(
 }
 
 fn timesyncd<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
     let arch_ntp_servers = [
@@ -1328,7 +1418,7 @@ fn timesyncd<'elevate: 'action, 'action>(
 }
 
 fn reflector<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
     plan.add(
@@ -1379,7 +1469,7 @@ fn reflector<'elevate: 'action, 'action>(
 }
 
 fn pacman<'plan, 'elevate: 'action, 'action>(
-    plan: &'plan mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &'plan mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
     plan.with(elevate, |mut plan| {
@@ -1442,7 +1532,7 @@ fn pacman<'plan, 'elevate: 'action, 'action>(
 }
 
 fn pacman_cache_cleanup<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
     let pacman_contrib = &[Ref("pacman-contrib")];
@@ -1523,7 +1613,7 @@ fn pacman_cache_cleanup<'elevate: 'action, 'action>(
 }
 
 fn install_packages<'elevate: 'action, 'action, 'pkgs>(
-    plan: &mut Plan<'_, 'elevate, 'pkgs, 'action>,
+    plan: &mut Plan<'_, 'elevate, 'pkgs, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
     packages: &'pkgs PackageConfig,
 ) {
@@ -1547,7 +1637,7 @@ fn install_packages<'elevate: 'action, 'action, 'pkgs>(
 }
 
 fn hardware<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
     config: &Config,
 ) {
@@ -1651,7 +1741,7 @@ fn hardware<'elevate: 'action, 'action>(
 }
 
 fn backlight<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
     plan.add(
@@ -1676,7 +1766,7 @@ fn backlight<'elevate: 'action, 'action>(
 }
 
 fn kernel_modules<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
     plan.add(
@@ -1713,7 +1803,7 @@ fn kernel_modules<'elevate: 'action, 'action>(
 }
 
 fn journald<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
     plan.block("journald", |block| {
@@ -1740,7 +1830,7 @@ fn journald<'elevate: 'action, 'action>(
 }
 
 fn logind<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
     plan.add(
@@ -1768,7 +1858,7 @@ fn logind<'elevate: 'action, 'action>(
 }
 
 fn firefox<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
     for directory in [
@@ -1988,11 +2078,11 @@ struct UserDirectories {
 }
 
 fn root_setup<'elevate: 'action, 'action, 'pkgs>(
-    plan: &mut Plan<'_, 'elevate, 'pkgs, 'action>,
+    plan: &mut Plan<'_, 'elevate, 'pkgs, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
     config: &Config,
     packages: &'pkgs PackageConfig,
-) {
+) -> Result<()> {
     pacman(plan, elevate);
     install_packages(plan, elevate, packages);
     aur(plan, elevate);
@@ -2010,10 +2100,12 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     kernel_modules(plan, elevate);
     backlight(plan, elevate);
     firefox(plan, elevate);
+
+    Ok(())
 }
 
 async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     root: &'elevate Elevate,
     user: &'elevate UserContext,
     machine: &'machine MachineConfig,
@@ -2103,7 +2195,7 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
 }
 
 fn user_firefox<'elevate: 'action, 'action, 'user, 'machine>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     user_elevate: &'elevate Elevate,
     user: &'user UserConfig,
     home: &Path,
@@ -2228,7 +2320,7 @@ fn user_firefox<'elevate: 'action, 'action, 'user, 'machine>(
 }
 
 fn user_create_directories<'elevate: 'action, 'action, 'user, 'machine>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     user_elevate: &'elevate Elevate,
     user: &'elevate UserConfig,
     user_directories: &UserDirectories,
@@ -2370,7 +2462,7 @@ fn user_create_directories<'elevate: 'action, 'action, 'user, 'machine>(
 }
 
 fn user_spotify<'elevate: 'action, 'action, 'user, 'machine>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     user_elevate: &'elevate Elevate,
     user: &'user UserConfig,
     user_directories: &UserDirectories,
@@ -2396,7 +2488,7 @@ fn user_spotify<'elevate: 'action, 'action, 'user, 'machine>(
 }
 
 fn user_autologin<'elevate: 'action, 'action, 'user, 'machine>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     root: &'elevate Elevate,
     user: &'user UserConfig,
 ) {
@@ -2448,7 +2540,7 @@ fn user_autologin<'elevate: 'action, 'action, 'user, 'machine>(
 }
 
 fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     user_elevate: &'elevate Elevate,
     user: &'user UserConfig,
     machine: &MachineConfig,
@@ -2819,7 +2911,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
 }
 
 async fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     user_elevate: &'elevate Elevate,
     user: &'user UserConfig,
     user_directories: &UserDirectories,
@@ -2940,7 +3032,7 @@ async fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
 }
 
 fn user_wallpaper<'elevate: 'action, 'action, 'user, 'machine>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     user_elevate: &'elevate Elevate,
     user: &'user UserConfig,
     user_directories: &UserDirectories,
@@ -2968,7 +3060,7 @@ fn user_wallpaper<'elevate: 'action, 'action, 'user, 'machine>(
     );
 }
 fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     user_elevate: &'elevate Elevate,
     user: &'user UserConfig,
     user_directories: &UserDirectories,
@@ -3432,7 +3524,7 @@ fn private_user(
 }
 
 async fn orphans<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) -> Result<()> {
     let orphans = list_orphaned_packages(elevate).await?;
@@ -3453,7 +3545,7 @@ async fn orphans<'elevate: 'action, 'action>(
 
 async fn unmanaged_packages<'elevate: 'action, 'action, 'pkgs>(
     managed_packages: &[MaybeOwned<'pkgs, str>],
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) -> Result<()> {
     let protected = [
@@ -3524,6 +3616,7 @@ async fn main() -> Result<()> {
             dry_run,
             only_changed,
             clean_packages,
+            secrets_command,
         } => {
             let root = match running_user.as_str() {
                 "root" => Elevate::No,
@@ -3702,9 +3795,20 @@ async fn main() -> Result<()> {
 
             let config = Config { machine, users };
 
+            let secrets = match secrets_command {
+                Some(command) => Some(Secrets::load_from_command(command).await?),
+                None => None,
+            };
+
             let mut plan = Plan::new();
 
-            root_setup(&mut plan, &root, &config, &PACKAGES);
+            if let Some(ref secrets) = secrets {
+                plan.set_secrets(SecretsWorkflow::Secrets(secrets));
+            } else {
+                plan.set_secrets(SecretsWorkflow::AssumeExisting);
+            }
+
+            root_setup(&mut plan, &root, &config, &PACKAGES)?;
 
             for user in &config.users {
                 configure_user(&mut plan, &root, user, &config.machine).await?;

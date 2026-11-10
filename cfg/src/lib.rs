@@ -44,7 +44,7 @@ pub mod prelude {
     pub use super::tempfile::Tempfile;
     pub use super::{
         Elevate, ElevateTo, FinishResult, Gid, Path, PathBuf, Plan, ReportConfig, Resource,
-        Uid,
+        SecretsWorkflow, Uid,
     };
 }
 
@@ -380,12 +380,19 @@ impl<'plan, 'name, 'elevate, 'action> NodePlanRef<'plan, 'name, 'elevate, 'actio
 }
 
 #[derive(Debug)]
-pub struct PlanAddWithElevate<'plan, 'name, 'elevate, 'pkgs, 'action> {
+pub struct PlanAddWithElevate<'plan, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>
+where
+    S: fmt::Debug + Sync,
+{
     elevate: &'elevate Elevate,
-    plan: &'plan mut Plan<'name, 'elevate, 'pkgs, 'action>,
+    plan: &'plan mut Plan<'name, 'elevate, 'pkgs, 'action, 'secrets, S>,
 }
 
-impl<'name, 'elevate, 'pkgs, 'action> PlanAddWithElevate<'_, 'name, 'elevate, 'pkgs, 'action> {
+impl<'name, 'elevate, 'pkgs, 'action, S>
+    PlanAddWithElevate<'_, 'name, 'elevate, 'pkgs, 'action, '_, S>
+where
+    S: fmt::Debug + Sync,
+{
     pub fn add<'a>(
         &'a mut self,
         name: impl Into<MaybeOwned<'name, str>>,
@@ -414,6 +421,28 @@ impl<'name, 'elevate, 'pkgs, 'action> PlanAddWithElevate<'_, 'name, 'elevate, 'p
 }
 
 #[derive(Debug)]
+pub enum SecretsWorkflow<'secrets, S>
+where
+    S: fmt::Debug,
+{
+    None,
+    AssumeExisting,
+    Secrets(&'secrets S),
+}
+
+impl<S> SecretsWorkflow<'_, S>
+where
+    S: fmt::Debug,
+{
+    fn as_ref(&self) -> Self {
+        match *self {
+            Self::None => Self::None,
+            Self::AssumeExisting => Self::AssumeExisting,
+            Self::Secrets(s) => Self::Secrets(s),
+        }
+    }
+}
+
 pub struct AssertionFailure<'name> {
     name: MaybeOwned<'name, str>,
     report: AssertionFailureReport,
@@ -432,10 +461,13 @@ where
     nodes: Vec<Node<'name, 'elevate, 'action>>,
     assertions: Vec<Assertion<'name, 'elevate, 'action>>,
     managed_packages: Vec<MaybeOwned<'pkgs, str>>,
+    secrets: SecretsWorkflow<'secrets, S>,
 }
 
-impl<'name, 'elevate, 'pkgs, 'action> Plan<'name, 'elevate, 'pkgs, 'action>
+impl<'name, 'elevate, 'pkgs, 'action, 'secrets, S>
+    Plan<'name, 'elevate, 'pkgs, 'action, 'secrets, S>
 where
+    S: fmt::Debug + Sync,
     'elevate: 'action,
 {
     pub fn new() -> Self {
@@ -443,14 +475,24 @@ where
             nodes: vec![],
             managed_packages: vec![],
             assertions: vec![],
+            secrets: SecretsWorkflow::None,
         }
+    }
+
+    pub fn set_secrets(&mut self, secrets: SecretsWorkflow<'secrets, S>) {
+        self.secrets = secrets;
+    }
+
+    pub fn secrets(&self) -> SecretsWorkflow<'secrets, S> {
+        let secrets = &self.secrets;
+        self.secrets.as_ref()
     }
 
     pub fn with<'plan, F, R>(&'plan mut self, elevate: &'elevate Elevate, f: F) -> R
     where
-        F: FnOnce(PlanAddWithElevate<'plan, 'name, 'elevate, 'pkgs, 'action>) -> R,
+        F: FnOnce(PlanAddWithElevate<'plan, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>) -> R,
     {
-        let plan = PlanAddWithElevate::<'plan, '_, '_, '_, '_> {
+        let plan = PlanAddWithElevate::<'plan, '_, '_, '_, '_, 'secrets, S> {
             elevate,
             plan: self,
         };
