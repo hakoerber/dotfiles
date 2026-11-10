@@ -1447,7 +1447,7 @@ fn wireguard<'elevate: 'action, 'action>(
         mode: FileMode(0o600),
     };
     match plan.secrets() {
-        SecretsWorkflow::None => (),
+        SecretsWorkflow::None => bail!("missing secrets"),
         SecretsWorkflow::AssumeExisting => plan.assert(
             "assert wireguard config exists",
             elevate,
