@@ -172,75 +172,76 @@ fn main() {
 
     write!(dest_file, "&[").unwrap();
 
-    for package in [
-        build_package("workstation-mgr", Path::new("../mgr/pkg"), None, true),
-        build_package(
-            "aws-session-manager-plugin",
-            Path::new("../pkgbuilds/aws-session-manager-plugin"),
-            None,
-            false,
-        ),
-        build_package(
-            "cargo-lambda-bin",
-            Path::new("../pkgbuilds/cargo-lambda-bin"),
-            None,
-            false,
-        ),
-        build_package(
-            "claude-code",
-            Path::new("../pkgbuilds/claude-code"),
-            None,
-            false,
-        ),
-        build_package("grm", Path::new("../pkgbuilds/grm"), None, false),
-        build_package(
-            "nm-sidebar",
-            Path::new("../pkgbuilds/nm-sidebar"),
-            None,
-            false,
-        ),
-        build_package(
-            "nodejs-intelephense",
-            Path::new("../pkgbuilds/nodejs-intelephense"),
-            None,
-            false,
-        ),
-        build_package(
-            "portfolio-performance-bin",
-            Path::new("../pkgbuilds/portfolio-performance-bin"),
-            Some(
-                "curl -sSf --proto '=https' https://keys.openpgp.org/vks/v1/by-fingerprint/E46E6F8FF02E4C83569084589239277F560C95AC | gpg --import -",
+    if env::var_os("SKIP_PKGBUILDS").is_none_or(|v| v != "1") {
+        for package in [
+            build_package("workstation-mgr", Path::new("../mgr/pkg"), None, true),
+            build_package(
+                "aws-session-manager-plugin",
+                Path::new("../pkgbuilds/aws-session-manager-plugin"),
+                None,
+                false,
             ),
-            false,
-        ),
-        build_package(
-            "screencfg",
-            Path::new("../pkgbuilds/screencfg"),
-            None,
-            false,
-        ),
-        build_package(
-            "slack-desktop",
-            Path::new("../pkgbuilds/slack-desktop"),
-            None,
-            false,
-        ),
-        // build_package(
-        //     "spotify",
-        //     Path::new("../pkgbuilds/spotify"),
-        //     Some(
-        //         "curl -sSf --proto '=https' https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.gpg | gpg --import -",
-        //     ),
-        //     false,
-        // ),
-        build_package(
-            "terraform-ls-bin",
-            Path::new("../pkgbuilds/terraform-ls-bin"),
-            None,
-            false,
-        ),
-    ] {
-        write!(
+            build_package(
+                "cargo-lambda-bin",
+                Path::new("../pkgbuilds/cargo-lambda-bin"),
+                None,
+                false,
+            ),
+            build_package(
+                "claude-code",
+                Path::new("../pkgbuilds/claude-code"),
+                None,
+                false,
+            ),
+            build_package("grm", Path::new("../pkgbuilds/grm"), None, false),
+            build_package(
+                "nm-sidebar",
+                Path::new("../pkgbuilds/nm-sidebar"),
+                None,
+                false,
+            ),
+            build_package(
+                "nodejs-intelephense",
+                Path::new("../pkgbuilds/nodejs-intelephense"),
+                None,
+                false,
+            ),
+            build_package(
+                "portfolio-performance-bin",
+                Path::new("../pkgbuilds/portfolio-performance-bin"),
+                Some(
+                    "curl -sSf --proto '=https' https://keys.openpgp.org/vks/v1/by-fingerprint/E46E6F8FF02E4C83569084589239277F560C95AC | gpg --import -",
+                ),
+                false,
+            ),
+            build_package(
+                "screencfg",
+                Path::new("../pkgbuilds/screencfg"),
+                None,
+                false,
+            ),
+            build_package(
+                "slack-desktop",
+                Path::new("../pkgbuilds/slack-desktop"),
+                None,
+                false,
+            ),
+            // build_package(
+            //     "spotify",
+            //     Path::new("../pkgbuilds/spotify"),
+            //     Some(
+            //         "curl -sSf --proto '=https' https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.gpg | gpg --import -",
+            //     ),
+            //     false,
+            // ),
+            build_package(
+                "terraform-ls-bin",
+                Path::new("../pkgbuilds/terraform-ls-bin"),
+                None,
+                false,
+            ),
+        ] {
+            write!(
             dest_file,
             r#"("{name}", "{version}", "{package_filename}", include_bytes!("{package_path}")),"#,
             name = package.app_name,
@@ -249,6 +250,7 @@ fn main() {
             package_path = package.path.display()
         )
         .unwrap();
+        }
     }
 
     write!(dest_file, "]").unwrap();
@@ -258,4 +260,5 @@ fn main() {
     println!("cargo::rerun-if-changed=../pkgbuilds");
     println!("cargo::rerun-if-changed=../files");
     println!("cargo::rerun-if-changed=../assets");
+    println!("cargo::rerun-if-env-changed=SKIP_PKGBUILDS");
 }
