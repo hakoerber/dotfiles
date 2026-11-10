@@ -567,26 +567,6 @@ fn hera<'elevate: 'action, 'action>(
     );
 }
 
-async fn orphans<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action>,
-    elevate: &'elevate Elevate,
-) -> Result<()> {
-    let orphans = list_orphaned_packages(elevate).await?;
-
-    plan.with(elevate, |mut plan| {
-        for orphan in orphans {
-            plan.add(
-                Owned(format!("remove orphaned package {orphan}")),
-                PackageRemove {
-                    remove: Owned(vec![Owned(orphan)]),
-                },
-            );
-        }
-    });
-
-    Ok(())
-}
-
 fn autoupdate<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action>,
     elevate: &'elevate Elevate,
@@ -3632,8 +3612,6 @@ async fn main() -> Result<()> {
                 }
                 Ares | Neptune => (),
             }
-
-            orphans(&mut plan, &root).await?;
 
             let plan_finished = plan.finish().await?;
 
