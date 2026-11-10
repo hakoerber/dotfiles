@@ -1468,6 +1468,104 @@ fn reflector<'elevate: 'action, 'action>(
     );
 }
 
+fn wireguard<'elevate: 'action, 'action>(
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    elevate: &'elevate Elevate,
+) -> Result<()> {
+    let path = Path::new("/etc/wireguard/wg0.conf");
+    let permissions = FilePermissions {
+        owner: Uid::root(),
+        group: Gid::root(),
+        mode: FileMode(0o600),
+    };
+    match plan.secrets() {
+        SecretsWorkflow::None => (),
+        SecretsWorkflow::AssumeExisting => plan.assert(
+            "assert wireguard config exists",
+            elevate,
+            AssertFile {
+                path: Ref(path),
+                permissions,
+            },
+        ),
+        SecretsWorkflow::Secrets(secrets) => {
+            let mut context = tera::Context::new();
+            context.insert("address", &secrets.wireguard.address.access());
+            context.insert("privkey", &secrets.wireguard.privkey.access().as_str());
+            context.insert("psk", &secrets.wireguard.psk.access().as_str());
+            context.insert(
+                "server_pubkey",
+                &secrets.wireguard.server_pubkey.access().as_str(),
+            );
+            context.insert("server_ip", &secrets.wireguard.server_ip.access());
+            context.insert(
+                "server_endpoint_domain",
+                &secrets.wireguard.server_endpoint_domain.access().as_str(),
+            );
+            context.insert(
+                "server_endpoint_port",
+                &secrets.wireguard.server_endpoint_port.access().as_inner(),
+            );
+            let template = tera::Tera::one_off(
+                &textwrap::dedent(
+                    r#"
+                    [Interface]
+                    Address = {{address}}/24 
+                    PrivateKey = {{privkey}}
+                    MTU = 1300
+
+                    [Peer]
+                    PublicKey = {{server_pubkey}}
+                    PresharedKey = {{psk}}
+                    AllowedIPs = {{server_ip}}/32
+                    Endpoint = {{server_endpoint_domain}}:{{server_endpoint_port}}
+                    "#,
+                ),
+                &context,
+                false,
+            )?;
+
+            plan.add(
+                "configure wireguard",
+                elevate,
+                File {
+                    path: Ref(path),
+                    permissions,
+                    on_directory: DirectoryHandling::Bail,
+                    on_symlink: SymlinkHandling::Bail,
+                    binary: false,
+                    secret: true,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Bytes(Owned(template.into_bytes())),
+                },
+            )
+            .on_change(|| {
+                Resource::new(
+                    Ref("restart wireguard"),
+                    elevate,
+                    RestartService {
+                        name: "wg-quick@wg0.service",
+                    },
+                )
+            });
+        }
+    }
+
+    plan.add(
+        "enable wireguard tunnel",
+        elevate,
+        Service {
+            name: "wg-quick@wg0.service",
+            state: ServiceState {
+                runtime: ServiceStateRuntime::Active,
+                persistent: ServiceStatePersistent::Enabled,
+            },
+        },
+    );
+
+    Ok(())
+}
+
 fn pacman<'plan, 'elevate: 'action, 'action>(
     plan: &'plan mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
@@ -2097,6 +2195,7 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     hardware(plan, elevate, config);
     logind(plan, elevate);
     journald(plan, elevate);
+    wireguard(plan, elevate)?;
     kernel_modules(plan, elevate);
     backlight(plan, elevate);
     firefox(plan, elevate);
