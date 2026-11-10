@@ -1640,7 +1640,7 @@ fn pacman<'plan, 'elevate: 'action, 'action>(
                         Architecture = auto
                         HoldPkg = pacman glibc
 
-                        # I have my own gpg agent user unit, don't want conflicts 
+                        # I have my own gpg agent user unit, don't want conflicts
                         NoExtract = usr/lib/systemd/user/gpg-agent*
 
                         # See https://bbs.archlinux.org/viewtopic.php?id=259764
