@@ -11,6 +11,7 @@ use std::{env, net::Ipv4Addr};
 
 use anyhow::{Result, anyhow};
 use clap::{Parser, Subcommand, ValueEnum};
+use dedent::dedent;
 use include_dir::{DirEntry, include_dir};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -621,16 +622,14 @@ fn hera<'elevate: 'action, 'action, 'secrets>(
             binary: false,
             secret: false,
             ignore_checksum_changes: false,
-            content: FileContent::Bytes(Owned(
-                textwrap::dedent(
-                    r#"
+            content: FileContent::Bytes(Ref(dedent!(
+                r#"
                     [Autologin]
                     User=herta
                     Session=plasma
-                    "#,
-                )
-                .into_bytes(),
-            )),
+                "#
+            )
+            .as_bytes())),
         },
     );
 
@@ -649,15 +648,17 @@ fn hera<'elevate: 'action, 'action, 'secrets>(
             binary: false,
             secret: false,
             ignore_checksum_changes: false,
-            content: FileContent::Bytes(Owned(
-                textwrap::dedent(
-                    r#"
+            #[expect(
+                clippy::string_lit_as_bytes,
+                reason = "false positive due to the dedent!() macro"
+            )]
+            content: FileContent::Bytes(Ref(dedent!(
+                r#"
                     [Daemon]
                     LockOnStart=true
-                    "#,
-                )
-                .into_bytes(),
-            )),
+                "#
+            )
+            .as_bytes())),
         },
     );
 }
@@ -681,9 +682,8 @@ fn autoupdate<'elevate: 'action, 'action>(
             binary: false,
             secret: false,
             ignore_checksum_changes: false,
-            content: FileContent::Bytes(Owned(
-                textwrap::dedent(
-                    r#"
+            content: FileContent::Bytes(Ref(
+                dedent!(r#"
                     #!/usr/bin/env bash
 
                     set -o errexit
@@ -710,9 +710,8 @@ fn autoupdate<'elevate: 'action, 'action>(
                     pacman --sync --noprogressbar --noconfirm --refresh --needed archlinux-keyring
 
                     pacman --noprogressbar --noconfirm --sysupgrade
-                    "#,
-                )
-                .into_bytes(),
+                "#)
+                .as_bytes(),
             )),
         },
     );
@@ -732,16 +731,14 @@ fn autoupdate<'elevate: 'action, 'action>(
             binary: false,
             secret: false,
             ignore_checksum_changes: false,
-            content: FileContent::Bytes(Owned(
-                textwrap::dedent(
-                    r#"
-                        [Service]
-                        Type=oneshot
-                        ExecStart=/usr/local/bin/pacman-autoupdate
-                        "#,
-                )
-                .into_bytes(),
-            )),
+            content: FileContent::Bytes(Ref(dedent!(
+                r#"
+                    [Service]
+                    Type=oneshot
+                    ExecStart=/usr/local/bin/pacman-autoupdate
+                "#
+            )
+            .as_bytes())),
         },
     )
     .on_change(|| {
@@ -767,20 +764,18 @@ fn autoupdate<'elevate: 'action, 'action>(
             binary: false,
             secret: false,
             ignore_checksum_changes: false,
-            content: FileContent::Bytes(Owned(
-                textwrap::dedent(
-                    r#"
-                        [Timer]
-                        OnCalendar=daily
-                        OnBootSec=5min
-                        OnUnitInactiveSec=120min
+            content: FileContent::Bytes(Ref(dedent!(
+                r#"
+                    [Timer]
+                    OnCalendar=daily
+                    OnBootSec=5min
+                    OnUnitInactiveSec=120min
 
-                        [Install]
-                        WantedBy=multi-user.target
-                        "#,
-                )
-                .into_bytes(),
-            )),
+                    [Install]
+                    WantedBy=multi-user.target
+                "#
+            )
+            .as_bytes())),
         },
     )
     .on_change(|| {
@@ -853,15 +848,13 @@ fn restic_backup<'elevate: 'action, 'action>(
             binary: false,
             secret: false,
             ignore_checksum_changes: false,
-            content: FileContent::Bytes(Owned(
-                textwrap::dedent(
-                    r#"
+            content: FileContent::Bytes(Ref(dedent!(
+                r#"
                     /home/*/.cache/**
                     /home/*/.mozilla/firefox/*/Cache/**
-                    "#,
-                )
-                .into_bytes(),
-            )),
+                "#
+            )
+            .as_bytes())),
         },
     );
 
@@ -880,9 +873,8 @@ fn restic_backup<'elevate: 'action, 'action>(
             binary: false,
             secret: false,
             ignore_checksum_changes: false,
-            content: FileContent::Bytes(Owned(
-                textwrap::dedent(
-                    r#"
+            content: FileContent::Bytes(Ref(dedent!(
+                r#"
                     #!/usr/bin/env bash
                     source /etc/restic/env
 
@@ -901,10 +893,9 @@ fn restic_backup<'elevate: 'action, 'action>(
                       --password-file=/etc/restic/repopassword \
                       --verbose \
                       "${@}"
-                    "#,
-                )
-                .into_bytes(),
-            )),
+                "#
+            )
+            .as_bytes())),
         },
     );
 
@@ -923,9 +914,8 @@ fn restic_backup<'elevate: 'action, 'action>(
             binary: false,
             secret: false,
             ignore_checksum_changes: false,
-            content: FileContent::Bytes(Owned(
-                textwrap::dedent(
-                    r#"
+            content: FileContent::Bytes(Ref(dedent!(
+                r#"
                     #!/usr/bin/env bash
 
                     set -o nounset
@@ -950,10 +940,9 @@ fn restic_backup<'elevate: 'action, 'action>(
                         --keep-daily 30 \
                         --keep-monthly 12 \
                         --keep-yearly 3
-                    "#,
-                )
-                .into_bytes(),
-            )),
+                "#
+            )
+            .as_bytes())),
         },
     );
 
@@ -973,16 +962,14 @@ fn restic_backup<'elevate: 'action, 'action>(
                     binary: false,
                     secret: false,
                     ignore_checksum_changes: false,
-                    content: FileContent::Bytes(Owned(
-                        textwrap::dedent(
-                            r#"
+                    content: FileContent::Bytes(Ref(dedent!(
+                        r#"
                             [Service]
                             Type=oneshot
                             ExecStart=systemd-inhibit /usr/local/bin/restic-backup
-                            "#,
-                        )
-                        .into_bytes(),
-                    )),
+                        "#
+                    )
+                    .as_bytes())),
                 },
             );
 
@@ -1000,19 +987,17 @@ fn restic_backup<'elevate: 'action, 'action>(
                     binary: false,
                     secret: false,
                     ignore_checksum_changes: false,
-                    content: FileContent::Bytes(Owned(
-                        textwrap::dedent(
-                            r#"
+                    content: FileContent::Bytes(Ref(dedent!(
+                        r#"
                             [Timer]
                             OnCalendar=daily
                             Persistent=true
 
                             [Install]
                             WantedBy=multi-user.target
-                            "#,
-                        )
-                        .into_bytes(),
-                    )),
+                        "#
+                    )
+                    .as_bytes())),
                 },
             );
         });
@@ -1099,16 +1084,18 @@ fn initrd<'name, 'elevate: 'action, 'action>(
                 secret: false,
                 ignore_checksum_changes: false,
                 content: FileContent::Bytes(Owned(
-                    textwrap::dedent(&format!(
-                        r#"
-                        MODULES=()
-                        BINARIES=()
-                        FILES=()
-                        HOOKS=({hooks})
-                        COMPRESSION="lz4"
-                        "#,
-                        hooks = hooks.join(" "),
-                    ))
+                    format!(
+                        dedent!(
+                            r#"
+                                MODULES=()
+                                BINARIES=()
+                                FILES=()
+                                HOOKS=({hooks})
+                                COMPRESSION="lz4"
+                            "#
+                        ),
+                        hooks = hooks.join(" ")
+                    )
                     .into_bytes(),
                 )),
             },
@@ -1507,19 +1494,19 @@ fn wireguard<'elevate: 'action, 'action>(
                 &secrets.wireguard.server_endpoint_port.access().as_inner(),
             );
             let template = tera::Tera::one_off(
-                &textwrap::dedent(
+                &dedent!(
                     r#"
-                    [Interface]
-                    Address = {{address}}/24 
-                    PrivateKey = {{privkey}}
-                    MTU = 1300
+                        [Interface]
+                        Address = {{address}}/24 
+                        PrivateKey = {{privkey}}
+                        MTU = 1300
 
-                    [Peer]
-                    PublicKey = {{server_pubkey}}
-                    PresharedKey = {{psk}}
-                    AllowedIPs = {{server_ip}}/32
-                    Endpoint = {{server_endpoint_domain}}:{{server_endpoint_port}}
-                    "#,
+                        [Peer]
+                        PublicKey = {{server_pubkey}}
+                        PresharedKey = {{psk}}
+                        AllowedIPs = {{server_ip}}/32
+                        Endpoint = {{server_endpoint_domain}}:{{server_endpoint_port}}
+                    "#
                 ),
                 &context,
                 false,
@@ -1585,9 +1572,8 @@ fn pacman<'plan, 'elevate: 'action, 'action>(
                 binary: false,
                 secret: false,
                 ignore_checksum_changes: false,
-                content: FileContent::Bytes(Owned(
-                    textwrap::dedent(
-                        r##"
+                content: FileContent::Bytes(Ref(dedent!(
+                    r##"
                         [options]
                         Architecture = auto
                         HoldPkg = pacman glibc
@@ -1613,10 +1599,9 @@ fn pacman<'plan, 'elevate: 'action, 'action>(
 
                         [multilib]
                         Include = /etc/pacman.d/mirrorlist
-                    "##,
-                    )
-                    .into_bytes(),
-                )),
+                    "##
+                )
+                .as_bytes())),
             },
         )
         .on_change(|| {
@@ -2374,43 +2359,43 @@ fn user_firefox<'elevate: 'action, 'action, 'user, 'machine>(
 
         if profile.manage_css {
             plan.add(
-            Owned(format!(
-                "create firefox userChrome.css for {}",
-                profile.name
-            )),
-            user_elevate,
-            File {
-                path: Owned(chrome_dir.join("userChrome.css")),
-                on_symlink: SymlinkHandling::Proceed,
-                on_directory: DirectoryHandling::Proceed,
-                permissions: FilePermissions {
-                    owner: Uid::from(user.name.clone()),
-                    group: Gid::from(user.name.clone()),
-                    mode: FileMode(0o644),
-                },
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-                content: FileContent::Bytes(Owned(
-                    textwrap::dedent(
+                Owned(format!(
+                    "create firefox userChrome.css for {}",
+                    profile.name
+                )),
+                user_elevate,
+                File {
+                    path: Owned(chrome_dir.join("userChrome.css")),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Proceed,
+                    permissions: FilePermissions {
+                        owner: Uid::from(user.name.clone()),
+                        group: Gid::from(user.name.clone()),
+                        mode: FileMode(0o644),
+                    },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(
+                    dedent!(
                         r##"
-                        /* hides the native tabs */
-                        #TabsToolbar {
-                          visibility: collapse;
-                        }
+                            /* hides the native tabs */
+                            #TabsToolbar {
+                              visibility: collapse;
+                            }
 
-                        /* removes the header for the sidebar that only shows "tree style tab" anyway */
-                        #sidebar-panel-header {
-                          visibility: collapse;
-                        }
+                            /* removes the header for the sidebar that only shows "tree style tab" anyway */
+                            #sidebar-panel-header {
+                              visibility: collapse;
+                            }
 
-                        /* removes the weird padding between sidebar and left window border */
-                        #sidebar-box {
-                          padding-left: 0 !important;
-                        }
-                        "##,
+                            /* removes the weird padding between sidebar and left window border */
+                            #sidebar-box {
+                              padding-left: 0 !important;
+                            }
+                        "##
                     )
-                    .into_bytes(),
+                    .as_bytes(),
                 )),
             },
         );

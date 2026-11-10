@@ -117,6 +117,7 @@ dependencies = [
  "async-trait",
  "camino",
  "clap",
+ "dedent",
  "derive_more",
  "diffy",
  "futures",
@@ -129,7 +130,6 @@ dependencies = [
  "tap",
  "tempfile",
  "tera",
- "textwrap",
  "tokio",
  "tokio-stream",
  "tracing",
@@ -212,6 +212,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ce6e4c961d6cd6c9a86db418387425e8bdeaf05b3c8bc1411e6dca4c252f1453"
 dependencies = [
  "hybrid-array",
+]
+
+[[package]]
+name = "dedent"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a8a3dee4e932355439992a45dc631b0979abf9c677958674bd94298bf9002870"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -723,12 +734,6 @@ checksum = "61e0cadeeb54426080b4c5395d59769ce8293f542cc25511c167c742b2175809"
 dependencies = [
  "serde",
 ]
-
-[[package]]
-name = "textwrap"
-version = "0.16.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ecfad6c3abc80a577f2b91c1e412ee57e7a060d430b553c1b0c940974ebcd49"
 
 [[package]]
 name = "thread_local"

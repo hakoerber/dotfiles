@@ -38,7 +38,7 @@ serde_json = { version = "1", default-features = false, features = ["std"] }
 sha3 = { version = "0.12", default-features = false }
 tap = { version = "1", default-features = false }
 tera = { version = "2", default-features = false }
-textwrap = { version = "0.16", default-features = false }
+dedent = { version = "0.1", default-features = false }
 tracing = { version = "0.1", default-features = false }
 tracing-subscriber = { version = "0.3", default-features = false, features = [
   "fmt",
