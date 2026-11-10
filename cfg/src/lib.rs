@@ -38,8 +38,7 @@ pub mod prelude {
     pub use super::maybeowned::MaybeOwned::{self, Owned, Ref};
     pub use super::pkg::{
         InstallReason, check_installed, get_package_version, list_explicitly_installed_packages,
-        list_explicitly_installed_packages_that_are_not_required, list_orphaned_packages,
-        resolve_installed_package,
+        list_orphaned_packages, resolve_installed_package,
     };
     pub use super::resources::prelude::*;
     pub use super::tempfile::Tempfile;
@@ -398,10 +397,6 @@ impl<'name, 'elevate, 'pkgs, 'action> Plan<'name, 'elevate, 'pkgs, 'action>
 where
     'elevate: 'action,
 {
-    pub fn managed_packages(&self) -> &[MaybeOwned<'pkgs, str>] {
-        &self.managed_packages
-    }
-
     pub fn new() -> Self {
         Self {
             nodes: vec![],
@@ -464,7 +459,7 @@ where
         self.managed_packages.extend_from_slice(packages);
     }
 
-    pub async fn finish(self) -> Result<PlanFinished<'name, 'elevate, 'action>> {
+    pub async fn finish(self) -> Result<PlanFinished<'name, 'elevate, 'pkgs, 'action>> {
         if cfg!(true) {
             let mut actions = vec![];
 
@@ -472,7 +467,10 @@ where
                 actions.extend(resolve_node(node).await?);
             }
 
-            Ok(PlanFinished { nodes: actions })
+            Ok(PlanFinished {
+                nodes: actions,
+                managed_packages: self.managed_packages,
+            })
         } else {
             let results = Arc::new(Mutex::new(vec![]));
             let errors = Arc::new(Mutex::new(vec![]));
@@ -507,7 +505,10 @@ where
                 // flatten the outer (all tasks) and inner (per task) vecs
                 let actions = actions.into_iter().flatten().collect();
 
-                Ok(PlanFinished { nodes: actions })
+                Ok(PlanFinished {
+                    nodes: actions,
+                    managed_packages: self.managed_packages,
+                })
             }
         }
     }
@@ -589,8 +590,9 @@ where
     Ok(actions)
 }
 
-pub struct PlanFinished<'name, 'elevate, 'action> {
+pub struct PlanFinished<'name, 'elevate, 'pkgs, 'action> {
     nodes: Vec<PlannedNode<'name, 'elevate, 'action>>,
+    managed_packages: Vec<MaybeOwned<'pkgs, str>>,
 }
 
 #[derive(Debug)]
@@ -915,7 +917,7 @@ where
     Ok(reports)
 }
 
-impl<'name, 'elevate, 'action> PlanFinished<'name, 'elevate, 'action> {
+impl<'name, 'elevate, 'pkgs, 'action> PlanFinished<'name, 'elevate, 'pkgs, 'action> {
     pub fn report(&'elevate self) -> Result<Reports<'elevate>> {
         let mut reports = vec![];
 
@@ -962,19 +964,23 @@ impl<'name, 'elevate, 'action> PlanFinished<'name, 'elevate, 'action> {
         })
     }
 
-    pub fn approve(self) -> PlanApproved<'name, 'elevate, 'action> {
-        PlanApproved::<'name, 'elevate, 'action> { nodes: self.nodes }
+    pub fn approve(self) -> PlanApproved<'name, 'elevate, 'pkgs, 'action> {
+        PlanApproved::<'name, 'elevate, 'pkgs, 'action> {
+            nodes: self.nodes,
+            managed_packages: self.managed_packages,
+        }
     }
 }
 
-pub struct PlanApproved<'name, 'elevate, 'action> {
+pub struct PlanApproved<'name, 'elevate, 'pkgs, 'action> {
     nodes: Vec<PlannedNode<'name, 'elevate, 'action>>,
+    managed_packages: Vec<MaybeOwned<'pkgs, str>>,
 }
 
-async fn apply_node(node: PlannedNode<'_, '_, '_>, stdout: &mut impl io::Write) -> Result<()> {
+async fn apply_node(node: &PlannedNode<'_, '_, '_>, stdout: &mut impl io::Write) -> Result<()> {
     match node.inner {
-        PlannedNodeInner::Block(block) => {
-            for node in block.nodes {
+        PlannedNodeInner::Block(ref block) => {
+            for node in &block.nodes {
                 Box::pin(apply_node(node, stdout)).await?;
             }
         }
@@ -986,12 +992,18 @@ async fn apply_node(node: PlannedNode<'_, '_, '_>, stdout: &mut impl io::Write) 
     Ok(())
 }
 
-impl PlanApproved<'_, '_, '_> {
+impl<'pkgs> PlanApproved<'_, '_, 'pkgs, '_> {
+    pub fn managed_packages(&self) -> &[MaybeOwned<'pkgs, str>] {
+        &self.managed_packages
+    }
+}
+
+impl PlanApproved<'_, '_, '_, '_> {
     #[expect(clippy::unwrap_used, reason = "stdout writing should never fail")]
-    pub async fn apply(self) -> Result<()> {
+    pub async fn apply(&self) -> Result<()> {
         let mut stdout = io::stdout();
         writeln!(stdout).unwrap();
-        for node in self.nodes {
+        for node in &self.nodes {
             apply_node(node, &mut stdout).await?;
         }
 

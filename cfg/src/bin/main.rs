@@ -55,6 +55,9 @@ enum Action {
 
         #[arg(long)]
         only_changed: bool,
+
+        #[arg(long)]
+        clean_packages: bool,
     },
     Bootstrap {
         #[arg(long)]
@@ -3393,6 +3396,75 @@ fn private_user(
     }
 }
 
+async fn orphans<'elevate: 'action, 'action>(
+    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    elevate: &'elevate Elevate,
+) -> Result<()> {
+    let orphans = list_orphaned_packages(elevate).await?;
+
+    plan.with(elevate, |mut plan| {
+        for orphan in orphans {
+            plan.add(
+                Owned(format!("remove orphaned package {orphan}")),
+                PackageRemove {
+                    remove: Owned(vec![Owned(orphan)]),
+                },
+            );
+        }
+    });
+
+    Ok(())
+}
+
+async fn unmanaged_packages<'elevate: 'action, 'action, 'pkgs>(
+    managed_packages: &[MaybeOwned<'pkgs, str>],
+    plan: &mut Plan<'_, 'elevate, '_, 'action>,
+    elevate: &'elevate Elevate,
+) -> Result<()> {
+    let protected = [
+        "base", // virtual package, would not hurt, but it's weird if its not installed
+    ];
+
+    let managed_packages = managed_packages
+        .iter()
+        .map(|s| s.to_owned())
+        .collect::<Vec<String>>();
+
+    let explicitly_installed_packages = list_explicitly_installed_packages(elevate).await?;
+
+    for installed_package in explicitly_installed_packages {
+        if !managed_packages.contains(&installed_package)
+            && !protected.contains(&installed_package.as_str())
+        {
+            plan.add(
+                Owned(format!("remove unmanaged package {installed_package}")),
+                elevate,
+                PackageRemove {
+                    remove: Owned(vec![Owned(installed_package)]),
+                },
+            );
+        }
+    }
+
+    let explicitly_installed_packages = list_explicitly_installed_packages(elevate).await?;
+
+    for installed_package in explicitly_installed_packages {
+        if !managed_packages.contains(&installed_package)
+            && !protected.contains(&installed_package.as_str())
+        {
+            plan.add(
+                Owned(format!("remove orphaned package {installed_package}")),
+                elevate,
+                PackageRemove {
+                    remove: Owned(vec![Owned(installed_package)]),
+                },
+            );
+        }
+    }
+
+    Ok(())
+}
+
 #[tokio::main(flavor = "multi_thread")]
 async fn main() -> Result<()> {
     let args = Cli::try_parse()?;
@@ -3416,6 +3488,7 @@ async fn main() -> Result<()> {
         Action::Deploy {
             dry_run,
             only_changed,
+            clean_packages,
         } => {
             let root = match running_user.as_str() {
                 "root" => Elevate::No,
@@ -3629,6 +3702,34 @@ async fn main() -> Result<()> {
 
             if !dry_run && has_changes {
                 plan_approved.apply().await?;
+            }
+
+            if clean_packages {
+                // removed packages may produce orphans, so we apply this until there is nothing more
+                // to remove
+                loop {
+                    let mut cleanup_plan = Plan::new();
+                    let managed_packages = plan_approved.managed_packages();
+
+                    unmanaged_packages(managed_packages, &mut cleanup_plan, &root).await?;
+                    orphans(&mut cleanup_plan, &root).await?;
+
+                    let cleanup_plan_finished = cleanup_plan.finish().await?;
+                    let cleanup_report = cleanup_plan_finished.report()?;
+
+                    // it's only package remove resources anyway, will always be changed
+                    cleanup_report.print(&ReportConfig::All);
+
+                    let has_changes = cleanup_report.has_changes();
+
+                    let cleanup_plan_approved = cleanup_plan_finished.approve();
+
+                    if !dry_run && has_changes {
+                        cleanup_plan_approved.apply().await?;
+                    } else {
+                        break;
+                    }
+                }
             }
 
             Ok(())
