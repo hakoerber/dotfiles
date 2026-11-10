@@ -1042,19 +1042,18 @@ fn initrd<'name, 'elevate: 'action, 'action>(
         let hooks: Vec<&str> = {
             let mut hooks = vec![
                 "base",
-                "udev",
+                "systemd",
                 "autodetect",
                 "microcode",
                 "modconf",
                 "kms",
                 "keyboard",
-                "keymap",
-                "consolefont",
+                "sd-vconsole",
                 "block",
             ];
 
             if config.machine.encrypted_root {
-                hooks.extend(["encrypt", "lvm2"]);
+                hooks.extend(["sd-encrypt", "lvm2"]);
             }
 
             hooks.extend(["filesystems", "resume", "fsck"]);
