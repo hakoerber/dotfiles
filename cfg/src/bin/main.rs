@@ -1954,12 +1954,30 @@ fn journald<'elevate: 'action, 'action>(
     plan.block("journald", |block| {
         block
             .add(
-                "limit journald size",
+                "configure journald",
                 elevate,
-                LineInFile {
-                    path: Path::new("/etc/systemd/journald.conf"),
-                    line: Ref("SystemMaxUse=50M"),
-                    regex: Regex::new(r#"^#?SystemMaxUse=.*$"#).expect("regex to be valid"),
+                File {
+                    path: Ref(Path::new("/etc/systemd/journald.conf")),
+                    permissions: FilePermissions {
+                        owner: Uid::root(),
+                        group: Gid::root(),
+                        mode: FileMode(0o600),
+                    },
+                    on_symlink: SymlinkHandling::Bail,
+                    on_directory: DirectoryHandling::Bail,
+                    secret: false,
+                    binary: false,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Bytes(Ref(concat!(
+                        dedent!(
+                            r#"
+                                [Journal]
+                                SystemMaxUse=50M
+                            "#
+                        ),
+                        "\n"
+                    )
+                    .as_bytes())),
                 },
             )
             .on_change(|| {
