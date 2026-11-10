@@ -7,7 +7,7 @@
 // required for `serde_json::json!()`
 #![recursion_limit = "256"]
 
-use std::{env, net::Ipv4Addr};
+use std::{env, net::Ipv4Addr, process};
 
 use anyhow::{Result, anyhow, bail};
 use clap::{Parser, Subcommand, ValueEnum};
@@ -3867,374 +3867,402 @@ async fn unmanaged_packages<'elevate: 'action, 'action, 'pkgs>(
     Ok(())
 }
 
+enum MainResult {
+    Success,
+    Failure,
+    Error(anyhow::Error),
+}
+
+#[expect(clippy::print_stderr, reason = "we need to report the error")]
+impl process::Termination for MainResult {
+    fn report(self) -> process::ExitCode {
+        match self {
+            Self::Success => process::ExitCode::SUCCESS,
+            Self::Failure => process::ExitCode::FAILURE,
+            Self::Error(e) => {
+                eprintln!("Error: {e}");
+                process::ExitCode::FAILURE
+            }
+        }
+    }
+}
+
 #[tokio::main(flavor = "multi_thread")]
-async fn main() -> Result<()> {
-    let args = Cli::try_parse()?;
+async fn main() -> MainResult {
+    async fn inner() -> Result<std::result::Result<(), ()>> {
+        let args = Cli::try_parse()?;
 
-    let subscriber = configure_tracing(if args.debug {
-        tracing::Level::DEBUG
-    } else {
-        tracing::Level::INFO
-    });
+        let subscriber = configure_tracing(if args.debug {
+            tracing::Level::DEBUG
+        } else {
+            tracing::Level::INFO
+        });
 
-    tracing::subscriber::set_global_default(subscriber)?;
+        tracing::subscriber::set_global_default(subscriber)?;
 
-    let running_user = Process::run("id", &["--user", "--name"], &Elevate::No, Stdin::Closed)
-        .await?
-        .check()?
-        .stdout
-        .trim()
-        .to_owned();
+        let running_user = Process::run("id", &["--user", "--name"], &Elevate::No, Stdin::Closed)
+            .await?
+            .check()?
+            .stdout
+            .trim()
+            .to_owned();
 
-    match args.action {
-        Action::Deploy {
-            dry_run,
-            only_changed,
-            clean_packages,
-            secrets_command,
-        } => {
-            let root = match running_user.as_str() {
-                "root" => Elevate::No,
-                _ => Elevate::Sudo(ElevateTo::Root),
-            };
+        match args.action {
+            Action::Deploy {
+                dry_run,
+                only_changed,
+                clean_packages,
+                secrets_command,
+            } => {
+                let root = match running_user.as_str() {
+                    "root" => Elevate::No,
+                    _ => Elevate::Sudo(ElevateTo::Root),
+                };
 
-            let work_user = UserConfig {
-                autologin: true,
-                vt: 1,
-                name: "hannes-work".to_owned(),
-                fullname: "Hannes Körber".to_owned(),
-                mail: "h.koerber@clipmyhorse.tv".to_owned(),
-                keyboard: UserKeyboardConfig {
-                    repeat_delay: 150,
-                    repeat_rate: 50,
-                },
-                ssh_agent_enabled: true,
-                gpg: None,
-                nextcloud: FeatureState::Disabled,
-                steam: FeatureState::Disabled,
-                keepassxc: FeatureState::Enabled,
-                firefox: FirefoxUserConfig {
-                    profiles: vec![
-                        FirefoxProfile {
-                            name: "default".to_owned(),
-                            manage_css: true,
-                            extensions: vec![
-                                "ublock-origin".to_owned(),
-                                "tree-style-tab".to_owned(),
-                                "i-dont-care-about-cookies".to_owned(),
-                            ],
+                let work_user = UserConfig {
+                    autologin: true,
+                    vt: 1,
+                    name: "hannes-work".to_owned(),
+                    fullname: "Hannes Körber".to_owned(),
+                    mail: "h.koerber@clipmyhorse.tv".to_owned(),
+                    keyboard: UserKeyboardConfig {
+                        repeat_delay: 150,
+                        repeat_rate: 50,
+                    },
+                    ssh_agent_enabled: true,
+                    gpg: None,
+                    nextcloud: FeatureState::Disabled,
+                    steam: FeatureState::Disabled,
+                    keepassxc: FeatureState::Enabled,
+                    firefox: FirefoxUserConfig {
+                        profiles: vec![
+                            FirefoxProfile {
+                                name: "default".to_owned(),
+                                manage_css: true,
+                                extensions: vec![
+                                    "ublock-origin".to_owned(),
+                                    "tree-style-tab".to_owned(),
+                                    "i-dont-care-about-cookies".to_owned(),
+                                ],
+                            },
+                            FirefoxProfile {
+                                name: "meet".to_owned(),
+                                manage_css: false,
+                                extensions: vec!["ublock-origin".to_owned()],
+                            },
+                        ],
+                    },
+                };
+
+                let machine = match args.hostname {
+                    Neptune => MachineConfig {
+                        encrypted_root: true,
+                        boot_target: Target::MultiUser,
+                        cpu: Cpu::Intel,
+                        gpu: Gpu::Nvidia,
+                        font_size: 11,
+                        workspace: WorkspaceConfig {
+                            num1: Some("".to_owned()),
+                            num2: Some("".to_owned()),
+                            num3: Some("".to_owned()),
+                            num4: Some("".to_owned()),
+                            num5: None,
+                            num6: None,
+                            num7: Some("".to_owned()),
+                            num8: Some("".to_owned()),
+                            num9: Some("".to_owned()),
+                            num0: Some("".to_owned()),
                         },
-                        FirefoxProfile {
-                            name: "meet".to_owned(),
-                            manage_css: false,
-                            extensions: vec!["ublock-origin".to_owned()],
+                        machine_type: Laptop,
+                    },
+                    Ares => MachineConfig {
+                        encrypted_root: true,
+                        boot_target: Target::MultiUser,
+                        cpu: Cpu::Amd,
+                        gpu: Gpu::Amd,
+                        font_size: 10,
+                        workspace: WorkspaceConfig {
+                            num1: Some("".to_owned()),
+                            num2: None,
+                            num3: None,
+                            num4: None,
+                            num5: None,
+                            num6: None,
+                            num7: None,
+                            num8: None,
+                            num9: Some("".to_owned()),
+                            num0: Some("".to_owned()),
                         },
+                        machine_type: Workstation,
+                    },
+                    Hera => MachineConfig {
+                        encrypted_root: false,
+                        boot_target: Target::Graphical,
+                        cpu: Cpu::Intel,
+                        gpu: Gpu::Intel,
+                        font_size: 11,
+                        workspace: WorkspaceConfig {
+                            num1: Some("".to_owned()),
+                            num2: Some("".to_owned()),
+                            num3: Some("".to_owned()),
+                            num4: Some("".to_owned()),
+                            num5: None,
+                            num6: None,
+                            num7: Some("".to_owned()),
+                            num8: Some("".to_owned()),
+                            num9: Some("".to_owned()),
+                            num0: Some("".to_owned()),
+                        },
+                        machine_type: Laptop,
+                    },
+                    Dionysus => MachineConfig {
+                        encrypted_root: true,
+                        boot_target: Target::MultiUser,
+                        cpu: Cpu::Intel,
+                        gpu: Gpu::Intel,
+                        font_size: 11,
+                        workspace: WorkspaceConfig {
+                            num1: Some("".to_owned()),
+                            num2: Some("".to_owned()),
+                            num3: Some("".to_owned()),
+                            num4: None,
+                            num5: None,
+                            num6: None,
+                            num7: None,
+                            num8: None,
+                            num9: None,
+                            num0: None,
+                        },
+                        machine_type: Tv,
+                    },
+                };
+
+                let users = match args.hostname {
+                    Neptune => vec![
+                        private_user(
+                            true,
+                            2,
+                            "hannes-private".to_owned(),
+                            FeatureState::Disabled,
+                            &machine,
+                        ),
+                        work_user,
                     ],
-                },
-            };
-
-            let machine = match args.hostname {
-                Neptune => MachineConfig {
-                    encrypted_root: true,
-                    boot_target: Target::MultiUser,
-                    cpu: Cpu::Intel,
-                    gpu: Gpu::Nvidia,
-                    font_size: 11,
-                    workspace: WorkspaceConfig {
-                        num1: Some("".to_owned()),
-                        num2: Some("".to_owned()),
-                        num3: Some("".to_owned()),
-                        num4: Some("".to_owned()),
-                        num5: None,
-                        num6: None,
-                        num7: Some("".to_owned()),
-                        num8: Some("".to_owned()),
-                        num9: Some("".to_owned()),
-                        num0: Some("".to_owned()),
-                    },
-                    machine_type: Laptop,
-                },
-                Ares => MachineConfig {
-                    encrypted_root: true,
-                    boot_target: Target::MultiUser,
-                    cpu: Cpu::Amd,
-                    gpu: Gpu::Amd,
-                    font_size: 10,
-                    workspace: WorkspaceConfig {
-                        num1: Some("".to_owned()),
-                        num2: None,
-                        num3: None,
-                        num4: None,
-                        num5: None,
-                        num6: None,
-                        num7: None,
-                        num8: None,
-                        num9: Some("".to_owned()),
-                        num0: Some("".to_owned()),
-                    },
-                    machine_type: Workstation,
-                },
-                Hera => MachineConfig {
-                    encrypted_root: false,
-                    boot_target: Target::Graphical,
-                    cpu: Cpu::Intel,
-                    gpu: Gpu::Intel,
-                    font_size: 11,
-                    workspace: WorkspaceConfig {
-                        num1: Some("".to_owned()),
-                        num2: Some("".to_owned()),
-                        num3: Some("".to_owned()),
-                        num4: Some("".to_owned()),
-                        num5: None,
-                        num6: None,
-                        num7: Some("".to_owned()),
-                        num8: Some("".to_owned()),
-                        num9: Some("".to_owned()),
-                        num0: Some("".to_owned()),
-                    },
-                    machine_type: Laptop,
-                },
-                Dionysus => MachineConfig {
-                    encrypted_root: true,
-                    boot_target: Target::MultiUser,
-                    cpu: Cpu::Intel,
-                    gpu: Gpu::Intel,
-                    font_size: 11,
-                    workspace: WorkspaceConfig {
-                        num1: Some("".to_owned()),
-                        num2: Some("".to_owned()),
-                        num3: Some("".to_owned()),
-                        num4: None,
-                        num5: None,
-                        num6: None,
-                        num7: None,
-                        num8: None,
-                        num9: None,
-                        num0: None,
-                    },
-                    machine_type: Tv,
-                },
-            };
-
-            let users = match args.hostname {
-                Neptune => vec![
-                    private_user(
+                    Ares => vec![private_user(
                         true,
-                        2,
-                        "hannes-private".to_owned(),
+                        1,
+                        "hannes".to_owned(),
+                        FeatureState::Enabled,
+                        &machine,
+                    )],
+                    Dionysus => vec![private_user(
+                        true,
+                        1,
+                        "hannes".to_owned(),
                         FeatureState::Disabled,
                         &machine,
-                    ),
-                    work_user,
-                ],
-                Ares => vec![private_user(
-                    true,
-                    1,
-                    "hannes".to_owned(),
-                    FeatureState::Enabled,
-                    &machine,
-                )],
-                Dionysus => vec![private_user(
-                    true,
-                    1,
-                    "hannes".to_owned(),
-                    FeatureState::Disabled,
-                    &machine,
-                )],
-                Hera => vec![private_user(
-                    false,
-                    1,
-                    "hannes".to_owned(),
-                    FeatureState::Disabled,
-                    &machine,
-                )],
-            }
-            .into_iter()
-            .map(|config| UserContext {
-                simplest_elevate: match running_user.as_str() {
-                    "root" => Elevate::No,
-                    name if name == config.name => Elevate::No,
-                    _other => Elevate::Sudo(ElevateTo::User {
-                        user: config.name.clone(),
-                    }),
-                },
-                strict_elevate: match running_user.as_str() {
-                    name if name == config.name => Elevate::No,
-                    _other => Elevate::Sudo(ElevateTo::User {
-                        user: config.name.clone(),
-                    }),
-                },
-                config,
-            })
-            .collect();
-
-            let config = Config { machine, users };
-
-            let secrets = match secrets_command {
-                Some(command) => Some(Secrets::load_from_command(command).await?),
-                None => None,
-            };
-
-            let mut plan = Plan::new();
-
-            if let Some(ref secrets) = secrets {
-                plan.set_secrets(SecretsWorkflow::Secrets(secrets));
-            } else {
-                plan.set_secrets(SecretsWorkflow::AssumeExisting);
-            }
-
-            root_setup(&mut plan, &root, &config, &PACKAGES)?;
-
-            for user in &config.users {
-                configure_user(&mut plan, &root, user, &config.machine).await?;
-            }
-
-            match args.hostname {
-                Hera => {
-                    hera(&mut plan, &root);
-                    autoupdate(&mut plan, &root);
-                    restic_backup(&mut plan, &root);
+                    )],
+                    Hera => vec![private_user(
+                        false,
+                        1,
+                        "hannes".to_owned(),
+                        FeatureState::Disabled,
+                        &machine,
+                    )],
                 }
-                Dionysus => {
-                    autoupdate(&mut plan, &root);
-                }
-                Ares | Neptune => (),
-            }
+                .into_iter()
+                .map(|config| UserContext {
+                    simplest_elevate: match running_user.as_str() {
+                        "root" => Elevate::No,
+                        name if name == config.name => Elevate::No,
+                        _other => Elevate::Sudo(ElevateTo::User {
+                            user: config.name.clone(),
+                        }),
+                    },
+                    strict_elevate: match running_user.as_str() {
+                        name if name == config.name => Elevate::No,
+                        _other => Elevate::Sudo(ElevateTo::User {
+                            user: config.name.clone(),
+                        }),
+                    },
+                    config,
+                })
+                .collect();
 
-            let plan_finished = match plan.finish().await? {
-                FinishResult::AssertionsFailed { report } => {
-                    report.print();
-                    return Ok(());
-                }
-                FinishResult::Success(plan) => plan,
-            };
+                let config = Config { machine, users };
 
-            let report = plan_finished.report()?;
-            report.print(
-                &if only_changed {
-                    ReportConfig::OnlyChanged
+                let secrets = match secrets_command {
+                    Some(command) => Some(Secrets::load_from_command(command).await?),
+                    None => None,
+                };
+
+                let mut plan = Plan::new();
+
+                if let Some(ref secrets) = secrets {
+                    plan.set_secrets(SecretsWorkflow::Secrets(secrets));
                 } else {
-                    ReportConfig::All
-                },
-                true,
-            );
+                    plan.set_secrets(SecretsWorkflow::AssumeExisting);
+                }
 
-            let has_changes = report.has_changes();
+                root_setup(&mut plan, &root, &config, &PACKAGES)?;
 
-            let plan_approved = plan_finished.approve();
+                for user in &config.users {
+                    configure_user(&mut plan, &root, user, &config.machine).await?;
+                }
 
-            if !dry_run && has_changes {
-                plan_approved.apply().await?;
+                match args.hostname {
+                    Hera => {
+                        hera(&mut plan, &root);
+                        autoupdate(&mut plan, &root);
+                        restic_backup(&mut plan, &root);
+                    }
+                    Dionysus => {
+                        autoupdate(&mut plan, &root);
+                    }
+                    Ares | Neptune => (),
+                }
+
+                let plan_finished = match plan.finish().await? {
+                    FinishResult::AssertionsFailed { report } => {
+                        report.print();
+                        return Ok(Err(()));
+                    }
+                    FinishResult::Success(plan) => plan,
+                };
+
+                let report = plan_finished.report()?;
+                report.print(
+                    &if only_changed {
+                        ReportConfig::OnlyChanged
+                    } else {
+                        ReportConfig::All
+                    },
+                    true,
+                );
+
+                let has_changes = report.has_changes();
+
+                let plan_approved = plan_finished.approve();
+
+                if !dry_run && has_changes {
+                    plan_approved.apply().await?;
+                }
+
+                if !dry_run && clean_packages {
+                    // Removed packages may produce orphans, so we apply this until there
+                    // is nothing more to remove
+                    //
+                    // We also do not remove unmanaged packages immediately, but just mark
+                    // them as "installed as dependency". It can happen that a package is
+                    // installed explicitly while *also* being a dependency of another package.
+                    // We cannot rip it out immedaitely, but mark is as dependency and then
+                    // wait for orphan removal to get rid of it.
+                    loop {
+                        let mut unmanaged_package_plan = Plan::new();
+                        let managed_packages = plan_approved.managed_packages();
+
+                        unmanaged_packages(managed_packages, &mut unmanaged_package_plan, &root)
+                            .await?;
+
+                        let cleanup_plan_finished = match unmanaged_package_plan.finish().await? {
+                            FinishResult::AssertionsFailed { report } => {
+                                unreachable!("removal plan does not contain assertions")
+                            }
+                            FinishResult::Success(plan) => plan,
+                        };
+
+                        let cleanup_report = cleanup_plan_finished.report()?;
+
+                        // it's only package remove resources anyway, will always be changed
+                        cleanup_report.print(&ReportConfig::All, false);
+
+                        let has_changes = cleanup_report.has_changes();
+
+                        let cleanup_plan_approved = cleanup_plan_finished.approve();
+
+                        if !dry_run && has_changes {
+                            cleanup_plan_approved.apply().await?;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    loop {
+                        let mut orphaned_package_plan = Plan::new();
+
+                        orphans(&mut orphaned_package_plan, &root).await?;
+
+                        let cleanup_plan_finished = match orphaned_package_plan.finish().await? {
+                            FinishResult::AssertionsFailed { report } => {
+                                unreachable!("removal plan does not contain assertions")
+                            }
+                            FinishResult::Success(plan) => plan,
+                        };
+
+                        let cleanup_report = cleanup_plan_finished.report()?;
+
+                        // it's only package remove resources anyway, will always be changed
+                        cleanup_report.print(&ReportConfig::All, false);
+
+                        let has_changes = cleanup_report.has_changes();
+
+                        let cleanup_plan_approved = cleanup_plan_finished.approve();
+
+                        if !dry_run && has_changes {
+                            cleanup_plan_approved.apply().await?;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+
+                Ok(Ok(()))
             }
-
-            if !dry_run && clean_packages {
-                // Removed packages may produce orphans, so we apply this until there
-                // is nothing more to remove
-                //
-                // We also do not remove unmanaged packages immediately, but just mark
-                // them as "installed as dependency". It can happen that a package is
-                // installed explicitly while *also* being a dependency of another package.
-                // We cannot rip it out immedaitely, but mark is as dependency and then
-                // wait for orphan removal to get rid of it.
-                loop {
-                    let mut unmanaged_package_plan = Plan::new();
-                    let managed_packages = plan_approved.managed_packages();
-
-                    unmanaged_packages(managed_packages, &mut unmanaged_package_plan, &root)
+            Action::Bootstrap { i_am_sure } => {
+                if running_user != "root" {
+                    Err(anyhow!("needs to be run as root"))
+                } else if i_am_sure {
+                    let elevate = Elevate::No;
+                    let tempfile = Tempfile::new(&elevate).await?;
+                    tempfile
+                        .write(match args.hostname {
+                            Neptune => include_bytes!(concat!(
+                                env!("CARGO_MANIFEST_DIR"),
+                                "/../install_scripts/neptune.sh"
+                            )),
+                            Ares => include_bytes!(concat!(
+                                env!("CARGO_MANIFEST_DIR"),
+                                "/../install_scripts/ares.sh"
+                            )),
+                            Dionysus => include_bytes!(concat!(
+                                env!("CARGO_MANIFEST_DIR"),
+                                "/../install_scripts/dionysus.sh"
+                            )),
+                            Hera => include_bytes!(concat!(
+                                env!("CARGO_MANIFEST_DIR"),
+                                "/../install_scripts/hera.sh"
+                            )),
+                        })
                         .await?;
 
-                    let cleanup_plan_finished = match unmanaged_package_plan.finish().await? {
-                        FinishResult::AssertionsFailed { report } => {
-                            unreachable!("removal plan does not contain assertions")
-                        }
-                        FinishResult::Success(plan) => plan,
-                    };
-
-                    let cleanup_report = cleanup_plan_finished.report()?;
-
-                    // it's only package remove resources anyway, will always be changed
-                    cleanup_report.print(&ReportConfig::All, false);
-
-                    let has_changes = cleanup_report.has_changes();
-
-                    let cleanup_plan_approved = cleanup_plan_finished.approve();
-
-                    if !dry_run && has_changes {
-                        cleanup_plan_approved.apply().await?;
-                    } else {
-                        break;
-                    }
-                }
-
-                loop {
-                    let mut orphaned_package_plan = Plan::new();
-
-                    orphans(&mut orphaned_package_plan, &root).await?;
-
-                    let cleanup_plan_finished = match orphaned_package_plan.finish().await? {
-                        FinishResult::AssertionsFailed { report } => {
-                            unreachable!("removal plan does not contain assertions")
-                        }
-                        FinishResult::Success(plan) => plan,
-                    };
-
-                    let cleanup_report = cleanup_plan_finished.report()?;
-
-                    // it's only package remove resources anyway, will always be changed
-                    cleanup_report.print(&ReportConfig::All, false);
-
-                    let has_changes = cleanup_report.has_changes();
-
-                    let cleanup_plan_approved = cleanup_plan_finished.approve();
-
-                    if !dry_run && has_changes {
-                        cleanup_plan_approved.apply().await?;
-                    } else {
-                        break;
-                    }
+                    Process::run_in_foreground(
+                        "bash",
+                        &[tempfile.path().as_str()],
+                        &elevate,
+                        &Stdin::Open,
+                    )?
+                    .check()?;
+                    Ok(Ok(()))
+                } else {
+                    Err(anyhow!("coward"))
                 }
             }
-
-            Ok(())
         }
-        Action::Bootstrap { i_am_sure } => {
-            if running_user != "root" {
-                Err(anyhow!("needs to be run as root"))
-            } else if i_am_sure {
-                let elevate = Elevate::No;
-                let tempfile = Tempfile::new(&elevate).await?;
-                tempfile
-                    .write(match args.hostname {
-                        Neptune => include_bytes!(concat!(
-                            env!("CARGO_MANIFEST_DIR"),
-                            "/../install_scripts/neptune.sh"
-                        )),
-                        Ares => include_bytes!(concat!(
-                            env!("CARGO_MANIFEST_DIR"),
-                            "/../install_scripts/ares.sh"
-                        )),
-                        Dionysus => include_bytes!(concat!(
-                            env!("CARGO_MANIFEST_DIR"),
-                            "/../install_scripts/dionysus.sh"
-                        )),
-                        Hera => include_bytes!(concat!(
-                            env!("CARGO_MANIFEST_DIR"),
-                            "/../install_scripts/hera.sh"
-                        )),
-                    })
-                    .await?;
+    }
 
-                Process::run_in_foreground(
-                    "bash",
-                    &[tempfile.path().as_str()],
-                    &elevate,
-                    &Stdin::Open,
-                )?
-                .check()?;
-                Ok(())
-            } else {
-                Err(anyhow!("coward"))
-            }
-        }
+    match inner().await {
+        Ok(Ok(())) => MainResult::Success,
+        Ok(Err(())) => MainResult::Failure,
+        Err(err) => MainResult::Error(err),
     }
 }
