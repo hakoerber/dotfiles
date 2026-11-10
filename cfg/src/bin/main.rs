@@ -1456,6 +1456,7 @@ fn pacman_cache_cleanup<'elevate: 'action, 'action>(
                 Ref("[Service]"),
                 Ref("Type=oneshot"),
                 Ref("ExecStart=/bin/sh -c '/usr/bin/paccache -rk1 && /usr/bin/paccache -ruk0'"),
+                Ref("ExecStart=/bin/sh -c '/usr/bin/paccache -rk1 -c /var/lib/packages && /usr/bin/paccache -ruk0 -c /var/lib/packages'"),
                 Ref("RemainAfterExit=true"),
             ])),
         },
@@ -1966,14 +1967,14 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     packages: &'pkgs PackageConfig,
 ) {
     pacman(plan, elevate);
-    pacman_cache_cleanup(plan, elevate);
     install_packages(plan, elevate, packages);
+    aur(plan, elevate);
+    pacman_cache_cleanup(plan, elevate);
     reflector(plan, elevate);
     initrd(plan, elevate, config);
     libvirt(plan, elevate);
     services(plan, elevate);
     boot_target(plan, elevate, config);
-    aur(plan, elevate);
     timesyncd(plan, elevate);
     sudo(plan, elevate);
     hardware(plan, elevate, config);
