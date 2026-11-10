@@ -6,8 +6,8 @@ shift
 
 cd /root
 
-curl --proto '=https' --tlsv1.2 --fail --output cfg https://de-hkoerber-public.s3.eu-central-1.amazonaws.com/configure
-install --mode 700 configure /usr/local/bin/cfg
+curl --proto '=https' --tlsv1.2 --fail --output cfg https://de-hkoerber-public.s3.eu-central-1.amazonaws.com/cfg
+install --mode 700 cfg /usr/local/bin/cfg
 
 /usr/local/bin/cfg --hostname "${host}" bootstrap --i-am-sure
 
