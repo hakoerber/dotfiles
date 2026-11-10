@@ -158,6 +158,92 @@ struct Package<'a> {
     path: PathBuf,
 }
 
+struct BuildInfo {
+    name: &'static str,
+    path: &'static str,
+    preexec: Option<&'static str>,
+    update: bool,
+}
+
+const PKGBUILDS: &[BuildInfo] = &[
+    BuildInfo {
+        name: "workstation-mgr",
+        path: "../mgr/pkg",
+        preexec: None,
+        update: true,
+    },
+    BuildInfo {
+        name: "aws-session-manager-plugin",
+        path: "../pkgbuilds/aws-session-manager-plugin",
+        preexec: None,
+        update: false,
+    },
+    BuildInfo {
+        name: "cargo-lambda-bin",
+        path: "../pkgbuilds/cargo-lambda-bin",
+        preexec: None,
+        update: false,
+    },
+    BuildInfo {
+        name: "claude-code",
+        path: "../pkgbuilds/claude-code",
+        preexec: None,
+        update: false,
+    },
+    BuildInfo {
+        name: "grm",
+        path: "../pkgbuilds/grm",
+        preexec: None,
+        update: false,
+    },
+    BuildInfo {
+        name: "nm-sidebar",
+        path: "../pkgbuilds/nm-sidebar",
+        preexec: None,
+        update: false,
+    },
+    BuildInfo {
+        name: "nodejs-intelephense",
+        path: "../pkgbuilds/nodejs-intelephense",
+        preexec: None,
+        update: false,
+    },
+    BuildInfo {
+        name: "portfolio-performance-bin",
+        path: "../pkgbuilds/portfolio-performance-bin",
+        preexec: Some(
+            "curl -sSf --proto '=https' https://keys.openpgp.org/vks/v1/by-fingerprint/E46E6F8FF02E4C83569084589239277F560C95AC | gpg --import -",
+        ),
+        update: false,
+    },
+    BuildInfo {
+        name: "screencfg",
+        path: "../pkgbuilds/screencfg",
+        preexec: None,
+        update: false,
+    },
+    BuildInfo {
+        name: "slack-desktop",
+        path: "../pkgbuilds/slack-desktop",
+        preexec: None,
+        update: false,
+    },
+    BuildInfo {
+        name: "spotify",
+        path: "../pkgbuilds/spotify",
+        preexec: Some(
+            "curl -sSf --proto '=https' https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.gpg | gpg --import -",
+        ),
+        update: false,
+    },
+    BuildInfo {
+        name: "terraform-ls-bin",
+        path: "../pkgbuilds/terraform-ls-bin",
+        preexec: None,
+        update: false,
+    },
+];
+
 fn main() {
     let out_dir = env::var_os("OUT_DIR").unwrap();
 
@@ -173,83 +259,22 @@ fn main() {
     write!(dest_file, "&[").unwrap();
 
     if env::var_os("SKIP_PKGBUILDS").is_none_or(|v| v != "1") {
-        for package in [
-            build_package("workstation-mgr", Path::new("../mgr/pkg"), None, true),
-            build_package(
-                "aws-session-manager-plugin",
-                Path::new("../pkgbuilds/aws-session-manager-plugin"),
-                None,
-                false,
-            ),
-            build_package(
-                "cargo-lambda-bin",
-                Path::new("../pkgbuilds/cargo-lambda-bin"),
-                None,
-                false,
-            ),
-            build_package(
-                "claude-code",
-                Path::new("../pkgbuilds/claude-code"),
-                None,
-                false,
-            ),
-            build_package("grm", Path::new("../pkgbuilds/grm"), None, false),
-            build_package(
-                "nm-sidebar",
-                Path::new("../pkgbuilds/nm-sidebar"),
-                None,
-                false,
-            ),
-            build_package(
-                "nodejs-intelephense",
-                Path::new("../pkgbuilds/nodejs-intelephense"),
-                None,
-                false,
-            ),
-            build_package(
-                "portfolio-performance-bin",
-                Path::new("../pkgbuilds/portfolio-performance-bin"),
-                Some(
-                    "curl -sSf --proto '=https' https://keys.openpgp.org/vks/v1/by-fingerprint/E46E6F8FF02E4C83569084589239277F560C95AC | gpg --import -",
-                ),
-                false,
-            ),
-            build_package(
-                "screencfg",
-                Path::new("../pkgbuilds/screencfg"),
-                None,
-                false,
-            ),
-            build_package(
-                "slack-desktop",
-                Path::new("../pkgbuilds/slack-desktop"),
-                None,
-                false,
-            ),
-            build_package(
-                "spotify",
-                Path::new("../pkgbuilds/spotify"),
-                Some(
-                    "curl -sSf --proto '=https' https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.gpg | gpg --import -",
-                ),
-                false,
-            ),
-            build_package(
-                "terraform-ls-bin",
-                Path::new("../pkgbuilds/terraform-ls-bin"),
-                None,
-                false,
-            ),
-        ] {
+        for pkgbuild in PKGBUILDS {
+            let package = build_package(
+                pkgbuild.name,
+                Path::new(pkgbuild.path),
+                pkgbuild.preexec,
+                pkgbuild.update,
+            );
+
             write!(
-            dest_file,
-            r#"("{name}", "{version}", "{package_filename}", include_bytes!("{package_path}")),"#,
-            name = package.app_name,
-            version = package.version,
-            package_filename = package.filename,
-            package_path = package.path.display()
-        )
-        .unwrap();
+                dest_file,
+                r#"("{name}", "{version}", "{package_filename}", include_bytes!("{package_path}")),"#,
+                name = package.app_name,
+                version = package.version,
+                package_filename = package.filename,
+                package_path = package.path.display()
+            ).unwrap();
         }
     }
 
@@ -257,7 +282,12 @@ fn main() {
 
     dest_file.flush().unwrap();
 
-    println!("cargo::rerun-if-changed=../pkgbuilds");
+    for pkgbuild in PKGBUILDS {
+        println!(
+            "cargo::rerun-if-changed={path}/PKGBUILD",
+            path = pkgbuild.path
+        );
+    }
     println!("cargo::rerun-if-changed=../files");
     println!("cargo::rerun-if-changed=../assets");
     println!("cargo::rerun-if-env-changed=SKIP_PKGBUILDS");
