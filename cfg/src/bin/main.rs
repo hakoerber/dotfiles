@@ -2454,32 +2454,32 @@ fn user_firefox<'elevate: 'action, 'action, 'user, 'machine>(
                         group: Gid::from(user.name.clone()),
                         mode: FileMode(0o644),
                     },
-                binary: false,
-                secret: false,
-                ignore_checksum_changes: false,
-                content: FileContent::Bytes(Ref(
-                    dedent!(
-                        r##"
-                            /* hides the native tabs */
-                            #TabsToolbar {
-                              visibility: collapse;
-                            }
+                    binary: false,
+                    secret: false,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Bytes(Ref(
+                        dedent!(
+                            r##"
+                                /* hides the native tabs */
+                                #TabsToolbar {
+                                  visibility: collapse;
+                                }
 
-                            /* removes the header for the sidebar that only shows "tree style tab" anyway */
-                            #sidebar-panel-header {
-                              visibility: collapse;
-                            }
+                                /* removes the header for the sidebar that only shows "tree style tab" anyway */
+                                #sidebar-panel-header {
+                                  visibility: collapse;
+                                }
 
-                            /* removes the weird padding between sidebar and left window border */
-                            #sidebar-box {
-                              padding-left: 0 !important;
-                            }
-                        "##
-                    )
-                    .as_bytes(),
-                )),
-            },
-        );
+                                /* removes the weird padding between sidebar and left window border */
+                                #sidebar-box {
+                                  padding-left: 0 !important;
+                                }
+                            "##
+                        )
+                        .as_bytes(),
+                    )),
+                },
+            );
         }
     }
 }
