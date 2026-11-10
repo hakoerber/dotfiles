@@ -3939,7 +3939,7 @@ async fn main() -> Result<()> {
                         num9: None,
                         num0: None,
                     },
-                    machine_type: Laptop,
+                    machine_type: Tv,
                 },
             };
 
