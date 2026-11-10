@@ -1497,14 +1497,14 @@ fn wireguard<'elevate: 'action, 'action>(
                 &dedent!(
                     r#"
                         [Interface]
-                        Address = {{address}}/24 
+                        Address = {{address}}/32
                         PrivateKey = {{privkey}}
                         MTU = 1300
 
                         [Peer]
                         PublicKey = {{server_pubkey}}
                         PresharedKey = {{psk}}
-                        AllowedIPs = {{server_ip}}/32
+                        AllowedIPs = {{server_ip}}/24
                         Endpoint = {{server_endpoint_domain}}:{{server_endpoint_port}}
                     "#
                 ),
