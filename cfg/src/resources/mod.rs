@@ -10,7 +10,7 @@ pub mod prelude {
     pub use super::block_in_file::{BlockInFile, LineInFile};
     pub use super::command::{CheckScript, Command};
     pub use super::file::{
-        Directory, DirectoryHandling, File, FileHandling, Remove, SymlinkHandling,
+        AssertFile, Directory, DirectoryHandling, File, FileHandling, Remove, SymlinkHandling,
     };
     pub use super::gpg::GpgKey;
     pub use super::package::{

@@ -1,8 +1,9 @@
 use anyhow::{Result, anyhow, bail};
+use async_trait::async_trait;
 
 use super::super::{
-    Applyable, ChangeStatus, ChecksumChange, Elevate, MaybeOwned, Path, Plannable, Reporter,
-    Tempfile, checksum,
+    Applyable, Assertable, AssertionFailureReport, AssertionResult, ChangeStatus, ChecksumChange,
+    Elevate, MaybeOwned, Path, Plannable, Reporter, Tempfile, checksum,
     fs::{self, FileContent, FilePermissionChange, FilePermissions, RawFileContent},
 };
 
@@ -27,7 +28,7 @@ pub(crate) struct FileChangePlan<'args> {
     pub(crate) change: FileChange,
 }
 
-#[async_trait::async_trait]
+#[async_trait]
 impl Applyable for FileChangePlan<'_> {
     async fn apply(&self, elevate: &Elevate) -> Result<()> {
         async fn rewrite_file(
@@ -202,7 +203,7 @@ pub struct File<'args> {
     pub ignore_checksum_changes: bool,
 }
 
-#[async_trait::async_trait]
+#[async_trait]
 impl<'args> Plannable<'args> for File<'args> {
     async fn plan<'elevate>(
         self: Box<Self>,
@@ -301,7 +302,7 @@ pub(crate) struct DirectoryChangePlan<'args> {
     pub(crate) change: DirectoryChange,
 }
 
-#[async_trait::async_trait]
+#[async_trait]
 impl Applyable for DirectoryChangePlan<'_> {
     async fn apply(&self, elevate: &Elevate) -> Result<()> {
         async fn create(
@@ -410,7 +411,7 @@ pub struct Directory<'args> {
     pub permissions: FilePermissions,
 }
 
-#[async_trait::async_trait]
+#[async_trait]
 impl<'args> Plannable<'args> for Directory<'args> {
     async fn plan<'elevate>(
         self: Box<Self>,
@@ -479,7 +480,7 @@ pub(crate) struct RemovePlan<'args> {
     pub(crate) change: RemoveChange,
 }
 
-#[async_trait::async_trait]
+#[async_trait]
 impl Applyable for RemovePlan<'_> {
     async fn apply(&self, elevate: &Elevate) -> Result<()> {
         match self.change {
@@ -508,7 +509,7 @@ pub struct Remove<'args> {
     pub on_symlink: SymlinkHandling,
 }
 
-#[async_trait::async_trait]
+#[async_trait]
 impl<'args> Plannable<'args> for Remove<'args> {
     async fn plan<'elevate>(
         self: Box<Self>,
@@ -543,6 +544,60 @@ impl<'args> Plannable<'args> for Remove<'args> {
                 args: *self,
             }))),
             None => Ok(ChangeStatus::Clean),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct AssertFile<'args> {
+    pub path: MaybeOwned<'args, Path>,
+    pub permissions: FilePermissions,
+}
+
+#[async_trait]
+impl Assertable<'_> for AssertFile<'_> {
+    async fn assert<'elevate>(
+        self: Box<Self>,
+        elevate: &'elevate Elevate,
+    ) -> Result<AssertionResult> {
+        let stat = fs::stat(elevate, self.path.as_ref()).await?;
+
+        if let Some(stat) = stat {
+            match stat.entry_type {
+                fs::EntryType::File => {
+                    let permission_change =
+                        fs::check_file_permissions(elevate, self.path.as_ref(), &self.permissions)
+                            .await?;
+
+                    if let Some(permission_change) = permission_change {
+                        Ok(AssertionResult::Failed(AssertionFailureReport {
+                            reason: {
+                                let mut out = vec!["permission mismatch".to_owned()];
+                                out.extend(permission_change.report()?);
+                                out
+                            },
+                        }))
+                    } else {
+                        Ok(AssertionResult::Success)
+                    }
+                }
+                fs::EntryType::Directory => Ok(AssertionResult::Failed(AssertionFailureReport {
+                    reason: vec![format!(
+                        "{} is a directory (expected file)",
+                        self.path.as_ref()
+                    )],
+                })),
+                fs::EntryType::Symlink => Ok(AssertionResult::Failed(AssertionFailureReport {
+                    reason: vec![format!(
+                        "{} is a symlink (expected file)",
+                        self.path.as_ref()
+                    )],
+                })),
+            }
+        } else {
+            Ok(AssertionResult::Failed(AssertionFailureReport {
+                reason: vec![format!("file {} does not exist", self.path.as_ref())],
+            }))
         }
     }
 }
