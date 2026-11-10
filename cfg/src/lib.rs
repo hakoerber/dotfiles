@@ -833,11 +833,27 @@ fn print_node(
                     if *config == ReportConfig::All {
                         writeln!(
                             stdout,
-                            "{}  {name}",
+                            "{prefix}{c}─ {} {name}",
                             "Resource [CLEAN]".fg::<colors::Green>(),
+                            prefix = prefix.fg::<colors::White>(),
+                            c = if first && last {
+                                // only a single resource, no lines to draw
+                                '•'
+                            } else if first {
+                                '╭'
+                            } else if last {
+                                '╰'
+                            } else {
+                                '├'
+                            },
                             name = report.name.as_ref()
                         )
                         .unwrap();
+
+                        if !last {
+                            writeln!(stdout, "{prefix}│", prefix = prefix.fg::<colors::White>())
+                                .unwrap();
+                        }
                         action_printed = true;
                     }
                 }
