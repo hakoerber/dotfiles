@@ -106,12 +106,19 @@ impl<'change> Plannable<'change> for Service<'change> {
         'elevate: 'change,
     {
         let runtime_state = {
+            // `ConditionResult` is weird. It may report `no` for stopped units
+            // that never checked their condition (i.e. they were never started).
+            // So we have to also check `ConditionTimestampMonotonic`, which is 0 when
+            // the unit was never started. In that case, regardless of `ConditionResult`,
+            // we report whatever `ActiveState` reports
             let systemctl = cmd::Process::run(
                 "systemctl",
                 &[
                     "show",
                     "-p",
                     "ActiveState",
+                    "-p",
+                    "ConditionTimestampMonotonic",
                     "-p",
                     "ConditionResult",
                     "--",
@@ -123,7 +130,7 @@ impl<'change> Plannable<'change> for Service<'change> {
             .await?
             .check()?;
 
-            let lines: [&str; 2] = systemctl
+            let lines: [&str; 3] = systemctl
                 .stdout
                 .trim()
                 .lines()
@@ -141,7 +148,18 @@ impl<'change> Plannable<'change> for Service<'change> {
                 );
             };
 
-            let Some(condition) = lines
+            let Some(condition_checked) = lines
+                .iter()
+                .find_map(|line| line.strip_prefix("ConditionTimestampMonotonic="))
+                .map(|s| s != "0")
+            else {
+                bail!(
+                    "invalid systemctl condition timestamp prefix in \"{}\"",
+                    systemctl.stdout.trim()
+                );
+            };
+
+            let Some(condition_result) = lines
                 .iter()
                 .find_map(|line| line.strip_prefix("ConditionResult="))
                 .map(|s| match s {
@@ -157,15 +175,14 @@ impl<'change> Plannable<'change> for Service<'change> {
                 );
             };
 
-            match (condition, state) {
-                (true, "active" | "activating" | "reloading" | "refreshing") => {
+            match (condition_checked, condition_result, state) {
+                (true, false, _) => ServiceStateRuntimeActual::ConditionNotMet,
+                (_, _, "active" | "activating" | "reloading" | "refreshing") => {
                     ServiceStateRuntimeActual::Active
                 }
-                (true, "inactive" | "failed" | "deactivating" | "maintenance") => {
+                (_, _, "inactive" | "failed" | "deactivating" | "maintenance") => {
                     ServiceStateRuntimeActual::Inactive
                 }
-                (false, _) => ServiceStateRuntimeActual::ConditionNotMet,
-
                 _ => bail!("invalid systemctl active output \"{}\"", state.trim()),
             }
         };
