@@ -226,14 +226,14 @@ fn main() {
                 None,
                 false,
             ),
-            // build_package(
-            //     "spotify",
-            //     Path::new("../pkgbuilds/spotify"),
-            //     Some(
-            //         "curl -sSf --proto '=https' https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.gpg | gpg --import -",
-            //     ),
-            //     false,
-            // ),
+            build_package(
+                "spotify",
+                Path::new("../pkgbuilds/spotify"),
+                Some(
+                    "curl -sSf --proto '=https' https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.gpg | gpg --import -",
+                ),
+                false,
+            ),
             build_package(
                 "terraform-ls-bin",
                 Path::new("../pkgbuilds/terraform-ls-bin"),
