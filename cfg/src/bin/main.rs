@@ -521,6 +521,7 @@ const PACKAGES: PackageConfig = PackageConfig(&[
     ("mousepad", &["mousepad"]),
     ("graphviz", &["graphviz", "xdot"]),
     ("wireguard", &["wireguard-tools"]),
+    ("sccache", &["sccache"]),
     // build dependencies for included packages
     ("pkgbuilds-nm-sidebar", &["meson", "ninja"]),
 ]);
