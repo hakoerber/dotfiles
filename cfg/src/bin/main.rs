@@ -1649,6 +1649,8 @@ fn iptables<'elevate: 'action, 'action>(
         },
     );
 
+    plan.register_packages(&[Ref("nftables")]);
+
     plan.add(
         Ref("install iptables-legacy"),
         elevate,
@@ -1660,6 +1662,8 @@ fn iptables<'elevate: 'action, 'action>(
             force: true,
         },
     );
+
+    plan.register_packages(&[Ref("iptables-legacy")]);
 
     plan.add(
         "configure iptables",
