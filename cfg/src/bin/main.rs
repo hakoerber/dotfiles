@@ -2476,7 +2476,7 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
             permissions: FilePermissions {
                 owner: Uid::from(user.name.clone()),
                 group: Gid::from(user.name.clone()),
-                mode: FileMode(0o644),
+                mode: FileMode(0o600),
             },
             on_directory: DirectoryHandling::Bail,
             on_symlink: SymlinkHandling::Proceed,
