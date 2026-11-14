@@ -417,7 +417,6 @@ const PACKAGES: PackageConfig = PackageConfig(&[
     ("yt-dlp", &["yt-dlp"]),
     ("ytfzf", &["ytfzf"]),
     ("ffmpeg", &["ffmpeg"]),
-    ("zeal", &["zeal"]),
     ("kcharselect", &["kcharselect"]),
     ("bottom", &["bottom"]),
     ("sysstat", &["sysstat"]),
