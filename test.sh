@@ -149,32 +149,6 @@ EOF
 
     cp /usr/share/edk2/x64/OVMF_VARS.4m.fd "${tmpdir}/efivars.fd"
 
-    wg genkey > "${tmpdir}/client.key"
-    wg genkey | wg pubkey > "${tmpdir}/server.pub"
-    wg genpsk > "${tmpdir}/psk"
-
-    # shellcheck disable=SC2016
-    jq --null-input \
-        --arg address "127.0.0.1" \
-        --arg privkey "$(< "${tmpdir}/client.key")" \
-        --arg psk "$(< "${tmpdir}/psk")" \
-        --arg server_pubkey "$(< "${tmpdir}/server.pub")" \
-        --arg server_ip "127.0.0.1" \
-        --arg server_endpoint_domain "localhost" \
-        --argjson server_endpoint_port "51820" \
-        '{
-            wireguard: {
-                address: $address,
-                privkey: $privkey,
-                psk: $psk,
-                server_pubkey: $server_pubkey,
-                server_ip: $server_ip,
-                server_endpoint_domain: $server_endpoint_domain,
-                server_endpoint_port: $server_endpoint_port,
-            }
-        }' \
-    > "${tmpdir}/secrets.json"
-
     mkisofs \
         -uid 0 \
         -gid 0 \
@@ -184,7 +158,7 @@ EOF
         -V SHARE \
         -o "${tmpdir}/share.iso" \
         ./cfg/target/release/cfg \
-        "${tmpdir}/secrets.json"
+        ./secrets.example.json
 
     qemu-img create \
         -f qcow2 \
@@ -254,7 +228,7 @@ SPECIALS
       cat /tmp/specials.sh /tmp/rest.sh > /mnt/root/.bash_profile
 
       cp /share/cfg /mnt/usr/local/bin/cfg
-      cp /share/secrets.json /mnt/usr/local/share/secrets.json
+      cp /share/secrets.example.json /mnt/usr/local/share/secrets.json
 
       umount --recursive /mnt
 
