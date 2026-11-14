@@ -189,13 +189,7 @@ const REQUIRED_PACKAGES: &[(&str, &[&str])] = &[
         "zsh",
         &["zsh", "zsh-syntax-highlighting", "zsh-completions"],
     ),
-    (
-        "firefox",
-        &[
-            "firefox",
-            "pipewire-media-session", // required for screensharing in wayland
-        ],
-    ),
+    ("firefox", &["firefox"]),
     (
         "qt-theming",
         &["breeze", "breeze-icons", "breeze-grub", "qt5ct"],
