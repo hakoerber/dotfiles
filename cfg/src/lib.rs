@@ -99,6 +99,7 @@ pub struct Block<'name, 'elevate, 'action> {
     name: MaybeOwned<'name, str>,
     nodes: Vec<Node<'name, 'elevate, 'action>>,
     triggers: Vec<Trigger<'name, 'elevate, 'action>>,
+    assertions: Vec<Assertion<'name, 'elevate, 'action>>,
 }
 
 impl<'name, 'elevate, 'action> Block<'name, 'elevate, 'action> {
@@ -132,9 +133,15 @@ impl<'name, 'elevate, 'action> Block<'name, 'elevate, 'action> {
             name: name.into(),
             nodes: vec![],
             triggers: vec![],
+            assertions: vec![],
         };
 
         f(&mut block);
+
+        let mut assertions = vec![];
+        mem::swap(&mut block.assertions, &mut assertions);
+
+        self.assertions.extend(assertions);
 
         let resource_ref = self.nodes.push_mut(Node::Block(block));
 
@@ -151,6 +158,20 @@ impl<'name, 'elevate, 'action> Block<'name, 'elevate, 'action> {
         };
 
         f(plan)
+    }
+
+    pub fn assert<'plan>(
+        &'plan mut self,
+        name: impl Into<MaybeOwned<'name, str>>,
+        elevate: &'elevate Elevate,
+        assertion: impl Assertable<'action> + Send + 'action,
+    ) {
+        let assertion = Assertion {
+            name: name.into(),
+            elevate,
+            assert: Box::new(assertion),
+        };
+        self.assertions.push(assertion);
     }
 }
 
@@ -544,9 +565,15 @@ where
             name: name.into(),
             nodes: vec![],
             triggers: vec![],
+            assertions: vec![],
         };
 
         f(&mut block);
+
+        let mut assertions = vec![];
+        mem::swap(&mut block.assertions, &mut assertions);
+
+        self.assertions.extend(assertions);
 
         let node_ref = self.nodes.push_mut(Node::Block(block));
 
@@ -565,6 +592,7 @@ where
             name: name.into(),
             nodes: vec![],
             triggers: vec![],
+            assertions: vec![],
         };
 
         f(&mut block)?;
@@ -664,6 +692,7 @@ where
             name,
             nodes,
             triggers,
+            assertions,
         }) => {
             let mut block_actions = vec![];
             let mut any_changed = false;
