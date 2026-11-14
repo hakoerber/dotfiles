@@ -113,9 +113,28 @@ cat << 'EOF' > /root/.bash_profile
             sleep 5
         done
         rm -rf /etc/systemd/system/getty@tty1.service.d/
+
+        # Temporarily disable plasmalogin, otherwise it messes with the initial setup. The unit will still be
+        # properly enabled
+        echo '[Unit]' >> /etc/systemd/system/plasmalogin.service
+        echo '[Service]' >> /etc/systemd/system/plasmalogin.service
+        echo 'ExecStart=/usr/bin/sleep inf' >> /etc/systemd/system/plasmalogin.service
+        echo '[Install]' >> /etc/systemd/system/plasmalogin.service
+        echo 'Alias=display-manager.service' >> /etc/systemd/system/plasmalogin.service
+
         if /usr/local/bin/cfg --hostname hera deploy --only-changed --secrets-stdin < /usr/local/share/secrets.json 2>&1 | tee /var/log/install.log ; then
             rm -f /usr/local/bin/cfg
             rm -f /root/.bash_profile
+
+            # remove the hack
+            rm -f /etc/systemd/system/plasmalogin.service
+
+            # systemd needs to be aware of the change config
+            systemctl daemon-reload
+
+            # re-enable to fix the symlink
+            systemctl reenable plasmalogin.service
+
             reboot
         fi
     fi
