@@ -2268,7 +2268,13 @@ fn firefox<'elevate: 'action, 'action>(
                     "Value": false,
                     "Status": "default",
                     "Type": "boolean"
-                }
+                },
+                // Otherwise, userChrome.css does not apply
+                "toolkit.legacyUserProfileCustomizations.stylesheets": {
+                    "Value": true,
+                    "Status": "default",
+                    "Type": "boolean"
+                },
             },
             "PromptForDownloadLocation": false,
             "RequestedLocales": [
