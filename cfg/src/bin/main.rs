@@ -418,7 +418,6 @@ const PACKAGES: PackageConfig = PackageConfig(&[
     ("ytfzf", &["ytfzf"]),
     ("ffmpeg", &["ffmpeg"]),
     ("kcharselect", &["kcharselect"]),
-    ("bottom", &["bottom"]),
     ("sysstat", &["sysstat"]),
     ("qrencode", &["qrencode"]),
     ("iotop", &["iotop"]),
