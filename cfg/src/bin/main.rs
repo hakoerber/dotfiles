@@ -189,7 +189,7 @@ const REQUIRED_PACKAGES: &[(&str, &[&str])] = &[
     ),
     ("firefox", &["firefox"]),
     ("theming", &["breeze", "breeze-grub", "breeze-gtk"]),
-    ("python-modules", &["python-ruamel-yaml"]),
+    ("python-yaml", &["python-ruamel-yaml"]),
     ("brightnessctl", &["brightnessctl"]),
     ("curl", &["curl"]),
     ("wget", &["wget"]),
