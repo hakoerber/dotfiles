@@ -6,7 +6,7 @@
 // required for `serde_json::json!()`
 #![recursion_limit = "256"]
 
-use std::{env, io, net::Ipv4Addr, process};
+use std::{collections::HashSet, env, io, net::Ipv4Addr, process};
 
 use anyhow::{Result, anyhow, bail};
 use clap::{Parser, Subcommand, ValueEnum};
@@ -454,10 +454,10 @@ const ADDITIONAL_PACKAGES: &[(&str, &[&str])] = &[
     ("pkgbuilds-nm-sidebar", &["meson", "ninja"]),
 ];
 
-struct PackageConfig(Vec<(&'static str, &'static [&'static str])>);
+struct PackageConfig(HashSet<(&'static str, &'static [&'static str])>);
 
 fn packages() -> PackageConfig {
-    let mut list = vec![];
+    let mut list = HashSet::new();
 
     list.extend(REQUIRED_PACKAGES);
 
@@ -2064,6 +2064,7 @@ fn install_packages<'elevate: 'action, 'action, 'pkgs>(
     elevate: &'elevate Elevate,
     packages: &'pkgs PackageConfig,
 ) {
+    #[expect(clippy::iter_over_hash_type, reason = "order does not matter")]
     for &(section, packages) in &packages.0 {
         let packages = packages
             .iter()
@@ -4112,6 +4113,7 @@ async fn orphans<'elevate: 'action, 'action>(
     let orphans = list_orphaned_packages(elevate).await?;
 
     plan.with(elevate, |mut plan| {
+        #[expect(clippy::iter_over_hash_type, reason = "order does not matter")]
         for orphan in orphans {
             plan.add(
                 Owned(format!("remove orphaned package {orphan}")),
@@ -4137,10 +4139,11 @@ async fn unmanaged_packages<'elevate: 'action, 'action, 'pkgs>(
     let managed_packages = managed_packages
         .iter()
         .map(|s| s.to_owned())
-        .collect::<Vec<String>>();
+        .collect::<HashSet<String>>();
 
     let explicitly_installed_packages = list_explicitly_installed_packages(elevate).await?;
 
+    #[expect(clippy::iter_over_hash_type, reason = "order does not matter")]
     for installed_package in explicitly_installed_packages {
         if !managed_packages.contains(&installed_package)
             && !protected.contains(&installed_package.as_str())

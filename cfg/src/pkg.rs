@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use anyhow::{Result, anyhow};
 
 use super::{Elevate, cmd};
@@ -9,7 +11,7 @@ pub enum InstallReason {
     DependencyIfInstalling,
 }
 
-pub async fn list_installed_packages(elevate: &Elevate) -> Result<Vec<String>> {
+pub async fn list_installed_packages(elevate: &Elevate) -> Result<HashSet<String>> {
     Ok(cmd::Process::run(
         "pacman",
         &["--query", "--quiet"],
@@ -79,7 +81,7 @@ pub async fn resolve_installed_package(elevate: &Elevate, name: &str) -> Result<
     }
 }
 
-pub async fn list_explicitly_installed_packages(elevate: &Elevate) -> Result<Vec<String>> {
+pub async fn list_explicitly_installed_packages(elevate: &Elevate) -> Result<HashSet<String>> {
     Ok(cmd::Process::run(
         "pacman",
         &["--query", "--quiet", "--explicit"],
@@ -111,7 +113,7 @@ pub async fn list_explicitly_installed_packages_that_are_not_required(
     .collect())
 }
 
-pub async fn list_packages_installed_as_dependencies(elevate: &Elevate) -> Result<Vec<String>> {
+pub async fn list_packages_installed_as_dependencies(elevate: &Elevate) -> Result<HashSet<String>> {
     Ok(cmd::Process::run(
         "pacman",
         &["--query", "--quiet", "--deps"],
@@ -126,7 +128,7 @@ pub async fn list_packages_installed_as_dependencies(elevate: &Elevate) -> Resul
     .collect())
 }
 
-pub async fn list_orphaned_packages(elevate: &Elevate) -> Result<Vec<String>> {
+pub async fn list_orphaned_packages(elevate: &Elevate) -> Result<HashSet<String>> {
     let pacman = cmd::Process::run(
         "pacman",
         &[
@@ -145,7 +147,7 @@ pub async fn list_orphaned_packages(elevate: &Elevate) -> Result<Vec<String>> {
     .unchecked();
 
     if pacman.stdout.is_empty() && pacman.stderr.is_empty() && pacman.status.code() == 1 {
-        Ok(vec![])
+        Ok(HashSet::new())
     } else if pacman.status.success() {
         Ok(pacman.stdout.lines().map(|line| line.to_owned()).collect())
     } else {

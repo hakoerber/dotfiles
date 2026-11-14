@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use anyhow::Result;
 use async_once_cell::OnceCell;
 use tap::Tap as _;
@@ -8,27 +10,27 @@ use super::super::{
     pkg::{self, InstallReason},
 };
 
-static INSTALLED_PACKAGES: OnceCell<Vec<String>> = OnceCell::new();
+static INSTALLED_PACKAGES: OnceCell<HashSet<String>> = OnceCell::new();
 
-async fn installed_packages(elevate: &Elevate) -> Result<&Vec<String>> {
+async fn installed_packages(elevate: &Elevate) -> Result<&HashSet<String>> {
     let packages = INSTALLED_PACKAGES
         .get_or_try_init(async { pkg::list_installed_packages(elevate).await })
         .await?;
     Ok(packages)
 }
 
-static EXPLICITLY_INSTALLED_PACKAGES: OnceCell<Vec<String>> = OnceCell::new();
+static EXPLICITLY_INSTALLED_PACKAGES: OnceCell<HashSet<String>> = OnceCell::new();
 
-async fn explicitly_installed_packages(elevate: &Elevate) -> Result<&Vec<String>> {
+async fn explicitly_installed_packages(elevate: &Elevate) -> Result<&HashSet<String>> {
     let packages = EXPLICITLY_INSTALLED_PACKAGES
         .get_or_try_init(async { pkg::list_explicitly_installed_packages(elevate).await })
         .await?;
     Ok(packages)
 }
 
-static PACKAGES_INSTALLED_AS_DEPENDENCIES: OnceCell<Vec<String>> = OnceCell::new();
+static PACKAGES_INSTALLED_AS_DEPENDENCIES: OnceCell<HashSet<String>> = OnceCell::new();
 
-async fn packages_installed_as_dependencies(elevate: &Elevate) -> Result<&Vec<String>> {
+async fn packages_installed_as_dependencies(elevate: &Elevate) -> Result<&HashSet<String>> {
     let packages = PACKAGES_INSTALLED_AS_DEPENDENCIES
         .get_or_try_init(async { pkg::list_packages_installed_as_dependencies(elevate).await })
         .await?;
