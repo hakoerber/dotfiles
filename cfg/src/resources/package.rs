@@ -558,8 +558,8 @@ impl Applyable for SinglePackagePlan<'_> {
                     // * "Remove $conflicting_package?"
                     // * "Proceed with installation?"
                     cmd::Process::run(
-                        "pacman",
-                        &["--needed", "--sync", "--", name],
+                        "env",
+                        &["-", "LC_ALL=C", "pacman", "--needed", "--sync", "--", name],
                         elevate,
                         cmd::Stdin::Write(b"yes\nyes\n"),
                     )
