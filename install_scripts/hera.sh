@@ -107,9 +107,13 @@ EOF
 
 # Run
 cat << 'EOF' > /root/.bash_profile
+    set -o nounset
+    set -o errexit
+    set -o pipefail
+
     if [[ "\$(tty)" == "/dev/tty1" ]] ; then
         while ! ping -w 3 -c 3 8.8.8.8 ; do
-            nmtui
+            nmtui || true
             sleep 5
         done
         rm -rf /etc/systemd/system/getty@tty1.service.d/
