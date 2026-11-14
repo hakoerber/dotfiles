@@ -129,7 +129,15 @@ pub async fn list_packages_installed_as_dependencies(elevate: &Elevate) -> Resul
 pub async fn list_orphaned_packages(elevate: &Elevate) -> Result<Vec<String>> {
     let pacman = cmd::Process::run(
         "pacman",
-        &["--query", "--quiet", "--deps", "--unrequired"],
+        &[
+            "--query",
+            "--quiet",
+            "--deps",
+            // `--unrequired` twice to also remove packages that are just
+            // *optionally* dependencies of other packages
+            "--unrequired",
+            "--unrequired",
+        ],
         elevate,
         cmd::Stdin::Closed,
     )
