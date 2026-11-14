@@ -29,8 +29,6 @@ mkdir -p "${XDG_DATA_HOME}"
 mkdir -p "${XDG_STATE_HOME}"
 mkdir -p "${XDG_DOWNLOAD_DIR}"
 
-export XAUTHORITY="$XDG_RUNTIME_DIR"/Xauthority
-
 export RUSTUP_HOME="$XDG_DATA_HOME"/rustup
 
 export GOPATH="$XDG_DATA_HOME"/go
@@ -99,7 +97,6 @@ systemd_envs=(
     XDG_DATA_HOME
     XDG_STATE_HOME
     XDG_DOWNLOAD_DIR
-    XAUTHORITY
     RUSTUP_HOME
     GOPATH
     GOMODCACHE
