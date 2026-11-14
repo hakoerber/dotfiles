@@ -367,7 +367,6 @@ const PACKAGES: PackageConfig = PackageConfig(&[
     ("imagemagick", &["imagemagick"]),
     ("mpv", &["mpv"]),
     ("gnome-keyring", &["gnome-keyring", "seahorse"]),
-    ("element", &["element-desktop"]),
     ("mkinitcpio", &["mkinitcpio"]),
     ("terraform", &["terraform", "terragrunt"]),
     ("ncdu", &["ncdu"]),
