@@ -188,11 +188,7 @@ const REQUIRED_PACKAGES: &[(&str, &[&str])] = &[
         &["zsh", "zsh-syntax-highlighting", "zsh-completions"],
     ),
     ("firefox", &["firefox"]),
-    (
-        "qt-theming",
-        &["breeze", "breeze-icons", "breeze-grub", "qt5ct"],
-    ),
-    ("gtk-theming", &["breeze-gtk", "lxappearance"]),
+    ("theming", &["breeze", "breeze-grub", "breeze-gtk"]),
     ("python-modules", &["python-ruamel-yaml"]),
     ("brightnessctl", &["brightnessctl"]),
     ("curl", &["curl"]),
@@ -273,6 +269,7 @@ const ADDITIONAL_PACKAGES: &[(&str, &[&str])] = &[
     ("inotify", &["inotify-tools"]),
     ("bwm-ng", &["bwm-ng"]),
     ("pv", &["pv"]),
+    ("lxappearance", &["lxappearance"]),
     ("stress", &["stress"]),
     ("ncdu", &["ncdu"]),
     (
