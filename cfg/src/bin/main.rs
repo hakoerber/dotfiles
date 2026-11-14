@@ -165,31 +165,7 @@ struct Cli {
     action: Action,
 }
 
-struct PackageConfig(&'static [(&'static str, &'static [&'static str])]);
-
-const PACKAGES: PackageConfig = PackageConfig(&[
-    (
-        "kernel",
-        &[
-            "linux-zen",
-            "linux-zen-headers",
-            "linux-zen-docs",
-            "linux-firmware",
-        ],
-    ),
-    ("grub", &["grub", "efibootmgr"]),
-    ("lvm", &["lvm2"]),
-    (
-        "build-essentials",
-        &["gcc", "ctags", "cmake", "maven", "base-devel"],
-    ),
-    ("posix", &["posix"]),
-    ("make", &["make"]),
-    ("gdb", &["gdb"]),
-    ("strace", &["strace"]),
-    ("sudo", &["sudo"]),
-    ("doas", &["opendoas"]),
-    ("ansible", &["ansible", "ansible-lint", "python-jmespath"]),
+const REQUIRED_PACKAGES: &[(&str, &[&str])] = &[
     ("awesome-terminal-fonts", &["awesome-terminal-fonts"]),
     (
         "font-inconsolata",
@@ -203,9 +179,6 @@ const PACKAGES: PackageConfig = PackageConfig(&[
     ("font-libertine", &["otf-libertinus"]),
     ("font-awesome", &["woff2-font-awesome"]),
     ("font-noto", &["noto-fonts"]),
-    ("git", &["git", "qgit", "git-delta", "git-filter-repo"]),
-    ("htop", &["htop"]),
-    ("neovim", &["neovim", "python-pynvim"]),
     ("vim", &["vim"]),
     ("gammastep", &["gammastep"]),
     ("pinentry-qt", &["pinentry"]),
@@ -216,30 +189,6 @@ const PACKAGES: PackageConfig = PackageConfig(&[
         "zsh",
         &["zsh", "zsh-syntax-highlighting", "zsh-completions"],
     ),
-    ("zathura", &["zathura", "zathura-pdf-poppler"]),
-    ("pdf", &["ghostscript", "enscript"]),
-    (
-        "pandoc",
-        &[
-            "pandoc-cli",
-            "texlive-basic",
-            "texlive-fontsextra",
-            "texlive-latexextra",
-        ],
-    ),
-    (
-        "libvirt",
-        &[
-            "virt-manager",
-            "libvirt",
-            "dnsmasq",
-            "dmidecode",
-            "virt-install",
-            "virt-viewer",
-            "libguestfs",
-            "edk2-ovmf",
-        ],
-    ),
     (
         "firefox",
         &[
@@ -247,48 +196,15 @@ const PACKAGES: PackageConfig = PackageConfig(&[
             "pipewire-media-session", // required for screensharing in wayland
         ],
     ),
-    ("ranger", &["ranger"]),
-    ("thunar", &["thunar"]),
-    (
-        "libreoffice",
-        &["libreoffice-fresh", "libreoffice-fresh-de"],
-    ),
     (
         "qt-theming",
         &["breeze", "breeze-icons", "breeze-grub", "qt5ct"],
     ),
     ("gtk-theming", &["breeze-gtk", "lxappearance"]),
-    (
-        "python",
-        &[
-            "python",
-            "python-lsp-server",
-            "bandit",
-            "python-pyflakes",
-            "python-pylint",
-            "python-flake8",
-            "mypy",
-            "uv",
-            "ty",
-            "jedi-language-server",
-        ],
-    ),
     ("python-modules", &["python-ruamel-yaml"]),
     ("brightnessctl", &["brightnessctl"]),
-    ("wireshark", &["wireshark-cli", "wireshark-qt"]),
-    ("nmap", &["nmap"]),
     ("curl", &["curl"]),
     ("wget", &["wget"]),
-    ("tree", &["tree"]),
-    ("which", &["which"]),
-    ("zip", &["zip", "unzip"]),
-    ("traceroute", &["traceroute"]),
-    ("tcpdump", &["tcpdump"]),
-    ("tar", &["tar"]),
-    ("rsync", &["rsync"]),
-    ("net-tools", &["net-tools"]),
-    ("ntfs", &["ntfs-3g"]),
-    ("lsof", &["lsof"]),
     ("pwgen", &["pwgen"]),
     (
         "gpg",
@@ -299,7 +215,6 @@ const PACKAGES: PackageConfig = PackageConfig(&[
             "yubikey-touch-detector",
         ],
     ),
-    ("networkmanager", &["networkmanager", "capnet-assist"]),
     (
         "pulseaudio",
         &[
@@ -315,21 +230,89 @@ const PACKAGES: PackageConfig = PackageConfig(&[
     // this needs to come *after* pulseaudio, otherwise it will pull in pipewire-pulse as the
     // provider for pulse-native-provider
     ("pavucontrol", &["pavucontrol-qt"]),
-    ("iw", &["iw"]),
-    ("cowsay", &["cowsay"]),
-    ("ruby", &["ruby"]),
-    ("acpi", &["acpi", "acpid"]),
+    ("dunst", &["dunst"]),
+    ("rofi", &["rofi"]),
+    ("imv", &["imv"]),
+    (
+        "steam",
+        &["steam", "lib32-pango", "pango", "ttf-liberation"],
+    ),
+    ("nextcloud", &["nextcloud-client"]),
+    ("kwallet", &["kwallet", "kwalletmanager"]),
+    ("mpris", &["playerctl"]),
+    ("gnome-keyring", &["gnome-keyring", "seahorse"]),
+    ("jq", &["jq"]),
+    ("kdeconnect", &["kdeconnect"]),
+    ("helix", &["helix"]),
+    ("keepassxc", &["keepassxc"]),
+    ("eza", &["eza"]),
+    ("ripgrep", &["ripgrep"]),
+    ("fzf", &["fzf"]),
+    (
+        "sway",
+        &[
+            "sway",
+            "swaybg",
+            "swaylock",
+            "swayidle",
+            "xorg-xwayland",
+            "xorg-xlsclients",
+        ],
+    ),
+    ("i3status-rust", &["i3status-rust"]),
+    ("sccache", &["sccache"]),
+];
+
+const ADDITIONAL_PACKAGES: &[(&str, &[&str])] = &[
+    (
+        "build-essentials",
+        &["gcc", "ctags", "cmake", "maven", "base-devel"],
+    ),
+    ("strace", &["strace"]),
+    (
+        "arch-packaging",
+        &["namcap", "devtools", "arch-install-scripts", "archiso"],
+    ),
+    ("lsp/systemd", &["systemd-lsp"]),
+    ("qemu", &["qemu-base", "qemu-desktop"]),
+    ("make", &["make"]),
+    ("gdb", &["gdb"]),
+    ("font-utils", &["woff2"]),
+    ("restic", &["restic"]),
+    ("neovim", &["neovim", "python-pynvim"]),
     ("nodejs", &["nodejs-lts-jod", "npm", "yarn"]),
     // this needs to come *after* nodejs, otherwise dockerfile-language-server will pull
     // nodejs (non-LTS)
     ("docker", &["dockerfile-language-server"]),
-    ("xdg", &["xdg-utils"]),
-    ("dunst", &["dunst"]),
-    ("bwm-ng", &["bwm-ng"]),
-    ("ssh", &["openssh"]),
+    ("git", &["git", "qgit", "git-delta", "git-filter-repo"]),
+    ("ansible", &["ansible", "ansible-lint", "python-jmespath"]),
+    ("htop", &["htop"]),
+    ("which", &["which"]),
+    ("zip", &["zip", "unzip"]),
+    ("tar", &["tar"]),
     ("sshfs", &["sshfs"]),
     ("expect", &["expect"]),
     ("inotify", &["inotify-tools"]),
+    ("bwm-ng", &["bwm-ng"]),
+    ("pv", &["pv"]),
+    ("stress", &["stress"]),
+    ("ncdu", &["ncdu"]),
+    (
+        "python",
+        &[
+            "python",
+            "python-lsp-server",
+            "bandit",
+            "python-pyflakes",
+            "python-pylint",
+            "python-flake8",
+            "mypy",
+            "uv",
+            "ty",
+            "jedi-language-server",
+        ],
+    ),
+    ("dust", &["dust"]),
     ("rclone", &["rclone"]),
     (
         "rust",
@@ -350,100 +333,86 @@ const PACKAGES: PackageConfig = PackageConfig(&[
             "bacon",
         ],
     ),
-    ("musescore", &["musescore"]),
-    ("rofi", &["rofi"]),
-    ("imv", &["imv"]),
-    ("pacman", &["pacman", "pacman-contrib"]),
+    ("mold", &["clang", "mold"]),
+    ("wild", &["wild"]),
+    ("rsync", &["rsync"]),
+    ("net-tools", &["net-tools"]),
+    ("ntfs", &["ntfs-3g"]),
+    ("lsof", &["lsof"]),
+    ("iw", &["iw"]),
+    ("awscli", &["aws-cli-v2"]),
+    ("php", &["php", "composer"]),
+    ("cowsay", &["cowsay"]),
+    ("ruby", &["ruby"]),
+    ("zathura", &["zathura", "zathura-pdf-poppler"]),
+    ("pdf", &["ghostscript", "enscript"]),
     (
-        "steam",
-        &["steam", "lib32-pango", "pango", "ttf-liberation"],
+        "pandoc",
+        &[
+            "pandoc-cli",
+            "texlive-basic",
+            "texlive-fontsextra",
+            "texlive-latexextra",
+        ],
     ),
-    ("man", &["man-db", "man-pages"]),
-    ("nextcloud", &["nextcloud-client"]),
-    ("kwallet", &["kwallet", "kwalletmanager"]),
-    ("pv", &["pv"]),
-    ("stress", &["stress"]),
-    ("mpris", &["playerctl"]),
+    ("ranger", &["ranger"]),
+    ("thunar", &["thunar"]),
+    (
+        "libreoffice",
+        &["libreoffice-fresh", "libreoffice-fresh-de"],
+    ),
+    ("bind", &["bind"]),
+    ("nmap", &["nmap"]),
+    ("tree", &["tree"]),
+    ("traceroute", &["traceroute"]),
+    ("tcpdump", &["tcpdump"]),
+    ("musescore", &["musescore"]),
     ("imagemagick", &["imagemagick"]),
     ("mpv", &["mpv"]),
-    ("gnome-keyring", &["gnome-keyring", "seahorse"]),
-    ("mkinitcpio", &["mkinitcpio"]),
     ("terraform", &["terraform", "terragrunt"]),
-    ("ncdu", &["ncdu"]),
-    ("dust", &["dust"]),
-    ("font-utils", &["woff2"]),
-    ("jq", &["jq"]),
-    ("kdeconnect", &["kdeconnect"]),
-    ("restic", &["restic"]),
     ("discord", &["discord"]),
     ("kubectl", &["kubectl"]),
-    ("bind", &["bind"]),
-    ("fzf", &["fzf"]),
     ("chromium", &["chromium"]),
     ("go", &["go", "gopls", "delve", "golangci-lint"]),
-    ("helix", &["helix"]),
-    ("keepassxc", &["keepassxc"]),
-    ("awscli", &["aws-cli-v2"]),
     ("mariadb-client", &["mariadb-clients"]),
-    ("php", &["php", "composer"]),
-    ("eza", &["eza"]),
+    ("mdbook", &["mdbook"]),
+    ("packer", &["packer"]),
+    ("johntheripper", &["john"]),
     ("just", &["just", "just-lsp"]),
-    ("ripgrep", &["ripgrep"]),
     ("fd", &["fd"]),
     ("bat", &["bat"]),
-    ("mdbook", &["mdbook"]),
     (
         "bash",
         &["bash", "bash-language-server", "shellcheck", "shfmt"],
     ),
-    ("packer", &["packer"]),
+    ("age", &["age"]),
+    ("httpie", &["httpie"]),
     ("c", &["gcc", "clang"]),
-    ("sed", &["sed"]),
-    ("findutils", &["findutils"]),
     ("html", &["vscode-html-languageserver"]),
     ("typescript", &["typescript", "typescript-language-server"]),
     ("json", &["vscode-json-languageserver", "gron"]),
-    ("markdown", &["marksman", "mdformat"]),
     ("lldb", &["lldb"]),
     ("yaml", &["yaml-language-server", "yamllint"]),
-    ("qemu", &["qemu-base", "qemu-desktop"]),
     ("cloud-init", &["cloud-init", "cloud-utils"]),
     ("netcat", &["openbsd-netcat"]),
     ("telnet", &["inetutils"]),
     ("cloudformation-tools", &["python-cfn-lint"]),
-    ("johntheripper", &["john"]),
-    ("age", &["age"]),
-    ("httpie", &["httpie"]),
-    ("yt-dlp", &["yt-dlp"]),
-    ("ytfzf", &["ytfzf"]),
-    ("ffmpeg", &["ffmpeg"]),
     ("kcharselect", &["kcharselect"]),
     ("sysstat", &["sysstat"]),
     ("qrencode", &["qrencode"]),
     ("iotop", &["iotop"]),
     ("w3m", &["w3m"]),
-    ("ruff", &["ruff"]),
-    ("mold", &["clang", "mold"]),
-    ("wild", &["wild"]),
-    (
-        "arch-packaging",
-        &["namcap", "devtools", "arch-install-scripts", "archiso"],
-    ),
-    ("sqlite", &["sqlite"]),
+    ("xpath", &["perl-xml-xpath"]),
+    ("apache", &["apache"]),
+    ("xfce4-screenshooter", &["xfce4-screenshooter"]),
+    ("fuseiso", &["fuseiso"]),
+    ("7zip", &["7zip"]),
+    ("unrar", &["unrar"]),
+    ("wasm", &["wasm-pack"]),
     ("css", &["vscode-css-languageserver"]),
-    ("watchexec", &["watchexec"]),
-    ("postgresql", &["postgresql", "pgformatter"]),
-    ("tokei", &["tokei"]),
     ("whois", &["whois"]),
     ("encfs", &["encfs"]),
-    ("digikam", &["digikam"]),
-    ("evince", &["evince"]),
     ("iftop", &["iftop"]),
-    ("inkscape", &["inkscape"]),
-    ("android", &["android-tools", "android-udev"]),
-    ("audacity", &["audacity"]),
-    ("calibre", &["calibre"]),
-    ("deluge", &["deluge", "deluge-gtk"]),
     (
         "wine",
         &[
@@ -457,14 +426,23 @@ const PACKAGES: PackageConfig = PackageConfig(&[
             "lib32-gnutls",
         ],
     ),
+    ("yt-dlp", &["yt-dlp"]),
+    ("ytfzf", &["ytfzf"]),
+    ("ffmpeg", &["ffmpeg"]),
+    ("ruff", &["ruff"]),
+    ("sqlite", &["sqlite"]),
+    ("watchexec", &["watchexec"]),
+    ("postgresql", &["postgresql", "pgformatter"]),
+    ("tokei", &["tokei"]),
+    ("digikam", &["digikam"]),
+    ("evince", &["evince"]),
+    ("inkscape", &["inkscape"]),
+    ("android", &["android-tools", "android-udev"]),
+    ("audacity", &["audacity"]),
+    ("calibre", &["calibre"]),
+    ("deluge", &["deluge", "deluge-gtk"]),
     ("sqlx", &["sqlx-cli"]),
     ("geeqie", &["geeqie"]),
-    ("xpath", &["perl-xml-xpath"]),
-    ("apache", &["apache"]),
-    ("xfce4-screenshooter", &["xfce4-screenshooter"]),
-    ("fuseiso", &["fuseiso"]),
-    ("7zip", &["7zip"]),
-    ("unrar", &["unrar"]),
     ("toml", &["taplo-cli", "tombi"]),
     ("prettier", &["prettier"]),
     ("btop", &["btop"]),
@@ -474,7 +452,6 @@ const PACKAGES: PackageConfig = PackageConfig(&[
     ("kolourpaint", &["kolourpaint"]),
     ("podman", &["podman", "podman-compose"]),
     ("pulumi", &["pulumi"]),
-    ("reflector", &["reflector"]),
     (
         "yazi",
         &[
@@ -494,28 +471,26 @@ const PACKAGES: PackageConfig = PackageConfig(&[
     ),
     ("filezilla", &["filezilla"]),
     ("protontricks", &["protontricks"]),
-    ("systemd", &["systemd-lsp"]),
-    ("wasm", &["wasm-pack"]),
     ("glab", &["glab"]),
-    (
-        "sway",
-        &[
-            "sway",
-            "swaybg",
-            "swaylock",
-            "swayidle",
-            "xorg-xwayland",
-            "xorg-xlsclients",
-        ],
-    ),
-    ("i3status-rust", &["i3status-rust"]),
     ("mousepad", &["mousepad"]),
     ("graphviz", &["graphviz", "xdot"]),
-    ("wireguard", &["wireguard-tools"]),
-    ("sccache", &["sccache"]),
+    ("markdown", &["marksman", "mdformat"]),
     // build dependencies for included packages
     ("pkgbuilds-nm-sidebar", &["meson", "ninja"]),
-]);
+];
+
+struct PackageConfig(Vec<(&'static str, &'static [&'static str])>);
+
+fn packages() -> PackageConfig {
+    let mut list = vec![];
+
+    list.extend(REQUIRED_PACKAGES);
+
+    #[cfg(not(feature = "testing"))]
+    list.extend(ADDITIONAL_PACKAGES);
+
+    PackageConfig(list)
+}
 
 fn hera<'elevate: 'action, 'action, 'secrets>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, 'secrets, Secrets>,
@@ -773,6 +748,17 @@ fn restic_backup<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
+    let restic = &[Ref("restic")];
+    plan.add(
+        "install restic",
+        elevate,
+        Packages {
+            install: Ref(restic),
+            reason: InstallReason::Explicit,
+        },
+    );
+    plan.register_packages(restic);
+
     plan.add(
         Ref("create restic config directory"),
         elevate,
@@ -998,6 +984,17 @@ fn initrd<'name, 'elevate: 'action, 'action>(
     elevate: &'elevate Elevate,
     config: &Config,
 ) {
+    let mkinitcpio = &[Ref("mkinitcpio")];
+    plan.add(
+        "install mkinitcpio",
+        elevate,
+        Packages {
+            install: Ref(mkinitcpio),
+            reason: InstallReason::Explicit,
+        },
+    );
+    plan.register_packages(mkinitcpio);
+
     plan.with(elevate, |mut plan| {
         let lz4 = &[Ref("lz4")];
         plan.add(
@@ -1078,6 +1075,27 @@ fn libvirt<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
+    let libvirt = &[
+        Ref("virt-manager"),
+        Ref("libvirt"),
+        Ref("dnsmasq"),
+        Ref("dmidecode"),
+        Ref("virt-install"),
+        Ref("virt-viewer"),
+        Ref("libguestfs"),
+        Ref("edk2-ovmf"),
+    ];
+    plan.register_packages(libvirt);
+
+    plan.add(
+        "install libvirt",
+        elevate,
+        Packages {
+            install: Ref(libvirt),
+            reason: InstallReason::Explicit,
+        },
+    );
+
     for socket in [
         "libvirtd.socket",
         "libvirtd-tls.socket",
@@ -1151,41 +1169,48 @@ fn libvirt<'elevate: 'action, 'action>(
     );
 }
 
-fn services<'elevate: 'action, 'action>(
+fn wireshark<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
-    for service in ["NetworkManager.service", "systemd-timesyncd.service"] {
-        plan.add(
-            Owned(format!("enable service {service}")),
-            elevate,
-            Service {
-                name: service,
-                state: ServiceState {
-                    runtime: ServiceStateRuntime::Active,
-                    persistent: ServiceStatePersistent::Enabled,
-                },
-            },
-        );
-    }
+    let wireshark = &[Ref("wireshark-cli"), Ref("wireshark-qt")];
+    plan.add(
+        "install wireshark",
+        elevate,
+        Packages {
+            install: Ref(wireshark),
+            reason: InstallReason::Explicit,
+        },
+    );
+    plan.register_packages(wireshark);
+}
 
-    #[expect(
-        clippy::single_element_loop,
-        reason = "consistency with enabled services"
-    )]
-    for socket in ["pcscd.socket"] {
-        plan.add(
-            Owned(format!("enable socket {socket}")),
-            elevate,
-            Service {
-                name: socket,
-                state: ServiceState {
-                    runtime: ServiceStateRuntime::Active,
-                    persistent: ServiceStatePersistent::Enabled,
-                },
+fn smartcard<'elevate: 'action, 'action>(
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    elevate: &'elevate Elevate,
+) {
+    let smartcard = &[Ref("ccid"), Ref("pcsclite")];
+    plan.add(
+        "install smartcard manager",
+        elevate,
+        Packages {
+            install: Ref(smartcard),
+            reason: InstallReason::Explicit,
+        },
+    );
+    plan.register_packages(smartcard);
+
+    plan.add(
+        "enable smartcard daemon socket",
+        elevate,
+        Service {
+            name: "pcscd.socket",
+            state: ServiceState {
+                runtime: ServiceStateRuntime::Active,
+                persistent: ServiceStatePersistent::Enabled,
             },
-        );
-    }
+        },
+    );
 }
 
 fn aur<'elevate: 'action, 'action>(
@@ -1266,6 +1291,19 @@ fn sudo<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
+    let sudo = &[Ref("sudo")];
+
+    plan.add(
+        "install sudo",
+        elevate,
+        Packages {
+            install: Ref(sudo),
+            reason: InstallReason::Explicit,
+        },
+    );
+
+    plan.register_packages(sudo);
+
     plan.add(
         Ref("add sudonopw"),
         elevate,
@@ -1293,6 +1331,17 @@ fn sudo<'elevate: 'action, 'action>(
             content: Lines(Owned(vec![Ref("%sudonopw ALL=(ALL) NOPASSWD: ALL")])),
         },
     );
+
+    let doas = &[Ref("opendoas")];
+    plan.add(
+        "install doas",
+        elevate,
+        Packages {
+            install: Ref(doas),
+            reason: InstallReason::Explicit,
+        },
+    );
+    plan.register_packages(doas);
 
     plan.add(
         Ref("configure passwordless doas"),
@@ -1354,12 +1403,35 @@ fn timesyncd<'elevate: 'action, 'action>(
             ])),
         },
     );
+
+    plan.add(
+        "enable timesyncd",
+        elevate,
+        Service {
+            name: "systemd-timesyncd.service",
+            state: ServiceState {
+                runtime: ServiceStateRuntime::Active,
+                persistent: ServiceStatePersistent::Enabled,
+            },
+        },
+    );
 }
 
 fn reflector<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
+    let reflector = &[Ref("reflector")];
+    plan.add(
+        "install reflector",
+        elevate,
+        Packages {
+            install: Ref(reflector),
+            reason: InstallReason::Explicit,
+        },
+    );
+    plan.register_packages(reflector);
+
     plan.add(
         "configure reflector",
         elevate,
@@ -1411,6 +1483,17 @@ fn wireguard<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) -> Result<()> {
+    let wireguard = &[Ref("wireguard-tools")];
+    plan.add(
+        "install wireguard",
+        elevate,
+        Packages {
+            install: Ref(wireguard),
+            reason: InstallReason::Explicit,
+        },
+    );
+    plan.register_packages(wireguard);
+
     let path = Path::new("/etc/wireguard/wg0.conf");
     let permissions = FilePermissions {
         owner: Uid::root(),
@@ -1509,6 +1592,17 @@ fn sshd<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) -> Result<()> {
+    let ssh = &[Ref("openssh")];
+    plan.add(
+        "install ssh",
+        elevate,
+        Packages {
+            install: Ref(ssh),
+            reason: InstallReason::Explicit,
+        },
+    );
+    plan.register_packages(ssh);
+
     plan.add(
         Ref("add ssh group"),
         elevate,
@@ -1847,7 +1941,7 @@ fn install_packages<'elevate: 'action, 'action, 'pkgs>(
     elevate: &'elevate Elevate,
     packages: &'pkgs PackageConfig,
 ) {
-    for &(section, packages) in packages.0 {
+    for &(section, packages) in &packages.0 {
         let packages = packages
             .iter()
             .map(|package| Ref(*package))
@@ -1995,10 +2089,98 @@ fn backlight<'elevate: 'action, 'action>(
     );
 }
 
-fn kernel_modules<'elevate: 'action, 'action>(
+fn networkmanager<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
+    let networkmanager = &[Ref("networkmanager"), Ref("capnet-assist")];
+    plan.add(
+        "install networkmanager",
+        elevate,
+        Packages {
+            install: Ref(networkmanager),
+            reason: InstallReason::Explicit,
+        },
+    );
+    plan.register_packages(networkmanager);
+
+    plan.add(
+        "enable networkmanager",
+        elevate,
+        Service {
+            name: "NetworkManager.service",
+            state: ServiceState {
+                runtime: ServiceStateRuntime::Active,
+                persistent: ServiceStatePersistent::Enabled,
+            },
+        },
+    );
+}
+
+fn filesystem<'elevate: 'action, 'action>(
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    elevate: &'elevate Elevate,
+) {
+    let lvm = &[Ref("lvm2")];
+    plan.add(
+        "install lvm",
+        elevate,
+        Packages {
+            install: Ref(lvm),
+            reason: InstallReason::Explicit,
+        },
+    );
+    plan.register_packages(lvm);
+}
+
+fn posix<'elevate: 'action, 'action>(
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    elevate: &'elevate Elevate,
+) {
+    let posix = &[Ref("posix")];
+    plan.add(
+        "install posix",
+        elevate,
+        Packages {
+            install: Ref(posix),
+            reason: InstallReason::Explicit,
+        },
+    );
+    plan.register_packages(posix);
+}
+
+fn kernel<'elevate: 'action, 'action>(
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    elevate: &'elevate Elevate,
+) {
+    let kernel = &[
+        Ref("linux-zen"),
+        Ref("linux-zen-headers"),
+        Ref("linux-zen-docs"),
+        Ref("linux-firmware"),
+        Ref("man-pages"),
+    ];
+    plan.add(
+        "install kernel",
+        elevate,
+        Packages {
+            install: Ref(kernel),
+            reason: InstallReason::Explicit,
+        },
+    );
+    plan.register_packages(kernel);
+
+    let bootloader = &[Ref("grub"), Ref("efibootmgr")];
+    plan.add(
+        "install bootloader",
+        elevate,
+        Packages {
+            install: Ref(bootloader),
+            reason: InstallReason::Explicit,
+        },
+    );
+    plan.register_packages(bootloader);
+
     plan.add(
         "disable kernel modules",
         elevate,
@@ -2337,14 +2519,19 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     config: &Config,
     packages: &'pkgs PackageConfig,
 ) -> Result<()> {
+    kernel(plan, elevate);
+    filesystem(plan, elevate);
     pacman(plan, elevate);
+    posix(plan, elevate);
     install_packages(plan, elevate, packages);
+    networkmanager(plan, elevate);
     aur(plan, elevate);
     pacman_cache_cleanup(plan, elevate);
     reflector(plan, elevate);
     initrd(plan, elevate, config);
     libvirt(plan, elevate);
-    services(plan, elevate);
+    smartcard(plan, elevate);
+    wireshark(plan, elevate);
     sshd(plan, elevate)?;
     boot_target(plan, elevate, config);
     timesyncd(plan, elevate);
@@ -2354,7 +2541,6 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     journald(plan, elevate);
     wireguard(plan, elevate)?;
     iptables(plan, elevate);
-    kernel_modules(plan, elevate);
     backlight(plan, elevate);
     firefox(plan, elevate);
 
@@ -4066,6 +4252,8 @@ async fn main() -> MainResult {
                 })
                 .collect();
 
+                let packages = packages();
+
                 let config = Config { machine, users };
 
                 let secrets = if secrets_stdin {
@@ -4082,7 +4270,7 @@ async fn main() -> MainResult {
                     plan.set_secrets(SecretsWorkflow::AssumeExisting);
                 }
 
-                root_setup(&mut plan, &root, &config, &PACKAGES)?;
+                root_setup(&mut plan, &root, &config, &packages)?;
 
                 for user in &config.users {
                     configure_user(&mut plan, &root, user, &config.machine).await?;

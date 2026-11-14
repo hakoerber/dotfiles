@@ -282,7 +282,7 @@ fi
 
 download_iso
 
-cargo build --manifest-path=./cfg/Cargo.toml --release
+cargo build --features=testing --manifest-path=./cfg/Cargo.toml --release
 
 for hostname in "${machines[@]}"; do
     IFS='|' read -r -a cfg <<< "${machinecfg[${hostname}]}"
