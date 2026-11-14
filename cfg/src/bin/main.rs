@@ -717,7 +717,7 @@ fn autoupdate<'elevate: 'action, 'action>(
                     OnUnitInactiveSec=120min
 
                     [Install]
-                    WantedBy=multi-user.target
+                    WantedBy=timers.target
                 "#
             )
             .as_bytes())),
@@ -950,7 +950,7 @@ fn restic_backup<'elevate: 'action, 'action>(
                             Persistent=true
 
                             [Install]
-                            WantedBy=multi-user.target
+                            WantedBy=timers.target
                         "#
                     )
                     .as_bytes())),
@@ -1918,7 +1918,7 @@ fn pacman_cache_cleanup<'elevate: 'action, 'action>(
                 Ref("OnCalendar=daily"),
                 Ref(""),
                 Ref("[Install]"),
-                Ref("WantedBy=multi-user.target"),
+                Ref("WantedBy=timers.target"),
             ])),
         },
     );
