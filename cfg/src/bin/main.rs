@@ -325,7 +325,6 @@ const PACKAGES: PackageConfig = PackageConfig(&[
     ("docker", &["dockerfile-language-server"]),
     ("xdg", &["xdg-utils"]),
     ("dunst", &["dunst"]),
-    ("cloc", &["cloc"]),
     ("bwm-ng", &["bwm-ng"]),
     ("ssh", &["openssh"]),
     ("sshfs", &["sshfs"]),
