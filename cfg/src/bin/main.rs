@@ -1585,6 +1585,81 @@ fn wireguard<'elevate: 'action, 'action>(
         },
     );
 
+    plan.add(
+        "add wireguard-reresolve-dns service",
+        elevate,
+        File {
+            path: Ref(Path::new(
+                "/etc/systemd/system/wireguard-reresolve-dns.service",
+            )),
+            on_directory: DirectoryHandling::Bail,
+            on_symlink: SymlinkHandling::Proceed,
+            permissions: FilePermissions {
+                owner: Uid::root(),
+                group: Gid::root(),
+                mode: FileMode(0o644),
+            },
+            binary: false,
+            secret: false,
+            ignore_checksum_changes: false,
+            content: FileContent::Bytes(Ref(dedent!(
+                "
+                [Unit]
+                Wants=network-online.target
+                After=network-online.target nss-lookup.target
+
+                [Service]
+                Type=oneshot
+                ExecStart=/usr/share/wireguard-tools/examples/reresolve-dns/reresolve-dns.sh wg0
+                "
+            )
+            .as_bytes())),
+        },
+    );
+
+    plan.add(
+        "wireguard dns reresolve timer",
+        elevate,
+        File {
+            path: Ref(Path::new(
+                "/etc/systemd/system/wireguard-reresolve-dns.timer",
+            )),
+            permissions: FilePermissions {
+                owner: Uid::root(),
+                group: Gid::root(),
+                mode: FileMode(0o644),
+            },
+            on_directory: DirectoryHandling::Bail,
+            on_symlink: SymlinkHandling::Proceed,
+            binary: false,
+            secret: false,
+            ignore_checksum_changes: false,
+            content: FileContent::Bytes(Ref(dedent!(
+                "
+                [Timer]
+                OnBootSec=1m
+                OnUnitActiveSec=30s
+
+                [Install]
+                WantedBy=timers.target
+                "
+            )
+            .as_bytes())),
+        },
+    );
+
+    plan.add(
+        "enable wireguard dns reresolve timer",
+        elevate,
+        Service {
+            name: "wireguard-reresolve-dns.timer",
+            state: ServiceState {
+                runtime: ServiceStateRuntime::Active,
+                persistent: ServiceStatePersistent::Enabled,
+            },
+        },
+    );
+
     Ok(())
 }
 
