@@ -1,10 +1,10 @@
 use thiserror::Error;
 
 use super::{
-    Exec,
     cli::{self, CliCommand},
     cmd,
-    wire::{WireCommand, server},
+    wire::{server, WireCommand},
+    Exec,
 };
 
 #[derive(Error, Debug)]
@@ -95,16 +95,16 @@ impl Exec for Action {
     fn execute(&self) -> Result<Option<String>, Self::ExecErr> {
         match *self {
             Self::InputToggle => {
-                cmd::Command::run("pactl", &["set-source-mute", "@DEFAULT_SOURCE@", "toggle"])?
+                cmd::Command::run("wpctl", &["set-mute", "@DEFAULT_SOURCE@", "toggle"])?
             }
             Self::OutputToggle => {
-                cmd::Command::run("pactl", &["set-sink-mute", "@DEFAULT_SINK@", "toggle"])?
+                cmd::Command::run("wpctl", &["set-mute", "@DEFAULT_SINK@", "toggle"])?
             }
             Self::OutputInc => {
-                cmd::Command::run("pactl", &["set-sink-volume", "@DEFAULT_SINK@", "+5%"])?
+                cmd::Command::run("wpctl", &["set-volume", "@DEFAULT_SINK@", "5%+"])?
             }
             Self::OutputDec => {
-                cmd::Command::run("pactl", &["set-sink-volume", "@DEFAULT_SINK@", "-5%"])?
+                cmd::Command::run("wpctl", &["set-volume", "@DEFAULT_SINK@", "5%-"])?
             }
         }
         .check()?;

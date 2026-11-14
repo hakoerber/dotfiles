@@ -28,13 +28,13 @@ format = " $icon  {$combo $prev $play $next|-} "
 
 [[block]]
 block = "sound"
-driver = "pulseaudio"
+driver = "pipewire"
 max_vol = 100
 format = " $icon{ $volume.eng(w:2)|} "
 
 [[block.click]]
 button = "left"
-cmd = "workstation-client pulseaudio output toggle"
+cmd = "workstation-client pipewire output toggle"
 update = true
 
 [[block.click]]
@@ -44,7 +44,7 @@ cmd = "pavucontrol-qt"
 {% if not is_tv %}
 [[block]]
 block = "sound"
-driver = "pulseaudio"
+driver = "pipewire"
 device_kind = "source"
 format = "  $icon  "
 
@@ -56,7 +56,7 @@ idle_bg = { link = "warning_bg" }
 
 [[block.click]]
 button = "left"
-cmd = "workstation-client pulseaudio input toggle"
+cmd = "workstation-client pipewire input toggle"
 update = true
 {% endif %}
 

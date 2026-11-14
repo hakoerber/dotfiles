@@ -1,6 +1,6 @@
 # Maintainer: Hannes Körber <hannes@hkoerber.de>
 pkgname='workstation-mgr'
-pkgver=23
+pkgver=24
 pkgrel=1
 pkgdesc=''
 arch=('x86_64')
@@ -8,7 +8,7 @@ depends=(
   'glibc'
   'gcc-libs'
   'brightnessctl'
-  'libpulse'
+  'wireplumber'
   'playerctl'
   'dunst'
 )

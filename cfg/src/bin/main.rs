@@ -1458,30 +1458,34 @@ fn wireguard<'elevate: 'action, 'action>(
     Ok(())
 }
 
-fn pulseaudio<'elevate: 'action, 'action>(
+fn pipewire<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
-    let pulseaudio = &[
-        Ref("pulseaudio"),
-        Ref("pulseaudio-alsa"),
-        Ref("lib32-libpulse"),
-        Ref("alsa-utils"),
-        Ref("alsa-firmware"),
-        Ref("sof-firmware"),
-        Ref("alsa-ucm-conf"),
-        Ref("pavucontrol-qt"),
-    ];
+    plan.block("pipewire", |plan| {
+        let pipewire = &[
+            Ref("pipewire"),
+            Ref("lib32-pipewire"),
+            Ref("wireplumber"),
+            Ref("pavucontrol-qt"),
+            Ref("pipewire-audio"),
+            Ref("pipewire-pulse"),
+            Ref("pipewire-alsa"),
+            Ref("sof-firmware"),
+            Ref("rtkit"),
+        ];
 
-    plan.add(
-        "install pulseaudio",
-        elevate,
-        Packages {
-            install: Ref(pulseaudio),
-            reason: InstallReason::Explicit,
-        },
-    );
-    plan.register_packages(pulseaudio);
+        plan.add(
+            "install pipewire",
+            elevate,
+            Packages {
+                install: Ref(pipewire),
+                reason: InstallReason::Explicit,
+            },
+        );
+
+        plan.register_packages(pipewire);
+    });
 }
 
 fn fonts<'elevate: 'action, 'action>(
@@ -2434,7 +2438,7 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     reflector(plan, elevate);
     initrd(plan, elevate, config);
     libvirt(plan, elevate);
-    pulseaudio(plan, elevate);
+    pipewire(plan, elevate);
     fonts(plan, elevate);
     smartcard(plan, elevate);
     wireshark(plan, elevate);

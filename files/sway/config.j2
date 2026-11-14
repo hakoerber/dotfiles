@@ -196,9 +196,9 @@ bindsym {
 
     XF86Sleep exec --no-startup-id workstation-client power lock
 
-    XF86AudioMute exec        --no-startup-id workstation-client pulseaudio output toggle
-    XF86AudioRaiseVolume exec --no-startup-id workstation-client pulseaudio output inc
-    XF86AudioLowerVolume exec --no-startup-id workstation-client pulseaudio output dec
+    XF86AudioMute exec        --no-startup-id workstation-client pipewire output toggle
+    XF86AudioRaiseVolume exec --no-startup-id workstation-client pipewire output inc
+    XF86AudioLowerVolume exec --no-startup-id workstation-client pipewire output dec
 
     XF86AudioPlay exec --no-startup-id workstation-client spotify toggle
     XF86AudioNext exec --no-startup-id workstation-client spotify next
@@ -207,9 +207,9 @@ bindsym {
     XF86MonBrightnessUp   exec --no-startup-id workstation-client brightness inc
     XF86MonBrightnessDown exec --no-startup-id workstation-client brightness dec
 
-    $mod+m     exec --no-startup-id workstation-client pulseaudio input toggle
-    $mod+space exec --no-startup-id workstation-client pulseaudio input toggle
-    KP_Enter   exec --no-startup-id workstation-client pulseaudio input toggle
+    $mod+m     exec --no-startup-id workstation-client pipewire input toggle
+    $mod+space exec --no-startup-id workstation-client pipewire input toggle
+    KP_Enter   exec --no-startup-id workstation-client pipewire input toggle
 }
 
 mode "resize" {

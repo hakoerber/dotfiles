@@ -8,9 +8,9 @@ pub mod dmenu;
 pub(crate) mod dunst;
 pub(crate) mod env;
 pub(crate) mod gammastep;
+pub(crate) mod pipewire;
 pub mod power;
 pub mod present;
-pub(crate) mod pulseaudio;
 pub(crate) mod sleep;
 pub(crate) mod spotify;
 pub(crate) mod systemd;
@@ -25,7 +25,7 @@ pub enum ExecError {
     #[error(transparent)]
     Presentation(#[from] present::Error),
     #[error(transparent)]
-    Pulseaudio(#[from] pulseaudio::Error),
+    Pipewire(#[from] pipewire::Error),
     #[error(transparent)]
     Theme(#[from] theme::Error),
     #[error(transparent)]
@@ -46,7 +46,7 @@ pub enum ExecError {
 pub enum Action {
     Power(power::Action),
     Present(present::Action),
-    Pulseaudio(pulseaudio::Action),
+    Pipewire(pipewire::Action),
     Theme(theme::Action),
     Spotify(spotify::Action),
     Gammastep(gammastep::Action),
@@ -60,7 +60,7 @@ impl wire::WireCommand for Action {
         match input.next().ok_or(wire::server::ParseError::Eof)? {
             0x01 => Ok(Self::Power(power::Action::parse_wire(input)?)),
             0x02 => Ok(Self::Present(present::Action::parse_wire(input)?)),
-            0x03 => Ok(Self::Pulseaudio(pulseaudio::Action::parse_wire(input)?)),
+            0x03 => Ok(Self::Pipewire(pipewire::Action::parse_wire(input)?)),
             0x04 => Ok(Self::Theme(theme::Action::parse_wire(input)?)),
             0x05 => Ok(Self::Spotify(spotify::Action::parse_wire(input)?)),
             0x06 => Ok(Self::Gammastep(gammastep::Action::parse_wire(input)?)),
@@ -83,7 +83,7 @@ impl wire::WireCommand for Action {
                 v.extend_from_slice(&action.to_wire());
                 v
             }
-            Self::Pulseaudio(action) => {
+            Self::Pipewire(action) => {
                 let mut v = vec![0x03];
                 v.extend_from_slice(&action.to_wire());
                 v
@@ -141,11 +141,9 @@ impl cli::CliCommand for Action {
                 let choice = rest.next().ok_or(cli::ParseError::MissingAction)?;
                 Ok(Self::Present(present::Action::parse_str(&choice, rest)?))
             }
-            "pulseaudio" => {
+            "pipewire" => {
                 let choice = rest.next().ok_or(cli::ParseError::MissingAction)?;
-                Ok(Self::Pulseaudio(pulseaudio::Action::parse_str(
-                    &choice, rest,
-                )?))
+                Ok(Self::Pipewire(pipewire::Action::parse_str(&choice, rest)?))
             }
             "theme" => {
                 let choice = rest.next().ok_or(cli::ParseError::MissingAction)?;
@@ -195,7 +193,7 @@ impl Exec for Action {
         match *self {
             Self::Power(action) => Ok(action.execute()?),
             Self::Present(action) => Ok(action.execute()?),
-            Self::Pulseaudio(action) => Ok(action.execute()?),
+            Self::Pipewire(action) => Ok(action.execute()?),
             Self::Theme(action) => Ok(action.execute()?),
             Self::Spotify(action) => Ok(action.execute()?),
             Self::Gammastep(action) => Ok(action.execute()?),
