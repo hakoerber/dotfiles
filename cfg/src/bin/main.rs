@@ -373,7 +373,6 @@ const PACKAGES: PackageConfig = PackageConfig(&[
     ("dust", &["dust"]),
     ("font-utils", &["woff2"]),
     ("jq", &["jq"]),
-    ("musl", &["musl"]),
     ("kdeconnect", &["kdeconnect"]),
     ("restic", &["restic"]),
     ("discord", &["discord"]),
