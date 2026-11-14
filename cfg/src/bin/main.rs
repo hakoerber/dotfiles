@@ -205,7 +205,6 @@ const PACKAGES: PackageConfig = PackageConfig(&[
     ("font-noto", &["noto-fonts"]),
     ("git", &["git", "qgit", "git-delta", "git-filter-repo"]),
     ("htop", &["htop"]),
-    ("feh", &["feh"]),
     ("neovim", &["neovim", "python-pynvim"]),
     ("vim", &["vim"]),
     ("gammastep", &["gammastep"]),
