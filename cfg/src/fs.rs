@@ -1,4 +1,8 @@
-use std::{ffi::OsString, io::Write as _, os::unix::fs::PermissionsExt as _};
+use std::{
+    ffi::OsString,
+    io::{self, Write as _},
+    os::unix::fs::PermissionsExt as _,
+};
 
 use anyhow::{Result, anyhow, bail};
 use tokio::fs;
@@ -150,10 +154,20 @@ pub(crate) async fn mv(from: &Path, to: &Path, elevate: &Elevate) -> Result<()> 
             )
             .await?
             .check()?;
+
+            Ok(())
         }
-        Elevate::No => fs::rename(from, to).await?,
+        Elevate::No => match fs::rename(from, to).await {
+            Ok(()) => Ok(()),
+            Err(err) if err.kind() == io::ErrorKind::CrossesDevices => {
+                fs::copy(from, to).await?;
+                fs::remove_file(from).await?;
+
+                Ok(())
+            }
+            Err(err) => Err(err.into()),
+        },
     }
-    Ok(())
 }
 
 pub(crate) async fn create_directory(path: &Path, elevate: &Elevate) -> Result<()> {
