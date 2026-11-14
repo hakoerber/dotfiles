@@ -136,14 +136,17 @@ impl<'change> Plannable<'change> for Service<'change> {
                 .lines()
                 .collect::<Vec<&str>>()
                 .try_into()
-                .map_err(|_err| anyhow!("invalid systemctl show outputs lines"))?;
+                .map_err(|_err| {
+                    anyhow!("invalid systemctl show outputs lines for {}", self.name)
+                })?;
 
             let Some(state) = lines
                 .iter()
                 .find_map(|line| line.strip_prefix("ActiveState="))
             else {
                 bail!(
-                    "invalid systemctl active output prefix in \"{}\"",
+                    "invalid systemctl active output prefix for {} in \"{}\"",
+                    self.name,
                     systemctl.stdout.trim()
                 );
             };
@@ -154,7 +157,8 @@ impl<'change> Plannable<'change> for Service<'change> {
                 .map(|s| s != "0")
             else {
                 bail!(
-                    "invalid systemctl condition timestamp prefix in \"{}\"",
+                    "invalid systemctl condition timestamp prefix for {} in \"{}\"",
+                    self.name,
                     systemctl.stdout.trim()
                 );
             };
@@ -165,12 +169,16 @@ impl<'change> Plannable<'change> for Service<'change> {
                 .map(|s| match s {
                     "yes" => Ok(true),
                     "no" => Ok(false),
-                    other => Err(anyhow!("invalid conditionresult value {other}")),
+                    other => Err(anyhow!(
+                        "invalid conditionresult value for {}: {other}",
+                        self.name
+                    )),
                 })
                 .transpose()?
             else {
                 bail!(
-                    "invalid systemctl condition result output prefix in \"{}\"",
+                    "invalid systemctl condition result output prefix for {} in \"{}\"",
+                    self.name,
                     systemctl.stdout.trim()
                 );
             };
@@ -183,7 +191,11 @@ impl<'change> Plannable<'change> for Service<'change> {
                 (_, _, "inactive" | "failed" | "deactivating" | "maintenance") => {
                     ServiceStateRuntimeActual::Inactive
                 }
-                _ => bail!("invalid systemctl active output \"{}\"", state.trim()),
+                _ => bail!(
+                    "invalid systemctl active output for {}: \"{}\"",
+                    self.name,
+                    state.trim()
+                ),
             }
         };
 
