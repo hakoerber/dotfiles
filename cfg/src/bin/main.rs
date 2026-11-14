@@ -6,7 +6,12 @@
 // required for `serde_json::json!()`
 #![recursion_limit = "256"]
 
-use std::{collections::HashSet, env, io, net::Ipv4Addr, process};
+use std::{
+    collections::{HashMap, HashSet},
+    env, io,
+    net::Ipv4Addr,
+    process,
+};
 
 use anyhow::{Result, anyhow, bail};
 use clap::{Parser, Subcommand, ValueEnum};
@@ -2630,12 +2635,16 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     Ok(())
 }
 
+struct UserResult {
+    packages: HashMap<&'static str, &'static [MaybeOwned<'static, str>]>,
+}
+
 async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     root: &'elevate Elevate,
     user: &'elevate UserContext,
     machine: &'machine MachineConfig,
-) -> Result<()> {
+) -> Result<UserResult> {
     let UserContext {
         simplest_elevate: ref user_elevate,
         ref strict_elevate,
@@ -2752,7 +2761,9 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
         },
     );
 
-    Ok(())
+    Ok(UserResult {
+        packages: HashMap::new(),
+    })
 }
 
 fn user_firefox<'elevate: 'action, 'action, 'user, 'machine>(
@@ -4357,8 +4368,26 @@ async fn main() -> MainResult {
 
                 root_setup(&mut plan, &root, &config, &packages)?;
 
+                let mut user_packages: HashMap<&'static str, &'static [MaybeOwned<'static, str>]> =
+                    HashMap::new();
+
                 for user in &config.users {
-                    configure_user(&mut plan, &root, user, &config.machine).await?;
+                    let user_result =
+                        configure_user(&mut plan, &root, user, &config.machine).await?;
+                    user_packages.extend(user_result.packages);
+                }
+
+                for (section, packages) in user_packages {
+                    plan.add(
+                        Owned(format!("install user packages for {section}")),
+                        &root,
+                        Packages {
+                            install: Ref(packages),
+                            reason: InstallReason::Explicit,
+                        },
+                    );
+
+                    plan.register_packages(&packages);
                 }
 
                 match args.hostname {
