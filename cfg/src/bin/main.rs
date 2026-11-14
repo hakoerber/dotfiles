@@ -2170,7 +2170,7 @@ fn networkmanager<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
-    let networkmanager = &[Ref("networkmanager"), Ref("capnet-assist")];
+    let networkmanager = &[Ref("networkmanager")];
     plan.add(
         "install networkmanager",
         elevate,
