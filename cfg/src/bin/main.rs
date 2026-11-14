@@ -430,7 +430,6 @@ const PACKAGES: PackageConfig = PackageConfig(&[
         "arch-packaging",
         &["namcap", "devtools", "arch-install-scripts", "archiso"],
     ),
-    ("drone", &["drone-cli"]),
     ("sqlite", &["sqlite"]),
     ("css", &["vscode-css-languageserver"]),
     ("watchexec", &["watchexec"]),
