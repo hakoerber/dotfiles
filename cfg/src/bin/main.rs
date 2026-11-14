@@ -4424,9 +4424,6 @@ async fn main() -> MainResult {
 
                         let cleanup_report = cleanup_plan_finished.report()?;
 
-                        // it's only package remove resources anyway, will always be changed
-                        cleanup_report.print(&ReportConfig::All, false);
-
                         let has_changes = cleanup_report.has_changes();
 
                         let cleanup_plan_approved = cleanup_plan_finished.approve();
@@ -4451,9 +4448,6 @@ async fn main() -> MainResult {
                         };
 
                         let cleanup_report = cleanup_plan_finished.report()?;
-
-                        // it's only package remove resources anyway, will always be changed
-                        cleanup_report.print(&ReportConfig::All, false);
 
                         let has_changes = cleanup_report.has_changes();
 
