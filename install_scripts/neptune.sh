@@ -120,7 +120,7 @@ cat << 'EOF' > /root/.bash_profile
             sleep 5
         done
         rm -rf /etc/systemd/system/getty@tty1.service.d/
-        if /usr/local/bin/cfg --hostname neptune deploy --only-changed --secrets-stdin < /usr/local/share/secrets.json ; then
+        if /usr/local/bin/cfg --hostname neptune deploy --only-changed --secrets-stdin < /usr/local/share/secrets.json 2>&1 | tee /var/log/install.log ; then
             rm -f /usr/local/bin/cfg
             rm -f /root/.bash_profile
             reboot
