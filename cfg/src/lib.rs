@@ -1174,7 +1174,6 @@ impl PlanApproved<'_, '_, '_, '_> {
     #[expect(clippy::unwrap_used, reason = "stdout writing should never fail")]
     pub async fn apply(&self) -> Result<()> {
         let mut stdout = io::stdout();
-        writeln!(stdout).unwrap();
         for node in &self.nodes {
             apply_node(node, &mut stdout).await?;
         }
