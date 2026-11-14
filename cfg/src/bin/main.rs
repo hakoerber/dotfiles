@@ -164,7 +164,6 @@ struct Cli {
 }
 
 const REQUIRED_PACKAGES: &[(&str, &[&str])] = &[
-    ("vim", &["vim"]),
     ("gammastep", &["gammastep"]),
     ("pinentry-qt", &["pinentry"]),
     ("pass", &["pass", "passff-host"]),
