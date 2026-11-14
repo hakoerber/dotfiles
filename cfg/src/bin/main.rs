@@ -207,21 +207,6 @@ const REQUIRED_PACKAGES: &[(&str, &[&str])] = &[
             "yubikey-touch-detector",
         ],
     ),
-    (
-        "pulseaudio",
-        &[
-            "pulseaudio",
-            "pulseaudio-alsa",
-            "lib32-libpulse",
-            "alsa-utils",
-            "alsa-firmware",
-            "sof-firmware",
-            "alsa-ucm-conf",
-        ],
-    ),
-    // this needs to come *after* pulseaudio, otherwise it will pull in pipewire-pulse as the
-    // provider for pulse-native-provider
-    ("pavucontrol", &["pavucontrol-qt"]),
     ("dunst", &["dunst"]),
     ("rofi", &["rofi"]),
     ("imv", &["imv"]),
@@ -1656,6 +1641,30 @@ fn wireguard<'elevate: 'action, 'action>(
     Ok(())
 }
 
+fn pipewire<'elevate: 'action, 'action>(
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    elevate: &'elevate Elevate,
+) {
+    let pipewire = &[
+        Ref("pipewire"),
+        Ref("lib32-pipewire"),
+        Ref("wireplumber"),
+        Ref("pavucontrol-qt"),
+        Ref("pipewire-audio"),
+        Ref("pipewire-pulse"),
+    ];
+
+    plan.add(
+        "install pipewire",
+        elevate,
+        Packages {
+            install: Ref(pipewire),
+            reason: InstallReason::Explicit,
+        },
+    );
+    plan.register_packages(pipewire);
+}
+
 fn sshd<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
@@ -2598,6 +2607,7 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     reflector(plan, elevate);
     initrd(plan, elevate, config);
     libvirt(plan, elevate);
+    pipewire(plan, elevate);
     smartcard(plan, elevate);
     wireshark(plan, elevate);
     sshd(plan, elevate)?;

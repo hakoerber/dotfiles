@@ -88,6 +88,9 @@ qemuopts=(
 
     "-nodefaults"
 
+    "-audiodev" "pa,id=default"
+    "-device" "virtio-sound-pci,audiodev=default"
+
     "-vga" "virtio"
     "-display" "spice-app"
 )
