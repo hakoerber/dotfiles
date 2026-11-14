@@ -255,6 +255,7 @@ const REQUIRED_PACKAGES: &[(&str, &[&str])] = &[
     ("sccache", &["sccache"]),
 ];
 
+#[cfg_attr(feature = "testing", expect(unused, reason = "not used in testing"))]
 const ADDITIONAL_PACKAGES: &[(&str, &[&str])] = &[
     (
         "build-essentials",
