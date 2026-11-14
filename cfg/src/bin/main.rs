@@ -538,8 +538,7 @@ fn hera<'elevate: 'action, 'action, 'secrets>(
         Ref("plasma-nm"),
         Ref("plasma-pa"),
         Ref("plasma-systemmonitor"),
-        Ref("sddm"),
-        Ref("sddm-kcm"),
+        Ref("plasma-login-manager"),
         Ref("thunderbird"),
         // kde archive manager
         Ref("ark"),
@@ -576,10 +575,10 @@ fn hera<'elevate: 'action, 'action, 'secrets>(
     );
 
     plan.add(
-        Ref("enable sddm"),
+        Ref("enable plasma-login-manager"),
         elevate,
         Service {
-            name: "sddm.service",
+            name: "plasmalogin.service",
             state: ServiceState {
                 runtime: ServiceStateRuntime::Active,
                 persistent: ServiceStatePersistent::Enabled,
@@ -588,25 +587,10 @@ fn hera<'elevate: 'action, 'action, 'secrets>(
     );
 
     plan.add(
-        Ref("create sddm config folder"),
-        elevate,
-        Directory {
-            path: Ref(Path::new("/etc/sddm.conf.d/")),
-            on_symlink: SymlinkHandling::Proceed,
-            on_file: FileHandling::Proceed,
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o755),
-            },
-        },
-    );
-
-    plan.add(
-        "enable autologin",
+        "configure plasma login manager",
         elevate,
         File {
-            path: Ref(Path::new("/etc/sddm.conf.d/autologin.conf")),
+            path: Ref(Path::new("/etc/plasmalogin.conf")),
             permissions: FilePermissions {
                 owner: Uid::root(),
                 group: Gid::root(),
@@ -621,7 +605,7 @@ fn hera<'elevate: 'action, 'action, 'secrets>(
                 r#"
                     [Autologin]
                     User=herta
-                    Session=plasma
+                    Session=plasma.desktop
                 "#
             )
             .as_bytes())),
