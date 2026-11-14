@@ -2474,8 +2474,8 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
         File {
             path: Owned(ssh_directory.join("authorized_keys")),
             permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
+                owner: Uid::from(user.name.clone()),
+                group: Gid::from(user.name.clone()),
                 mode: FileMode(0o644),
             },
             on_directory: DirectoryHandling::Bail,
