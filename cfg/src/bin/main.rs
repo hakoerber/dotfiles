@@ -211,7 +211,6 @@ const REQUIRED_PACKAGES: &[(&str, &[&str])] = &[
         &["steam", "lib32-pango", "pango", "ttf-liberation"],
     ),
     ("nextcloud", &["nextcloud-client"]),
-    ("kwallet", &["kwallet", "kwalletmanager"]),
     ("mpris", &["playerctl"]),
     ("gnome-keyring", &["gnome-keyring", "seahorse"]),
     ("jq", &["jq"]),
