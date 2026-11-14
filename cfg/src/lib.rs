@@ -553,6 +553,27 @@ where
         NodePlanRef { node: node_ref }
     }
 
+    pub fn try_block<'plan, F>(
+        &'plan mut self,
+        name: impl Into<MaybeOwned<'name, str>>,
+        f: F,
+    ) -> Result<NodePlanRef<'plan, 'name, 'elevate, 'action>>
+    where
+        F: FnOnce(&mut Block<'name, 'elevate, 'action>) -> Result<()>,
+    {
+        let mut block = Block {
+            name: name.into(),
+            nodes: vec![],
+            triggers: vec![],
+        };
+
+        f(&mut block)?;
+
+        let node_ref = self.nodes.push_mut(Node::Block(block));
+
+        Ok(NodePlanRef { node: node_ref })
+    }
+
     pub fn register_packages<'a: 'pkgs>(&mut self, packages: &[MaybeOwned<'a, str>]) {
         self.managed_packages.extend_from_slice(packages);
     }
