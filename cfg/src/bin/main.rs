@@ -2,7 +2,6 @@
     clippy::large_include_file,
     reason = "Everything necessary should be included in the binary (PKGBUILDS, locally built packages)"
 )]
-#![allow(unused, reason = "dev")]
 #![deny(unused_must_use)]
 // required for `serde_json::json!()`
 #![recursion_limit = "256"]
@@ -13,7 +12,6 @@ use anyhow::{Result, anyhow, bail};
 use clap::{Parser, Subcommand, ValueEnum};
 use dedent::dedent;
 use include_dir::{DirEntry, include_dir};
-use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 use cfg::prelude::*;
@@ -4400,7 +4398,7 @@ async fn main() -> MainResult {
                             .await?;
 
                         let cleanup_plan_finished = match unmanaged_package_plan.finish().await? {
-                            FinishResult::AssertionsFailed { report } => {
+                            FinishResult::AssertionsFailed { report: _ } => {
                                 unreachable!("removal plan does not contain assertions")
                             }
                             FinishResult::Success(plan) => plan,
@@ -4428,7 +4426,7 @@ async fn main() -> MainResult {
                         orphans(&mut orphaned_package_plan, &root).await?;
 
                         let cleanup_plan_finished = match orphaned_package_plan.finish().await? {
-                            FinishResult::AssertionsFailed { report } => {
+                            FinishResult::AssertionsFailed { report: _ } => {
                                 unreachable!("removal plan does not contain assertions")
                             }
                             FinishResult::Success(plan) => plan,
