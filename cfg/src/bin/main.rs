@@ -679,7 +679,7 @@ fn autoupdate<'elevate: 'action, 'action>(
                     # Make sure that keys are up to date, otherwise sig checks may fail
                     pacman --sync --noprogressbar --noconfirm --refresh --needed archlinux-keyring
 
-                    pacman --noprogressbar --noconfirm --sysupgrade
+                    pacman --sync --noprogressbar --noconfirm --sysupgrade
                 "#)
                 .as_bytes(),
             )),
