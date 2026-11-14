@@ -2430,7 +2430,6 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
     user_dotfiles(plan, user_elevate, user, machine, &home)?;
     user_wallpaper(plan, user_elevate, user, &user_directories);
     user_services(plan, user_elevate, user, &user_directories, machine);
-    user_spotify(plan, user_elevate, user, &user_directories);
     user_firefox(plan, user_elevate, user, &home);
 
     let ssh_directory = home.join(".ssh");
@@ -2750,32 +2749,6 @@ fn user_create_directories<'elevate: 'action, 'action, 'user, 'machine>(
                 group: Gid::from(user.name.clone()),
                 mode: FileMode(0o755),
             },
-        },
-    );
-}
-
-fn user_spotify<'elevate: 'action, 'action, 'user, 'machine>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
-    user_elevate: &'elevate Elevate,
-    user: &'user UserConfig,
-    user_directories: &UserDirectories,
-) {
-    plan.add(
-        Owned("fix spotify audio api".to_owned()),
-        user_elevate,
-        File {
-            path: Owned(user_directories.config.join("spotify-flags.conf")),
-            on_symlink: SymlinkHandling::Proceed,
-            on_directory: DirectoryHandling::Bail,
-            permissions: FilePermissions {
-                owner: Uid::from(user.name.clone()),
-                group: Gid::from(user.name.clone()),
-                mode: FileMode(0o644),
-            },
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: FileContent::Lines(Ref(&[Ref("--audio-api=pulseaudio")])),
         },
     );
 }

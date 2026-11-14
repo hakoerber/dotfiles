@@ -3,6 +3,6 @@ BindsTo=autostart.target
 After=windowmanager.target
 
 [Service]
-ExecStart=/usr/bin/env spotify --audio-api=pulseaudio
+ExecStart=/usr/bin/env spotify --audio-api=pulseaudio --enable-features=UseOzonePlatform --ozone-platform=wayland
 PassEnvironment=WAYLAND_DISPLAY
 Restart=always
