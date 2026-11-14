@@ -189,7 +189,6 @@ const PACKAGES: PackageConfig = PackageConfig(&[
     ("strace", &["strace"]),
     ("sudo", &["sudo"]),
     ("doas", &["opendoas"]),
-    ("apt", &["apt"]),
     ("ansible", &["ansible", "ansible-lint", "python-jmespath"]),
     ("awesome-terminal-fonts", &["awesome-terminal-fonts"]),
     (
