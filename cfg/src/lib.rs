@@ -871,7 +871,13 @@ fn print_node(
                 stdout,
                 "{prefix}{c}──┬─ {} {name}",
                 "Block".fg::<colors::Yellow>(),
-                c = if last { '╰' } else { '├' },
+                c = if first {
+                    '╭'
+                } else if last {
+                    '╰'
+                } else {
+                    '├'
+                },
                 name = name.as_ref()
             )
             .unwrap();
