@@ -331,7 +331,6 @@ const PACKAGES: PackageConfig = PackageConfig(&[
     ("expect", &["expect"]),
     ("inotify", &["inotify-tools"]),
     ("rclone", &["rclone"]),
-    ("dnf", &["dnf5"]),
     (
         "rust",
         &[
