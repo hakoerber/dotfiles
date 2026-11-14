@@ -164,19 +164,6 @@ struct Cli {
 }
 
 const REQUIRED_PACKAGES: &[(&str, &[&str])] = &[
-    ("awesome-terminal-fonts", &["awesome-terminal-fonts"]),
-    (
-        "font-inconsolata",
-        &["ttf-inconsolata", "ttf-inconsolata-nerd"],
-    ),
-    (
-        "font-jetbrainsmono",
-        &["ttf-jetbrains-mono", "ttf-jetbrains-mono-nerd"],
-    ),
-    ("font-dejavu", &["ttf-dejavu", "ttf-dejavu-nerd"]),
-    ("font-libertine", &["otf-libertinus"]),
-    ("font-awesome", &["woff2-font-awesome"]),
-    ("font-noto", &["noto-fonts"]),
     ("vim", &["vim"]),
     ("gammastep", &["gammastep"]),
     ("pinentry-qt", &["pinentry"]),
@@ -1661,6 +1648,27 @@ fn pipewire<'elevate: 'action, 'action>(
     plan.register_packages(pipewire);
 }
 
+fn fonts<'elevate: 'action, 'action>(
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    elevate: &'elevate Elevate,
+) {
+    let fonts = &[
+        Ref("awesome-terminal-fonts"),
+        Ref("ttf-jetbrains-mono"),
+        Ref("ttf-dejavu"),
+    ];
+
+    plan.add(
+        "install fonts",
+        elevate,
+        Packages {
+            install: Ref(fonts),
+            reason: InstallReason::Explicit,
+        },
+    );
+    plan.register_packages(fonts);
+}
+
 fn sshd<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
@@ -2604,6 +2612,7 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     initrd(plan, elevate, config);
     libvirt(plan, elevate);
     pipewire(plan, elevate);
+    fonts(plan, elevate);
     smartcard(plan, elevate);
     wireshark(plan, elevate);
     sshd(plan, elevate)?;
