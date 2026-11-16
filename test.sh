@@ -191,6 +191,8 @@ EOF
       # Pacman will always use the first directory with write access for downloads
       sed -i 's/^#\?\(CacheDir.*\)/\1\nCacheDir = \/var\/cache\/pacman-cache-host\//' /etc/pacman.conf
 
+      pacman -Sy
+
       mkdir /share/
       mount /dev/disk/by-label/SHARE /share/
 
