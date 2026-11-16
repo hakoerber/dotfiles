@@ -326,15 +326,6 @@ const ADDITIONAL_PACKAGES: &[(&str, &[&str])] = &[
     ("ruby", &["ruby"]),
     ("zathura", &["zathura", "zathura-pdf-poppler"]),
     ("pdf", &["ghostscript", "enscript"]),
-    (
-        "pandoc",
-        &[
-            "pandoc-cli",
-            "texlive-basic",
-            "texlive-fontsextra",
-            "texlive-latexextra",
-        ],
-    ),
     ("ranger", &["ranger"]),
     ("thunar", &["thunar"]),
     (
