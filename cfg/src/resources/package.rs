@@ -98,6 +98,7 @@ impl<'change> Plannable<'change> for Packages<'change> {
         'elevate: 'change,
     {
         let mut install = Vec::new();
+        let mut set_reason = Vec::new();
 
         for package in self.install.as_ref() {
             if !installed_packages(elevate)
@@ -106,36 +107,32 @@ impl<'change> Plannable<'change> for Packages<'change> {
                 .any(|s| s == package.as_ref())
             {
                 install.push(package.clone());
-            }
-        }
-
-        let mut set_reason = Vec::new();
-
-        match self.reason {
-            InstallReason::Explicit => {
-                for package in self.install.as_ref() {
-                    if !explicitly_installed_packages(elevate)
-                        .await?
-                        .iter()
-                        .any(|s| s == package.as_ref())
-                    {
-                        set_reason.push(package.clone());
+            } else {
+                match self.reason {
+                    InstallReason::Explicit => {
+                        if !explicitly_installed_packages(elevate)
+                            .await?
+                            .iter()
+                            .any(|s| s == package.as_ref())
+                        {
+                            set_reason.push(package.clone());
+                        }
+                    }
+                    InstallReason::Dependency => {
+                        for package in self.install.as_ref() {
+                            if !packages_installed_as_dependencies(elevate)
+                                .await?
+                                .iter()
+                                .any(|s| s == package.as_ref())
+                            {
+                                set_reason.push(package.clone());
+                            }
+                        }
+                    }
+                    InstallReason::DependencyIfInstalling => {
+                        // in this case, we retain the current setting, except when we install new
                     }
                 }
-            }
-            InstallReason::Dependency => {
-                for package in self.install.as_ref() {
-                    if !packages_installed_as_dependencies(elevate)
-                        .await?
-                        .iter()
-                        .any(|s| s == package.as_ref())
-                    {
-                        set_reason.push(package.clone());
-                    }
-                }
-            }
-            InstallReason::DependencyIfInstalling => {
-                // in this case, we retain the current setting, except when we install new
             }
         }
 
