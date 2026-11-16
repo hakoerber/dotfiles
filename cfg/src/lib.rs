@@ -4,7 +4,7 @@
 use std::{
     fmt,
     io::{self, Write},
-    mem,
+    iter, mem,
     sync::{Arc, Mutex},
 };
 
@@ -289,12 +289,22 @@ struct PlannedResource<'name, 'elevate, 'action> {
 
 impl<'name, 'elevate: 'name> PlannedResource<'name, 'elevate, '_> {
     #[expect(clippy::unwrap_used, reason = "stdout writing should never fail")]
-    async fn apply(&self, mut stdout: impl io::Write, elevate: &Elevate) -> Result<()> {
+    async fn apply(
+        &self,
+        mut stdout: impl io::Write,
+        elevate: &Elevate,
+        path: &[&str],
+    ) -> Result<()> {
         match self.status {
             ChangeStatus::NeedsChange(ref plan) => {
-                let name = self.name.as_ref();
+                let name_with_path = path
+                    .iter()
+                    .map(|s| *s)
+                    .chain(iter::once(self.name.as_ref()))
+                    .collect::<Vec<_>>()
+                    .join(" ⟶ ");
 
-                write!(stdout, "Applying \"{name}\" ... ").unwrap();
+                write!(stdout, "Applying {name_with_path} ... ").unwrap();
                 stdout.flush().unwrap();
 
                 match plan.apply(elevate).await {
@@ -1237,15 +1247,21 @@ pub struct PlanApproved<'name, 'elevate, 'pkgs, 'action> {
     managed_packages: Vec<MaybeOwned<'pkgs, str>>,
 }
 
-async fn apply_node(node: &PlannedNode<'_, '_, '_>, stdout: &mut impl io::Write) -> Result<()> {
+async fn apply_node(
+    node: &PlannedNode<'_, '_, '_>,
+    stdout: &mut impl io::Write,
+    path: &[&str],
+) -> Result<()> {
     match node.inner {
         PlannedNodeInner::Block(ref block) => {
+            let mut path = path.to_owned();
+            path.push(block.name.as_ref());
             for node in &block.nodes {
-                Box::pin(apply_node(node, stdout)).await?;
+                Box::pin(apply_node(node, stdout, &path)).await?;
             }
         }
         PlannedNodeInner::Leaf(ref resource) => {
-            resource.apply(stdout, resource.elevate).await?;
+            resource.apply(stdout, resource.elevate, path).await?;
         }
     }
 
@@ -1263,7 +1279,7 @@ impl PlanApproved<'_, '_, '_, '_> {
     pub async fn apply(&self) -> Result<()> {
         let mut stdout = io::stdout();
         for node in &self.nodes {
-            apply_node(node, &mut stdout).await?;
+            apply_node(node, &mut stdout, &[]).await?;
         }
 
         Ok(())
