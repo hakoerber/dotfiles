@@ -43,7 +43,7 @@ pub mod prelude {
     pub use super::resources::prelude::*;
     pub use super::tempfile::Tempfile;
     pub use super::{
-        Elevate, ElevateTo, FinishResult, Gid, Path, PathBuf, Plan, ReportConfig, Resource,
+        Block, Elevate, ElevateTo, FinishResult, Gid, Path, PathBuf, Plan, ReportConfig, Resource,
         SecretsWorkflow, Uid,
     };
 }
@@ -66,7 +66,7 @@ pub trait Reporter {
 
 #[derive(Debug)]
 pub enum ChangeStatus<'action> {
-    NeedsChange(Box<dyn Applyable + 'action + Send + Sync>),
+    NeedsChange(Box<dyn Applyable + 'action + Sync + Send + Sync>),
     Clean,
 }
 
@@ -83,7 +83,7 @@ pub enum AssertionResult {
 }
 
 enum Trigger<'name, 'elevate, 'action> {
-    OnChange(Box<dyn FnOnce() -> Resource<'name, 'elevate, 'action> + Send + 'elevate>),
+    OnChange(Box<dyn FnOnce() -> Resource<'name, 'elevate, 'action> + Sync + Send + 'elevate>),
 }
 
 impl fmt::Debug for Trigger<'_, '_, '_> {
@@ -95,20 +95,29 @@ impl fmt::Debug for Trigger<'_, '_, '_> {
 }
 
 #[derive(Debug)]
-pub struct Block<'name, 'elevate, 'action> {
+pub struct Block<'name, 'elevate, 'pkgs, 'action, 'secrets, S>
+where
+    S: fmt::Debug + Sync + Send + Clone,
+{
     name: MaybeOwned<'name, str>,
-    nodes: Vec<Node<'name, 'elevate, 'action>>,
+    nodes: Vec<Node<'name, 'elevate, 'pkgs, 'action, 'secrets, S>>,
     triggers: Vec<Trigger<'name, 'elevate, 'action>>,
     assertions: Vec<Assertion<'name, 'elevate, 'action>>,
+    managed_packages: Vec<MaybeOwned<'pkgs, str>>,
+    secrets: SecretsWorkflow<'secrets, S>,
 }
 
-impl<'name, 'elevate, 'action> Block<'name, 'elevate, 'action> {
-    pub fn add<'a>(
-        &'a mut self,
+impl<'name, 'elevate, 'pkgs, 'action, 'secrets, S>
+    Block<'name, 'elevate, 'pkgs, 'action, 'secrets, S>
+where
+    S: fmt::Debug + Sync + Send + Clone,
+{
+    pub fn add<'s>(
+        &'s mut self,
         name: impl Into<MaybeOwned<'name, str>>,
         elevate: &'elevate Elevate,
-        action: impl Plannable<'action> + Send + 'action,
-    ) -> NodePlanRef<'a, 'name, 'elevate, 'action> {
+        action: impl Plannable<'action> + Sync + Send + 'action,
+    ) -> NodePlanRef<'s, 'name, 'elevate, 'pkgs, 'action, 'secrets, S> {
         let resource = Resource {
             name: name.into(),
             elevate,
@@ -121,11 +130,119 @@ impl<'name, 'elevate, 'action> Block<'name, 'elevate, 'action> {
         NodePlanRef { node: resource_ref }
     }
 
-    pub fn block<'plan, F>(
-        &'plan mut self,
+    pub fn secrets(&self) -> SecretsWorkflow<'secrets, S> {
+        let secrets = &self.secrets;
+        self.secrets.as_ref()
+    }
+
+    pub async fn block_async<'s, F>(
+        &'s mut self,
         name: impl Into<MaybeOwned<'name, str>>,
         f: F,
-    ) -> NodePlanRef<'plan, 'name, 'elevate, 'action>
+    ) -> NodePlanRef<'s, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>
+    where
+        F: AsyncFnOnce(&mut Self),
+    {
+        let mut block = Block {
+            name: name.into(),
+            nodes: vec![],
+            triggers: vec![],
+            assertions: vec![],
+            managed_packages: vec![],
+            secrets: self.secrets.clone(),
+        };
+
+        f(&mut block).await;
+
+        let mut assertions = vec![];
+        mem::swap(&mut block.assertions, &mut assertions);
+        self.assertions.extend(assertions);
+
+        let mut packages = vec![];
+        mem::swap(&mut block.managed_packages, &mut packages);
+        self.managed_packages.extend(packages);
+
+        let node_ref = self.nodes.push_mut(Node::Block(block));
+
+        NodePlanRef { node: node_ref }
+    }
+
+    pub async fn try_block_async<'s, F, R>(
+        &'s mut self,
+        name: impl Into<MaybeOwned<'name, str>>,
+        f: F,
+    ) -> Result<NodePlanRef<'s, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>>
+    where
+        F: AsyncFnOnce(&mut Self) -> Result<()>,
+    {
+        let mut block = Block {
+            name: name.into(),
+            nodes: vec![],
+            triggers: vec![],
+            assertions: vec![],
+            managed_packages: vec![],
+            secrets: self.secrets.clone(),
+        };
+
+        f(&mut block).await?;
+
+        let mut assertions = vec![];
+        mem::swap(&mut block.assertions, &mut assertions);
+        self.assertions.extend(assertions);
+
+        let mut packages = vec![];
+        mem::swap(&mut block.managed_packages, &mut packages);
+        self.managed_packages.extend(packages);
+
+        let node_ref = self.nodes.push_mut(Node::Block(block));
+
+        Ok(NodePlanRef { node: node_ref })
+    }
+
+    pub async fn try_block_async_with_value<'s, F, V>(
+        &'s mut self,
+        name: impl Into<MaybeOwned<'name, str>>,
+        f: F,
+    ) -> Result<NodePlanRefWithValue<'s, 'name, 'elevate, 'pkgs, 'action, 'secrets, S, V>>
+    where
+        F: AsyncFnOnce(&mut Self) -> Result<V>,
+    {
+        let mut block = Block {
+            name: name.into(),
+            nodes: vec![],
+            triggers: vec![],
+            assertions: vec![],
+            managed_packages: vec![],
+            secrets: self.secrets.clone(),
+        };
+
+        let value = f(&mut block).await?;
+
+        let mut assertions = vec![];
+        mem::swap(&mut block.assertions, &mut assertions);
+        self.assertions.extend(assertions);
+
+        let mut packages = vec![];
+        mem::swap(&mut block.managed_packages, &mut packages);
+        self.managed_packages.extend(packages);
+
+        let node_ref = self.nodes.push_mut(Node::Block(block));
+
+        Ok(NodePlanRefWithValue {
+            node: node_ref,
+            value,
+        })
+    }
+
+    pub fn register_packages<'s, 'a: 'pkgs>(&'s mut self, packages: &[MaybeOwned<'a, str>]) {
+        self.managed_packages.extend_from_slice(packages);
+    }
+
+    pub fn block<'s, F>(
+        &'s mut self,
+        name: impl Into<MaybeOwned<'name, str>>,
+        f: F,
+    ) -> NodePlanRef<'s, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>
     where
         F: FnOnce(&mut Self),
     {
@@ -134,23 +251,60 @@ impl<'name, 'elevate, 'action> Block<'name, 'elevate, 'action> {
             nodes: vec![],
             triggers: vec![],
             assertions: vec![],
+            managed_packages: vec![],
+            secrets: self.secrets.clone(),
         };
 
         f(&mut block);
 
         let mut assertions = vec![];
         mem::swap(&mut block.assertions, &mut assertions);
-
         self.assertions.extend(assertions);
+
+        let mut packages = vec![];
+        mem::swap(&mut block.managed_packages, &mut packages);
+        self.managed_packages.extend(packages);
 
         let resource_ref = self.nodes.push_mut(Node::Block(block));
 
         NodePlanRef { node: resource_ref }
     }
 
-    pub fn with<'block, F, R>(&'block mut self, elevate: &'elevate Elevate, f: F) -> R
+    pub fn try_block<'s, F>(
+        &'s mut self,
+        name: impl Into<MaybeOwned<'name, str>>,
+        f: F,
+    ) -> Result<NodePlanRef<'s, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>>
     where
-        F: FnOnce(BlockAddWithElevate<'block, 'name, 'elevate, 'action>) -> R,
+        F: FnOnce(&mut Self) -> Result<()>,
+    {
+        let mut block = Block {
+            name: name.into(),
+            nodes: vec![],
+            triggers: vec![],
+            assertions: vec![],
+            managed_packages: vec![],
+            secrets: self.secrets.clone(),
+        };
+
+        f(&mut block)?;
+
+        let mut assertions = vec![];
+        mem::swap(&mut block.assertions, &mut assertions);
+        self.assertions.extend(assertions);
+
+        let mut packages = vec![];
+        mem::swap(&mut block.managed_packages, &mut packages);
+        self.managed_packages.extend(packages);
+
+        let node_ref = self.nodes.push_mut(Node::Block(block));
+
+        Ok(NodePlanRef { node: node_ref })
+    }
+
+    pub fn with<'s, F, R>(&'s mut self, elevate: &'elevate Elevate, f: F) -> R
+    where
+        F: FnOnce(BlockAddWithElevate<'s, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>) -> R,
     {
         let plan = BlockAddWithElevate {
             elevate,
@@ -160,11 +314,11 @@ impl<'name, 'elevate, 'action> Block<'name, 'elevate, 'action> {
         f(plan)
     }
 
-    pub fn assert<'plan>(
-        &'plan mut self,
+    pub fn assert<'a>(
+        &'a mut self,
         name: impl Into<MaybeOwned<'name, str>>,
         elevate: &'elevate Elevate,
-        assertion: impl Assertable<'action> + Send + 'action,
+        assertion: impl Assertable<'action> + Sync + Send + 'action,
     ) {
         let assertion = Assertion {
             name: name.into(),
@@ -175,18 +329,58 @@ impl<'name, 'elevate, 'action> Block<'name, 'elevate, 'action> {
     }
 }
 
-#[derive(Debug)]
-pub struct BlockAddWithElevate<'block, 'name, 'elevate, 'action> {
-    elevate: &'elevate Elevate,
-    block: &'block mut Block<'name, 'elevate, 'action>,
+pub struct NodePlanRefWithValue<'plan, 'name, 'elevate, 'pkgs, 'action, 'secrets, S, V>
+where
+    S: fmt::Debug + Sync + Send + Clone,
+{
+    node: &'plan mut Node<'name, 'elevate, 'pkgs, 'action, 'secrets, S>,
+    value: V,
 }
 
-impl<'name, 'elevate, 'action> BlockAddWithElevate<'_, 'name, 'elevate, 'action> {
-    pub fn add<'a>(
-        &'a mut self,
+impl<'plan, 'name, 'elevate, 'action, S, V>
+    NodePlanRefWithValue<'plan, 'name, 'elevate, '_, 'action, '_, S, V>
+where
+    S: fmt::Debug + Sync + Send + Clone,
+{
+    pub fn on_change<F>(&'plan mut self, f: F)
+    where
+        F: FnOnce() -> Resource<'name, 'elevate, 'action> + Sync + Send + 'elevate,
+    {
+        let new_trigger = Trigger::OnChange(Box::new(f));
+        match *self.node {
+            Node::Block(ref mut block) => block.triggers.push(new_trigger),
+            Node::Leaf(ref mut resource) => resource.triggers.push(new_trigger),
+        }
+    }
+
+    pub fn value(self) -> V {
+        self.value
+    }
+
+    pub fn value_ok(self) -> Result<V> {
+        Ok(self.value)
+    }
+}
+
+#[derive(Debug)]
+pub struct BlockAddWithElevate<'block, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>
+where
+    S: fmt::Debug + Sync + Send + Clone,
+{
+    elevate: &'elevate Elevate,
+    block: &'block mut Block<'name, 'elevate, 'pkgs, 'action, 'secrets, S>,
+}
+
+impl<'plan, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>
+    BlockAddWithElevate<'_, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>
+where
+    S: fmt::Debug + Sync + Send + Clone,
+{
+    pub fn add(
+        &'plan mut self,
         name: impl Into<MaybeOwned<'name, str>>,
-        action: impl Plannable<'action> + Send + 'action,
-    ) -> NodePlanRef<'a, 'name, 'elevate, 'action> {
+        action: impl Plannable<'action> + Sync + Send + 'action,
+    ) -> NodePlanRef<'plan, 'name, 'elevate, 'pkgs, 'action, 'secrets, S> {
         let resource = Resource {
             name: name.into(),
             elevate: self.elevate,
@@ -204,12 +398,15 @@ impl<'name, 'elevate, 'action> BlockAddWithElevate<'_, 'name, 'elevate, 'action>
 pub struct Assertion<'name, 'elevate, 'assert> {
     name: MaybeOwned<'name, str>,
     elevate: &'elevate Elevate,
-    assert: Box<dyn Assertable<'assert> + Send + 'assert>,
+    assert: Box<dyn Assertable<'assert> + Sync + Send + 'assert>,
 }
 
 #[derive(Debug)]
-enum Node<'name, 'elevate, 'action> {
-    Block(Block<'name, 'elevate, 'action>),
+enum Node<'name, 'elevate, 'pkgs, 'action, 'secrets, S>
+where
+    S: fmt::Debug + Sync + Send + Clone,
+{
+    Block(Block<'name, 'elevate, 'pkgs, 'action, 'secrets, S>),
     Leaf(Resource<'name, 'elevate, 'action>),
 }
 
@@ -217,7 +414,7 @@ enum Node<'name, 'elevate, 'action> {
 pub struct Resource<'name, 'elevate, 'action> {
     name: MaybeOwned<'name, str>,
     elevate: &'elevate Elevate,
-    action: Box<dyn Plannable<'action> + Send + 'action>,
+    action: Box<dyn Plannable<'action> + Sync + Send + 'action>,
     triggers: Vec<Trigger<'name, 'elevate, 'action>>,
 }
 
@@ -225,7 +422,7 @@ impl<'name, 'elevate: 'action, 'action> Resource<'name, 'elevate, 'action> {
     pub fn new(
         name: MaybeOwned<'name, str>,
         elevate: &'elevate Elevate,
-        action: impl Plannable<'action> + Send + 'action,
+        action: impl Plannable<'action> + Sync + Send + 'action,
     ) -> Self {
         Self {
             name,
@@ -299,7 +496,7 @@ impl<'name, 'elevate: 'name> PlannedResource<'name, 'elevate, '_> {
             ChangeStatus::NeedsChange(ref plan) => {
                 let name_with_path = path
                     .iter()
-                    .map(|s| *s)
+                    .copied()
                     .chain(iter::once(self.name.as_ref()))
                     .collect::<Vec<_>>()
                     .join(" ⟶ ");
@@ -393,14 +590,20 @@ impl Gid {
     }
 }
 
-pub struct NodePlanRef<'plan, 'name, 'elevate, 'action> {
-    node: &'plan mut Node<'name, 'elevate, 'action>,
+pub struct NodePlanRef<'plan, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>
+where
+    S: fmt::Debug + Sync + Send + Clone,
+{
+    node: &'plan mut Node<'name, 'elevate, 'pkgs, 'action, 'secrets, S>,
 }
 
-impl<'plan, 'name, 'elevate, 'action> NodePlanRef<'plan, 'name, 'elevate, 'action> {
+impl<'plan, 'name, 'elevate, 'action, S> NodePlanRef<'plan, 'name, 'elevate, '_, 'action, '_, S>
+where
+    S: fmt::Debug + Sync + Send + Clone,
+{
     pub fn on_change<F>(&'plan mut self, f: F)
     where
-        F: FnOnce() -> Resource<'name, 'elevate, 'action> + Send + 'elevate,
+        F: FnOnce() -> Resource<'name, 'elevate, 'action> + Sync + Send + 'elevate,
     {
         let new_trigger = Trigger::OnChange(Box::new(f));
         match *self.node {
@@ -413,22 +616,22 @@ impl<'plan, 'name, 'elevate, 'action> NodePlanRef<'plan, 'name, 'elevate, 'actio
 #[derive(Debug)]
 pub struct PlanAddWithElevate<'plan, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>
 where
-    S: fmt::Debug + Sync,
+    S: fmt::Debug + Clone + Sync + Send,
 {
     elevate: &'elevate Elevate,
     plan: &'plan mut Plan<'name, 'elevate, 'pkgs, 'action, 'secrets, S>,
 }
 
-impl<'name, 'elevate, 'pkgs, 'action, S>
-    PlanAddWithElevate<'_, 'name, 'elevate, 'pkgs, 'action, '_, S>
+impl<'plan, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>
+    PlanAddWithElevate<'plan, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>
 where
-    S: fmt::Debug + Sync,
+    S: fmt::Debug + Clone + Sync + Send,
 {
-    pub fn add<'a>(
-        &'a mut self,
+    pub fn add(
+        &'plan mut self,
         name: impl Into<MaybeOwned<'name, str>>,
-        action: impl Plannable<'action> + Send + 'action,
-    ) -> NodePlanRef<'a, 'name, 'elevate, 'action> {
+        action: impl Plannable<'action> + Sync + Send + 'action,
+    ) -> NodePlanRef<'plan, 'name, 'elevate, 'pkgs, 'action, 'secrets, S> {
         let resource = Resource {
             name: name.into(),
             elevate: self.elevate,
@@ -442,7 +645,7 @@ where
     }
 
     pub fn register_packages<'a: 'pkgs>(
-        &mut self,
+        &'plan mut self,
         packages: &MaybeOwned<'a, [MaybeOwned<'a, str>]>,
     ) {
         self.plan
@@ -451,10 +654,10 @@ where
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum SecretsWorkflow<'secrets, S>
 where
-    S: fmt::Debug,
+    S: fmt::Debug + Sync + Send + Clone,
 {
     None,
     AssumeExisting,
@@ -463,7 +666,7 @@ where
 
 impl<S> SecretsWorkflow<'_, S>
 where
-    S: fmt::Debug,
+    S: fmt::Debug + Sync + Send + Clone,
 {
     fn as_ref(&self) -> Self {
         match *self {
@@ -487,9 +690,9 @@ pub enum FinishResult<'name, 'elevate, 'pkgs, 'action> {
 #[derive(Debug)]
 pub struct Plan<'name, 'elevate, 'pkgs, 'action, 'secrets, S>
 where
-    S: fmt::Debug,
+    S: fmt::Debug + Sync + Send + Clone,
 {
-    nodes: Vec<Node<'name, 'elevate, 'action>>,
+    nodes: Vec<Node<'name, 'elevate, 'pkgs, 'action, 'secrets, S>>,
     assertions: Vec<Assertion<'name, 'elevate, 'action>>,
     managed_packages: Vec<MaybeOwned<'pkgs, str>>,
     secrets: SecretsWorkflow<'secrets, S>,
@@ -498,7 +701,7 @@ where
 impl<'name, 'elevate, 'pkgs, 'action, 'secrets, S>
     Plan<'name, 'elevate, 'pkgs, 'action, 'secrets, S>
 where
-    S: fmt::Debug + Sync,
+    S: fmt::Debug + Clone + Sync + Send + 'name,
     'elevate: 'action,
 {
     pub fn new() -> Self {
@@ -519,23 +722,11 @@ where
         self.secrets.as_ref()
     }
 
-    pub fn with<'plan, F, R>(&'plan mut self, elevate: &'elevate Elevate, f: F) -> R
-    where
-        F: FnOnce(PlanAddWithElevate<'plan, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>) -> R,
-    {
-        let plan = PlanAddWithElevate::<'plan, '_, '_, '_, '_, 'secrets, S> {
-            elevate,
-            plan: self,
-        };
-
-        f(plan)
-    }
-
     pub fn assert<'plan>(
         &'plan mut self,
         name: impl Into<MaybeOwned<'name, str>>,
         elevate: &'elevate Elevate,
-        assertion: impl Assertable<'action> + Send + 'action,
+        assertion: impl Assertable<'action> + Sync + Send + 'action,
     ) {
         let assertion = Assertion {
             name: name.into(),
@@ -545,12 +736,12 @@ where
         self.assertions.push(assertion);
     }
 
-    pub fn add<'plan>(
-        &'plan mut self,
+    pub fn add<'s>(
+        &'s mut self,
         name: impl Into<MaybeOwned<'name, str>>,
         elevate: &'elevate Elevate,
-        action: impl Plannable<'action> + Send + 'action,
-    ) -> NodePlanRef<'plan, 'name, 'elevate, 'action> {
+        action: impl Plannable<'action> + Sync + Send + 'action,
+    ) -> NodePlanRef<'s, 'name, 'elevate, 'pkgs, 'action, 'secrets, S> {
         let resource = Resource {
             name: name.into(),
             elevate,
@@ -563,56 +754,147 @@ where
         NodePlanRef { node }
     }
 
-    pub fn block<'plan, F>(
-        &'plan mut self,
+    pub async fn block_async<'s, F>(
+        &'s mut self,
         name: impl Into<MaybeOwned<'name, str>>,
         f: F,
-    ) -> NodePlanRef<'plan, 'name, 'elevate, 'action>
+    ) -> NodePlanRef<'s, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>
     where
-        F: FnOnce(&mut Block<'name, 'elevate, 'action>),
+        F: AsyncFnOnce(&mut Block<'name, 'elevate, 'pkgs, 'action, 'secrets, S>),
     {
         let mut block = Block {
             name: name.into(),
             nodes: vec![],
             triggers: vec![],
             assertions: vec![],
+            managed_packages: vec![],
+            secrets: self.secrets.clone(),
         };
 
-        f(&mut block);
+        f(&mut block).await;
 
         let mut assertions = vec![];
         mem::swap(&mut block.assertions, &mut assertions);
-
         self.assertions.extend(assertions);
+
+        let mut packages = vec![];
+        mem::swap(&mut block.managed_packages, &mut packages);
+        self.managed_packages.extend(packages);
 
         let node_ref = self.nodes.push_mut(Node::Block(block));
 
         NodePlanRef { node: node_ref }
     }
 
-    pub fn try_block<'plan, F>(
-        &'plan mut self,
+    pub async fn try_block_async<'s, F>(
+        &'s mut self,
         name: impl Into<MaybeOwned<'name, str>>,
         f: F,
-    ) -> Result<NodePlanRef<'plan, 'name, 'elevate, 'action>>
+    ) -> Result<NodePlanRef<'s, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>>
     where
-        F: FnOnce(&mut Block<'name, 'elevate, 'action>) -> Result<()>,
+        F: AsyncFnOnce(&mut Block<'name, 'elevate, 'pkgs, 'action, 'secrets, S>) -> Result<()>,
     {
         let mut block = Block {
             name: name.into(),
             nodes: vec![],
             triggers: vec![],
             assertions: vec![],
+            managed_packages: vec![],
+            secrets: self.secrets.clone(),
         };
 
-        f(&mut block)?;
+        f(&mut block).await?;
+
+        let mut assertions = vec![];
+        mem::swap(&mut block.assertions, &mut assertions);
+        self.assertions.extend(assertions);
+
+        let mut packages = vec![];
+        mem::swap(&mut block.managed_packages, &mut packages);
+        self.managed_packages.extend(packages);
 
         let node_ref = self.nodes.push_mut(Node::Block(block));
 
         Ok(NodePlanRef { node: node_ref })
     }
 
-    pub fn register_packages<'a: 'pkgs>(&mut self, packages: &[MaybeOwned<'a, str>]) {
+    pub fn with<'s, F, R>(&'s mut self, elevate: &'elevate Elevate, f: F) -> R
+    where
+        F: FnOnce(PlanAddWithElevate<'s, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>) -> R,
+    {
+        let plan = PlanAddWithElevate::<'s, 'name, 'elevate, 'pkgs, 'action, 'secrets, S> {
+            elevate,
+            plan: self,
+        };
+
+        f(plan)
+    }
+
+    pub fn block<'s, F>(
+        &'s mut self,
+        name: impl Into<MaybeOwned<'name, str>>,
+        f: F,
+    ) -> NodePlanRef<'s, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>
+    where
+        F: FnOnce(&mut Block<'name, 'elevate, 'pkgs, 'action, 'secrets, S>),
+    {
+        let mut block = Block {
+            name: name.into(),
+            nodes: vec![],
+            triggers: vec![],
+            assertions: vec![],
+            managed_packages: vec![],
+            secrets: self.secrets.clone(),
+        };
+
+        f(&mut block);
+
+        let mut assertions = vec![];
+        mem::swap(&mut block.assertions, &mut assertions);
+        self.assertions.extend(assertions);
+
+        let mut packages = vec![];
+        mem::swap(&mut block.managed_packages, &mut packages);
+        self.managed_packages.extend(packages);
+
+        let node_ref = self.nodes.push_mut(Node::Block(block));
+
+        NodePlanRef { node: node_ref }
+    }
+
+    pub fn try_block<'s, F>(
+        &'s mut self,
+        name: impl Into<MaybeOwned<'name, str>>,
+        f: F,
+    ) -> Result<NodePlanRef<'s, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>>
+    where
+        F: FnOnce(&mut Block<'name, 'elevate, 'pkgs, 'action, 'secrets, S>) -> Result<()>,
+    {
+        let mut block = Block {
+            name: name.into(),
+            nodes: vec![],
+            triggers: vec![],
+            assertions: vec![],
+            managed_packages: vec![],
+            secrets: self.secrets.clone(),
+        };
+
+        f(&mut block)?;
+
+        let mut assertions = vec![];
+        mem::swap(&mut block.assertions, &mut assertions);
+        self.assertions.extend(assertions);
+
+        let mut packages = vec![];
+        mem::swap(&mut block.managed_packages, &mut packages);
+        self.managed_packages.extend(packages);
+
+        let node_ref = self.nodes.push_mut(Node::Block(block));
+
+        Ok(NodePlanRef { node: node_ref })
+    }
+
+    pub fn register_packages<'s, 'a: 'pkgs>(&'s mut self, packages: &[MaybeOwned<'a, str>]) {
         self.managed_packages.extend_from_slice(packages);
     }
 
@@ -689,13 +971,15 @@ where
     }
 }
 
-async fn resolve_node<'name, 'elevate, 'action>(
-    node: Node<'name, 'elevate, 'action>,
+async fn resolve_node<'plan, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>(
+    node: Node<'name, 'elevate, 'pkgs, 'action, 'secrets, S>,
 ) -> Result<Vec<PlannedNode<'name, 'elevate, 'action>>>
 where
     'elevate: 'action,
+    S: fmt::Debug + Sync + Send + Clone,
 {
     let mut actions = vec![];
+    // let mut managed_packages = vec![];
 
     match node {
         Node::Block(Block {
@@ -703,6 +987,8 @@ where
             nodes,
             triggers,
             assertions,
+            managed_packages,
+            secrets,
         }) => {
             let mut block_actions = vec![];
             let mut any_changed = false;
@@ -1275,7 +1561,6 @@ impl<'pkgs> PlanApproved<'_, '_, 'pkgs, '_> {
 }
 
 impl PlanApproved<'_, '_, '_, '_> {
-    #[expect(clippy::unwrap_used, reason = "stdout writing should never fail")]
     pub async fn apply(&self) -> Result<()> {
         let mut stdout = io::stdout();
         for node in &self.nodes {
