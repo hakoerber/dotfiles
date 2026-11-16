@@ -606,3 +606,24 @@ impl Assertable<'_> for AssertFile<'_> {
         }
     }
 }
+
+#[derive(Debug)]
+pub struct AssertAbsent<'args> {
+    pub path: MaybeOwned<'args, Path>,
+}
+
+#[async_trait]
+impl Assertable<'_> for AssertAbsent<'_> {
+    async fn assert<'elevate>(
+        self: Box<Self>,
+        elevate: &'elevate Elevate,
+    ) -> Result<AssertionResult> {
+        if fs::exists(elevate, self.path.as_ref()).await? {
+            Ok(AssertionResult::Failed(AssertionFailureReport {
+                reason: { vec!["path exists".to_owned()] },
+            }))
+        } else {
+            Ok(AssertionResult::Success)
+        }
+    }
+}
