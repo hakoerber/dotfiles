@@ -340,7 +340,7 @@ const ADDITIONAL_PACKAGES: &[(&str, &[&str])] = &[
     ("musescore", &["musescore"]),
     ("imagemagick", &["imagemagick"]),
     ("mpv", &["mpv"]),
-    ("terraform", &["terraform", "terragrunt"]),
+    ("terraform", &["terraform", "terragrunt", "tflint"]),
     ("discord", &["discord"]),
     ("kubectl", &["kubectl"]),
     ("chromium", &["chromium"]),
