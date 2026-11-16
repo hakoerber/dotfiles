@@ -223,12 +223,6 @@ const PKGBUILDS: &[BuildInfo] = &[
         update: false,
     },
     BuildInfo {
-        name: "slack-desktop",
-        path: "../pkgbuilds/slack-desktop",
-        preexec: None,
-        update: false,
-    },
-    BuildInfo {
         name: "spotify",
         path: "../pkgbuilds/spotify",
         preexec: Some(
