@@ -828,8 +828,8 @@ fn print_node(
     node: &NodeReport,
     stdout: &mut impl io::Write,
     config: &ReportConfig,
-    first: bool,
-    last: bool,
+    first_in_block: bool,
+    last_in_block: bool,
     prefix: &str,
 ) -> bool {
     match *node {
@@ -843,12 +843,12 @@ fn print_node(
                         "{prefix}{c}─ {} {name}",
                         "Resource [CHANGE]".fg::<colors::Yellow>(),
                         prefix = prefix.fg::<colors::White>(),
-                        c = if first && last {
+                        c = if first_in_block && last_in_block {
                             // only a single resource, no lines to draw
                             '•'
-                        } else if first {
+                        } else if first_in_block {
                             '╭'
-                        } else if last {
+                        } else if last_in_block {
                             '╰'
                         } else {
                             '├'
@@ -857,7 +857,7 @@ fn print_node(
                     )
                     .unwrap();
 
-                    let detail_prefix = if last {
+                    let detail_prefix = if last_in_block {
                         format!("{prefix}   ")
                     } else {
                         format!("{prefix}│  ")
@@ -872,7 +872,7 @@ fn print_node(
                         .unwrap();
                     }
 
-                    if !last {
+                    if !last_in_block {
                         writeln!(stdout, "{prefix}│", prefix = prefix.fg::<colors::White>())
                             .unwrap();
                     }
@@ -886,12 +886,12 @@ fn print_node(
                             "{prefix}{c}─ {} {name}",
                             "Resource [CLEAN]".fg::<colors::Green>(),
                             prefix = prefix.fg::<colors::White>(),
-                            c = if first && last {
+                            c = if first_in_block && last_in_block {
                                 // only a single resource, no lines to draw
                                 '•'
-                            } else if first {
+                            } else if first_in_block {
                                 '╭'
-                            } else if last {
+                            } else if last_in_block {
                                 '╰'
                             } else {
                                 '├'
@@ -900,10 +900,11 @@ fn print_node(
                         )
                         .unwrap();
 
-                        if !last {
+                        if !last_in_block {
                             writeln!(stdout, "{prefix}│", prefix = prefix.fg::<colors::White>())
                                 .unwrap();
                         }
+
                         action_printed = true;
                     }
                 }
@@ -917,57 +918,82 @@ fn print_node(
             count: _,
             changes: _,
         } => {
-            writeln!(
-                stdout,
-                "{prefix}{c}──┬─ {} {name}",
-                "Block".fg::<colors::Yellow>(),
-                c = if first {
-                    '╭'
-                } else if last {
-                    '╰'
-                } else {
-                    '├'
-                },
-                name = name.as_ref()
-            )
-            .unwrap();
-
-            let nodes: Vec<_> = if *config == ReportConfig::All {
-                nodes.iter().collect()
-            } else {
-                nodes
-                    .iter()
-                    .filter(|node| match **node {
-                        NodeReport::Resource { ref report } => report.status.is_changed(),
-                        NodeReport::Block {
-                            name: _,
-                            nodes: _,
-                            count: _,
-                            changes,
-                        } => changes != 0,
-                    })
-                    .collect()
-            };
-
-            let prefix = format!("{prefix}{add}", add = if last { "   " } else { "│  " });
-
-            writeln!(stdout, "{prefix}│", prefix = prefix.fg::<colors::White>()).unwrap();
-
-            for (i, node) in nodes.iter().enumerate() {
-                print_node(
-                    node,
+            if nodes.is_empty() {
+                writeln!(
                     stdout,
-                    config,
-                    false,
-                    i == nodes
-                        .len()
-                        .checked_sub(1)
-                        .expect("if len < 1, this loop would never be taken"),
-                    &prefix,
+                    "{prefix}{c}──── {} {name}",
+                    "Block".fg::<colors::White>(),
+                    c = if first_in_block {
+                        '╭'
+                    } else if last_in_block {
+                        '╰'
+                    } else {
+                        '├'
+                    },
+                    name = name.as_ref()
+                )
+                .unwrap();
+            } else {
+                writeln!(
+                    stdout,
+                    "{prefix}{c}──┬─ {} {name}",
+                    "Block".fg::<colors::White>(),
+                    c = if first_in_block {
+                        '╭'
+                    } else if last_in_block {
+                        '╰'
+                    } else {
+                        '├'
+                    },
+                    name = name.as_ref()
+                )
+                .unwrap();
+
+                let nodes: Vec<_> = if *config == ReportConfig::All {
+                    nodes.iter().collect()
+                } else {
+                    nodes
+                        .iter()
+                        .filter(|node| match **node {
+                            NodeReport::Resource { ref report } => report.status.is_changed(),
+                            NodeReport::Block {
+                                name: _,
+                                nodes: _,
+                                count: _,
+                                changes,
+                            } => changes != 0,
+                        })
+                        .collect()
+                };
+
+                let prefix = format!(
+                    "{prefix}{add}",
+                    add = if last_in_block { "   " } else { "│  " }
                 );
+
+                writeln!(stdout, "{prefix}│", prefix = prefix.fg::<colors::White>()).unwrap();
+
+                for (i, node) in nodes.iter().enumerate() {
+                    print_node(
+                        node,
+                        stdout,
+                        config,
+                        false,
+                        i == nodes
+                            .len()
+                            .checked_sub(1)
+                            .expect("if len < 1, this loop would never be taken"),
+                        &prefix,
+                    );
+                }
             }
 
-            if !last {
+            if !last_in_block {
+                let prefix = format!(
+                    "{prefix}{add}",
+                    add = if last_in_block { "   " } else { "│  " }
+                );
+
                 writeln!(stdout, "{prefix}", prefix = prefix.fg::<colors::White>()).unwrap();
             }
             true // blocks always print something
