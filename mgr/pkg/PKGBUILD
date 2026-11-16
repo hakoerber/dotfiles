@@ -1,10 +1,17 @@
 # Maintainer: Hannes Körber <hannes@hkoerber.de>
 pkgname='workstation-mgr'
-pkgver=22
+pkgver=23
 pkgrel=1
 pkgdesc=''
 arch=('x86_64')
-depends=('glibc' 'gcc-libs')
+depends=(
+  'glibc'
+  'gcc-libs'
+  'brightnessctl'
+  'libpulse'
+  'playerctl'
+  'dunst'
+)
 makedepends=('cargo')
 options=(!lto !debug)
 source=()
