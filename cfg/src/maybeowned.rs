@@ -125,3 +125,41 @@ where
         }
     }
 }
+
+impl<R> PartialEq for MaybeOwned<'_, R>
+where
+    R: ToOwned + ?Sized + PartialEq,
+    <R as ToOwned>::Owned: AsRef<R> + PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        #[expect(
+            clippy::pattern_type_mismatch,
+            reason = "conflicts with `needless_borrowed_reference`"
+        )]
+        match (self, other) {
+            (Self::Owned(l0), Self::Owned(r0)) => l0 == r0,
+            (&Self::Ref(l0), &Self::Ref(r0)) => *l0 == *r0,
+            _ => false,
+        }
+    }
+}
+
+impl<R> Eq for MaybeOwned<'_, R>
+where
+    R: ToOwned + ?Sized + Eq,
+    <R as ToOwned>::Owned: AsRef<R> + Eq,
+{
+}
+
+impl<R> std::hash::Hash for MaybeOwned<'_, R>
+where
+    R: ToOwned + ?Sized + std::hash::Hash,
+    <R as ToOwned>::Owned: AsRef<R> + std::hash::Hash,
+{
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        match *self {
+            MaybeOwned::Owned(ref o) => o.hash(state),
+            MaybeOwned::Ref(r) => r.hash(state),
+        }
+    }
+}
