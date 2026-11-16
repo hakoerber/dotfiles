@@ -3735,7 +3735,6 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                 Ref("cargo-machete"),
                 Ref("rust-script"),
                 Ref("bacon"),
-                Ref("sccache"),
                 Ref("mold"),
             ]
             .as_slice()),

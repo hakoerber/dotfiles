@@ -1,5 +1,2 @@
 [target.'cfg(target_os = "linux")']
 rustflags = ["-C", "link-arg=-fuse-ld=mold"]
-
-[build]
-rustc-wrapper = "sccache"
