@@ -918,21 +918,40 @@ fn print_node(
             count: _,
             changes: _,
         } => {
+            let nodes: Vec<_> = if *config == ReportConfig::All {
+                nodes.iter().collect()
+            } else {
+                nodes
+                    .iter()
+                    .filter(|node| match **node {
+                        NodeReport::Resource { ref report } => report.status.is_changed(),
+                        NodeReport::Block {
+                            name: _,
+                            nodes: _,
+                            count: _,
+                            changes,
+                        } => changes != 0,
+                    })
+                    .collect()
+            };
+
             if nodes.is_empty() {
-                writeln!(
-                    stdout,
-                    "{prefix}{c}──── {} {name}",
-                    "Block".fg::<colors::White>(),
-                    c = if first_in_block {
-                        '╭'
-                    } else if last_in_block {
-                        '╰'
-                    } else {
-                        '├'
-                    },
-                    name = name.as_ref()
-                )
-                .unwrap();
+                if *config == ReportConfig::All {
+                    writeln!(
+                        stdout,
+                        "{prefix}{c}──── {} {name}",
+                        "Block".fg::<colors::White>(),
+                        c = if first_in_block {
+                            '╭'
+                        } else if last_in_block {
+                            '╰'
+                        } else {
+                            '├'
+                        },
+                        name = name.as_ref()
+                    )
+                    .unwrap();
+                }
             } else {
                 writeln!(
                     stdout,
@@ -948,23 +967,6 @@ fn print_node(
                     name = name.as_ref()
                 )
                 .unwrap();
-
-                let nodes: Vec<_> = if *config == ReportConfig::All {
-                    nodes.iter().collect()
-                } else {
-                    nodes
-                        .iter()
-                        .filter(|node| match **node {
-                            NodeReport::Resource { ref report } => report.status.is_changed(),
-                            NodeReport::Block {
-                                name: _,
-                                nodes: _,
-                                count: _,
-                                changes,
-                            } => changes != 0,
-                        })
-                        .collect()
-                };
 
                 let prefix = format!(
                     "{prefix}{add}",
@@ -1121,10 +1123,12 @@ where
     match node.inner {
         PlannedNodeInner::Block(ref block) => {
             let mut nodes = vec![];
+
             for node in &block.nodes {
                 let node_reports = report_node(node)?;
                 nodes.extend(node_reports);
             }
+
             let node_count = nodes
                 .iter()
                 .map(|report| match *report {
@@ -1137,6 +1141,7 @@ where
                     } => count,
                 })
                 .sum();
+
             let changes = nodes
                 .iter()
                 .map(|report| match *report {
@@ -1155,6 +1160,7 @@ where
                     } => changes,
                 })
                 .sum();
+
             reports.push(NodeReport::Block {
                 name: &block.name,
                 nodes,
