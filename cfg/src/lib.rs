@@ -1150,9 +1150,9 @@ where
                     NodeReport::Block {
                         name: _,
                         nodes: _,
-                        count,
-                        changes: _,
-                    } => count,
+                        count: _,
+                        changes,
+                    } => changes,
                 })
                 .sum();
             reports.push(NodeReport::Block {
