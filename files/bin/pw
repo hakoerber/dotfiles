@@ -1,2 +1,4 @@
 #!/usr/bin/env bash
+# depends: pwgen
+
 pwgen -s 25 1

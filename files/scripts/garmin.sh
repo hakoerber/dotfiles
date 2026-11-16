@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# depends: sudo rsync util-linux
 
 set -o nounset
 

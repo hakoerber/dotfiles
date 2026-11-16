@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# depends: procps-ng sed
 
 set -o nounset
 

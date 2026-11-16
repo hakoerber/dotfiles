@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# depends: sed
+#
 # Stolen from https://devops.stackexchange.com/a/8984 and adapted to my use case
 
 if (( $# == 0 )) ; then

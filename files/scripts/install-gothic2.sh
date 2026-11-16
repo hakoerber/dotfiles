@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# depends: curl wine winetricks unzip tar sed
 
 # Steam setting: Proton 4.11-13
 #

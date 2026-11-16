@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# depends: libnotify
 
 set -o nounset
 

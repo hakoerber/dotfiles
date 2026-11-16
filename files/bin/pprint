@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# depends: python
 
 import sys
 import pprint

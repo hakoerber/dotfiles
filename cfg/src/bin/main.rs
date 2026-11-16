@@ -30,6 +30,9 @@ static INCLUDED_PACKAGES: &[(&str, &str, &str, &[u8])] =
 
 const MY_SSH_PUBKEY: &str = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCxOtVxz3vRL7SUZVO899RUcg9BiDuZfPUfsd9v3AHOwNvSVsLObqq0QgwajmTML9nRZzX7kc7RmFtXZ5ypMkyEJ9p14rYXKYKhLqEM4Paz0lUagQhy0sdYijtayNsM5luU3yk6a4F/PkanprDGEEtJPMLCwpDODTwlE7THvFtJXLnYeFtF2DJKnUcP6E9MWGYM1zYdrmf43pxWg2YXFjoyLEkOy6TVjjqwz+tKa6+4YRqFWNyXcEWqI2ZLqHRzZTvu+46gsnR+8HcLpov3ij/Mr0jYSJ4vqMGz1yfKnrsKZUp0IhvlPYbGjdcL17xYame2UroPS8AzWWegyqeEFh54qmCrFVw/uwErcWcUJX3KEijrc48DYZUBK09vnFFcXIYR/cfFWpTGhnqlwp/EAaBeR3zr6hS6lL+XluMIjHHkwT/eD3YydEwABjbJwBJp5PdYR4M/bSHuOoCH6d/U36OpkwwekyYKWvEoxxPSJIWCy1ApILQZmWuctIFc8SQfSXfRifPEDBnL9hNzzX00beDYmS6cPIP0TIqa9fdL1AeO68Tk7o67f2cCE11QTH7FI9JjhuQ/M4dO8jUw7kmtGCKdReNIuYYU3xZB4wdFHs/5UxROCwEZnv+3uWAgHbgc14XLWunN9P9msOxYLHPVJK/XcdhHvWSmQdNq4ajry/H+kQ==";
 
+type PackageList<'pkgs> =
+    HashMap<MaybeOwned<'pkgs, str>, MaybeOwned<'pkgs, [MaybeOwned<'pkgs, str>]>>;
+
 #[derive(Serialize)]
 enum Cpu {
     Intel,
@@ -53,22 +56,22 @@ enum Host {
 
 use Host::{Ares, Dionysus, Hera, Neptune};
 
-#[derive(Deserialize)]
-struct Secret<T>(T);
+#[derive(Deserialize, Clone)]
+struct Secret<T: Clone>(T);
 
-impl<T> std::fmt::Debug for Secret<T> {
+impl<T: Clone> std::fmt::Debug for Secret<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_tuple("[redacted]").finish()
     }
 }
 
-impl<T> Secret<T> {
+impl<T: Clone> Secret<T> {
     fn access(&self) -> &T {
         &self.0
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 struct WireguardPubkey(String);
 
 impl WireguardPubkey {
@@ -77,7 +80,7 @@ impl WireguardPubkey {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 struct WireguardPrivkey(String);
 
 impl WireguardPrivkey {
@@ -86,7 +89,7 @@ impl WireguardPrivkey {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 struct WireguardPsk(String);
 
 impl WireguardPsk {
@@ -95,7 +98,7 @@ impl WireguardPsk {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 struct Domain(String);
 
 impl Domain {
@@ -104,7 +107,7 @@ impl Domain {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 struct Port(u16);
 
 impl Port {
@@ -113,7 +116,7 @@ impl Port {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 struct WireguardSecrets {
     address: Secret<Ipv4Addr>,
     privkey: Secret<WireguardPrivkey>,
@@ -124,7 +127,7 @@ struct WireguardSecrets {
     server_endpoint_port: Secret<Port>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 struct Secrets {
     wireguard: WireguardSecrets,
 }
@@ -168,20 +171,8 @@ struct Cli {
     action: Action,
 }
 
-const REQUIRED_PACKAGES: &[(&str, &[&str])] = &[
-    ("gammastep", &["gammastep"]),
-    ("pinentry-qt", &["pinentry"]),
-    ("pass", &["pass", "passff-host"]),
-    ("alacritty", &["alacritty"]),
-    ("tmux", &["tmux"]),
-    (
-        "zsh",
-        &["zsh", "zsh-syntax-highlighting", "zsh-completions"],
-    ),
-    ("firefox", &["firefox"]),
-    ("theming", &["breeze", "breeze-grub", "breeze-gtk"]),
-    ("python-yaml", &["python-ruamel-yaml"]),
-    ("brightnessctl", &["brightnessctl"]),
+#[cfg_attr(feature = "testing", expect(unused, reason = "not used in testing"))]
+const APPLICATION_PACKAGES: &[(&str, &[&str])] = &[
     ("curl", &["curl"]),
     ("wget", &["wget"]),
     ("pwgen", &["pwgen"]),
@@ -194,55 +185,12 @@ const REQUIRED_PACKAGES: &[(&str, &[&str])] = &[
             "yubikey-touch-detector",
         ],
     ),
-    (
-        "pulseaudio",
-        &[
-            "pulseaudio",
-            "pulseaudio-alsa",
-            "lib32-libpulse",
-            "alsa-utils",
-            "alsa-firmware",
-            "sof-firmware",
-            "alsa-ucm-conf",
-        ],
-    ),
-    // this needs to come *after* pulseaudio, otherwise it will pull in pipewire-pulse as the
-    // provider for pulse-native-provider
-    ("pavucontrol", &["pavucontrol-qt"]),
     ("dunst", &["dunst"]),
     ("rofi", &["rofi"]),
     ("imv", &["imv"]),
-    (
-        "steam",
-        &["steam", "lib32-pango", "pango", "ttf-liberation"],
-    ),
-    ("nextcloud", &["nextcloud-client"]),
-    ("mpris", &["playerctl"]),
-    ("gnome-keyring", &["gnome-keyring", "seahorse"]),
     ("jq", &["jq"]),
-    ("kdeconnect", &["kdeconnect"]),
-    ("helix", &["helix"]),
-    ("keepassxc", &["keepassxc"]),
-    ("eza", &["eza"]),
     ("ripgrep", &["ripgrep"]),
     ("fzf", &["fzf"]),
-    (
-        "sway",
-        &[
-            "sway",
-            "swaybg",
-            "swaylock",
-            "swayidle",
-            "xorg-xwayland",
-            "xorg-xlsclients",
-        ],
-    ),
-    ("i3status-rust", &["i3status-rust"]),
-    ("sccache", &["sccache"]),
-];
-
-#[cfg_attr(feature = "testing", expect(unused, reason = "not used in testing"))]
-const ADDITIONAL_PACKAGES: &[(&str, &[&str])] = &[
     (
         "build-essentials",
         &["gcc", "ctags", "cmake", "maven", "base-devel"],
@@ -259,11 +207,8 @@ const ADDITIONAL_PACKAGES: &[(&str, &[&str])] = &[
     ("font-utils", &["woff2"]),
     ("restic", &["restic"]),
     ("neovim", &["neovim", "python-pynvim"]),
-    ("nodejs", &["nodejs-lts-jod", "npm", "yarn"]),
-    // this needs to come *after* nodejs, otherwise dockerfile-language-server will pull
-    // nodejs (non-LTS)
+    ("nodejs", &["nodejs", "npm", "yarn"]),
     ("docker", &["dockerfile-language-server"]),
-    ("git", &["git", "qgit", "git-delta", "git-filter-repo"]),
     ("ansible", &["ansible", "ansible-lint", "python-jmespath"]),
     ("htop", &["htop"]),
     ("which", &["which"]),
@@ -294,26 +239,6 @@ const ADDITIONAL_PACKAGES: &[(&str, &[&str])] = &[
     ),
     ("dust", &["dust"]),
     ("rclone", &["rclone"]),
-    (
-        "rust",
-        &[
-            "rustup",
-            "rust-analyzer",
-            "cargo-edit",
-            "cargo-expand",
-            "cargo-msrv",
-            "cargo-watch",
-            "cargo-release",
-            "cargo-sort",
-            "cargo-hack",
-            "cargo-dist",
-            "cargo-binstall",
-            "cargo-machete",
-            "rust-script",
-            "bacon",
-        ],
-    ),
-    ("mold", &["clang", "mold"]),
     ("wild", &["wild"]),
     ("rsync", &["rsync"]),
     ("net-tools", &["net-tools"]),
@@ -450,504 +375,381 @@ const ADDITIONAL_PACKAGES: &[(&str, &[&str])] = &[
     ("pkgbuilds-nm-sidebar", &["meson", "ninja"]),
 ];
 
-struct PackageConfig(HashSet<(&'static str, &'static [&'static str])>);
-
-fn packages() -> PackageConfig {
-    let mut list = HashSet::new();
-
-    list.extend(REQUIRED_PACKAGES);
-
-    #[cfg(not(feature = "testing"))]
-    list.extend(ADDITIONAL_PACKAGES);
-
-    PackageConfig(list)
-}
-
-fn hera<'elevate: 'action, 'action, 'secrets>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action, 'secrets, Secrets>,
+fn autoupdate<'name: 'static, 'elevate: 'action, 'pkgs, 'action, 'secrets>(
+    plan: &mut Block<'name, 'elevate, 'pkgs, 'action, 'secrets, Secrets>,
     elevate: &'elevate Elevate,
 ) {
-    let packages = &[
-        Ref("plasma-desktop"),
-        Ref("konsole"),
-        Ref("dolphin"),
-        Ref("kdeplasma-addons"),
-        Ref("plasma-nm"),
-        Ref("plasma-pa"),
-        Ref("plasma-systemmonitor"),
-        Ref("plasma-login-manager"),
-        Ref("thunderbird"),
-        // kde archive manager
-        Ref("ark"),
-        // kde image viewer
-        Ref("gwenview"),
-        // german language packs
-        Ref("hunspell-de"),
-        Ref("thunderbird-i18n-de"),
-        Ref("firefox-i18n-de"),
-    ];
+    plan.block("autoupdate", |plan| {
+        plan.add(
+            "deploy autoupdate script",
+            elevate,
+            File {
+                path: Ref(Path::new("/usr/local/bin/pacman-autoupdate")),
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o755),
+                },
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Proceed,
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(
+                    dedent!(r#"
+                        #!/usr/bin/env bash
 
-    plan.add(
-        "install packages",
-        elevate,
-        Packages {
-            install: Ref(packages),
-            reason: InstallReason::Explicit,
-        },
-    );
+                        set -o errexit
+                        set -o nounset
+                        set -o pipefail
 
-    plan.register_packages(packages);
+                        # Prevent failures when no battery present
+                        shopt -s nullglob
 
-    plan.add(
-        Ref("create user"),
-        elevate,
-        User {
-            name: "herta",
-            home: Ref(Path::new("/home/herta")),
-            primary_group: PrimaryGroupConfig::Automatic,
-            additional_groups: &["wheel", "sudonopw", "games", "kvm", "video"],
-            shell: "/usr/bin/zsh",
-            system: false,
-        },
-    );
+                        for battery in /sys/class/power_supply/*/capacity ; do
+                            capacity="$(< "$battery")"
+                            if (( "${capacity}" < 40 )) ; then
+                                printf "Battery at %s%%, exiting\n" "${capacity}" >&2
+                                exit 0
+                            fi
+                        done
 
-    plan.add(
-        Ref("enable plasma-login-manager"),
-        elevate,
-        Service {
-            name: "plasmalogin.service",
-            state: ServiceState {
-                runtime: ServiceStateRuntime::Active,
-                persistent: ServiceStatePersistent::Enabled,
-            },
-        },
-    );
-
-    plan.add(
-        "configure plasma login manager",
-        elevate,
-        File {
-            path: Ref(Path::new("/etc/plasmalogin.conf")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o644),
-            },
-            on_symlink: SymlinkHandling::Proceed,
-            on_directory: DirectoryHandling::Proceed,
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: FileContent::Bytes(Ref(dedent!(
-                r#"
-                    [Autologin]
-                    User=herta
-                    Session=plasma.desktop
-                "#
-            )
-            .as_bytes())),
-        },
-    );
-
-    plan.add(
-        "lock on startup",
-        elevate,
-        File {
-            path: Ref(Path::new("/etc/xdg/kscreenlockerrc")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o644),
-            },
-            on_symlink: SymlinkHandling::Proceed,
-            on_directory: DirectoryHandling::Proceed,
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            #[expect(
-                clippy::string_lit_as_bytes,
-                reason = "false positive due to the dedent!() macro"
-            )]
-            content: FileContent::Bytes(Ref(dedent!(
-                r#"
-                    [Daemon]
-                    LockOnStart=true
-                "#
-            )
-            .as_bytes())),
-        },
-    );
-}
-
-fn autoupdate<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
-    elevate: &'elevate Elevate,
-) {
-    plan.add(
-        "deploy autoupdate script",
-        elevate,
-        File {
-            path: Ref(Path::new("/usr/local/bin/pacman-autoupdate")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o755),
-            },
-            on_symlink: SymlinkHandling::Proceed,
-            on_directory: DirectoryHandling::Proceed,
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: FileContent::Bytes(Ref(
-                dedent!(r#"
-                    #!/usr/bin/env bash
-
-                    set -o errexit
-                    set -o nounset
-                    set -o pipefail
-
-                    # Prevent failures when no battery present
-                    shopt -s nullglob
-
-                    for battery in /sys/class/power_supply/*/capacity ; do
-                        capacity="$(< "$battery")"
-                        if (( "${capacity}" < 40 )) ; then
-                            printf "Battery at %s%%, exiting\n" "${capacity}" >&2
+                        if nmcli --terse --fields GENERAL.METERED dev show 2>/dev/null | grep -q "yes" ; then
+                            printf "Detected metered connection, exiting\n" >&2
                             exit 0
                         fi
-                    done
 
-                    if nmcli --terse --fields GENERAL.METERED dev show 2>/dev/null | grep -q "yes" ; then
-                        printf "Detected metered connection, exiting\n" >&2
-                        exit 0
-                    fi
+                        # Make sure that keys are up to date, otherwise sig checks may fail
+                        pacman --sync --noprogressbar --noconfirm --refresh --needed archlinux-keyring
 
-                    # Make sure that keys are up to date, otherwise sig checks may fail
-                    pacman --sync --noprogressbar --noconfirm --refresh --needed archlinux-keyring
-
-                    pacman --sync --noprogressbar --noconfirm --sysupgrade
-                "#)
-                .as_bytes(),
-            )),
-        },
-    );
-
-    plan.add(
-        "install pacman autoupdate service",
-        elevate,
-        File {
-            path: Ref(Path::new("/etc/systemd/system/pacman-autoupdate.service")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o644),
+                        pacman --sync --noprogressbar --noconfirm --sysupgrade
+                    "#)
+                    .as_bytes(),
+                )),
             },
-            on_symlink: SymlinkHandling::Proceed,
-            on_directory: DirectoryHandling::Proceed,
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: FileContent::Bytes(Ref(dedent!(
-                r#"
-                    [Service]
-                    Type=oneshot
-                    ExecStart=/usr/local/bin/pacman-autoupdate
-                "#
-            )
-            .as_bytes())),
-        },
-    )
-    .on_change(|| {
-        Resource::new(
-            Ref("restart service manager due to new packages"),
+        );
+
+        plan.add(
+            "install pacman autoupdate service",
             elevate,
-            DaemonReload {},
-        )
-    });
-
-    plan.add(
-        "install pacman autoupdate timer",
-        elevate,
-        File {
-            path: Ref(Path::new("/etc/systemd/system/pacman-autoupdate.timer")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o644),
+            File {
+                path: Ref(Path::new("/etc/systemd/system/pacman-autoupdate.service")),
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o644),
+                },
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Proceed,
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(dedent!(
+                    r#"
+                        [Service]
+                        Type=oneshot
+                        ExecStart=/usr/local/bin/pacman-autoupdate
+                    "#
+                )
+                .as_bytes())),
             },
-            on_symlink: SymlinkHandling::Proceed,
-            on_directory: DirectoryHandling::Proceed,
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: FileContent::Bytes(Ref(dedent!(
-                r#"
-                    [Timer]
-                    OnCalendar=daily
-                    OnBootSec=5min
-                    OnUnitInactiveSec=120min
-
-                    [Install]
-                    WantedBy=timers.target
-                "#
+        )
+        .on_change(|| {
+            Resource::new(
+                Ref("restart service manager due to new packages"),
+                elevate,
+                DaemonReload {},
             )
-            .as_bytes())),
-        },
-    )
-    .on_change(|| {
-        Resource::new(
-            Ref("restart service manager due to new packages"),
-            elevate,
-            DaemonReload {},
-        )
-    });
+        });
 
-    plan.add(
-        Ref("enable pacman autoupdate timer"),
-        elevate,
-        Service {
-            name: "pacman-autoupdate.timer",
-            state: ServiceState {
-                runtime: ServiceStateRuntime::Active,
-                persistent: ServiceStatePersistent::Enabled,
+        plan.add(
+            "install pacman autoupdate timer",
+            elevate,
+            File {
+                path: Ref(Path::new("/etc/systemd/system/pacman-autoupdate.timer")),
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o644),
+                },
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Proceed,
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(dedent!(
+                    r#"
+                        [Timer]
+                        OnCalendar=daily
+                        OnBootSec=5min
+                        OnUnitInactiveSec=120min
+
+                        [Install]
+                        WantedBy=timers.target
+                    "#
+                )
+                .as_bytes())),
             },
-        },
-    );
+        )
+        .on_change(|| {
+            Resource::new(
+                Ref("restart service manager due to new packages"),
+                elevate,
+                DaemonReload {},
+            )
+        });
+
+        plan.add(
+            Ref("enable pacman autoupdate timer"),
+            elevate,
+            Service {
+                name: "pacman-autoupdate.timer",
+                state: ServiceState {
+                    runtime: ServiceStateRuntime::Active,
+                    persistent: ServiceStatePersistent::Enabled,
+                },
+            },
+        );
+    });
 }
 
 fn restic_backup<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    plan: &mut Block<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
-    let restic = &[Ref("restic")];
-    plan.add(
-        "install restic",
-        elevate,
-        Packages {
-            install: Ref(restic),
-            reason: InstallReason::Explicit,
-        },
-    );
-    plan.register_packages(restic);
+    plan.block("restic", |plan| {
+        let restic = &[Ref("restic")];
 
-    plan.add(
-        Ref("create restic config directory"),
-        elevate,
-        Directory {
-            path: Ref(Path::new("/etc/restic")),
-            on_symlink: SymlinkHandling::Proceed,
-            on_file: FileHandling::Proceed,
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o755),
-            },
-        },
-    );
-
-    plan.add(
-        Ref("create restic cache directory"),
-        elevate,
-        Directory {
-            path: Ref(Path::new("/var/cache/restic")),
-            on_symlink: SymlinkHandling::Proceed,
-            on_file: FileHandling::Proceed,
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o755),
-            },
-        },
-    );
-
-    plan.add(
-        "create restic exclude file",
-        elevate,
-        File {
-            path: Ref(Path::new("/etc/restic/exclude.lst")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o644),
-            },
-            on_symlink: SymlinkHandling::Proceed,
-            on_directory: DirectoryHandling::Proceed,
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: FileContent::Bytes(Ref(dedent!(
-                r#"
-                    /home/*/.cache/**
-                    /home/*/.mozilla/firefox/*/Cache/**
-                "#
-            )
-            .as_bytes())),
-        },
-    );
-
-    plan.add(
-        "create restic wrapper script",
-        elevate,
-        File {
-            path: Ref(Path::new("/usr/local/bin/restic-cmd")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o755),
-            },
-            on_symlink: SymlinkHandling::Proceed,
-            on_directory: DirectoryHandling::Proceed,
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: FileContent::Bytes(Ref(dedent!(
-                r#"
-                    #!/usr/bin/env bash
-                    source /etc/restic/env
-
-                    set -o nounset
-                    set -o errexit
-                    set -o pipefail
-
-                    export B2_ACCOUNT_ID
-                    export B2_ACCOUNT_KEY
-
-                    export RESTIC_PASSWORD_FILE=/etc/restic/repopassword
-
-                    restic \
-                      --cache-dir=/var/cache/restic/ \
-                      --repo="b2:${BUCKET_NAME}:hera" \
-                      --password-file=/etc/restic/repopassword \
-                      --verbose \
-                      "${@}"
-                "#
-            )
-            .as_bytes())),
-        },
-    );
-
-    plan.add(
-        "create restic backup script",
-        elevate,
-        File {
-            path: Ref(Path::new("/usr/local/bin/restic-backup")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o755),
-            },
-            on_symlink: SymlinkHandling::Proceed,
-            on_directory: DirectoryHandling::Proceed,
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: FileContent::Bytes(Ref(dedent!(
-                r#"
-                    #!/usr/bin/env bash
-
-                    set -o nounset
-                    set -o errexit
-                    set -o pipefail
-
-                    run() {
-                      name="${1}" ; shift
-                      printf '[%s] %s - start\n' "${name}" "$(date --utc --iso-8601=seconds)"
-                      "${@}"
-                      printf '[%s] %s - end\n' "${name}" "$(date --utc --iso-8601=seconds)"
-                    }
-
-                    run backup restic-cmd \
-                        backup \
-                        --exclude-file /etc/restic/exclude.lst \
-                        /home/
-
-                    run forget restic-cmd \
-                        forget \
-                        --prune \
-                        --keep-daily 30 \
-                        --keep-monthly 12 \
-                        --keep-yearly 3
-                "#
-            )
-            .as_bytes())),
-        },
-    );
-
-    plan.block("restic backup service", |block| {
-        block.with(elevate, |mut block| {
-            block.add(
-                "install restic backup service",
-                File {
-                    path: Ref(Path::new("/etc/systemd/system/restic-backup.service")),
-                    permissions: FilePermissions {
-                        owner: Uid::root(),
-                        group: Gid::root(),
-                        mode: FileMode(0o644),
-                    },
-                    on_symlink: SymlinkHandling::Proceed,
-                    on_directory: DirectoryHandling::Proceed,
-                    binary: false,
-                    secret: false,
-                    ignore_checksum_changes: false,
-                    content: FileContent::Bytes(Ref(dedent!(
-                        r#"
-                            [Service]
-                            Type=oneshot
-                            ExecStart=systemd-inhibit /usr/local/bin/restic-backup
-                        "#
-                    )
-                    .as_bytes())),
-                },
-            );
-
-            block.add(
-                "install restic backup timer",
-                File {
-                    path: Ref(Path::new("/etc/systemd/system/restic-backup.timer")),
-                    permissions: FilePermissions {
-                        owner: Uid::root(),
-                        group: Gid::root(),
-                        mode: FileMode(0o644),
-                    },
-                    on_symlink: SymlinkHandling::Proceed,
-                    on_directory: DirectoryHandling::Proceed,
-                    binary: false,
-                    secret: false,
-                    ignore_checksum_changes: false,
-                    content: FileContent::Bytes(Ref(dedent!(
-                        r#"
-                            [Timer]
-                            OnCalendar=daily
-                            Persistent=true
-
-                            [Install]
-                            WantedBy=timers.target
-                        "#
-                    )
-                    .as_bytes())),
-                },
-            );
-        });
-    })
-    .on_change(|| {
-        Resource::new(
-            Ref("restart service manager due to new packages"),
+        plan.add(
+            "install restic",
             elevate,
-            DaemonReload {},
-        )
-    });
-
-    plan.add(
-        Ref("enable pacman autoupdate timer"),
-        elevate,
-        Service {
-            name: "restic-backup.timer",
-            state: ServiceState {
-                runtime: ServiceStateRuntime::Active,
-                persistent: ServiceStatePersistent::Enabled,
+            Packages {
+                install: Ref(restic),
+                reason: InstallReason::Explicit,
             },
-        },
-    );
+        );
+
+        plan.register_packages(restic);
+
+        plan.add(
+            Ref("create restic config directory"),
+            elevate,
+            Directory {
+                path: Ref(Path::new("/etc/restic")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o755),
+                },
+            },
+        );
+
+        plan.add(
+            Ref("create restic cache directory"),
+            elevate,
+            Directory {
+                path: Ref(Path::new("/var/cache/restic")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o755),
+                },
+            },
+        );
+
+        plan.add(
+            "create restic exclude file",
+            elevate,
+            File {
+                path: Ref(Path::new("/etc/restic/exclude.lst")),
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o644),
+                },
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Proceed,
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(dedent!(
+                    r#"
+                        /home/*/.cache/**
+                        /home/*/.mozilla/firefox/*/Cache/**
+                    "#
+                )
+                .as_bytes())),
+            },
+        );
+
+        plan.add(
+            "create restic wrapper script",
+            elevate,
+            File {
+                path: Ref(Path::new("/usr/local/bin/restic-cmd")),
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o755),
+                },
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Proceed,
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(dedent!(
+                    r#"
+                        #!/usr/bin/env bash
+                        source /etc/restic/env
+
+                        set -o nounset
+                        set -o errexit
+                        set -o pipefail
+
+                        export B2_ACCOUNT_ID
+                        export B2_ACCOUNT_KEY
+
+                        export RESTIC_PASSWORD_FILE=/etc/restic/repopassword
+
+                        restic \
+                          --cache-dir=/var/cache/restic/ \
+                          --repo="b2:${BUCKET_NAME}:hera" \
+                          --password-file=/etc/restic/repopassword \
+                          --verbose \
+                          "${@}"
+                    "#
+                )
+                .as_bytes())),
+            },
+        );
+
+        plan.add(
+            "create restic backup script",
+            elevate,
+            File {
+                path: Ref(Path::new("/usr/local/bin/restic-backup")),
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o755),
+                },
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Proceed,
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(dedent!(
+                    r#"
+                        #!/usr/bin/env bash
+
+                        set -o nounset
+                        set -o errexit
+                        set -o pipefail
+
+                        run() {
+                          name="${1}" ; shift
+                          printf '[%s] %s - start\n' "${name}" "$(date --utc --iso-8601=seconds)"
+                          "${@}"
+                          printf '[%s] %s - end\n' "${name}" "$(date --utc --iso-8601=seconds)"
+                        }
+
+                        run backup restic-cmd \
+                            backup \
+                            --exclude-file /etc/restic/exclude.lst \
+                            /home/
+
+                        run forget restic-cmd \
+                            forget \
+                            --prune \
+                            --keep-daily 30 \
+                            --keep-monthly 12 \
+                            --keep-yearly 3
+                    "#
+                )
+                .as_bytes())),
+            },
+        );
+
+        plan.block("restic backup service", |block| {
+            block.with(elevate, |mut block| {
+                block.add(
+                    "install restic backup service",
+                    File {
+                        path: Ref(Path::new("/etc/systemd/system/restic-backup.service")),
+                        permissions: FilePermissions {
+                            owner: Uid::root(),
+                            group: Gid::root(),
+                            mode: FileMode(0o644),
+                        },
+                        on_symlink: SymlinkHandling::Proceed,
+                        on_directory: DirectoryHandling::Proceed,
+                        binary: false,
+                        secret: false,
+                        ignore_checksum_changes: false,
+                        content: FileContent::Bytes(Ref(dedent!(
+                            r#"
+                                [Service]
+                                Type=oneshot
+                                ExecStart=systemd-inhibit /usr/local/bin/restic-backup
+                            "#
+                        )
+                        .as_bytes())),
+                    },
+                );
+
+                block.add(
+                    "install restic backup timer",
+                    File {
+                        path: Ref(Path::new("/etc/systemd/system/restic-backup.timer")),
+                        permissions: FilePermissions {
+                            owner: Uid::root(),
+                            group: Gid::root(),
+                            mode: FileMode(0o644),
+                        },
+                        on_symlink: SymlinkHandling::Proceed,
+                        on_directory: DirectoryHandling::Proceed,
+                        binary: false,
+                        secret: false,
+                        ignore_checksum_changes: false,
+                        content: FileContent::Bytes(Ref(dedent!(
+                            r#"
+                                [Timer]
+                                OnCalendar=daily
+                                Persistent=true
+
+                                [Install]
+                                WantedBy=timers.target
+                            "#
+                        )
+                        .as_bytes())),
+                    },
+                );
+            });
+        })
+        .on_change(|| {
+            Resource::new(
+                Ref("restart service manager due to new packages"),
+                elevate,
+                DaemonReload {},
+            )
+        });
+
+        plan.add(
+            Ref("enable pacman autoupdate timer"),
+            elevate,
+            Service {
+                name: "restic-backup.timer",
+                state: ServiceState {
+                    runtime: ServiceStateRuntime::Active,
+                    persistent: ServiceStatePersistent::Enabled,
+                },
+            },
+        );
+    });
 }
 
 fn initrd<'name, 'elevate: 'action, 'action>(
@@ -955,28 +757,29 @@ fn initrd<'name, 'elevate: 'action, 'action>(
     elevate: &'elevate Elevate,
     config: &Config,
 ) {
-    let mkinitcpio = &[Ref("mkinitcpio")];
-    plan.add(
-        "install mkinitcpio",
-        elevate,
-        Packages {
-            install: Ref(mkinitcpio),
-            reason: InstallReason::Explicit,
-        },
-    );
-    plan.register_packages(mkinitcpio);
+    plan.block("initrd", |plan| {
+        let mkinitcpio = &[Ref("mkinitcpio")];
+        plan.add(
+            "install mkinitcpio",
+            elevate,
+            Packages {
+                install: Ref(mkinitcpio),
+                reason: InstallReason::Explicit,
+            },
+        );
+        plan.register_packages(mkinitcpio);
 
-    plan.with(elevate, |mut plan| {
         let lz4 = &[Ref("lz4")];
         plan.add(
             "install lz4",
+            elevate,
             Packages {
                 install: Ref(lz4),
                 reason: InstallReason::Explicit,
             },
         );
 
-        plan.register_packages(&Ref(lz4));
+        plan.register_packages(lz4);
 
         let hooks: Vec<&str> = {
             let mut hooks = vec![
@@ -1009,6 +812,7 @@ fn initrd<'name, 'elevate: 'action, 'action>(
 
         plan.add(
             "configure mkinitcpio",
+            elevate,
             File {
                 path: Ref(Path::new("/etc/mkinitcpio.conf")),
                 permissions: FilePermissions {
@@ -1046,202 +850,212 @@ fn libvirt<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
-    let libvirt = &[
-        Ref("virt-manager"),
-        Ref("libvirt"),
-        Ref("dnsmasq"),
-        Ref("dmidecode"),
-        Ref("virt-install"),
-        Ref("virt-viewer"),
-        Ref("libguestfs"),
-        Ref("edk2-ovmf"),
-    ];
-    plan.register_packages(libvirt);
+    plan.block("libvirt", |plan| {
+        let libvirt = &[
+            Ref("virt-manager"),
+            Ref("libvirt"),
+            Ref("dnsmasq"),
+            Ref("dmidecode"),
+            Ref("virt-install"),
+            Ref("virt-viewer"),
+            Ref("libguestfs"),
+            Ref("edk2-ovmf"),
+        ];
+        plan.register_packages(libvirt);
 
-    plan.add(
-        "install libvirt",
-        elevate,
-        Packages {
-            install: Ref(libvirt),
-            reason: InstallReason::Explicit,
-        },
-    );
-
-    for socket in [
-        "libvirtd.socket",
-        "libvirtd-tls.socket",
-        "libvirtd-tcp.socket",
-        "libvirtd-ro.socket",
-        "libvirtd-admin.socket",
-    ] {
         plan.add(
-            Owned(format!("mask {socket}")),
+            "install libvirt",
+            elevate,
+            Packages {
+                install: Ref(libvirt),
+                reason: InstallReason::Explicit,
+            },
+        );
+
+        for socket in [
+            "libvirtd.socket",
+            "libvirtd-tls.socket",
+            "libvirtd-tcp.socket",
+            "libvirtd-ro.socket",
+            "libvirtd-admin.socket",
+        ] {
+            plan.add(
+                Owned(format!("mask {socket}")),
+                elevate,
+                Service {
+                    name: socket,
+                    state: ServiceState {
+                        runtime: ServiceStateRuntime::Inactive,
+                        persistent: ServiceStatePersistent::Masked,
+                    },
+                },
+            );
+        }
+
+        // the libvirtd unit file contains the following setting:
+        //
+        // Environment=LIBVIRTD_ARGS="--timeout 120"
+        //
+        // This will make libvirtd stop after 120 seconds without connections or running
+        // domains. To convince the daemon to just keep being a daemon, this needs to be
+        // removed. Fortunately, the unit also contains the following:
+        //
+        // EnvironmentFile=-/etc/conf.d/libvirtd
+        //
+        // And `EnvironmentFile` trumps `Environment`. Otherwise we'd need to do some
+        // damn systemd override shenanigans.
+        plan.add(
+            "configure libvirtd env variable override",
+            elevate,
+            File {
+                path: Ref(Path::new("/etc/conf.d/libvirtd")),
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o600),
+                },
+                on_directory: DirectoryHandling::Bail,
+                on_symlink: SymlinkHandling::Proceed,
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: Lines(Ref(&[Ref("LIBVIRTD_ARGS=")])),
+            },
+        )
+        .on_change(|| {
+            Resource::new(
+                Ref("restart libvirt"),
+                elevate,
+                RestartService {
+                    name: "libvirtd.service",
+                },
+            )
+        });
+
+        plan.add(
+            Ref("enable libvirt"),
             elevate,
             Service {
-                name: socket,
+                name: "libvirtd.service",
                 state: ServiceState {
-                    runtime: ServiceStateRuntime::Inactive,
-                    persistent: ServiceStatePersistent::Masked,
+                    runtime: ServiceStateRuntime::Active,
+                    persistent: ServiceStatePersistent::Enabled,
                 },
             },
         );
-    }
-
-    // the libvirtd unit file contains the following setting:
-    //
-    // Environment=LIBVIRTD_ARGS="--timeout 120"
-    //
-    // This will make libvirtd stop after 120 seconds without connections or running
-    // domains. To convince the daemon to just keep being a daemon, this needs to be
-    // removed. Fortunately, the unit also contains the following:
-    //
-    // EnvironmentFile=-/etc/conf.d/libvirtd
-    //
-    // And `EnvironmentFile` trumps `Environment`. Otherwise we'd need to do some
-    // damn systemd override shenanigans.
-    plan.add(
-        "configure libvirtd env variable override",
-        elevate,
-        File {
-            path: Ref(Path::new("/etc/conf.d/libvirtd")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o600),
-            },
-            on_directory: DirectoryHandling::Bail,
-            on_symlink: SymlinkHandling::Proceed,
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: Lines(Ref(&[Ref("LIBVIRTD_ARGS=")])),
-        },
-    )
-    .on_change(|| {
-        Resource::new(
-            Ref("restart libvirt"),
-            elevate,
-            RestartService {
-                name: "libvirtd.service",
-            },
-        )
     });
-
-    plan.add(
-        Ref("enable libvirt"),
-        elevate,
-        Service {
-            name: "libvirtd.service",
-            state: ServiceState {
-                runtime: ServiceStateRuntime::Active,
-                persistent: ServiceStatePersistent::Enabled,
-            },
-        },
-    );
 }
 
 fn wireshark<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
-    let wireshark = &[Ref("wireshark-cli"), Ref("wireshark-qt")];
-    plan.add(
-        "install wireshark",
-        elevate,
-        Packages {
-            install: Ref(wireshark),
-            reason: InstallReason::Explicit,
-        },
-    );
-    plan.register_packages(wireshark);
+    plan.block("wireshark", |plan| {
+        let wireshark = &[Ref("wireshark-cli"), Ref("wireshark-qt")];
+        plan.add(
+            "install wireshark",
+            elevate,
+            Packages {
+                install: Ref(wireshark),
+                reason: InstallReason::Explicit,
+            },
+        );
+        plan.register_packages(wireshark);
+    });
 }
 
 fn smartcard<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
-    let smartcard = &[Ref("ccid"), Ref("pcsclite")];
-    plan.add(
-        "install smartcard manager",
-        elevate,
-        Packages {
-            install: Ref(smartcard),
-            reason: InstallReason::Explicit,
-        },
-    );
-    plan.register_packages(smartcard);
-
-    plan.add(
-        "enable smartcard daemon socket",
-        elevate,
-        Service {
-            name: "pcscd.socket",
-            state: ServiceState {
-                runtime: ServiceStateRuntime::Active,
-                persistent: ServiceStatePersistent::Enabled,
+    plan.block("smartcard", |plan| {
+        let smartcard = &[Ref("ccid"), Ref("pcsclite")];
+        plan.add(
+            "install smartcard manager",
+            elevate,
+            Packages {
+                install: Ref(smartcard),
+                reason: InstallReason::Explicit,
             },
-        },
-    );
+        );
+        plan.register_packages(smartcard);
+
+        plan.add(
+            "enable smartcard daemon socket",
+            elevate,
+            Service {
+                name: "pcscd.socket",
+                state: ServiceState {
+                    runtime: ServiceStateRuntime::Active,
+                    persistent: ServiceStatePersistent::Enabled,
+                },
+            },
+        );
+    });
 }
 
 fn aur<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
-    let included_packages_directory = Path::new("/var/lib/packages");
-
-    plan.add(
-        Ref("create included packages directory"),
-        elevate,
-        Directory {
-            path: Owned(included_packages_directory.to_owned()),
-            on_symlink: SymlinkHandling::Proceed,
-            on_file: FileHandling::Proceed,
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o700),
-            },
-        },
-    );
-
-    for &(name, version, filename, content) in INCLUDED_PACKAGES {
-        let package_path = included_packages_directory.join(filename);
+    plan.block("aur", |plan| {
+        let included_packages_directory = Path::new("/var/lib/packages");
 
         plan.add(
-            Owned(format!("deploy included package {name}")),
+            Ref("create included packages directory"),
             elevate,
-            File {
-                content: FileContent::Bytes(Ref(content)),
-                binary: true,
-                // checksum may change, the only thing that matters is the version, which is
-                // part of the filename
-                ignore_checksum_changes: true,
-                secret: false,
-                path: Owned(package_path.clone()),
+            Directory {
+                path: Owned(included_packages_directory.to_owned()),
                 on_symlink: SymlinkHandling::Proceed,
-                on_directory: DirectoryHandling::Bail,
+                on_file: FileHandling::Proceed,
                 permissions: FilePermissions {
                     owner: Uid::root(),
                     group: Gid::root(),
-                    mode: FileMode(0o600),
+                    mode: FileMode(0o700),
                 },
             },
         );
 
-        plan.add(
-            Owned(format!("install included package {name}")),
-            elevate,
-            LocalPackage {
-                name: Ref(name),
-                path: Owned(package_path),
-                version: Ref(version),
-                reason: InstallReason::Explicit,
-            },
-        );
+        for &(name, version, filename, content) in INCLUDED_PACKAGES {
+            plan.block(name, |plan| {
+                let package_path = included_packages_directory.join(filename);
 
-        plan.register_packages(&[Ref(name)]);
-    }
+                plan.add(
+                    Ref("deploy included package"),
+                    elevate,
+                    File {
+                        content: FileContent::Bytes(Ref(content)),
+                        binary: true,
+                        // checksum may change, the only thing that matters is the version, which is
+                        // part of the filename
+                        ignore_checksum_changes: true,
+                        secret: false,
+                        path: Owned(package_path.clone()),
+                        on_symlink: SymlinkHandling::Proceed,
+                        on_directory: DirectoryHandling::Bail,
+                        permissions: FilePermissions {
+                            owner: Uid::root(),
+                            group: Gid::root(),
+                            mode: FileMode(0o600),
+                        },
+                    },
+                );
+
+                plan.add(
+                    Ref("install included package"),
+                    elevate,
+                    LocalPackage {
+                        name: Ref(name),
+                        path: Owned(package_path),
+                        version: Ref(version),
+                        reason: InstallReason::Explicit,
+                    },
+                );
+
+                plan.register_packages(&[Ref(name)]);
+            });
+        }
+    });
 }
 
 fn boot_target<'elevate: 'action, 'action>(
@@ -1262,246 +1076,253 @@ fn sudo<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
-    let sudo = &[Ref("sudo")];
+    plan.block("sudo", |plan| {
+        let sudo = &[Ref("sudo")];
 
-    plan.add(
-        "install sudo",
-        elevate,
-        Packages {
-            install: Ref(sudo),
-            reason: InstallReason::Explicit,
-        },
-    );
-
-    plan.register_packages(sudo);
-
-    plan.add(
-        Ref("add sudonopw"),
-        elevate,
-        Group {
-            name: "sudonopw",
-            system: true,
-        },
-    );
-
-    plan.add(
-        Ref("configure passwordless sudo"),
-        elevate,
-        File {
-            path: Ref(Path::new("/etc/sudoers.d/sudonopw")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o600),
+        plan.add(
+            "install sudo",
+            elevate,
+            Packages {
+                install: Ref(sudo),
+                reason: InstallReason::Explicit,
             },
-            on_directory: DirectoryHandling::Bail,
-            on_symlink: SymlinkHandling::Proceed,
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: Lines(Owned(vec![Ref("%sudonopw ALL=(ALL) NOPASSWD: ALL")])),
-        },
-    );
+        );
 
-    let doas = &[Ref("opendoas")];
-    plan.add(
-        "install doas",
-        elevate,
-        Packages {
-            install: Ref(doas),
-            reason: InstallReason::Explicit,
-        },
-    );
-    plan.register_packages(doas);
+        plan.register_packages(sudo);
 
-    plan.add(
-        Ref("configure passwordless doas"),
-        elevate,
-        File {
-            path: Ref(Path::new("/etc/doas.conf")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o400),
+        plan.add(
+            Ref("add sudonopw"),
+            elevate,
+            Group {
+                name: "sudonopw",
+                system: true,
             },
-            on_directory: DirectoryHandling::Bail,
-            on_symlink: SymlinkHandling::Proceed,
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: Lines(Owned(vec![Ref("permit nopass nolog setenv {PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin} :sudonopw")])),
-        },
-    );
+        );
+
+        plan.add(
+            Ref("configure passwordless sudo"),
+            elevate,
+            File {
+                path: Ref(Path::new("/etc/sudoers.d/sudonopw")),
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o600),
+                },
+                on_directory: DirectoryHandling::Bail,
+                on_symlink: SymlinkHandling::Proceed,
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: Lines(Owned(vec![Ref("%sudonopw ALL=(ALL) NOPASSWD: ALL")])),
+            },
+        );
+
+        let doas = &[Ref("opendoas")];
+        plan.add(
+            "install doas",
+            elevate,
+            Packages {
+                install: Ref(doas),
+                reason: InstallReason::Explicit,
+            },
+        );
+        plan.register_packages(doas);
+
+        plan.add(
+            Ref("configure passwordless doas"),
+            elevate,
+            File {
+                path: Ref(Path::new("/etc/doas.conf")),
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o400),
+                },
+                on_directory: DirectoryHandling::Bail,
+                on_symlink: SymlinkHandling::Proceed,
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: Lines(Owned(vec![Ref("permit nopass nolog setenv {PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin} :sudonopw")])),
+            },
+        );
+    });
 }
 
 fn timesyncd<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
-    let arch_ntp_servers = [
-        "0.arch.pool.ntp.org",
-        "1.arch.pool.ntp.org",
-        "2.arch.pool.ntp.org",
-        "3.arch.pool.ntp.org",
-    ];
+    plan.block("timesyncd", |plan| {
+        let arch_ntp_servers = [
+            "0.arch.pool.ntp.org",
+            "1.arch.pool.ntp.org",
+            "2.arch.pool.ntp.org",
+            "3.arch.pool.ntp.org",
+        ];
 
-    let fallback_ntp_servers = [
-        "0.pool.ntp.org",
-        "1.pool.ntp.org",
-        "2.pool.ntp.org",
-        "3.pool.ntp.org",
-    ];
+        let fallback_ntp_servers = [
+            "0.pool.ntp.org",
+            "1.pool.ntp.org",
+            "2.pool.ntp.org",
+            "3.pool.ntp.org",
+        ];
 
-    plan.add(
-        Ref("configure timesyncd"),
-        elevate,
-        File {
-            path: Ref(Path::new("/etc/systemd/timesyncd.conf")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o644),
+        plan.add(
+            Ref("configure timesyncd"),
+            elevate,
+            File {
+                path: Ref(Path::new("/etc/systemd/timesyncd.conf")),
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o644),
+                },
+                on_directory: DirectoryHandling::Bail,
+                on_symlink: SymlinkHandling::Proceed,
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: Lines(Owned(vec![
+                    Ref("[Time]"),
+                    Owned(format!("NTP={}", arch_ntp_servers.join(" "))),
+                    Owned(format!("FallbackNTP={}", fallback_ntp_servers.join(" "))),
+                ])),
             },
-            on_directory: DirectoryHandling::Bail,
-            on_symlink: SymlinkHandling::Proceed,
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: Lines(Owned(vec![
-                Ref("[Time]"),
-                Owned(format!("NTP={}", arch_ntp_servers.join(" "))),
-                Owned(format!("FallbackNTP={}", fallback_ntp_servers.join(" "))),
-            ])),
-        },
-    );
+        );
 
-    plan.add(
-        "enable timesyncd",
-        elevate,
-        Service {
-            name: "systemd-timesyncd.service",
-            state: ServiceState {
-                runtime: ServiceStateRuntime::Active,
-                persistent: ServiceStatePersistent::Enabled,
+        plan.add(
+            "enable timesyncd",
+            elevate,
+            Service {
+                name: "systemd-timesyncd.service",
+                state: ServiceState {
+                    runtime: ServiceStateRuntime::Active,
+                    persistent: ServiceStatePersistent::Enabled,
+                },
             },
-        },
-    );
+        );
+    });
 }
 
 fn reflector<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
-    let reflector = &[Ref("reflector")];
-    plan.add(
-        "install reflector",
-        elevate,
-        Packages {
-            install: Ref(reflector),
-            reason: InstallReason::Explicit,
-        },
-    );
-    plan.register_packages(reflector);
-
-    plan.add(
-        "configure reflector",
-        elevate,
-        File {
-            path: Ref(Path::new("/etc/xdg/reflector/reflector.conf")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o644),
-            },
-            on_directory: DirectoryHandling::Bail,
-            on_symlink: SymlinkHandling::Proceed,
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: Lines(Ref(&[
-                Ref("--save /etc/pacman.d/mirrorlist"),
-                Ref("--protocol https"),
-                Ref("--country Germany"),
-                Ref("--latest 5"),
-                Ref("--sort age"),
-            ])),
-        },
-    )
-    .on_change(|| {
-        Resource::new(
-            Ref("restart reflector"),
+    plan.block("reflector", |plan| {
+        let reflector = &[Ref("reflector")];
+        plan.add(
+            "install reflector",
             elevate,
-            RestartService {
-                name: "reflector.service",
+            Packages {
+                install: Ref(reflector),
+                reason: InstallReason::Explicit,
+            },
+        );
+        plan.register_packages(reflector);
+
+        plan.add(
+            "configure reflector",
+            elevate,
+            File {
+                path: Ref(Path::new("/etc/xdg/reflector/reflector.conf")),
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o644),
+                },
+                on_directory: DirectoryHandling::Bail,
+                on_symlink: SymlinkHandling::Proceed,
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: Lines(Ref(&[
+                    Ref("--save /etc/pacman.d/mirrorlist"),
+                    Ref("--protocol https"),
+                    Ref("--country Germany"),
+                    Ref("--latest 5"),
+                    Ref("--sort age"),
+                ])),
             },
         )
-    });
+        .on_change(|| {
+            Resource::new(
+                Ref("restart reflector"),
+                elevate,
+                RestartService {
+                    name: "reflector.service",
+                },
+            )
+        });
 
-    plan.add(
-        "enable reflector timer",
-        elevate,
-        Service {
-            name: "reflector.timer",
-            state: ServiceState {
-                runtime: ServiceStateRuntime::Active,
-                persistent: ServiceStatePersistent::Enabled,
+        plan.add(
+            "enable reflector timer",
+            elevate,
+            Service {
+                name: "reflector.timer",
+                state: ServiceState {
+                    runtime: ServiceStateRuntime::Active,
+                    persistent: ServiceStatePersistent::Enabled,
+                },
             },
-        },
-    );
+        );
+    });
 }
 
 fn wireguard<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) -> Result<()> {
-    let wireguard = &[Ref("wireguard-tools")];
-    plan.add(
-        "install wireguard",
-        elevate,
-        Packages {
-            install: Ref(wireguard),
-            reason: InstallReason::Explicit,
-        },
-    );
-    plan.register_packages(wireguard);
-
-    let path = Path::new("/etc/wireguard/wg0.conf");
-    let permissions = FilePermissions {
-        owner: Uid::root(),
-        group: Gid::root(),
-        mode: FileMode(0o600),
-    };
-    match plan.secrets() {
-        SecretsWorkflow::None => bail!("missing secrets"),
-        SecretsWorkflow::AssumeExisting => plan.assert(
-            "assert wireguard config exists",
+    plan.try_block("wireguard", |plan| {
+        let wireguard = &[Ref("wireguard-tools")];
+        plan.add(
+            "install wireguard",
             elevate,
-            AssertFile {
-                path: Ref(path),
-                permissions,
+            Packages {
+                install: Ref(wireguard),
+                reason: InstallReason::Explicit,
             },
-        ),
-        SecretsWorkflow::Secrets(secrets) => {
-            let mut context = tera::Context::new();
-            context.insert("address", &secrets.wireguard.address.access());
-            context.insert("privkey", &secrets.wireguard.privkey.access().as_str());
-            context.insert("psk", &secrets.wireguard.psk.access().as_str());
-            context.insert(
-                "server_pubkey",
-                &secrets.wireguard.server_pubkey.access().as_str(),
-            );
-            context.insert("server_ip", &secrets.wireguard.server_ip.access());
-            context.insert(
-                "server_endpoint_domain",
-                &secrets.wireguard.server_endpoint_domain.access().as_str(),
-            );
-            context.insert(
-                "server_endpoint_port",
-                &secrets.wireguard.server_endpoint_port.access().as_inner(),
-            );
-            let template = tera::Tera::one_off(
-                &dedent!(
-                    r#"
+        );
+        plan.register_packages(wireguard);
+
+        let path = Path::new("/etc/wireguard/wg0.conf");
+        let permissions = FilePermissions {
+            owner: Uid::root(),
+            group: Gid::root(),
+            mode: FileMode(0o600),
+        };
+        match plan.secrets() {
+            SecretsWorkflow::None => bail!("missing secrets"),
+            SecretsWorkflow::AssumeExisting => plan.assert(
+                "assert wireguard config exists",
+                elevate,
+                AssertFile {
+                    path: Ref(path),
+                    permissions,
+                },
+            ),
+            SecretsWorkflow::Secrets(secrets) => {
+                let mut context = tera::Context::new();
+                context.insert("address", &secrets.wireguard.address.access());
+                context.insert("privkey", &secrets.wireguard.privkey.access().as_str());
+                context.insert("psk", &secrets.wireguard.psk.access().as_str());
+                context.insert(
+                    "server_pubkey",
+                    &secrets.wireguard.server_pubkey.access().as_str(),
+                );
+                context.insert("server_ip", &secrets.wireguard.server_ip.access());
+                context.insert(
+                    "server_endpoint_domain",
+                    &secrets.wireguard.server_endpoint_domain.access().as_str(),
+                );
+                context.insert(
+                    "server_endpoint_port",
+                    &secrets.wireguard.server_endpoint_port.access().as_inner(),
+                );
+                let template = tera::Tera::one_off(
+                    &dedent!(
+                        r#"
                         [Interface]
                         Address = {{address}}/32
                         PrivateKey = {{privkey}}
@@ -1513,68 +1334,68 @@ fn wireguard<'elevate: 'action, 'action>(
                         AllowedIPs = {{server_ip}}/24
                         Endpoint = {{server_endpoint_domain}}:{{server_endpoint_port}}
                     "#
-                ),
-                &context,
-                false,
-            )?;
+                    ),
+                    &context,
+                    false,
+                )?;
 
-            plan.add(
-                "configure wireguard",
-                elevate,
-                File {
-                    path: Ref(path),
-                    permissions,
-                    on_directory: DirectoryHandling::Bail,
-                    on_symlink: SymlinkHandling::Bail,
-                    binary: false,
-                    secret: true,
-                    ignore_checksum_changes: false,
-                    content: FileContent::Bytes(Owned(template.into_bytes())),
-                },
-            )
-            .on_change(|| {
-                Resource::new(
-                    Ref("restart wireguard"),
+                plan.add(
+                    "configure wireguard",
                     elevate,
-                    RestartService {
-                        name: "wg-quick@wg0.service",
+                    File {
+                        path: Ref(path),
+                        permissions,
+                        on_directory: DirectoryHandling::Bail,
+                        on_symlink: SymlinkHandling::Bail,
+                        binary: false,
+                        secret: true,
+                        ignore_checksum_changes: false,
+                        content: FileContent::Bytes(Owned(template.into_bytes())),
                     },
                 )
-            });
+                .on_change(|| {
+                    Resource::new(
+                        Ref("restart wireguard"),
+                        elevate,
+                        RestartService {
+                            name: "wg-quick@wg0.service",
+                        },
+                    )
+                });
+            }
         }
-    }
 
-    plan.add(
-        "enable wireguard tunnel",
-        elevate,
-        Service {
-            name: "wg-quick@wg0.service",
-            state: ServiceState {
-                runtime: ServiceStateRuntime::Active,
-                persistent: ServiceStatePersistent::Enabled,
+        plan.add(
+            "enable wireguard tunnel",
+            elevate,
+            Service {
+                name: "wg-quick@wg0.service",
+                state: ServiceState {
+                    runtime: ServiceStateRuntime::Active,
+                    persistent: ServiceStatePersistent::Enabled,
+                },
             },
-        },
-    );
+        );
 
-    plan.add(
-        "add wireguard-reresolve-dns service",
-        elevate,
-        File {
-            path: Ref(Path::new(
-                "/etc/systemd/system/wireguard-reresolve-dns.service",
-            )),
-            on_directory: DirectoryHandling::Bail,
-            on_symlink: SymlinkHandling::Proceed,
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o644),
-            },
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: FileContent::Bytes(Ref(dedent!(
-                "
+        plan.add(
+            "add wireguard-reresolve-dns service",
+            elevate,
+            File {
+                path: Ref(Path::new(
+                    "/etc/systemd/system/wireguard-reresolve-dns.service",
+                )),
+                on_directory: DirectoryHandling::Bail,
+                on_symlink: SymlinkHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(dedent!(
+                    "
                 [Unit]
                 Wants=network-online.target
                 After=network-online.target nss-lookup.target
@@ -1583,30 +1404,30 @@ fn wireguard<'elevate: 'action, 'action>(
                 Type=oneshot
                 ExecStart=/usr/share/wireguard-tools/examples/reresolve-dns/reresolve-dns.sh wg0
                 "
-            )
-            .as_bytes())),
-        },
-    );
-
-    plan.add(
-        "wireguard dns reresolve timer",
-        elevate,
-        File {
-            path: Ref(Path::new(
-                "/etc/systemd/system/wireguard-reresolve-dns.timer",
-            )),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o644),
+                )
+                .as_bytes())),
             },
-            on_directory: DirectoryHandling::Bail,
-            on_symlink: SymlinkHandling::Proceed,
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: FileContent::Bytes(Ref(dedent!(
-                "
+        );
+
+        plan.add(
+            "wireguard dns reresolve timer",
+            elevate,
+            File {
+                path: Ref(Path::new(
+                    "/etc/systemd/system/wireguard-reresolve-dns.timer",
+                )),
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o644),
+                },
+                on_directory: DirectoryHandling::Bail,
+                on_symlink: SymlinkHandling::Proceed,
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(dedent!(
+                    "
                 [Timer]
                 OnBootSec=1m
                 OnUnitActiveSec=30s
@@ -1614,75 +1435,53 @@ fn wireguard<'elevate: 'action, 'action>(
                 [Install]
                 WantedBy=timers.target
                 "
-            )
-            .as_bytes())),
-        },
-    );
-
-    plan.add(
-        "enable wireguard dns reresolve timer",
-        elevate,
-        Service {
-            name: "wireguard-reresolve-dns.timer",
-            state: ServiceState {
-                runtime: ServiceStateRuntime::Active,
-                persistent: ServiceStatePersistent::Enabled,
+                )
+                .as_bytes())),
             },
-        },
-    );
+        );
+
+        plan.add(
+            "enable wireguard dns reresolve timer",
+            elevate,
+            Service {
+                name: "wireguard-reresolve-dns.timer",
+                state: ServiceState {
+                    runtime: ServiceStateRuntime::Active,
+                    persistent: ServiceStatePersistent::Enabled,
+                },
+            },
+        );
+
+        Ok(())
+    })?;
 
     Ok(())
 }
 
-<<<<<<< HEAD
-||||||| parent of e244c39d (Clean up fonts)
-fn pipewire<'elevate: 'action, 'action>(
+fn pulseaudio<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
-    let pipewire = &[
-        Ref("pipewire"),
-        Ref("lib32-pipewire"),
-        Ref("wireplumber"),
+    let pulseaudio = &[
+        Ref("pulseaudio"),
+        Ref("pulseaudio-alsa"),
+        Ref("lib32-libpulse"),
+        Ref("alsa-utils"),
+        Ref("alsa-firmware"),
+        Ref("sof-firmware"),
+        Ref("alsa-ucm-conf"),
         Ref("pavucontrol-qt"),
-        Ref("pipewire-audio"),
-        Ref("pipewire-pulse"),
     ];
 
     plan.add(
-        "install pipewire",
+        "install pulseaudio",
         elevate,
         Packages {
-            install: Ref(pipewire),
+            install: Ref(pulseaudio),
             reason: InstallReason::Explicit,
         },
     );
-    plan.register_packages(pipewire);
-}
-
-=======
-fn pipewire<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
-    elevate: &'elevate Elevate,
-) {
-    let pipewire = &[
-        Ref("pipewire"),
-        Ref("lib32-pipewire"),
-        Ref("wireplumber"),
-        Ref("pavucontrol-qt"),
-        Ref("pipewire-audio"),
-        Ref("pipewire-pulse"),
-    ];
-
-    plan.add(
-        "install pipewire",
-        elevate,
-        Packages {
-            install: Ref(pipewire),
-            reason: InstallReason::Explicit,
-        },
-    );
-    plan.register_packages(pipewire);
+    plan.register_packages(pulseaudio);
 }
 
 fn fonts<'elevate: 'action, 'action>(
@@ -1692,6 +1491,7 @@ fn fonts<'elevate: 'action, 'action>(
     let fonts = &[
         Ref("awesome-terminal-fonts"),
         Ref("ttf-jetbrains-mono"),
+        Ref("ttf-inconsolata-nerd"),
         Ref("ttf-dejavu"),
     ];
 
@@ -1706,53 +1506,53 @@ fn fonts<'elevate: 'action, 'action>(
     plan.register_packages(fonts);
 }
 
->>>>>>> e244c39d (Clean up fonts)
 fn sshd<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) -> Result<()> {
-    let ssh = &[Ref("openssh")];
-    plan.add(
-        "install ssh",
-        elevate,
-        Packages {
-            install: Ref(ssh),
-            reason: InstallReason::Explicit,
-        },
-    );
-    plan.register_packages(ssh);
-
-    plan.add(
-        Ref("add ssh group"),
-        elevate,
-        Group {
-            name: "ssh",
-            system: true,
-        },
-    );
-
-    let path = Path::new("/etc/ssh/sshd_config");
-    let permissions = FilePermissions {
-        owner: Uid::root(),
-        group: Gid::root(),
-        mode: FileMode(0o644),
-    };
-    match plan.secrets() {
-        SecretsWorkflow::None => bail!("missing secrets"),
-        SecretsWorkflow::AssumeExisting => plan.assert(
-            "assert wireguard config exists",
+    plan.try_block("sshd", |plan| {
+        let ssh = &[Ref("openssh")];
+        plan.add(
+            "install ssh",
             elevate,
-            AssertFile {
-                path: Ref(path),
-                permissions,
+            Packages {
+                install: Ref(ssh),
+                reason: InstallReason::Explicit,
             },
-        ),
-        SecretsWorkflow::Secrets(secrets) => {
-            let mut context = tera::Context::new();
-            context.insert("address", &secrets.wireguard.address.access());
-            let template = tera::Tera::one_off(
-                &dedent!(
-                    r#"
+        );
+        plan.register_packages(ssh);
+
+        plan.add(
+            Ref("add ssh group"),
+            elevate,
+            Group {
+                name: "ssh",
+                system: true,
+            },
+        );
+
+        let path = Path::new("/etc/ssh/sshd_config");
+        let permissions = FilePermissions {
+            owner: Uid::root(),
+            group: Gid::root(),
+            mode: FileMode(0o644),
+        };
+        match plan.secrets() {
+            SecretsWorkflow::None => bail!("missing secrets"),
+            SecretsWorkflow::AssumeExisting => plan.assert(
+                "assert wireguard config exists",
+                elevate,
+                AssertFile {
+                    path: Ref(path),
+                    permissions,
+                },
+            ),
+            SecretsWorkflow::Secrets(secrets) => {
+                let mut context = tera::Context::new();
+                context.insert("address", &secrets.wireguard.address.access());
+                let template = tera::Tera::one_off(
+                    &dedent!(
+                        r#"
                         AddressFamily inet
                         ListenAddress 127.0.0.1
                         ListenAddress {{ address }}
@@ -1779,46 +1579,49 @@ fn sshd<'elevate: 'action, 'action>(
 
                         PermitRootLogin no
                 "#
-                ),
-                &context,
-                false,
-            )?;
+                    ),
+                    &context,
+                    false,
+                )?;
 
-            plan.add(
-                "configure sshd",
-                elevate,
-                File {
-                    path: Ref(path),
-                    permissions,
-                    on_directory: DirectoryHandling::Bail,
-                    on_symlink: SymlinkHandling::Bail,
-                    binary: false,
-                    secret: false,
-                    ignore_checksum_changes: false,
-                    content: FileContent::Bytes(Owned(template.into_bytes())),
-                },
-            )
-            .on_change(|| {
-                Resource::new(
-                    Ref("restart sshd"),
+                plan.add(
+                    "configure sshd",
                     elevate,
-                    RestartService { name: "sshd" },
+                    File {
+                        path: Ref(path),
+                        permissions,
+                        on_directory: DirectoryHandling::Bail,
+                        on_symlink: SymlinkHandling::Bail,
+                        binary: false,
+                        secret: false,
+                        ignore_checksum_changes: false,
+                        content: FileContent::Bytes(Owned(template.into_bytes())),
+                    },
                 )
-            });
+                .on_change(|| {
+                    Resource::new(
+                        Ref("restart sshd"),
+                        elevate,
+                        RestartService { name: "sshd" },
+                    )
+                });
+            }
         }
-    }
 
-    plan.add(
-        "enable sshd",
-        elevate,
-        Service {
-            name: "sshd.service",
-            state: ServiceState {
-                runtime: ServiceStateRuntime::Active,
-                persistent: ServiceStatePersistent::Enabled,
+        plan.add(
+            "enable sshd",
+            elevate,
+            Service {
+                name: "sshd.service",
+                state: ServiceState {
+                    runtime: ServiceStateRuntime::Active,
+                    persistent: ServiceStatePersistent::Enabled,
+                },
             },
-        },
-    );
+        );
+
+        Ok(())
+    })?;
 
     Ok(())
 }
@@ -1827,50 +1630,51 @@ fn iptables<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
-    plan.add(
-        Ref("install nftables"),
-        elevate,
-        SinglePackage {
-            package: Ref("nftables"),
-            reason: InstallReason::Explicit,
-            force: false,
-        },
-    );
-
-    plan.register_packages(&[Ref("nftables")]);
-
-    plan.add(
-        Ref("install iptables-legacy"),
-        elevate,
-        SinglePackage {
-            package: Ref("iptables-legacy"),
-            reason: InstallReason::Explicit,
-            // conflicts with `iptables`, which is already present as
-            // it's part of `base`
-            force: true,
-        },
-    );
-
-    plan.register_packages(&[Ref("iptables-legacy")]);
-
-    plan.add(
-        "configure iptables",
-        elevate,
-        File {
-            path: Ref(Path::new("/etc/iptables/iptables.rules")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o644),
+    plan.block("iptables", |plan| {
+        plan.add(
+            Ref("install nftables"),
+            elevate,
+            SinglePackage {
+                package: Ref("nftables"),
+                reason: InstallReason::Explicit,
+                force: false,
             },
-            on_directory: DirectoryHandling::Bail,
-            on_symlink: SymlinkHandling::Bail,
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: FileContent::Bytes(Ref(concat!(
-                dedent!(
-                    r#"
+        );
+
+        plan.register_packages(&[Ref("nftables")]);
+
+        plan.add(
+            Ref("install iptables-legacy"),
+            elevate,
+            SinglePackage {
+                package: Ref("iptables-legacy"),
+                reason: InstallReason::Explicit,
+                // conflicts with `iptables`, which is already present as
+                // it's part of `base`
+                force: true,
+            },
+        );
+
+        plan.register_packages(&[Ref("iptables-legacy")]);
+
+        plan.add(
+            "configure iptables",
+            elevate,
+            File {
+                path: Ref(Path::new("/etc/iptables/iptables.rules")),
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o644),
+                },
+                on_directory: DirectoryHandling::Bail,
+                on_symlink: SymlinkHandling::Bail,
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(concat!(
+                    dedent!(
+                        r#"
                     *filter
                     :INPUT DROP [0:0]
                     :FORWARD DROP [0:0]
@@ -1884,42 +1688,44 @@ fn iptables<'elevate: 'action, 'action>(
                     -A INPUT -j REJECT --reject-with icmp-proto-unreachable
                     COMMIT
                 "#
-                ),
-                "\n"
-            )
-            .as_bytes())),
-        },
-    )
-    .on_change(|| {
-        Resource::new(
-            Ref("restart iptables"),
-            elevate,
-            RestartService {
-                name: "iptables.service",
+                    ),
+                    "\n"
+                )
+                .as_bytes())),
             },
         )
-    });
+        .on_change(|| {
+            Resource::new(
+                Ref("restart iptables"),
+                elevate,
+                RestartService {
+                    name: "iptables.service",
+                },
+            )
+        });
 
-    plan.add(
-        "enable iptables",
-        elevate,
-        Service {
-            name: "iptables.service",
-            state: ServiceState {
-                runtime: ServiceStateRuntime::Active,
-                persistent: ServiceStatePersistent::Enabled,
+        plan.add(
+            "enable iptables",
+            elevate,
+            Service {
+                name: "iptables.service",
+                state: ServiceState {
+                    runtime: ServiceStateRuntime::Active,
+                    persistent: ServiceStatePersistent::Enabled,
+                },
             },
-        },
-    );
+        );
+    });
 }
 
 fn pacman<'plan, 'elevate: 'action, 'action>(
     plan: &'plan mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
-    plan.with(elevate, |mut plan| {
+    plan.block("pacman", |plan| {
         plan.add(
             "configure pacman",
+            elevate,
             File {
                 path: Ref(Path::new("/etc/pacman.conf")),
                 permissions: FilePermissions {
@@ -1971,113 +1777,85 @@ fn pacman<'plan, 'elevate: 'action, 'action>(
                 PackageDatabaseRefresh {},
             )
         });
+
+        plan.block("pacman-cache-cleanup", |plan| {
+            let pacman_contrib = &[Ref("pacman-contrib")];
+            plan.add(
+                "install pacman-contrib",
+                elevate,
+                Packages {
+                    install: Ref(pacman_contrib),
+                    reason: InstallReason::Explicit,
+                },
+            );
+
+            plan.register_packages(pacman_contrib);
+
+            plan.add(
+                "pacman cache cleanup service",
+                elevate,
+                File {
+                    path: Ref(Path::new(
+                        "/etc/systemd/system/pacman-cache-cleanup.service",
+                    )),
+                    on_directory: DirectoryHandling::Bail,
+                    on_symlink: SymlinkHandling::Proceed,
+                    permissions: FilePermissions {
+                        owner: Uid::root(),
+                        group: Gid::root(),
+                        mode: FileMode(0o644),
+                    },
+                    binary: false,
+                    secret: false,
+                    ignore_checksum_changes: false,
+                    content: Lines(Ref(&[
+                        Ref("[Service]"),
+                        Ref("Type=oneshot"),
+                        Ref("ExecStart=/bin/sh -c '/usr/bin/paccache -rk1 && /usr/bin/paccache -ruk0'"),
+                        Ref("ExecStart=/bin/sh -c '/usr/bin/paccache -rk1 -c /var/lib/packages && /usr/bin/paccache -ruk0 -c /var/lib/packages'"),
+                        Ref("RemainAfterExit=true"),
+                    ])),
+                },
+            );
+
+            plan.add(
+                "pacman cache cleanup timer",
+                elevate,
+                File {
+                    path: Ref(Path::new("/etc/systemd/system/pacman-cache-cleanup.timer")),
+                    permissions: FilePermissions {
+                        owner: Uid::root(),
+                        group: Gid::root(),
+                        mode: FileMode(0o644),
+                    },
+                    on_directory: DirectoryHandling::Bail,
+                    on_symlink: SymlinkHandling::Proceed,
+                    binary: false,
+                    secret: false,
+                    ignore_checksum_changes: false,
+                    content: Lines(Ref(&[
+                        Ref("[Timer]"),
+                        Ref("OnCalendar=daily"),
+                        Ref(""),
+                        Ref("[Install]"),
+                        Ref("WantedBy=timers.target"),
+                    ])),
+                },
+            );
+
+            plan.add(
+                "enable pacman cache cleanup timer",
+                elevate,
+                Service {
+                    name: "pacman-cache-cleanup.timer",
+                    state: ServiceState {
+                        runtime: ServiceStateRuntime::Active,
+                        persistent: ServiceStatePersistent::Enabled,
+                    },
+                },
+            );
+        });
     });
-}
-
-fn pacman_cache_cleanup<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
-    elevate: &'elevate Elevate,
-) {
-    let pacman_contrib = &[Ref("pacman-contrib")];
-    plan.add(
-        "install pacman-contrib",
-        elevate,
-        Packages {
-            install: Ref(pacman_contrib),
-            reason: InstallReason::Explicit,
-        },
-    );
-
-    plan.register_packages(pacman_contrib);
-
-    plan.add(
-        "pacman cache cleanup service",
-        elevate,
-        File {
-            path: Ref(Path::new(
-                "/etc/systemd/system/pacman-cache-cleanup.service",
-            )),
-            on_directory: DirectoryHandling::Bail,
-            on_symlink: SymlinkHandling::Proceed,
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o644),
-            },
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: Lines(Ref(&[
-                Ref("[Service]"),
-                Ref("Type=oneshot"),
-                Ref("ExecStart=/bin/sh -c '/usr/bin/paccache -rk1 && /usr/bin/paccache -ruk0'"),
-                Ref("ExecStart=/bin/sh -c '/usr/bin/paccache -rk1 -c /var/lib/packages && /usr/bin/paccache -ruk0 -c /var/lib/packages'"),
-                Ref("RemainAfterExit=true"),
-            ])),
-        },
-    );
-
-    plan.add(
-        "pacman cache cleanup timer",
-        elevate,
-        File {
-            path: Ref(Path::new("/etc/systemd/system/pacman-cache-cleanup.timer")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o644),
-            },
-            on_directory: DirectoryHandling::Bail,
-            on_symlink: SymlinkHandling::Proceed,
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: Lines(Ref(&[
-                Ref("[Timer]"),
-                Ref("OnCalendar=daily"),
-                Ref(""),
-                Ref("[Install]"),
-                Ref("WantedBy=timers.target"),
-            ])),
-        },
-    );
-
-    plan.add(
-        "enable pacman cache cleanup timer",
-        elevate,
-        Service {
-            name: "pacman-cache-cleanup.timer",
-            state: ServiceState {
-                runtime: ServiceStateRuntime::Active,
-                persistent: ServiceStatePersistent::Enabled,
-            },
-        },
-    );
-}
-
-fn install_packages<'elevate: 'action, 'action, 'pkgs>(
-    plan: &mut Plan<'_, 'elevate, 'pkgs, 'action, '_, Secrets>,
-    elevate: &'elevate Elevate,
-    packages: &'pkgs PackageConfig,
-) {
-    #[expect(clippy::iter_over_hash_type, reason = "order does not matter")]
-    for &(section, packages) in &packages.0 {
-        let packages = packages
-            .iter()
-            .map(|package| Ref(*package))
-            .collect::<Vec<_>>();
-
-        plan.add(
-            Owned(format!("install packages for {section}")),
-            elevate,
-            Packages {
-                install: Owned(packages.clone()),
-                reason: InstallReason::Explicit,
-            },
-        );
-
-        plan.register_packages(&packages);
-    }
 }
 
 fn hardware<'elevate: 'action, 'action>(
@@ -2085,103 +1863,105 @@ fn hardware<'elevate: 'action, 'action>(
     elevate: &'elevate Elevate,
     config: &Config,
 ) {
-    match config.machine.gpu {
-        Gpu::Amd => {
-            let amdgpu_packages = &[
-                Ref("mesa"),
-                Ref("mesa-utils"),
-                Ref("lib32-mesa"),
-                Ref("vulkan-radeon"),
-                Ref("lib32-vulkan-radeon"),
-                Ref("vulkan-headers"),
-                Ref("vulkan-tools"),
-            ];
+    plan.block("hardware", |plan| {
+        plan.block("gpu", |plan| match config.machine.gpu {
+            Gpu::Amd => {
+                let amdgpu_packages = &[
+                    Ref("mesa"),
+                    Ref("mesa-utils"),
+                    Ref("lib32-mesa"),
+                    Ref("vulkan-radeon"),
+                    Ref("lib32-vulkan-radeon"),
+                    Ref("vulkan-headers"),
+                    Ref("vulkan-tools"),
+                ];
 
-            plan.add(
-                "install AMDGPU packages",
-                elevate,
-                Packages {
-                    install: Ref(amdgpu_packages),
-                    reason: InstallReason::Explicit,
-                },
-            );
+                plan.add(
+                    "install AMDGPU packages",
+                    elevate,
+                    Packages {
+                        install: Ref(amdgpu_packages),
+                        reason: InstallReason::Explicit,
+                    },
+                );
 
-            plan.register_packages(amdgpu_packages);
-        }
-        Gpu::Nvidia => {
-            let nouveau_packages = &[
-                Ref("mesa"),
-                Ref("mesa-utils"),
-                Ref("lib32-mesa"),
-                Ref("vulkan-nouveau"),
-                Ref("lib32-vulkan-nouveau"),
-                Ref("vulkan-headers"),
-                Ref("vulkan-tools"),
-            ];
+                plan.register_packages(amdgpu_packages);
+            }
+            Gpu::Nvidia => {
+                let nouveau_packages = &[
+                    Ref("mesa"),
+                    Ref("mesa-utils"),
+                    Ref("lib32-mesa"),
+                    Ref("vulkan-nouveau"),
+                    Ref("lib32-vulkan-nouveau"),
+                    Ref("vulkan-headers"),
+                    Ref("vulkan-tools"),
+                ];
 
-            plan.add(
-                "install nouveau packages",
-                elevate,
-                Packages {
-                    install: Ref(nouveau_packages),
-                    reason: InstallReason::Explicit,
-                },
-            );
+                plan.add(
+                    "install nouveau packages",
+                    elevate,
+                    Packages {
+                        install: Ref(nouveau_packages),
+                        reason: InstallReason::Explicit,
+                    },
+                );
 
-            plan.register_packages(nouveau_packages);
-        }
-        Gpu::Intel => {
-            let intel_packages = &[
-                Ref("mesa"),
-                Ref("mesa-utils"),
-                Ref("lib32-mesa"),
-                Ref("vulkan-intel"),
-                Ref("lib32-vulkan-intel"),
-            ];
+                plan.register_packages(nouveau_packages);
+            }
+            Gpu::Intel => {
+                let intel_packages = &[
+                    Ref("mesa"),
+                    Ref("mesa-utils"),
+                    Ref("lib32-mesa"),
+                    Ref("vulkan-intel"),
+                    Ref("lib32-vulkan-intel"),
+                ];
 
-            plan.add(
-                "install intel packages",
-                elevate,
-                Packages {
-                    install: Ref(intel_packages),
-                    reason: InstallReason::Explicit,
-                },
-            );
+                plan.add(
+                    "install intel packages",
+                    elevate,
+                    Packages {
+                        install: Ref(intel_packages),
+                        reason: InstallReason::Explicit,
+                    },
+                );
 
-            plan.register_packages(intel_packages);
-        }
-    }
+                plan.register_packages(intel_packages);
+            }
+        });
 
-    match config.machine.cpu {
-        Cpu::Amd => {
-            let amd_cpu_packages = &[Ref("amd-ucode")];
+        plan.block("cpu", |plan| match config.machine.cpu {
+            Cpu::Amd => {
+                let amd_cpu_packages = &[Ref("amd-ucode")];
 
-            plan.add(
-                "install AMD cpu packages",
-                elevate,
-                Packages {
-                    install: Ref(amd_cpu_packages),
-                    reason: InstallReason::Explicit,
-                },
-            );
+                plan.add(
+                    "install AMD cpu packages",
+                    elevate,
+                    Packages {
+                        install: Ref(amd_cpu_packages),
+                        reason: InstallReason::Explicit,
+                    },
+                );
 
-            plan.register_packages(amd_cpu_packages);
-        }
-        Cpu::Intel => {
-            let intel_cpu_packages = &[Ref("intel-ucode")];
+                plan.register_packages(amd_cpu_packages);
+            }
+            Cpu::Intel => {
+                let intel_cpu_packages = &[Ref("intel-ucode")];
 
-            plan.add(
-                "install intel cpu packages",
-                elevate,
-                Packages {
-                    install: Ref(intel_cpu_packages),
-                    reason: InstallReason::Explicit,
-                },
-            );
+                plan.add(
+                    "install intel cpu packages",
+                    elevate,
+                    Packages {
+                        install: Ref(intel_cpu_packages),
+                        reason: InstallReason::Explicit,
+                    },
+                );
 
-            plan.register_packages(intel_cpu_packages);
-        }
-    }
+                plan.register_packages(intel_cpu_packages);
+            }
+        });
+    });
 }
 
 fn backlight<'elevate: 'action, 'action>(
@@ -2213,28 +1993,30 @@ fn networkmanager<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
-    let networkmanager = &[Ref("networkmanager")];
-    plan.add(
-        "install networkmanager",
-        elevate,
-        Packages {
-            install: Ref(networkmanager),
-            reason: InstallReason::Explicit,
-        },
-    );
-    plan.register_packages(networkmanager);
-
-    plan.add(
-        "enable networkmanager",
-        elevate,
-        Service {
-            name: "NetworkManager.service",
-            state: ServiceState {
-                runtime: ServiceStateRuntime::Active,
-                persistent: ServiceStatePersistent::Enabled,
+    plan.block("networkmanager", |plan| {
+        let networkmanager = &[Ref("networkmanager")];
+        plan.add(
+            "install networkmanager",
+            elevate,
+            Packages {
+                install: Ref(networkmanager),
+                reason: InstallReason::Explicit,
             },
-        },
-    );
+        );
+        plan.register_packages(networkmanager);
+
+        plan.add(
+            "enable networkmanager",
+            elevate,
+            Service {
+                name: "NetworkManager.service",
+                state: ServiceState {
+                    runtime: ServiceStateRuntime::Active,
+                    persistent: ServiceStatePersistent::Enabled,
+                },
+            },
+        );
+    });
 }
 
 fn filesystem<'elevate: 'action, 'action>(
@@ -2273,65 +2055,67 @@ fn kernel<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
-    let kernel = &[
-        Ref("linux-zen"),
-        Ref("linux-zen-headers"),
-        Ref("linux-zen-docs"),
-        Ref("linux-firmware"),
-        Ref("man-pages"),
-    ];
-    plan.add(
-        "install kernel",
-        elevate,
-        Packages {
-            install: Ref(kernel),
-            reason: InstallReason::Explicit,
-        },
-    );
-    plan.register_packages(kernel);
-
-    let bootloader = &[Ref("grub"), Ref("efibootmgr")];
-    plan.add(
-        "install bootloader",
-        elevate,
-        Packages {
-            install: Ref(bootloader),
-            reason: InstallReason::Explicit,
-        },
-    );
-    plan.register_packages(bootloader);
-
-    plan.add(
-        "disable kernel modules",
-        elevate,
-        File {
-            path: Ref(Path::new("/etc/modprobe.d/disable.conf")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o600),
+    plan.block("kernel", |plan| {
+        let kernel = &[
+            Ref("linux-zen"),
+            Ref("linux-zen-headers"),
+            Ref("linux-zen-docs"),
+            Ref("linux-firmware"),
+            Ref("man-pages"),
+        ];
+        plan.add(
+            "install kernel",
+            elevate,
+            Packages {
+                install: Ref(kernel),
+                reason: InstallReason::Explicit,
             },
-            on_directory: DirectoryHandling::Bail,
-            on_symlink: SymlinkHandling::Proceed,
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: Lines(Ref(&[
-                // dirty flag
-                Ref("install esp4 /bin/false"),
-                Ref("install esp6 /bin/false"),
-                Ref("install rxrpc /bin/false"),
-                Ref("blacklist esp4"),
-                Ref("blacklist esp6"),
-                Ref("blacklist rxrpc"),
-                // copyfail
-                Ref("install algif_aead /bin/false"),
-                Ref("install authencesn /bin/true"),
-                Ref("blacklist algif_aead"),
-                Ref("blacklist authencesn"),
-            ])),
-        },
-    );
+        );
+        plan.register_packages(kernel);
+
+        let bootloader = &[Ref("grub"), Ref("efibootmgr")];
+        plan.add(
+            "install bootloader",
+            elevate,
+            Packages {
+                install: Ref(bootloader),
+                reason: InstallReason::Explicit,
+            },
+        );
+        plan.register_packages(bootloader);
+
+        plan.add(
+            "disable kernel modules",
+            elevate,
+            File {
+                path: Ref(Path::new("/etc/modprobe.d/disable.conf")),
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o600),
+                },
+                on_directory: DirectoryHandling::Bail,
+                on_symlink: SymlinkHandling::Proceed,
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: Lines(Ref(&[
+                    // dirty flag
+                    Ref("install esp4 /bin/false"),
+                    Ref("install esp6 /bin/false"),
+                    Ref("install rxrpc /bin/false"),
+                    Ref("blacklist esp4"),
+                    Ref("blacklist esp6"),
+                    Ref("blacklist rxrpc"),
+                    // copyfail
+                    Ref("install algif_aead /bin/false"),
+                    Ref("install authencesn /bin/true"),
+                    Ref("blacklist algif_aead"),
+                    Ref("blacklist authencesn"),
+                ])),
+            },
+        );
+    });
 }
 
 fn journald<'elevate: 'action, 'action>(
@@ -2411,214 +2195,216 @@ fn firefox<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
 ) {
-    for directory in [
-        Path::new("/etc/firefox"),
-        Path::new("/etc/firefox/policies"),
-    ] {
+    plan.block("firefox", |plan| {
+        for directory in [
+            Path::new("/etc/firefox"),
+            Path::new("/etc/firefox/policies"),
+        ] {
+            plan.add(
+                Owned(format!("create firefox directories {directory}")),
+                elevate,
+                Directory {
+                    path: Ref(directory),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_file: FileHandling::Proceed,
+                    permissions: FilePermissions {
+                        owner: Uid::root(),
+                        group: Gid::root(),
+                        mode: FileMode(0o775),
+                    },
+                },
+            );
+        }
+
+        #[expect(clippy::default_numeric_fallback, reason = "")]
+        let policies = serde_json::json!({
+            "policies": {
+                "AutofillAddressEnabled": false,
+                "AutofillCreditCardEnabled": false,
+                "DefaultDownloadDirectory": "${home}/download",
+                "DisableFeedbackCommands": true,
+                "DisableFirefoxAccounts": true,
+                "DisableFirefoxStudies": true,
+                "DisableForgetButton": true,
+                "DisableMasterPasswordCreation": true,
+                "DisableProfileImport": true,
+                "DisableProfileRefresh": true,
+                "DisableSafeMode": true,
+                "DisableSetDesktopBackground": true,
+                "DisableTelemetry": true,
+                "DisplayBookmarksToolbar": "always",
+                "DisplayMenuBar": "default-off",
+                "DontCheckDefaultBrowser": true,
+                "EnableTrackingProtection": {
+                    "Value": true,
+                    "Locked": false,
+                    "Category": "strict",
+                    "BaselineExceptions": true,
+                    "ConvenienceExceptions": false
+                },
+                "ExtensionSettings": {
+                    "*": {
+                        "allowed_types": [
+                            "extension"
+                        ]
+                    },
+                    "jid1-KKzOGWgsW3Ao4Q@jetpack": {
+                        "installation_mode": "normal_installed",
+                        "install_url": "https://addons.mozilla.org/firefox/downloads/file/4202634/i_dont_care_about_cookies.xpi",
+                        "default_area": "menupanel",
+                        "private_browsing": true,
+                        "updates_disabled": false
+                    },
+                    "uBlock0@raymondhill.net": {
+                        "installation_mode": "normal_installed",
+                        "install_url": "https://addons.mozilla.org/firefox/downloads/file/4598854/ublock_origin-1.67.0.xpi",
+                        "default_area": "navbar",
+                        "private_browsing": true,
+                        "updates_disabled": false
+                    },
+                    "treestyletab@piro.sakura.ne.jp": {
+                        "installation_mode": "normal_installed",
+                        "install_url": "https://addons.mozilla.org/firefox/downloads/file/4602712/tree_style_tab-4.2.7.xpi",
+                        "default_area": "navbar",
+                        "private_browsing": true,
+                        "updates_disabled": false
+                    },
+                    "{9063c2e9-e07c-4c2c-9646-cfe7ca8d0498}": {
+                        "installation_mode": "normal_installed",
+                        "install_url": "https://addons.mozilla.org/firefox/downloads/file/4526031/old_reddit_redirect-2.0.9.xpi",
+                        "default_area": "menupanel",
+                        "private_browsing": true,
+                        "updates_disabled": false
+                    }
+                },
+                "FirefoxHome": {
+                    "Search": false,
+                    "TopSites": false,
+                    "SponsoredTopSites": false,
+                    "Highlights": false,
+                    "Pocket": false,
+                    "Stories": false,
+                    "SponsoredPocket": false,
+                    "SponsoredStories": false,
+                    "Snippets": false,
+                    "Locked": true
+                },
+                "GenerativeAI": {
+                    "Enabled": false,
+                    "Chatbot": false,
+                    "LinkPreviews": false,
+                    "TabGroups": false
+                },
+                "Homepage": {
+                    "URL": "about:newtab",
+                    "StartPage": "previous-session"
+                },
+                "MicrosoftEntraSSO": false,
+                "NewTabPage": false,
+                "NoDefaultBookmarks": true,
+                "OfferToSaveLogins": false,
+                "OverrideFirstRunPage": "",
+                "PasswordManagerEnabled": false,
+                "Preferences": {
+                    "browser.translations.automaticallyPopup": {
+                        "Value": false,
+                        "Status": "default",
+                        "Type": "boolean"
+                    },
+                    "browser.aboutConfig.showWarning": {
+                        "Value": false,
+                        "Status": "default",
+                        "Type": "boolean"
+                    },
+                    "general.smoothScroll": {
+                        "Value": true,
+                        "Status": "default",
+                        "Type": "boolean"
+                    },
+                    "media.eme.enabled": {
+                        "Value": true,
+                        "Status": "default",
+                        "Type": "boolean"
+                    },
+                    "browser.startup.page": {
+                        "Value": 3,
+                        "Status": "default",
+                        "Type": "number"
+                    },
+                    "browser.sessionstore.restore_on_demand": {
+                        "Value": false,
+                        "Status": "default",
+                        "Type": "boolean"
+                    },
+                    "layout.spellcheckDefault": {
+                        "Value": 0,
+                        "Status": "default",
+                        "Type": "number"
+                    },
+                    "dom.private-attribution.submission.enabled": {
+                        "Value": false,
+                        "Status": "default",
+                        "Type": "boolean"
+                    },
+                    "app.update.auto": {
+                        "Value": false,
+                        "Status": "default",
+                        "Type": "boolean"
+                    },
+                    "app.update.service.enabled": {
+                        "Value": false,
+                        "Status": "default",
+                        "Type": "boolean"
+                    },
+                    // Otherwise, userChrome.css does not apply
+                    "toolkit.legacyUserProfileCustomizations.stylesheets": {
+                        "Value": true,
+                        "Status": "default",
+                        "Type": "boolean"
+                    },
+                },
+                "PromptForDownloadLocation": false,
+                "RequestedLocales": [
+                    "en-US",
+                    "de"
+                ],
+                "SearchSuggestEnabled": false,
+                "ShowHomeButton": false,
+                "SkipTermsOfUse": true,
+                "UserMessaging": {
+                    "ExtensionRecommendations": false,
+                    "FeatureRecommendations": false,
+                    "UrlbarInterventions": false,
+                    "SkipOnboarding": true,
+                    "MoreFromMozilla": false,
+                    "FirefoxLabs": false
+                },
+                "VisualSearchEnabled": false
+            }
+        });
+
         plan.add(
-            Owned(format!("create firefox directories {directory}")),
+            Ref("set firefox global policies"),
             elevate,
-            Directory {
-                path: Ref(directory),
-                on_symlink: SymlinkHandling::Proceed,
-                on_file: FileHandling::Proceed,
+            File {
+                path: Ref(Path::new("/etc/firefox/policies/policies.json")),
                 permissions: FilePermissions {
                     owner: Uid::root(),
                     group: Gid::root(),
-                    mode: FileMode(0o775),
+                    mode: FileMode(0o644),
                 },
+                on_directory: DirectoryHandling::Bail,
+                on_symlink: SymlinkHandling::Proceed,
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Owned(
+                    serde_json::to_vec_pretty(&policies)
+                        .expect("policies are builtin, will always be serializable"),
+                )),
             },
         );
-    }
-
-    #[expect(clippy::default_numeric_fallback, reason = "")]
-    let policies = serde_json::json!({
-        "policies": {
-            "AutofillAddressEnabled": false,
-            "AutofillCreditCardEnabled": false,
-            "DefaultDownloadDirectory": "${home}/download",
-            "DisableFeedbackCommands": true,
-            "DisableFirefoxAccounts": true,
-            "DisableFirefoxStudies": true,
-            "DisableForgetButton": true,
-            "DisableMasterPasswordCreation": true,
-            "DisableProfileImport": true,
-            "DisableProfileRefresh": true,
-            "DisableSafeMode": true,
-            "DisableSetDesktopBackground": true,
-            "DisableTelemetry": true,
-            "DisplayBookmarksToolbar": "always",
-            "DisplayMenuBar": "default-off",
-            "DontCheckDefaultBrowser": true,
-            "EnableTrackingProtection": {
-                "Value": true,
-                "Locked": false,
-                "Category": "strict",
-                "BaselineExceptions": true,
-                "ConvenienceExceptions": false
-            },
-            "ExtensionSettings": {
-                "*": {
-                    "allowed_types": [
-                        "extension"
-                    ]
-                },
-                "jid1-KKzOGWgsW3Ao4Q@jetpack": {
-                    "installation_mode": "normal_installed",
-                    "install_url": "https://addons.mozilla.org/firefox/downloads/file/4202634/i_dont_care_about_cookies.xpi",
-                    "default_area": "menupanel",
-                    "private_browsing": true,
-                    "updates_disabled": false
-                },
-                "uBlock0@raymondhill.net": {
-                    "installation_mode": "normal_installed",
-                    "install_url": "https://addons.mozilla.org/firefox/downloads/file/4598854/ublock_origin-1.67.0.xpi",
-                    "default_area": "navbar",
-                    "private_browsing": true,
-                    "updates_disabled": false
-                },
-                "treestyletab@piro.sakura.ne.jp": {
-                    "installation_mode": "normal_installed",
-                    "install_url": "https://addons.mozilla.org/firefox/downloads/file/4602712/tree_style_tab-4.2.7.xpi",
-                    "default_area": "navbar",
-                    "private_browsing": true,
-                    "updates_disabled": false
-                },
-                "{9063c2e9-e07c-4c2c-9646-cfe7ca8d0498}": {
-                    "installation_mode": "normal_installed",
-                    "install_url": "https://addons.mozilla.org/firefox/downloads/file/4526031/old_reddit_redirect-2.0.9.xpi",
-                    "default_area": "menupanel",
-                    "private_browsing": true,
-                    "updates_disabled": false
-                }
-            },
-            "FirefoxHome": {
-                "Search": false,
-                "TopSites": false,
-                "SponsoredTopSites": false,
-                "Highlights": false,
-                "Pocket": false,
-                "Stories": false,
-                "SponsoredPocket": false,
-                "SponsoredStories": false,
-                "Snippets": false,
-                "Locked": true
-            },
-            "GenerativeAI": {
-                "Enabled": false,
-                "Chatbot": false,
-                "LinkPreviews": false,
-                "TabGroups": false
-            },
-            "Homepage": {
-                "URL": "about:newtab",
-                "StartPage": "previous-session"
-            },
-            "MicrosoftEntraSSO": false,
-            "NewTabPage": false,
-            "NoDefaultBookmarks": true,
-            "OfferToSaveLogins": false,
-            "OverrideFirstRunPage": "",
-            "PasswordManagerEnabled": false,
-            "Preferences": {
-                "browser.translations.automaticallyPopup": {
-                    "Value": false,
-                    "Status": "default",
-                    "Type": "boolean"
-                },
-                "browser.aboutConfig.showWarning": {
-                    "Value": false,
-                    "Status": "default",
-                    "Type": "boolean"
-                },
-                "general.smoothScroll": {
-                    "Value": true,
-                    "Status": "default",
-                    "Type": "boolean"
-                },
-                "media.eme.enabled": {
-                    "Value": true,
-                    "Status": "default",
-                    "Type": "boolean"
-                },
-                "browser.startup.page": {
-                    "Value": 3,
-                    "Status": "default",
-                    "Type": "number"
-                },
-                "browser.sessionstore.restore_on_demand": {
-                    "Value": false,
-                    "Status": "default",
-                    "Type": "boolean"
-                },
-                "layout.spellcheckDefault": {
-                    "Value": 0,
-                    "Status": "default",
-                    "Type": "number"
-                },
-                "dom.private-attribution.submission.enabled": {
-                    "Value": false,
-                    "Status": "default",
-                    "Type": "boolean"
-                },
-                "app.update.auto": {
-                    "Value": false,
-                    "Status": "default",
-                    "Type": "boolean"
-                },
-                "app.update.service.enabled": {
-                    "Value": false,
-                    "Status": "default",
-                    "Type": "boolean"
-                },
-                // Otherwise, userChrome.css does not apply
-                "toolkit.legacyUserProfileCustomizations.stylesheets": {
-                    "Value": true,
-                    "Status": "default",
-                    "Type": "boolean"
-                },
-            },
-            "PromptForDownloadLocation": false,
-            "RequestedLocales": [
-                "en-US",
-                "de"
-            ],
-            "SearchSuggestEnabled": false,
-            "ShowHomeButton": false,
-            "SkipTermsOfUse": true,
-            "UserMessaging": {
-                "ExtensionRecommendations": false,
-                "FeatureRecommendations": false,
-                "UrlbarInterventions": false,
-                "SkipOnboarding": true,
-                "MoreFromMozilla": false,
-                "FirefoxLabs": false
-            },
-            "VisualSearchEnabled": false
-        }
     });
-
-    plan.add(
-        Ref("set firefox global policies"),
-        elevate,
-        File {
-            path: Ref(Path::new("/etc/firefox/policies/policies.json")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o644),
-            },
-            on_directory: DirectoryHandling::Bail,
-            on_symlink: SymlinkHandling::Proceed,
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: FileContent::Bytes(Owned(
-                serde_json::to_vec_pretty(&policies)
-                    .expect("policies are builtin, will always be serializable"),
-            )),
-        },
-    );
 }
 
 struct UserDirectories {
@@ -2631,32 +2417,25 @@ struct UserDirectories {
     systemd_user_units: PathBuf,
     local: PathBuf,
     data: PathBuf,
+    state: PathBuf,
+    applications: PathBuf,
 }
 
 fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     plan: &mut Plan<'_, 'elevate, 'pkgs, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
     config: &Config,
-    packages: &'pkgs PackageConfig,
 ) -> Result<()> {
     kernel(plan, elevate);
     filesystem(plan, elevate);
     pacman(plan, elevate);
     posix(plan, elevate);
-    install_packages(plan, elevate, packages);
     networkmanager(plan, elevate);
-    aur(plan, elevate);
-    pacman_cache_cleanup(plan, elevate);
     reflector(plan, elevate);
     initrd(plan, elevate, config);
     libvirt(plan, elevate);
-<<<<<<< HEAD
-||||||| parent of e244c39d (Clean up fonts)
-    pipewire(plan, elevate);
-=======
-    pipewire(plan, elevate);
+    pulseaudio(plan, elevate);
     fonts(plan, elevate);
->>>>>>> e244c39d (Clean up fonts)
     smartcard(plan, elevate);
     wireshark(plan, elevate);
     sshd(plan, elevate)?;
@@ -2674,16 +2453,18 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     Ok(())
 }
 
-struct UserResult {
-    packages: HashMap<&'static str, &'static [MaybeOwned<'static, str>]>,
+struct UserResult<'pkgs> {
+    packages: HashMap<MaybeOwned<'pkgs, str>, MaybeOwned<'pkgs, [MaybeOwned<'pkgs, str>]>>,
 }
 
-async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine, 'pkgs>(
+    plan: &mut Block<'_, 'elevate, 'pkgs, 'action, '_, Secrets>,
     root: &'elevate Elevate,
     user: &'elevate UserContext,
     machine: &'machine MachineConfig,
-) -> Result<UserResult> {
+) -> Result<UserResult<'pkgs>> {
+    let mut packages = HashMap::new();
+
     let UserContext {
         simplest_elevate: ref user_elevate,
         ref strict_elevate,
@@ -2691,6 +2472,15 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
     } = *user;
 
     let home = PathBuf::from("/home/").join(&user.name);
+
+    plan.add(
+        "install zsh",
+        root,
+        Packages {
+            install: Ref(&[Ref("zsh")]),
+            reason: InstallReason::Explicit,
+        },
+    );
 
     plan.add(
         "create user",
@@ -2722,6 +2512,7 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
         let config = home.join(".config");
         let systemd = config.join("systemd");
         let local = home.join(".local");
+        let data = local.join("share");
 
         UserDirectories {
             config,
@@ -2730,24 +2521,43 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
             tmp: home.join("tmp"),
             download: home.join("download"),
             systemd_user_units: systemd.join("user"),
-            data: local.join("share"),
+            state: local.join("state"),
+            applications: data.join("applications"),
+            data,
             systemd,
             local,
         }
     };
 
     user_create_directories(plan, user_elevate, user, &user_directories);
-    Box::pin(user_executables(
+
+    let mut required_packages =
+        user_dotfiles(plan, user_elevate, user, machine, &home, &user_directories)?;
+
+    let dependencies = Box::pin(user_executables(
         plan,
         user_elevate,
         user,
         &user_directories,
     ))
     .await?;
-    user_dotfiles(plan, user_elevate, user, machine, &home)?;
+
+    required_packages.extend(dependencies);
+
+    packages.extend(required_packages);
+
+    packages.insert(
+        Ref("pass"),
+        Ref([Ref("pass"), Ref("passff-host")].as_slice()),
+    );
+
+    packages.insert(
+        Ref("theming"),
+        Ref([Ref("breeze"), Ref("breeze-grub"), Ref("breeze-gtk")].as_slice()),
+    );
+
     user_wallpaper(plan, user_elevate, user, &user_directories);
     user_services(plan, user_elevate, user, &user_directories, machine);
-    user_firefox(plan, user_elevate, user, &home);
 
     let ssh_directory = home.join(".ssh");
     plan.add(
@@ -2800,337 +2610,245 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine>(
         },
     );
 
-    Ok(UserResult {
-        packages: HashMap::new(),
-    })
-}
-
-fn user_firefox<'elevate: 'action, 'action, 'user, 'machine>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
-    user_elevate: &'elevate Elevate,
-    user: &'user UserConfig,
-    home: &Path,
-) {
-    let mozilla_dir = home.join(".mozilla");
-    let firefox_dir = mozilla_dir.join("firefox");
-
-    plan.add(
-        Ref("create mozilla base directory"),
-        user_elevate,
-        Directory {
-            path: Owned(mozilla_dir),
-            on_symlink: SymlinkHandling::Proceed,
-            on_file: FileHandling::Proceed,
-            permissions: FilePermissions {
-                owner: Uid::from(user.name.clone()),
-                group: Gid::from(user.name.clone()),
-                mode: FileMode(0o755),
-            },
-        },
-    );
-
-    plan.add(
-        Ref("create firefox base directory"),
-        user_elevate,
-        Directory {
-            path: Owned(firefox_dir.clone()),
-            on_symlink: SymlinkHandling::Proceed,
-            on_file: FileHandling::Proceed,
-            permissions: FilePermissions {
-                owner: Uid::from(user.name.clone()),
-                group: Gid::from(user.name.clone()),
-                mode: FileMode(0o755),
-            },
-        },
-    );
-
-    for profile in &user.firefox.profiles {
-        let profile_dir = firefox_dir.join(format!("profile-{}", profile.name));
-        let chrome_dir = profile_dir.join("chrome");
-
-        plan.add(
-            Owned(format!(
-                "create firefox profile directory for {}",
-                profile.name
-            )),
-            user_elevate,
-            Directory {
-                path: Owned(profile_dir),
-                on_symlink: SymlinkHandling::Proceed,
-                on_file: FileHandling::Proceed,
-                permissions: FilePermissions {
-                    owner: Uid::from(user.name.clone()),
-                    group: Gid::from(user.name.clone()),
-                    mode: FileMode(0o755),
-                },
-            },
-        );
-
-        plan.add(
-            Owned(format!(
-                "create firefox chrome directory for {}",
-                profile.name
-            )),
-            user_elevate,
-            Directory {
-                path: Owned(chrome_dir.clone()),
-                on_symlink: SymlinkHandling::Proceed,
-                on_file: FileHandling::Proceed,
-                permissions: FilePermissions {
-                    owner: Uid::from(user.name.clone()),
-                    group: Gid::from(user.name.clone()),
-                    mode: FileMode(0o755),
-                },
-            },
-        );
-
-        if profile.manage_css {
-            plan.add(
-                Owned(format!(
-                    "create firefox userChrome.css for {}",
-                    profile.name
-                )),
-                user_elevate,
-                File {
-                    path: Owned(chrome_dir.join("userChrome.css")),
-                    on_symlink: SymlinkHandling::Proceed,
-                    on_directory: DirectoryHandling::Proceed,
-                    permissions: FilePermissions {
-                        owner: Uid::from(user.name.clone()),
-                        group: Gid::from(user.name.clone()),
-                        mode: FileMode(0o644),
-                    },
-                    binary: false,
-                    secret: false,
-                    ignore_checksum_changes: false,
-                    content: FileContent::Bytes(Ref(
-                        dedent!(
-                            r##"
-                                /* hides the native tabs */
-                                #TabsToolbar {
-                                  visibility: collapse;
-                                }
-
-                                /* removes the header for the sidebar that only shows "tree style tab" anyway */
-                                #sidebar-panel-header {
-                                  visibility: collapse;
-                                }
-
-                                /* removes the weird padding between sidebar and left window border */
-                                #sidebar-box {
-                                  padding-left: 0 !important;
-                                }
-                            "##
-                        )
-                        .as_bytes(),
-                    )),
-                },
-            );
-        }
-    }
+    Ok(UserResult { packages })
 }
 
 fn user_create_directories<'elevate: 'action, 'action, 'user, 'machine>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    plan: &mut Block<'_, 'elevate, '_, 'action, '_, Secrets>,
     user_elevate: &'elevate Elevate,
     user: &'elevate UserConfig,
     user_directories: &UserDirectories,
 ) {
-    plan.add(
-        "create user config directory",
-        user_elevate,
-        Directory {
-            path: Owned(user_directories.config.clone()),
-            on_symlink: SymlinkHandling::Proceed,
-            on_file: FileHandling::Proceed,
-            permissions: FilePermissions {
-                owner: Uid::from(user.name.clone()),
-                group: Gid::from(user.name.clone()),
-                mode: FileMode(0o755),
+    plan.block("user directories", |plan| {
+        plan.add(
+            "create user config directory",
+            user_elevate,
+            Directory {
+                path: Owned(user_directories.config.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
             },
-        },
-    );
+        );
 
-    plan.add(
-        Ref("create download directory"),
-        user_elevate,
-        Directory {
-            path: Owned(user_directories.download.clone()),
-            on_symlink: SymlinkHandling::Proceed,
-            on_file: FileHandling::Proceed,
-            permissions: FilePermissions {
-                owner: Uid::from(user.name.clone()),
-                group: Gid::from(user.name.clone()),
-                mode: FileMode(0o755),
+        plan.add(
+            Ref("create download directory"),
+            user_elevate,
+            Directory {
+                path: Owned(user_directories.download.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
             },
-        },
-    );
+        );
 
-    plan.add(
-        Ref("create tmp directory"),
-        user_elevate,
-        Directory {
-            path: Owned(user_directories.tmp.clone()),
-            on_symlink: SymlinkHandling::Proceed,
-            on_file: FileHandling::Proceed,
-            permissions: FilePermissions {
-                owner: Uid::from(user.name.clone()),
-                group: Gid::from(user.name.clone()),
-                mode: FileMode(0o755),
+        plan.add(
+            Ref("create tmp directory"),
+            user_elevate,
+            Directory {
+                path: Owned(user_directories.tmp.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
             },
-        },
-    );
+        );
 
-    plan.add(
-        Ref("create scripts directory"),
-        user_elevate,
-        Directory {
-            path: Owned(user_directories.scripts.clone()),
-            on_symlink: SymlinkHandling::Proceed,
-            on_file: FileHandling::Proceed,
-            permissions: FilePermissions {
-                owner: Uid::from(user.name.clone()),
-                group: Gid::from(user.name.clone()),
-                mode: FileMode(0o755),
+        plan.add(
+            Ref("create scripts directory"),
+            user_elevate,
+            Directory {
+                path: Owned(user_directories.scripts.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
             },
-        },
-    );
+        );
 
-    plan.add(
-        Ref("create bin directory"),
-        user_elevate,
-        Directory {
-            path: Owned(user_directories.bin.clone()),
-            on_symlink: SymlinkHandling::Proceed,
-            on_file: FileHandling::Proceed,
-            permissions: FilePermissions {
-                owner: Uid::from(user.name.clone()),
-                group: Gid::from(user.name.clone()),
-                mode: FileMode(0o755),
+        plan.add(
+            Ref("create bin directory"),
+            user_elevate,
+            Directory {
+                path: Owned(user_directories.bin.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
             },
-        },
-    );
+        );
 
-    plan.add(
-        Ref("create systemd user directory"),
-        user_elevate,
-        Directory {
-            path: Owned(user_directories.systemd.clone()),
-            on_symlink: SymlinkHandling::Proceed,
-            on_file: FileHandling::Proceed,
-            permissions: FilePermissions {
-                owner: Uid::from(user.name.clone()),
-                group: Gid::from(user.name.clone()),
-                mode: FileMode(0o755),
+        plan.add(
+            Ref("create systemd user directory"),
+            user_elevate,
+            Directory {
+                path: Owned(user_directories.systemd.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
             },
-        },
-    );
+        );
 
-    plan.add(
-        Ref("create systemd user unit directory"),
-        user_elevate,
-        Directory {
-            path: Owned(user_directories.systemd_user_units.clone()),
-            on_symlink: SymlinkHandling::Proceed,
-            on_file: FileHandling::Proceed,
-            permissions: FilePermissions {
-                owner: Uid::from(user.name.clone()),
-                group: Gid::from(user.name.clone()),
-                mode: FileMode(0o755),
+        plan.add(
+            Ref("create systemd user unit directory"),
+            user_elevate,
+            Directory {
+                path: Owned(user_directories.systemd_user_units.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
             },
-        },
-    );
+        );
 
-    plan.add(
-        Ref("create local directory"),
-        user_elevate,
-        Directory {
-            path: Owned(user_directories.local.clone()),
-            on_symlink: SymlinkHandling::Proceed,
-            on_file: FileHandling::Proceed,
-            permissions: FilePermissions {
-                owner: Uid::from(user.name.clone()),
-                group: Gid::from(user.name.clone()),
-                mode: FileMode(0o755),
+        plan.add(
+            Ref("create local directory"),
+            user_elevate,
+            Directory {
+                path: Owned(user_directories.local.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
             },
-        },
-    );
+        );
 
-    plan.add(
-        Ref("create data directory"),
-        user_elevate,
-        Directory {
-            path: Owned(user_directories.data.clone()),
-            on_symlink: SymlinkHandling::Proceed,
-            on_file: FileHandling::Proceed,
-            permissions: FilePermissions {
-                owner: Uid::from(user.name.clone()),
-                group: Gid::from(user.name.clone()),
-                mode: FileMode(0o755),
+        plan.add(
+            Ref("create data directory"),
+            user_elevate,
+            Directory {
+                path: Owned(user_directories.data.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
             },
-        },
-    );
+        );
+
+        plan.add(
+            Ref("create state directory"),
+            user_elevate,
+            Directory {
+                path: Owned(user_directories.state.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
+            },
+        );
+
+        plan.add(
+            Ref("create applications directory"),
+            user_elevate,
+            Directory {
+                path: Owned(user_directories.applications.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
+            },
+        );
+    });
 }
 
 fn user_autologin<'elevate: 'action, 'action, 'user, 'machine>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    plan: &mut Block<'_, 'elevate, '_, 'action, '_, Secrets>,
     root: &'elevate Elevate,
     user: &'user UserConfig,
 ) {
-    let getty_base = PathBuf::from(format!(
-        "/etc/systemd/system/getty@tty{vt}.service.d/",
-        vt = user.vt
-    ));
+    plan.block("autologin", |plan| {
+        let getty_base = PathBuf::from(format!(
+            "/etc/systemd/system/getty@tty{vt}.service.d/",
+            vt = user.vt
+        ));
 
-    plan.add(
-        "create directory for getty autologin",
-        root,
-        Directory {
-            path: Owned(getty_base.clone()),
-            on_symlink: SymlinkHandling::Proceed,
-            on_file: FileHandling::Proceed,
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o755),
+        plan.add(
+            "create directory for getty autologin",
+            root,
+            Directory {
+                path: Owned(getty_base.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o755),
+                },
             },
-        },
-    );
+        );
 
-    plan.add(
-        "enable getty autologin",
-        root,
-        File {
-            path: Owned(getty_base.join("override.conf")),
-            permissions: FilePermissions {
-                owner: Uid::root(),
-                group: Gid::root(),
-                mode: FileMode(0o644),
+        plan.add(
+            "enable getty autologin",
+            root,
+            File {
+                path: Owned(getty_base.join("override.conf")),
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o644),
+                },
+                on_directory: DirectoryHandling::Bail,
+                on_symlink: SymlinkHandling::Proceed,
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: Lines(Owned(vec![
+                    Ref("[Service]"),
+                    Ref("ExecStart="),
+                    Owned(format!(
+                        "ExecStart=-/sbin/agetty --autologin {name} --noclear %I $TERM",
+                        name = user.name
+                    )),
+                ])),
             },
-            on_directory: DirectoryHandling::Bail,
-            on_symlink: SymlinkHandling::Proceed,
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: Lines(Owned(vec![
-                Ref("[Service]"),
-                Ref("ExecStart="),
-                Owned(format!(
-                    "ExecStart=-/sbin/agetty --autologin {name} --noclear %I $TERM",
-                    name = user.name
-                )),
-            ])),
-        },
-    );
+        );
+    });
 }
 
-fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
+    plan: &mut Block<'_, 'elevate, 'pkgs, 'action, '_, Secrets>,
     user_elevate: &'elevate Elevate,
     user: &'user UserConfig,
     machine: &MachineConfig,
     home: &Path,
-) -> Result<()> {
+    directories: &UserDirectories,
+) -> Result<PackageList<'pkgs>> {
     #[derive(Serialize)]
     struct TemplateContext<'a> {
         user: &'a UserConfig,
@@ -3140,247 +2858,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
         is_tv: bool,
     }
 
-    for (directory, mode) in [
-        (".config/rofi", None),
-        (".config/gtk-3.0", None),
-        (".config/qt5ct", None),
-        (".config/i3status-rust", None),
-        (".config/i3status-rust/icons", None),
-        (".config/i3status-rust/themes", None),
-        (".config/helix", None),
-        (".config/git", None),
-        (".config/tmux", None),
-        (".config/sway", None),
-        (".config/sway/scripts", None),
-        (".config/zsh", None),
-        (".config/alacritty", None),
-        (".local/state/", None),
-        (".local/state/gnupg/", Some(FileMode(0o700))),
-        (".local/state/cargo/", None),
-        (".local/share/applications", None),
-        (".config/VSCodium/", None),
-        (".config/VSCodium/User", None),
-        (".config/alacritty/themes/", None),
-    ] {
-        plan.add(
-            Owned(format!("create empty directory {directory}")),
-            user_elevate,
-            Directory {
-                path: Owned(home.join(directory)),
-                on_symlink: SymlinkHandling::Proceed,
-                on_file: FileHandling::Proceed,
-                permissions: FilePermissions {
-                    owner: Uid::from(user.name.clone()),
-                    group: Gid::from(user.name.clone()),
-                    mode: mode.unwrap_or(FileMode(0o755)),
-                },
-            },
-        );
-    }
-
-    for to_remove in [
-        ".gitconfig",
-        ".vimrc",
-        ".config/nvim/init.vim",
-        ".tmux.conf",
-        ".i3",
-        ".gtkrc-2.0",
-        ".opt",
-        ".optbin",
-        ".usr",
-        ".var",
-        ".screenrc",
-        ".zshrc.d",
-    ] {
-        plan.add(
-            Owned(format!("remove entry {to_remove}")),
-            user_elevate,
-            Remove {
-                path: Owned(home.join(to_remove)),
-                on_directory: DirectoryHandling::Proceed,
-                on_file: FileHandling::Proceed,
-                on_symlink: SymlinkHandling::Proceed,
-            },
-        );
-    }
-
-    for (path, content) in [
-        (
-            ".local/share/applications/firefox.desktop",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/desktop/firefox.desktop"
-            ))
-            .as_slice(),
-        ),
-        (
-            ".config/alacritty/themes/monokai.toml",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/alacritty/themes/monokai.toml"
-            ))
-            .as_slice(),
-        ),
-        (
-            ".config/alacritty/themes/github_light.toml",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/alacritty/themes/github_light.toml"
-            ))
-            .as_slice(),
-        ),
-        (
-            ".local/state/cargo/config.toml",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/cargo/config.toml"
-            ))
-            .as_slice(),
-        ),
-        (
-            ".local/state/gnupg/dirmngr.conf",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/gnupg/dirmngr.conf"
-            ))
-            .as_slice(),
-        ),
-        (
-            ".local/state/gnupg/scdaemon.conf",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/gnupg/scdaemon.conf"
-            ))
-            .as_slice(),
-        ),
-        (
-            ".config/i3status-rust/themes/native.toml",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/i3status-rust/themes/native.toml"
-            ))
-            .as_slice(),
-        ),
-        (
-            ".config/i3status-rust/icons/awesome.toml",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/i3status-rust/icons/awesome.toml"
-            ))
-            .as_slice(),
-        ),
-        (
-            ".config/tmux/tmux.conf",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/tmux/tmux.conf"
-            ))
-            .as_slice(),
-        ),
-        (
-            ".zshenv",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/zsh/zshenv")).as_slice(),
-        ),
-        (
-            ".config/gammastep.conf",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/gammastep/gammastep.conf"
-            ))
-            .as_slice(),
-        ),
-        (
-            ".config/VSCodium/product.json",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/vscodium/product.json"
-            ))
-            .as_slice(),
-        ),
-        (
-            ".config/VSCodium/User/settings.json",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/vscodium/settings.json"
-            ))
-            .as_slice(),
-        ),
-        (
-            ".config/VSCodium/User/keybindings.json",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/vscodium/keybindings.json"
-            ))
-            .as_slice(),
-        ),
-        (
-            ".config/rofi/config",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/rofi/config")).as_slice(),
-        ),
-        (
-            ".config/qt5ct/qt5ct.conf",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/qt/qt5ct.conf"
-            ))
-            .as_slice(),
-        ),
-        (
-            ".config/helix/config.toml",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/helix/config.toml"
-            ))
-            .as_slice(),
-        ),
-        (
-            ".config/helix/languages.toml",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/helix/languages.toml"
-            ))
-            .as_slice(),
-        ),
-        (
-            ".local/state/cargo/config.toml",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/cargo/config.toml"
-            ))
-            .as_slice(),
-        ),
-        (
-            ".config/git/ignore",
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../files/git/ignore")).as_slice(),
-        ),
-        (
-            ".config/sway/scripts/swap-from-workspace.py",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/sway/scripts/swap-from-workspace.py"
-            ))
-            .as_slice(),
-        ),
-    ] {
-        plan.add(
-            Owned(format!("{user}: add dotfile ~/{path}", user = user.name)),
-            user_elevate,
-            File {
-                path: Owned(home.join(path)),
-                on_symlink: SymlinkHandling::Proceed,
-                on_directory: DirectoryHandling::Bail,
-                permissions: FilePermissions {
-                    owner: Uid::from(user.name.clone()),
-                    group: Gid::from(user.name.clone()),
-                    mode: FileMode(0o644),
-                },
-                binary: false,
-                secret: false,
-                ignore_checksum_changes: false,
-                content: FileContent::Bytes(Ref(content)),
-            },
-        );
-    }
+    let mut packages = HashMap::new();
 
     let template_context = TemplateContext {
         user,
@@ -3392,91 +2870,31 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
 
     let template_context = tera::Context::from_serialize(&template_context)?;
 
-    for (path, template) in [
-        (
-            ".config/git/config",
-            include_str!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/git/gitconfig.j2"
-            )),
-        ),
-        (
-            ".local/state/gnupg/gpg-agent.conf",
-            include_str!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/gnupg/gpg-agent.conf.j2"
-            )),
-        ),
-        (
-            ".local/state/gnupg/gpg.conf",
-            include_str!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/gnupg/gpg.conf.j2"
-            )),
-        ),
-        (
-            ".config/zsh/.zprofile",
-            include_str!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/zsh/zprofile.j2"
-            )),
-        ),
-        (
-            ".config/zsh/.zshrc",
-            include_str!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/zsh/zshrc.j2"
-            )),
-        ),
-        (
-            ".config/dunstrc",
-            include_str!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/dunst/dunstrc.j2"
-            )),
-        ),
-        (
-            ".config/alacritty/config.toml",
-            include_str!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/alacritty/alacritty.toml.j2"
-            )),
-        ),
-        (
-            ".config/gtk-3.0/settings.ini",
-            include_str!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/gtk/gtk-3.0.ini.j2"
-            )),
-        ),
-        (
-            ".config/gtkrc-2.0",
-            include_str!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/gtk/gtkrc-2.0.j2"
-            )),
-        ),
-        (
-            ".config/i3status-rust/config.toml",
-            include_str!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/i3status-rust/config.toml.j2"
-            )),
-        ),
-        (
-            ".config/sway/config",
-            include_str!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/sway/config.j2"
-            )),
-        ),
-    ] {
-        let template = tera::Tera::one_off(template, &template_context, false)?;
+    plan.block("rofi", |plan| {
+        let config_dir = directories.config.join("rofi");
+
+        packages.insert(Ref("rofi"), Ref([Ref("rofi")].as_slice()));
+
         plan.add(
-            Owned(format!("{user}: add dotfile ~/{path}", user = user.name)),
+            Ref("create config directory for rofi"),
+            user_elevate,
+            Directory {
+                path: Owned(config_dir.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
+            },
+        );
+
+        plan.add(
+            Ref("add config for rofi"),
             user_elevate,
             File {
-                path: Owned(home.join(path)),
+                path: Owned(config_dir.join("config")),
                 on_symlink: SymlinkHandling::Proceed,
                 on_directory: DirectoryHandling::Bail,
                 permissions: FilePermissions {
@@ -3487,137 +2905,1690 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine>(
                 binary: false,
                 secret: false,
                 ignore_checksum_changes: false,
-                content: FileContent::Bytes(Owned(template.into_bytes())),
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/rofi/config"
+                )))),
             },
         );
-    }
+    });
 
-    Ok(())
+    plan.try_block("i3status-rust", |plan| {
+        let config_dir = directories.config.join("i3status-rust");
+
+        packages.insert(Ref("i3status-rust"), Ref([Ref("i3status-rust")].as_slice()));
+
+        plan.add(
+            Ref("create config directory for i3status-rust"),
+            user_elevate,
+            Directory {
+                path: Owned(config_dir.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
+            },
+        );
+
+        plan.add(
+            Ref("add config for i3status-rust"),
+            user_elevate,
+            File {
+                path: Owned(config_dir.join("config.toml")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Owned(
+                    tera::Tera::one_off(
+                        include_str!(concat!(
+                            env!("CARGO_MANIFEST_DIR"),
+                            "/../files/i3status-rust/config.toml.j2"
+                        )),
+                        &template_context,
+                        false,
+                    )?
+                    .into_bytes(),
+                )),
+            },
+        );
+
+        let icons_dir = config_dir.join("icons");
+
+        plan.add(
+            Ref("create icons subdirectory for i3status-rust"),
+            user_elevate,
+            Directory {
+                path: Owned(icons_dir.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
+            },
+        );
+
+        plan.add(
+            Ref("add awesome icons for i3status-rust"),
+            user_elevate,
+            File {
+                path: Owned(icons_dir.join("awesome.toml")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/i3status-rust/icons/awesome.toml"
+                )))),
+            },
+        );
+
+        Ok(())
+    })?;
+
+    plan.block("helix", |plan| {
+        let config_dir = directories.config.join("helix");
+
+        packages.insert(Ref("helix"), Ref([Ref("helix")].as_slice()));
+
+        plan.add(
+            Ref("create config directory for helix"),
+            user_elevate,
+            Directory {
+                path: Owned(config_dir.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
+            },
+        );
+
+        plan.add(
+            Ref("add config for helix"),
+            user_elevate,
+            File {
+                path: Owned(config_dir.join("config.toml")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/helix/config.toml"
+                )))),
+            },
+        );
+
+        plan.add(
+            Ref("add language configs for helix"),
+            user_elevate,
+            File {
+                path: Owned(config_dir.join("languages.toml")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/helix/languages.toml"
+                )))),
+            },
+        );
+    });
+
+    plan.try_block("git", |plan| {
+        let config_dir = directories.config.join("git");
+
+        packages.insert(
+            Ref("git"),
+            Ref([
+                Ref("git"),
+                Ref("qgit"),
+                Ref("git-delta"),
+                Ref("git-filter-repo"),
+            ]
+            .as_slice()),
+        );
+
+        plan.add(
+            Ref("create config directory for git"),
+            user_elevate,
+            Directory {
+                path: Owned(config_dir.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
+            },
+        );
+
+        plan.add(
+            Ref("add config for git"),
+            user_elevate,
+            File {
+                path: Owned(config_dir.join("config")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Owned(
+                    tera::Tera::one_off(
+                        include_str!(concat!(
+                            env!("CARGO_MANIFEST_DIR"),
+                            "/../files/git/gitconfig.j2"
+                        )),
+                        &template_context,
+                        false,
+                    )?
+                    .into_bytes(),
+                )),
+            },
+        );
+
+        plan.add(
+            Ref("add global ignore for git"),
+            user_elevate,
+            File {
+                path: Owned(config_dir.join("ignore")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/git/ignore"
+                ))
+                .as_slice())),
+            },
+        );
+
+        Ok(())
+    })?;
+
+    plan.block("tmux", |plan| {
+        let config_dir = directories.config.join("tmux");
+
+        packages.insert(Ref("tmux"), Ref([Ref("tmux")].as_slice()));
+
+        plan.add(
+            Ref("create config directory for tmux"),
+            user_elevate,
+            Directory {
+                path: Owned(config_dir.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
+            },
+        );
+
+        plan.add(
+            Ref("add config for tmux"),
+            user_elevate,
+            File {
+                path: Owned(config_dir.join("tmux.conf")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/tmux/tmux.conf"
+                )))),
+            },
+        );
+    });
+
+    plan.try_block("sway", |plan| {
+        let config_dir = directories.config.join("sway");
+
+        packages.insert(
+            Ref("sway"),
+            Ref([
+                Ref("sway"),
+                Ref("swaybg"),
+                Ref("swaylock"),
+                Ref("swayidle"),
+                Ref("xorg-xwayland"),
+                Ref("xorg-xlsclients"),
+            ]
+            .as_slice()),
+        );
+
+        plan.add(
+            Ref("create config directory for sway"),
+            user_elevate,
+            Directory {
+                path: Owned(config_dir.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
+            },
+        );
+
+        plan.add(
+            Ref("add config for sway"),
+            user_elevate,
+            File {
+                path: Owned(config_dir.join("config")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Owned(
+                    tera::Tera::one_off(
+                        include_str!(concat!(
+                            env!("CARGO_MANIFEST_DIR"),
+                            "/../files/sway/config.j2"
+                        )),
+                        &template_context,
+                        false,
+                    )?
+                    .into_bytes(),
+                )),
+            },
+        );
+
+        let scripts_dir = config_dir.join("scripts");
+        plan.add(
+            Ref("create scripts directory for sway"),
+            user_elevate,
+            Directory {
+                path: Owned(scripts_dir.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
+            },
+        );
+
+        plan.add(
+            Ref("add workspace switcher script for sway"),
+            user_elevate,
+            File {
+                path: Owned(scripts_dir.join("swap-from-workspace.py")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/sway/scripts/swap-from-workspace.py"
+                )))),
+            },
+        );
+
+        plan.add(
+            Ref("add sway service"),
+            user_elevate,
+            File {
+                path: Owned(directories.systemd_user_units.join("sway.service")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/autostart/services/sway.service"
+                )))),
+            },
+        );
+
+        Ok(())
+    })?;
+
+    plan.try_block("zsh", |plan| {
+        let config_dir = directories.config.join("zsh");
+
+        packages.insert(
+            Ref("zsh"),
+            Ref([
+                Ref("zsh"),
+                Ref("zsh-syntax-highlighting"),
+                Ref("zsh-completions"),
+                Ref("eza"),                // alias for ls
+                Ref("python-ruamel-yaml"), // json2yaml alias
+            ]
+            .as_slice()),
+        );
+
+        plan.add(
+            Ref("add zshenv"),
+            user_elevate,
+            File {
+                path: Owned(home.join(".zshenv")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/zsh/zshenv"
+                )))),
+            },
+        );
+
+        plan.add(
+            Ref("create config directory for zsh"),
+            user_elevate,
+            Directory {
+                path: Owned(config_dir.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
+            },
+        );
+
+        plan.add(
+            Ref("add zprofile"),
+            user_elevate,
+            File {
+                path: Owned(config_dir.join(".zprofile")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Owned(
+                    tera::Tera::one_off(
+                        include_str!(concat!(
+                            env!("CARGO_MANIFEST_DIR"),
+                            "/../files/zsh/zprofile.j2"
+                        )),
+                        &template_context,
+                        false,
+                    )?
+                    .into_bytes(),
+                )),
+            },
+        );
+
+        plan.add(
+            Ref("add zshrc"),
+            user_elevate,
+            File {
+                path: Owned(config_dir.join(".zshrc")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Owned(
+                    tera::Tera::one_off(
+                        include_str!(concat!(
+                            env!("CARGO_MANIFEST_DIR"),
+                            "/../files/zsh/zshrc.j2"
+                        )),
+                        &template_context,
+                        false,
+                    )?
+                    .into_bytes(),
+                )),
+            },
+        );
+
+        Ok(())
+    })?;
+
+    plan.try_block("alacritty", |plan| {
+        let config_dir = directories.config.join("alacritty");
+
+        packages.insert(Ref("alacritty"), Ref([Ref("alacritty")].as_slice()));
+
+        plan.add(
+            Ref("create config directory for alacritty"),
+            user_elevate,
+            Directory {
+                path: Owned(config_dir.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
+            },
+        );
+
+        plan.add(
+            Ref("add config for alacritty"),
+            user_elevate,
+            File {
+                path: Owned(config_dir.join("config.toml")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Owned(
+                    tera::Tera::one_off(
+                        include_str!(concat!(
+                            env!("CARGO_MANIFEST_DIR"),
+                            "/../files/alacritty/alacritty.toml.j2"
+                        )),
+                        &template_context,
+                        false,
+                    )?
+                    .into_bytes(),
+                )),
+            },
+        );
+
+        let themes_dir = config_dir.join("themes");
+        plan.add(
+            Ref("create themes directory for alacritty"),
+            user_elevate,
+            Directory {
+                path: Owned(themes_dir.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
+            },
+        );
+
+        plan.add(
+            Ref("add monokai theme for alacritty"),
+            user_elevate,
+            File {
+                path: Owned(themes_dir.join("monokai.toml")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/alacritty/themes/monokai.toml"
+                )))),
+            },
+        );
+
+        plan.add(
+            Ref("add github_light theme for alacritty"),
+            user_elevate,
+            File {
+                path: Owned(themes_dir.join("github_light.toml")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/alacritty/themes/github_light.toml"
+                )))),
+            },
+        );
+
+        Ok(())
+    })?;
+
+    plan.try_block("gpg", |plan| {
+        let config_dir = directories.state.join("gnupg");
+
+        packages.insert(
+            Ref("gpg"),
+            Ref([
+                Ref("gnupg"),
+                Ref("paperkey"),
+                Ref("yubikey-manager"),
+                Ref("yubikey-touch-detector"),
+                Ref("pinentry"),
+            ]
+            .as_slice()),
+        );
+
+        plan.add(
+            Ref("create config directory for gpg"),
+            user_elevate,
+            Directory {
+                path: Owned(config_dir.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o700),
+                },
+            },
+        );
+
+        plan.add(
+            Ref("add config for gpg"),
+            user_elevate,
+            File {
+                path: Owned(config_dir.join("gpg.conf")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Owned(
+                    tera::Tera::one_off(
+                        include_str!(concat!(
+                            env!("CARGO_MANIFEST_DIR"),
+                            "/../files/gnupg/gpg.conf.j2"
+                        )),
+                        &template_context,
+                        false,
+                    )?
+                    .into_bytes(),
+                )),
+            },
+        );
+
+        plan.add(
+            Ref("add agent config for gpg"),
+            user_elevate,
+            File {
+                path: Owned(config_dir.join("gpg-agent.conf")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Owned(
+                    tera::Tera::one_off(
+                        include_str!(concat!(
+                            env!("CARGO_MANIFEST_DIR"),
+                            "/../files/gnupg/gpg-agent.conf.j2"
+                        )),
+                        &template_context,
+                        false,
+                    )?
+                    .into_bytes(),
+                )),
+            },
+        );
+
+        plan.add(
+            Ref("add dirmngr config for gpg"),
+            user_elevate,
+            File {
+                path: Owned(config_dir.join("dirmngr.conf")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/gnupg/dirmngr.conf"
+                )))),
+            },
+        );
+
+        plan.add(
+            Ref("add scdaemon config for gpg"),
+            user_elevate,
+            File {
+                path: Owned(config_dir.join("scdaemon.conf")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/gnupg/scdaemon.conf"
+                )))),
+            },
+        );
+
+        let service_path = directories.systemd_user_units.join("gpg-agent.service");
+        if user.gpg.as_ref().is_some_and(|gpg| gpg.agent_enabled) {
+            plan.add(
+                Ref("add gpg-agent service"),
+                user_elevate,
+                File {
+                    path: Owned(service_path),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Bail,
+                    permissions: FilePermissions {
+                        owner: Uid::from(user.name.clone()),
+                        group: Gid::from(user.name.clone()),
+                        mode: FileMode(0o644),
+                    },
+                    binary: false,
+                    secret: false,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                        env!("CARGO_MANIFEST_DIR"),
+                        "/../files/autostart/services/gpg-agent.service"
+                    )))),
+                },
+            );
+        } else {
+            plan.add(
+                Ref("user service gpg-agent"),
+                user_elevate,
+                Remove {
+                    path: Owned(service_path),
+                    on_directory: DirectoryHandling::Bail,
+                    on_file: FileHandling::Proceed,
+                    on_symlink: SymlinkHandling::Proceed,
+                },
+            );
+        }
+
+        Ok(())
+    })?;
+
+    plan.block("rust", |plan| {
+        let config_dir = directories.state.join("cargo");
+
+        packages.insert(
+            Ref("rust"),
+            Ref([
+                Ref("rustup"),
+                Ref("rust-analyzer"),
+                Ref("cargo-edit"),
+                Ref("cargo-expand"),
+                Ref("cargo-msrv"),
+                Ref("cargo-watch"),
+                Ref("cargo-release"),
+                Ref("cargo-sort"),
+                Ref("cargo-hack"),
+                Ref("cargo-dist"),
+                Ref("cargo-binstall"),
+                Ref("cargo-machete"),
+                Ref("rust-script"),
+                Ref("bacon"),
+                Ref("sccache"),
+                Ref("mold"),
+            ]
+            .as_slice()),
+        );
+
+        plan.add(
+            Ref("create config directory for cargo"),
+            user_elevate,
+            Directory {
+                path: Owned(config_dir.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
+            },
+        );
+
+        plan.add(
+            Ref("add config for cargo"),
+            user_elevate,
+            File {
+                path: Owned(config_dir.join("config.toml")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/cargo/config.toml"
+                )))),
+            },
+        );
+    });
+
+    plan.block("gnome-keyring", |plan| {
+        packages.insert(
+            Ref("gnome-keyring"),
+            Ref([Ref("gnome-keyring"), Ref("seahorse")].as_slice()),
+        );
+        plan.add(
+            Ref("add gnome-keyring service"),
+            user_elevate,
+            File {
+                path: Owned(directories.systemd_user_units.join("gnome-keyring.service")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/autostart/services/gnome-keyring.service"
+                )))),
+            },
+        );
+    });
+
+    plan.block("kdeconnect", |plan| {
+        packages.insert(Ref("kdeconnect"), Ref([Ref("kdeconnect")].as_slice()));
+        plan.add(
+            Ref("add kdeconnect service"),
+            user_elevate,
+            File {
+                path: Owned(directories.systemd_user_units.join("kdeconnect.service")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/autostart/services/kdeconnect.service"
+                )))),
+            },
+        );
+    });
+
+    plan.block("keepassxc", |plan| {
+        packages.insert(Ref("keepassxc"), Ref([Ref("keepassxc")].as_slice()));
+
+        let service_path = directories.systemd_user_units.join("keepassxc.service");
+        if user.keepassxc.enabled() {
+            plan.add(
+                Ref("add keepassxc service"),
+                user_elevate,
+                File {
+                    path: Owned(service_path),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Bail,
+                    permissions: FilePermissions {
+                        owner: Uid::from(user.name.clone()),
+                        group: Gid::from(user.name.clone()),
+                        mode: FileMode(0o644),
+                    },
+                    binary: false,
+                    secret: false,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                        env!("CARGO_MANIFEST_DIR"),
+                        "/../files/autostart/services/keepassxc.service"
+                    )))),
+                },
+            );
+        } else {
+            plan.add(
+                Ref("user service keepassxc"),
+                user_elevate,
+                Remove {
+                    path: Owned(service_path),
+                    on_directory: DirectoryHandling::Bail,
+                    on_file: FileHandling::Proceed,
+                    on_symlink: SymlinkHandling::Proceed,
+                },
+            );
+        }
+    });
+
+    plan.block("nextcloud", |plan| {
+        packages.insert(Ref("nextloud"), Ref([Ref("nextcloud-client")].as_slice()));
+
+        let service_path = directories.systemd_user_units.join("nextcloud.service");
+        if user.nextcloud.enabled() {
+            plan.add(
+                Ref("add nextcloud service"),
+                user_elevate,
+                File {
+                    path: Owned(service_path),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Bail,
+                    permissions: FilePermissions {
+                        owner: Uid::from(user.name.clone()),
+                        group: Gid::from(user.name.clone()),
+                        mode: FileMode(0o644),
+                    },
+                    binary: false,
+                    secret: false,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                        env!("CARGO_MANIFEST_DIR"),
+                        "/../files/autostart/services/nextcloud.service"
+                    )))),
+                },
+            );
+        } else {
+            plan.add(
+                Ref("user service nextcloud"),
+                user_elevate,
+                Remove {
+                    path: Owned(service_path),
+                    on_directory: DirectoryHandling::Bail,
+                    on_file: FileHandling::Proceed,
+                    on_symlink: SymlinkHandling::Proceed,
+                },
+            );
+        }
+    });
+
+    plan.block("screencfg", |plan| {
+        plan.add(
+            Ref("add screencfg service"),
+            user_elevate,
+            File {
+                path: Owned(directories.systemd_user_units.join("screencfg.service")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/autostart/services/screencfg.service"
+                )))),
+            },
+        );
+    });
+
+    plan.block("spotify", |plan| {
+        plan.add(
+            Ref("add spotify service"),
+            user_elevate,
+            File {
+                path: Owned(directories.systemd_user_units.join("spotify.service")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/autostart/services/spotify.service"
+                )))),
+            },
+        );
+    });
+
+    plan.block("steam", |plan| {
+        packages.insert(
+            Ref("steam"),
+            Ref([
+                Ref("steam"),
+                Ref("lib32-pango"),
+                Ref("pango"),
+                Ref("ttf-liberation"),
+            ]
+            .as_slice()),
+        );
+
+        let service_path = directories.systemd_user_units.join("steam.service");
+        if user.steam.enabled() {
+            plan.add(
+                Ref("add steam service"),
+                user_elevate,
+                File {
+                    path: Owned(service_path),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Bail,
+                    permissions: FilePermissions {
+                        owner: Uid::from(user.name.clone()),
+                        group: Gid::from(user.name.clone()),
+                        mode: FileMode(0o644),
+                    },
+                    binary: false,
+                    secret: false,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                        env!("CARGO_MANIFEST_DIR"),
+                        "/../files/autostart/services/steam.service"
+                    )))),
+                },
+            );
+        } else {
+            plan.add(
+                Ref("user service steam"),
+                user_elevate,
+                Remove {
+                    path: Owned(service_path),
+                    on_directory: DirectoryHandling::Bail,
+                    on_file: FileHandling::Proceed,
+                    on_symlink: SymlinkHandling::Proceed,
+                },
+            );
+        }
+    });
+
+    plan.block("yubikey-touch-detector", |plan| {
+        let service_path = directories
+            .systemd_user_units
+            .join("yubikey-touch-detector.service");
+        if user.gpg.as_ref().is_some_and(|gpg| gpg.agent_enabled) {
+            plan.add(
+                Ref("add yubikey-touch-detector service"),
+                user_elevate,
+                File {
+                    path: Owned(service_path),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Bail,
+                    permissions: FilePermissions {
+                        owner: Uid::from(user.name.clone()),
+                        group: Gid::from(user.name.clone()),
+                        mode: FileMode(0o644),
+                    },
+                    binary: false,
+                    secret: false,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                        env!("CARGO_MANIFEST_DIR"),
+                        "/../files/autostart/services/yubikey-touch-detector.service"
+                    )))),
+                },
+            );
+        } else {
+            plan.add(
+                Ref("user service yubikey-touch-detector"),
+                user_elevate,
+                Remove {
+                    path: Owned(service_path),
+                    on_directory: DirectoryHandling::Bail,
+                    on_file: FileHandling::Proceed,
+                    on_symlink: SymlinkHandling::Proceed,
+                },
+            );
+        }
+    });
+
+    plan.block("laptop-lid", |plan| {
+        let service_path = directories.systemd_user_units.join("laptop-lid.service");
+        if machine.machine_type == MachineType::Laptop {
+            plan.add(
+                Ref("add laptop-lid service"),
+                user_elevate,
+                File {
+                    path: Owned(service_path),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Bail,
+                    permissions: FilePermissions {
+                        owner: Uid::from(user.name.clone()),
+                        group: Gid::from(user.name.clone()),
+                        mode: FileMode(0o644),
+                    },
+                    binary: false,
+                    secret: false,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                        env!("CARGO_MANIFEST_DIR"),
+                        "/../files/autostart/services/laptop-lid.service"
+                    )))),
+                },
+            );
+        } else {
+            plan.add(
+                Ref("user service laptop-lid"),
+                user_elevate,
+                Remove {
+                    path: Owned(service_path),
+                    on_directory: DirectoryHandling::Bail,
+                    on_file: FileHandling::Proceed,
+                    on_symlink: SymlinkHandling::Proceed,
+                },
+            );
+        }
+    });
+
+    plan.block("gammastep", |plan| {
+        packages.insert(Ref("gammastep"), Ref([Ref("gammastep")].as_slice()));
+
+        plan.add(
+            Ref("add gammastep config"),
+            user_elevate,
+            File {
+                path: Owned(directories.config.join("gammastep.conf")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/gammastep/gammastep.conf"
+                )))),
+            },
+        );
+
+        let service_path = directories.systemd_user_units.join("gammastep.service");
+        if machine.machine_type != MachineType::Tv {
+            plan.add(
+                Ref("add gammastep service"),
+                user_elevate,
+                File {
+                    path: Owned(service_path),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Bail,
+                    permissions: FilePermissions {
+                        owner: Uid::from(user.name.clone()),
+                        group: Gid::from(user.name.clone()),
+                        mode: FileMode(0o644),
+                    },
+                    binary: false,
+                    secret: false,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                        env!("CARGO_MANIFEST_DIR"),
+                        "/../files/autostart/services/gammastep.service"
+                    )))),
+                },
+            );
+        } else {
+            plan.add(
+                Ref("user service gammastep"),
+                user_elevate,
+                Remove {
+                    path: Owned(service_path),
+                    on_directory: DirectoryHandling::Bail,
+                    on_file: FileHandling::Proceed,
+                    on_symlink: SymlinkHandling::Proceed,
+                },
+            );
+        }
+    });
+
+    plan.block("workstation-mgr", |plan| {
+        plan.add(
+            Ref("add workstation-mgr service"),
+            user_elevate,
+            File {
+                path: Owned(
+                    directories
+                        .systemd_user_units
+                        .join("workstation-mgr.service"),
+                ),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/autostart/services/workstation-mgr.service"
+                )))),
+            },
+        );
+    });
+
+    plan.try_block("dunst", |plan| {
+        packages.insert(Ref("dunst"), Ref([Ref("dunst")].as_slice()));
+
+        plan.add(
+            Ref("add dunst config"),
+            user_elevate,
+            File {
+                path: Owned(directories.config.join("dunstrc")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Owned(
+                    tera::Tera::one_off(
+                        include_str!(concat!(
+                            env!("CARGO_MANIFEST_DIR"),
+                            "/../files/dunst/dunstrc.j2"
+                        )),
+                        &template_context,
+                        false,
+                    )?
+                    .into_bytes(),
+                )),
+            },
+        );
+
+        plan.add(
+            Ref("add dunst service"),
+            user_elevate,
+            File {
+                path: Owned(directories.systemd_user_units.join("dunst.service")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/autostart/services/dunst.service"
+                )))),
+            },
+        );
+
+        Ok(())
+    })?;
+
+    plan.block("firefox", |plan| {
+        packages.insert(Ref("firefox"), Ref([Ref("firefox")].as_slice()));
+
+        plan.add(
+            Ref("add firefox desktop entry"),
+            user_elevate,
+            File {
+                path: Owned(directories.applications.join("firefox.desktop")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/firefox/firefox.desktop"
+                )))),
+            },
+        );
+
+        let mozilla_dir = home.join(".mozilla");
+        let firefox_dir = mozilla_dir.join("firefox");
+
+        plan.add(
+            Ref("create mozilla base directory"),
+            user_elevate,
+            Directory {
+                path: Owned(mozilla_dir),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
+            },
+        );
+
+        plan.add(
+            Ref("create firefox base directory"),
+            user_elevate,
+            Directory {
+                path: Owned(firefox_dir.clone()),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o755),
+                },
+            },
+        );
+
+        for profile in &user.firefox.profiles {
+            let profile_dir = firefox_dir.join(format!("profile-{}", profile.name));
+            let chrome_dir = profile_dir.join("chrome");
+
+            plan.add(
+                Owned(format!(
+                    "create firefox profile directory for {}",
+                    profile.name
+                )),
+                user_elevate,
+                Directory {
+                    path: Owned(profile_dir),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_file: FileHandling::Proceed,
+                    permissions: FilePermissions {
+                        owner: Uid::from(user.name.clone()),
+                        group: Gid::from(user.name.clone()),
+                        mode: FileMode(0o755),
+                    },
+                },
+            );
+
+            plan.add(
+                Owned(format!(
+                    "create firefox chrome directory for {}",
+                    profile.name
+                )),
+                user_elevate,
+                Directory {
+                    path: Owned(chrome_dir.clone()),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_file: FileHandling::Proceed,
+                    permissions: FilePermissions {
+                        owner: Uid::from(user.name.clone()),
+                        group: Gid::from(user.name.clone()),
+                        mode: FileMode(0o755),
+                    },
+                },
+            );
+
+            if profile.manage_css {
+                plan.add(
+                    Owned(format!(
+                        "create firefox userChrome.css for {}",
+                        profile.name
+                    )),
+                    user_elevate,
+                    File {
+                        path: Owned(chrome_dir.join("userChrome.css")),
+                        on_symlink: SymlinkHandling::Proceed,
+                        on_directory: DirectoryHandling::Proceed,
+                        permissions: FilePermissions {
+                            owner: Uid::from(user.name.clone()),
+                            group: Gid::from(user.name.clone()),
+                            mode: FileMode(0o644),
+                        },
+                        binary: false,
+                        secret: false,
+                        ignore_checksum_changes: false,
+                        content: FileContent::Bytes(Ref(
+                            dedent!(
+                                r##"
+                                    /* hides the native tabs */
+                                    #TabsToolbar {
+                                      visibility: collapse;
+                                    }
+
+                                    /* removes the header for the sidebar that only shows "tree style tab" anyway */
+                                    #sidebar-panel-header {
+                                      visibility: collapse;
+                                    }
+
+                                    /* removes the weird padding between sidebar and left window border */
+                                    #sidebar-box {
+                                      padding-left: 0 !important;
+                                    }
+                                "##
+                            )
+                            .as_bytes(),
+                        )),
+                    },
+                );
+            }
+        }
+
+        plan.add(
+            Ref("add firefox service"),
+            user_elevate,
+            File {
+                path: Owned(directories.systemd_user_units.join("firefox@.service")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/autostart/services/firefox@.service"
+                )))),
+            },
+        );
+    });
+
+    plan.block("ensure removed dotfiles", |plan| {
+        for absent in [
+            ".gitconfig",
+            ".vimrc",
+            ".config/nvim/init.vim",
+            ".tmux.conf",
+            ".i3",
+            ".gtkrc-2.0",
+            ".opt",
+            ".optbin",
+            ".usr",
+            ".var",
+            ".screenrc",
+            ".zshrc.d",
+        ] {
+            plan.assert(
+                Owned(format!("assert that {absent} does not exist")),
+                user_elevate,
+                AssertAbsent {
+                    path: Owned(home.join(absent)),
+                },
+            );
+        }
+    });
+
+    Ok(packages)
 }
 
-async fn user_executables<'elevate: 'action, 'action, 'user, 'machine>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+async fn user_executables<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
+    plan: &mut Block<'_, 'elevate, 'pkgs, 'action, '_, Secrets>,
     user_elevate: &'elevate Elevate,
     user: &'user UserConfig,
     user_directories: &UserDirectories,
-) -> Result<()> {
-    let scripts: Vec<(&str, &[u8])> = SCRIPTS
-        .entries()
-        .iter()
-        .map(|entry| match *entry {
-            DirEntry::Dir(ref _d) => Err(anyhow!("subdirectories in scripts not supported")),
-            DirEntry::File(ref file) => {
-                let path = Path::from_path(file.path())
-                    .ok_or_else(|| anyhow!("non utf-8 path in scripts"))?;
+) -> Result<HashMap<MaybeOwned<'pkgs, str>, MaybeOwned<'pkgs, [MaybeOwned<'pkgs, str>]>>> {
+    plan.try_block_async_with_value("executables", async |plan| {
+        let mut packages = HashMap::new();
 
-                let name = path.file_name().expect("file to have a name");
+        let scripts: Vec<(&str, &[u8])> = SCRIPTS
+            .entries()
+            .iter()
+            .map(|entry| match *entry {
+                DirEntry::Dir(ref _d) => Err(anyhow!("subdirectories in scripts not supported")),
+                DirEntry::File(ref file) => {
+                    let path = Path::from_path(file.path())
+                        .ok_or_else(|| anyhow!("non utf-8 path in scripts"))?;
 
-                Ok((name, file.contents()))
-            }
-        })
-        .collect::<Result<_, _>>()?;
+                    let name = path.file_name().expect("file to have a name");
 
-    for &(name, content) in &scripts {
-        plan.add(
-            Owned(format!("add script {name}")),
-            user_elevate,
-            File {
-                path: Owned(user_directories.scripts.join(name)),
-                on_symlink: SymlinkHandling::Proceed,
-                on_directory: DirectoryHandling::Bail,
-                permissions: FilePermissions {
-                    owner: Uid::from(user.name.clone()),
-                    group: Gid::from(user.name.clone()),
-                    mode: FileMode(0o755),
-                },
-                binary: false,
-                secret: false,
-                ignore_checksum_changes: false,
-                content: FileContent::Bytes(Ref(content)),
-            },
-        );
-    }
+                    Ok((name, file.contents()))
+                }
+            })
+            .collect::<Result<_, _>>()?;
 
-    if let Some(dir) = files_in_dir(user_elevate, &user_directories.scripts).await? {
-        for file in dir {
-            let name = file.as_str();
+        for &(name, content) in &scripts {
+            let dependencies = {
+                str::from_utf8(content)?
+                    .lines()
+                    .take(3)
+                    .find_map(|line| {
+                        line.strip_prefix("# depends:").map(|rest| {
+                            rest.split_whitespace()
+                                .map(|s| Owned(s.to_owned()))
+                                .collect::<Vec<_>>()
+                        })
+                    })
+                    .ok_or_else(|| anyhow!("no dependencies found in {name}"))?
+            };
 
-            if !scripts.iter().any(|&(file, _content)| file == name) {
-                plan.add(
-                    Owned(format!("remove unmanaged script {name}")),
-                    user_elevate,
-                    Remove {
-                        path: Owned(user_directories.scripts.join(name)),
-                        on_symlink: SymlinkHandling::Proceed,
-                        on_directory: DirectoryHandling::Bail,
-                        on_file: FileHandling::Proceed,
+            packages.insert(Owned(name.to_owned()), Owned(dependencies));
+
+            plan.add(
+                Owned(format!("add script {name}")),
+                user_elevate,
+                File {
+                    path: Owned(user_directories.scripts.join(name)),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Bail,
+                    permissions: FilePermissions {
+                        owner: Uid::from(user.name.clone()),
+                        group: Gid::from(user.name.clone()),
+                        mode: FileMode(0o755),
                     },
-                );
+                    binary: false,
+                    secret: false,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Bytes(Ref(content)),
+                },
+            );
+        }
+
+        if let Some(dir) = files_in_dir(user_elevate, &user_directories.scripts).await? {
+            for file in dir {
+                let name = file.as_str();
+
+                if !scripts.iter().any(|&(file, _content)| file == name) {
+                    plan.add(
+                        Owned(format!("remove unmanaged script {name}")),
+                        user_elevate,
+                        Remove {
+                            path: Owned(user_directories.scripts.join(name)),
+                            on_symlink: SymlinkHandling::Proceed,
+                            on_directory: DirectoryHandling::Bail,
+                            on_file: FileHandling::Proceed,
+                        },
+                    );
+                }
             }
         }
-    }
 
-    let bins: Vec<(&str, &[u8])> = BINS
-        .entries()
-        .iter()
-        .map(|entry| match *entry {
-            DirEntry::Dir(ref _d) => Err(anyhow!("subdirectories in bin not supported")),
-            DirEntry::File(ref file) => {
-                let path =
-                    Path::from_path(file.path()).ok_or_else(|| anyhow!("non utf-8 path in bin"))?;
+        let bins: Vec<(&str, &[u8])> = BINS
+            .entries()
+            .iter()
+            .map(|entry| match *entry {
+                DirEntry::Dir(ref _d) => Err(anyhow!("subdirectories in bin not supported")),
+                DirEntry::File(ref file) => {
+                    let path = Path::from_path(file.path())
+                        .ok_or_else(|| anyhow!("non utf-8 path in bin"))?;
 
-                let name = path.file_name().expect("file to have a name");
+                    let name = path.file_name().expect("file to have a name");
 
-                Ok((name, file.contents()))
-            }
-        })
-        .collect::<Result<_, _>>()?;
+                    Ok((name, file.contents()))
+                }
+            })
+            .collect::<Result<_, _>>()?;
 
-    for &(name, content) in &bins {
-        plan.add(
-            Owned(format!("add executable {name}")),
-            user_elevate,
-            File {
-                path: Owned(user_directories.bin.join(name)),
-                on_symlink: SymlinkHandling::Proceed,
-                on_directory: DirectoryHandling::Bail,
-                permissions: FilePermissions {
-                    owner: Uid::from(user.name.clone()),
-                    group: Gid::from(user.name.clone()),
-                    mode: FileMode(0o755),
-                },
-                binary: false,
-                secret: false,
-                ignore_checksum_changes: false,
-                content: FileContent::Bytes(Ref(content)),
-            },
-        );
-    }
+        for &(name, content) in &bins {
+            let dependencies = {
+                str::from_utf8(content)?
+                    .lines()
+                    .take(3)
+                    .find_map(|line| {
+                        line.strip_prefix("# depends:").map(|rest| {
+                            rest.split_whitespace()
+                                .map(|s| Owned(s.to_owned()))
+                                .collect::<Vec<_>>()
+                        })
+                    })
+                    .ok_or_else(|| anyhow!("no dependencies found in {name}"))?
+            };
 
-    if let Some(dir) = files_in_dir(user_elevate, &user_directories.bin).await? {
-        for file in dir {
-            let name = file.as_str();
+            packages.insert(Owned(name.to_owned()), Owned(dependencies));
 
-            if !bins.iter().any(|&(file, _content)| file == name) {
-                plan.add(
-                    Owned(format!("remove unmanaged executable {name}")),
-                    user_elevate,
-                    Remove {
-                        path: Owned(user_directories.bin.join(name)),
-                        on_symlink: SymlinkHandling::Proceed,
-                        on_directory: DirectoryHandling::Bail,
-                        on_file: FileHandling::Proceed,
+            plan.add(
+                Owned(format!("add executable {name}")),
+                user_elevate,
+                File {
+                    path: Owned(user_directories.bin.join(name)),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Bail,
+                    permissions: FilePermissions {
+                        owner: Uid::from(user.name.clone()),
+                        group: Gid::from(user.name.clone()),
+                        mode: FileMode(0o755),
                     },
-                );
+                    binary: false,
+                    secret: false,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Bytes(Ref(content)),
+                },
+            );
+        }
+
+        if let Some(dir) = files_in_dir(user_elevate, &user_directories.bin).await? {
+            for file in dir {
+                let name = file.as_str();
+
+                if !bins.iter().any(|&(file, _content)| file == name) {
+                    plan.add(
+                        Owned(format!("remove unmanaged executable {name}")),
+                        user_elevate,
+                        Remove {
+                            path: Owned(user_directories.bin.join(name)),
+                            on_symlink: SymlinkHandling::Proceed,
+                            on_directory: DirectoryHandling::Bail,
+                            on_file: FileHandling::Proceed,
+                        },
+                    );
+                }
             }
         }
-    }
 
-    Ok(())
+        Ok(packages)
+    })
+    .await?
+    .value_ok()
 }
 
 fn user_wallpaper<'elevate: 'action, 'action, 'user, 'machine>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    plan: &mut Block<'_, 'elevate, '_, 'action, '_, Secrets>,
     user_elevate: &'elevate Elevate,
     user: &'user UserConfig,
     user_directories: &UserDirectories,
@@ -3645,175 +4616,131 @@ fn user_wallpaper<'elevate: 'action, 'action, 'user, 'machine>(
     );
 }
 fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    plan: &mut Block<'_, 'elevate, '_, 'action, '_, Secrets>,
     user_elevate: &'elevate Elevate,
     user: &'user UserConfig,
     user_directories: &UserDirectories,
     machine: &MachineConfig,
 ) {
-    for (unit, content, enabled) in [
-        (
-            "dunst.service",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/autostart/services/dunst.service"
-            ))
-            .as_slice(),
-            true,
-        ),
-        (
-            "firefox@.service",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/autostart/services/firefox@.service"
-            ))
-            .as_slice(),
-            true,
-        ),
-        (
-            "gammastep.service",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/autostart/services/gammastep.service"
-            ))
-            .as_slice(),
-            machine.machine_type != MachineType::Tv,
-        ),
-        (
-            "gnome-keyring.service",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/autostart/services/gnome-keyring.service"
-            ))
-            .as_slice(),
-            true,
-        ),
-        (
-            "gpg-agent.service",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/autostart/services/gpg-agent.service"
-            ))
-            .as_slice(),
-            user.gpg.as_ref().is_some_and(|gpg| gpg.agent_enabled),
-        ),
-        (
-            "kdeconnect.service",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/autostart/services/kdeconnect.service"
-            ))
-            .as_slice(),
-            true,
-        ),
-        (
-            "keepassxc.service",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/autostart/services/keepassxc.service"
-            ))
-            .as_slice(),
-            user.keepassxc.enabled(),
-        ),
-        (
-            "laptop-lid.service",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/autostart/services/laptop-lid.service"
-            ))
-            .as_slice(),
-            machine.machine_type == Laptop,
-        ),
-        (
-            "nextcloud.service",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/autostart/services/nextcloud.service"
-            ))
-            .as_slice(),
-            user.nextcloud.enabled(),
-        ),
-        (
-            "nm-sidebar.service",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/autostart/services/nm-sidebar.service"
-            ))
-            .as_slice(),
-            true,
-        ),
-        (
-            "screencfg.service",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/autostart/services/screencfg.service"
-            ))
-            .as_slice(),
-            true,
-        ),
-        (
-            "spotify.service",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/autostart/services/spotify.service"
-            ))
-            .as_slice(),
-            true,
-        ),
-        (
-            "steam.service",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/autostart/services/steam.service"
-            ))
-            .as_slice(),
-            user.steam.enabled(),
-        ),
-        (
-            "sway.service",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/autostart/services/sway.service"
-            ))
-            .as_slice(),
-            true,
-        ),
-        (
-            "windowmanager.target",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/autostart/services/windowmanager.target"
-            ))
-            .as_slice(),
-            true,
-        ),
-        (
-            "workstation-mgr.service",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/autostart/services/workstation-mgr.service"
-            ))
-            .as_slice(),
-            true,
-        ),
-        (
-            "yubikey-touch-detector.service",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/autostart/services/yubikey-touch-detector.service"
-            ))
-            .as_slice(),
-            user.gpg.as_ref().is_some_and(|gpg| gpg.agent_enabled),
-        ),
-    ] {
-        let path = Owned(user_directories.systemd_user_units.join(unit));
-
-        if enabled {
+    plan.block("services", |plan| {
+        plan.block("targets", |plan| {
             plan.add(
-                Owned(format!("user autostart service {unit}")),
+                Ref("windowmanager.target"),
                 user_elevate,
                 File {
-                    path,
+                    path: Owned(
+                        user_directories
+                            .systemd_user_units
+                            .join("windowmanager.target"),
+                    ),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Bail,
+                    permissions: FilePermissions {
+                        owner: Uid::from(user.name.clone()),
+                        group: Gid::from(user.name.clone()),
+                        mode: FileMode(0o644),
+                    },
+                    binary: false,
+                    secret: false,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                        env!("CARGO_MANIFEST_DIR"),
+                        "/../files/autostart/services/windowmanager.target"
+                    )))),
+                },
+            );
+
+            plan.add(
+                "autostart target",
+                user_elevate,
+                File {
+                    path: Owned(user_directories.systemd_user_units.join("autostart.target")),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Bail,
+                    permissions: FilePermissions {
+                        owner: Uid::from(user.name.clone()),
+                        group: Gid::from(user.name.clone()),
+                        mode: FileMode(0o644),
+                    },
+                    binary: false,
+                    secret: false,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Lines(Owned({
+                        let mut out = vec![
+                            Ref("[Unit]"),
+                            Ref("BindsTo=windowmanager.target"),
+                            Ref("After=windowmanager.target"),
+                            Ref(""),
+                            Ref("Wants=gnome-keyring.service"),
+                            Ref("Wants=dunst.service"),
+                            Ref("Wants=nm-sidebar.service"),
+                            Ref("Wants=gammastep.service"),
+                            Ref("Wants=spotify.service"),
+                            Ref("Wants=kdeconnect.service"),
+                            Ref("Wants=color-theme-dark.service"),
+                            Ref("Wants=workstation-mgr.service"),
+                            Ref("Wants=screencfg.service"),
+                        ];
+
+                        if user.gpg.as_ref().is_some_and(|gpg| gpg.agent_enabled) {
+                            out.extend([
+                                Ref("Wants=gpg-agent.service"),
+                                Ref("Wants=yubikey-touch-detector.service"),
+                            ]);
+                        }
+
+                        if user.keepassxc.enabled() {
+                            out.push(Ref("Wants=keepassxc.service"));
+                        }
+
+                        if machine.machine_type == Laptop {
+                            out.push(Ref("Wants=laptop-lid.service"));
+                        }
+
+                        if user.nextcloud.enabled() {
+                            out.push(Ref("Wants=nextcloud.service"));
+                        }
+
+                        if user.steam.enabled() {
+                            out.push(Ref("Wants=steam.service"));
+                        }
+
+                        for profile in &user.firefox.profiles {
+                            out.push(Owned(format!(
+                                "Wants=firefox@{name}.service",
+                                name = profile.name
+                            )));
+                        }
+
+                        out
+                    })),
+                },
+            );
+        });
+
+        for (unit, content) in [
+            (
+                "color-theme-dark.service",
+                include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/services/color-theme-dark.service"
+                ))
+                .as_slice(),
+            ),
+            (
+                "color-theme-light.service",
+                include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/services/color-theme-light.service"
+                ))
+                .as_slice(),
+            ),
+        ] {
+            plan.add(
+                Owned(format!("user service {unit}")),
+                user_elevate,
+                File {
+                    path: Owned(user_directories.systemd_user_units.join(unit)),
                     on_symlink: SymlinkHandling::Proceed,
                     on_directory: DirectoryHandling::Bail,
                     permissions: FilePermissions {
@@ -3827,124 +4754,8 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
                     content: FileContent::Bytes(Ref(content)),
                 },
             );
-        } else {
-            plan.add(
-                Owned(format!("user service {unit}")),
-                user_elevate,
-                Remove {
-                    path,
-                    on_directory: DirectoryHandling::Bail,
-                    on_file: FileHandling::Proceed,
-                    on_symlink: SymlinkHandling::Proceed,
-                },
-            );
         }
-    }
-
-    plan.add(
-        "autostart target",
-        user_elevate,
-        File {
-            path: Owned(user_directories.systemd_user_units.join("autostart.target")),
-            on_symlink: SymlinkHandling::Proceed,
-            on_directory: DirectoryHandling::Bail,
-            permissions: FilePermissions {
-                owner: Uid::from(user.name.clone()),
-                group: Gid::from(user.name.clone()),
-                mode: FileMode(0o644),
-            },
-            binary: false,
-            secret: false,
-            ignore_checksum_changes: false,
-            content: FileContent::Lines(Owned({
-                let mut out = vec![
-                    Ref("[Unit]"),
-                    Ref("BindsTo=windowmanager.target"),
-                    Ref("After=windowmanager.target"),
-                    Ref(""),
-                    Ref("Wants=gnome-keyring.service"),
-                    Ref("Wants=dunst.service"),
-                    Ref("Wants=nm-sidebar.service"),
-                    Ref("Wants=gammastep.service"),
-                    Ref("Wants=spotify.service"),
-                    Ref("Wants=kdeconnect.service"),
-                    Ref("Wants=color-theme-dark.service"),
-                    Ref("Wants=workstation-mgr.service"),
-                    Ref("Wants=screencfg.service"),
-                ];
-
-                if user.gpg.as_ref().is_some_and(|gpg| gpg.agent_enabled) {
-                    out.extend([
-                        Ref("Wants=gpg-agent.service"),
-                        Ref("Wants=yubikey-touch-detector.service"),
-                    ]);
-                }
-
-                if user.keepassxc.enabled() {
-                    out.push(Ref("Wants=keepassxc.service"));
-                }
-
-                if machine.machine_type == Laptop {
-                    out.push(Ref("Wants=laptop-lid.service"));
-                }
-
-                if user.nextcloud.enabled() {
-                    out.push(Ref("Wants=nextcloud.service"));
-                }
-
-                if user.steam.enabled() {
-                    out.push(Ref("Wants=steam.service"));
-                }
-
-                for profile in &user.firefox.profiles {
-                    out.push(Owned(format!(
-                        "Wants=firefox@{name}.service",
-                        name = profile.name
-                    )));
-                }
-
-                out
-            })),
-        },
-    );
-
-    for (unit, content) in [
-        (
-            "color-theme-dark.service",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/services/color-theme-dark.service"
-            ))
-            .as_slice(),
-        ),
-        (
-            "color-theme-light.service",
-            include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/services/color-theme-light.service"
-            ))
-            .as_slice(),
-        ),
-    ] {
-        plan.add(
-            Owned(format!("user service {unit}")),
-            user_elevate,
-            File {
-                path: Owned(user_directories.systemd_user_units.join(unit)),
-                on_symlink: SymlinkHandling::Proceed,
-                on_directory: DirectoryHandling::Bail,
-                permissions: FilePermissions {
-                    owner: Uid::from(user.name.clone()),
-                    group: Gid::from(user.name.clone()),
-                    mode: FileMode(0o644),
-                },
-                binary: false,
-                secret: false,
-                ignore_checksum_changes: false,
-                content: FileContent::Bytes(Ref(content)),
-            },
-        );
-    }
+    });
 }
 
 #[derive(Eq, PartialEq, Serialize)]
@@ -4108,23 +4919,22 @@ fn private_user(
     }
 }
 
-async fn orphans<'elevate: 'action, 'action>(
-    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+async fn orphans<'name, 'elevate: 'action, 'pkgs, 'action, 'secrets>(
+    plan: &mut Plan<'name, 'elevate, 'pkgs, 'action, 'secrets, Secrets>,
     elevate: &'elevate Elevate,
 ) -> Result<()> {
     let orphans = list_orphaned_packages(elevate).await?;
 
-    plan.with(elevate, |mut plan| {
-        #[expect(clippy::iter_over_hash_type, reason = "order does not matter")]
-        for orphan in orphans {
-            plan.add(
-                Owned(format!("remove orphaned package {orphan}")),
-                PackageRemove {
-                    remove: Owned(vec![Owned(orphan)]),
-                },
-            );
-        }
-    });
+    #[expect(clippy::iter_over_hash_type, reason = "order does not matter")]
+    for orphan in orphans {
+        plan.add(
+            Owned(format!("remove orphaned package {orphan}")),
+            elevate,
+            PackageRemove {
+                remove: Owned(vec![Owned(orphan)]),
+            },
+        );
+    }
 
     Ok(())
 }
@@ -4387,8 +5197,6 @@ async fn main() -> MainResult {
                 })
                 .collect();
 
-                let packages = packages();
-
                 let config = Config { machine, users };
 
                 let secrets = if secrets_stdin {
@@ -4405,38 +5213,191 @@ async fn main() -> MainResult {
                     plan.set_secrets(SecretsWorkflow::AssumeExisting);
                 }
 
-                root_setup(&mut plan, &root, &config, &packages)?;
+                root_setup(&mut plan, &root, &config)?;
 
-                let mut user_packages: HashMap<&'static str, &'static [MaybeOwned<'static, str>]> =
-                    HashMap::new();
+                let mut user_packages: HashMap<
+                    MaybeOwned<'_, str>,
+                    MaybeOwned<'_, [MaybeOwned<'_, str>]>,
+                > = HashMap::new();
 
                 for user in &config.users {
-                    let user_result =
-                        configure_user(&mut plan, &root, user, &config.machine).await?;
-                    user_packages.extend(user_result.packages);
+                    plan.try_block_async(Owned(user.config.name.clone()), async |plan| {
+                        let user_result =
+                            configure_user(plan, &root, user, &config.machine).await?;
+                        user_packages.extend(user_result.packages);
+
+                        Ok(())
+                    })
+                    .await?;
                 }
 
-                for (section, packages) in user_packages {
-                    plan.add(
-                        Owned(format!("install user packages for {section}")),
-                        &root,
-                        Packages {
-                            install: Ref(packages),
-                            reason: InstallReason::Explicit,
-                        },
-                    );
+                plan.block("user packages", |plan| {
+                    #[expect(clippy::iter_over_hash_type, reason = "order does not matter")]
+                    for (section, packages) in user_packages {
+                        plan.add(
+                            Owned(format!(
+                                "install user packages for {section}",
+                                section = section.as_ref()
+                            )),
+                            &root,
+                            Packages {
+                                install: packages.clone(),
+                                reason: InstallReason::Explicit,
+                            },
+                        );
 
-                    plan.register_packages(&packages);
-                }
+                        plan.register_packages(packages.as_ref());
+                    }
+                });
+
+                plan.block("application packages", |plan| {
+                    for &(section, packages) in APPLICATION_PACKAGES {
+                        let packages = packages
+                            .iter()
+                            .map(|package| Ref(*package))
+                            .collect::<Vec<_>>();
+
+                        plan.add(
+                            Owned(format!("install packages for {section}")),
+                            &root,
+                            Packages {
+                                install: Owned(packages.clone()),
+                                reason: InstallReason::Explicit,
+                            },
+                        );
+
+                        plan.register_packages(&packages);
+                    }
+                });
+
+                aur(&mut plan, &root);
 
                 match args.hostname {
                     Hera => {
-                        hera(&mut plan, &root);
-                        autoupdate(&mut plan, &root);
-                        restic_backup(&mut plan, &root);
+                        plan.block("hera", |plan| {
+                            let packages = &[
+                                Ref("plasma-desktop"),
+                                Ref("konsole"),
+                                Ref("dolphin"),
+                                Ref("kdeplasma-addons"),
+                                Ref("plasma-nm"),
+                                Ref("plasma-pa"),
+                                Ref("plasma-systemmonitor"),
+                                Ref("plasma-login-manager"),
+                                Ref("thunderbird"),
+                                // kde archive manager
+                                Ref("ark"),
+                                // kde image viewer
+                                Ref("gwenview"),
+                                // german language packs
+                                Ref("hunspell-de"),
+                                Ref("thunderbird-i18n-de"),
+                                Ref("firefox-i18n-de"),
+                            ];
+
+                            plan.add(
+                                "install packages",
+                                &root,
+                                Packages {
+                                    install: Ref(packages),
+                                    reason: InstallReason::Explicit,
+                                },
+                            );
+
+                            plan.register_packages(packages);
+
+                            plan.add(
+                                Ref("create user"),
+                                &root,
+                                User {
+                                    name: "herta",
+                                    home: Ref(Path::new("/home/herta")),
+                                    primary_group: PrimaryGroupConfig::Automatic,
+                                    additional_groups: &[
+                                        "wheel", "sudonopw", "games", "kvm", "video",
+                                    ],
+                                    shell: "/usr/bin/zsh",
+                                    system: false,
+                                },
+                            );
+
+                            plan.block("login manager", |plan| {
+                                plan.add(
+                                    Ref("enable plasma-login-manager"),
+                                    &root,
+                                    Service {
+                                        name: "plasmalogin.service",
+                                        state: ServiceState {
+                                            runtime: ServiceStateRuntime::Active,
+                                            persistent: ServiceStatePersistent::Enabled,
+                                        },
+                                    },
+                                );
+
+                                plan.add(
+                                    "configure plasma login manager",
+                                    &root,
+                                    File {
+                                        path: Ref(Path::new("/etc/plasmalogin.conf")),
+                                        permissions: FilePermissions {
+                                            owner: Uid::root(),
+                                            group: Gid::root(),
+                                            mode: FileMode(0o644),
+                                        },
+                                        on_symlink: SymlinkHandling::Proceed,
+                                        on_directory: DirectoryHandling::Proceed,
+                                        binary: false,
+                                        secret: false,
+                                        ignore_checksum_changes: false,
+                                        content: FileContent::Bytes(Ref(dedent!(
+                                            r#"
+                                        [Autologin]
+                                        User=herta
+                                        Session=plasma.desktop
+                                    "#
+                                        )
+                                        .as_bytes())),
+                                    },
+                                );
+
+                                plan.add(
+                                    "lock on startup",
+                                    &root,
+                                    File {
+                                        path: Ref(Path::new("/etc/xdg/kscreenlockerrc")),
+                                        permissions: FilePermissions {
+                                            owner: Uid::root(),
+                                            group: Gid::root(),
+                                            mode: FileMode(0o644),
+                                        },
+                                        on_symlink: SymlinkHandling::Proceed,
+                                        on_directory: DirectoryHandling::Proceed,
+                                        binary: false,
+                                        secret: false,
+                                        ignore_checksum_changes: false,
+                                        #[expect(
+                                            clippy::string_lit_as_bytes,
+                                            reason = "false positive due to the dedent!() macro"
+                                        )]
+                                        content: FileContent::Bytes(Ref(dedent!(
+                                            r#"
+                                        [Daemon]
+                                        LockOnStart=true
+                                    "#
+                                        )
+                                        .as_bytes())),
+                                    },
+                                );
+                            });
+
+                            autoupdate(plan, &root);
+                            restic_backup(plan, &root);
+                        });
                     }
                     Dionysus => {
-                        autoupdate(&mut plan, &root);
+                        plan.block("dionysus", |plan| {
+                            autoupdate(plan, &root);
+                        });
                     }
                     Ares | Neptune => (),
                 }

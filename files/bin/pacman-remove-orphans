@@ -1,2 +1,4 @@
 #!/usr/bin/env sh
+# depends: pacman findutils
+
 pacman -Qtdq | xargs --open-tty --no-run-if-empty sudo pacman -Rns

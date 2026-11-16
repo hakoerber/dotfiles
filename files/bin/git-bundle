@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# depends: git
 
 set -o nounset
 set -o errexit

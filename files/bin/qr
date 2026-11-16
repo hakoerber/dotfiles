@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
+# depends: qrencode imv
 
 qrencode "$*" -o - | imv -

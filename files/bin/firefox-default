@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
+# depends: firefox
 
 exec /usr/bin/firefox --profile "$HOME/.mozilla/firefox/profile-default" "${@}"

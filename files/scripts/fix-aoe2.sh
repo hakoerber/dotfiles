@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# depends: wget cabextract
 
 cd "$(mktemp -d)" || exit 1
 

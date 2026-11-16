@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# depends: python python-ruamel-yaml jq
 
 import sys
 import json

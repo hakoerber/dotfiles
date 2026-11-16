@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# depends: python
 
 import sys
 import os.path
