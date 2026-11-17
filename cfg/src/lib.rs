@@ -1237,7 +1237,10 @@ fn print_node(
                         stdout,
                         "{prefix}{c}──── {} {name}",
                         "Block".fg::<colors::White>(),
-                        c = if first_in_block {
+                        c = if first_in_block && last_in_block {
+                            // only a single resource, no lines to draw
+                            '•'
+                        } else if first_in_block {
                             '╭'
                         } else if last_in_block {
                             '╰'
@@ -1253,7 +1256,10 @@ fn print_node(
                     stdout,
                     "{prefix}{c}──┬─ {} {name}",
                     "Block".fg::<colors::White>(),
-                    c = if first_in_block {
+                    c = if first_in_block && last_in_block {
+                        // only a single resource, no lines to draw
+                        '•'
+                    } else if first_in_block {
                         '╭'
                     } else if last_in_block {
                         '╰'
