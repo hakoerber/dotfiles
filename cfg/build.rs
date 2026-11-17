@@ -26,6 +26,7 @@ fn build_package<'a>(
             let makepkg_for_version = process::Command::new("makepkg")
                 .arg("--noextract")
                 .arg("--nobuild")
+                .arg("--nodeps")
                 .arg("--noprepare")
                 .envs(env.clone())
                 .current_dir(makepkg_path)
@@ -98,6 +99,7 @@ fn build_package<'a>(
 
             let makepkg = process::Command::new("makepkg")
                 .arg("--clean")
+                .arg("--nodeps")
                 .arg("--cleanbuild")
                 .current_dir(makepkg_path)
                 .envs(env.clone())
