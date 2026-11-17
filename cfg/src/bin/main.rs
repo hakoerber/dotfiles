@@ -1449,6 +1449,31 @@ fn wireguard<'elevate: 'action, 'action>(
             },
         );
 
+        plan.add(
+            "force networkmanager to ignore wireguard interfaces",
+            elevate,
+            File {
+                path: Ref(Path::new("/etc/NetworkManager/conf.d/unmanaged.conf")),
+                on_directory: DirectoryHandling::Bail,
+                on_symlink: SymlinkHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(dedent!(
+                    "
+                    [keyfile]
+                    unmanaged-devices=type:wireguard
+                    "
+                )
+                .as_bytes())),
+            },
+        );
+
         Ok(())
     })?;
 
