@@ -28,7 +28,7 @@ format = " $icon  {$combo $prev $play $next|-} "
 
 [[block]]
 block = "sound"
-driver = "pipewire"
+driver = "pulseaudio"
 max_vol = 100
 format = " $icon{ $volume.eng(w:2)|} "
 
@@ -44,7 +44,7 @@ cmd = "pavucontrol-qt"
 {% if not is_tv %}
 [[block]]
 block = "sound"
-driver = "pipewire"
+driver = "pulseaudio"
 device_kind = "source"
 format = "  $icon  "
 
@@ -74,8 +74,8 @@ missing_format = ""
 block = "toggle"
 format = "   $icon "
 signal = 1
-command_on = "workstation-client present toggle ; pkill -SIGRTMIN+1 i3status-rs"
-command_off = "workstation-client present toggle ; pkill -SIGRTMIN+1 i3status-rs"
+command_on = "workstation-client present toggle ; pkill -SIGRTMIN+0 i3status-rs"
+command_off = "workstation-client present toggle ; pkill -SIGRTMIN+0 i3status-rs"
 command_state = "[[ $(workstation-client present status) == on ]] && echo active"
 
 [[block]]
