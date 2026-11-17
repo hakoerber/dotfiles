@@ -370,8 +370,6 @@ const APPLICATION_PACKAGES: &[(&str, &[&str])] = &[
     ("mousepad", &["mousepad"]),
     ("graphviz", &["graphviz", "xdot"]),
     ("markdown", &["marksman", "mdformat"]),
-    // build dependencies for included packages
-    ("pkgbuilds-nm-sidebar", &["meson", "ninja"]),
 ];
 
 fn autoupdate<'name: 'static, 'elevate: 'action, 'pkgs, 'action, 'secrets>(
@@ -1997,7 +1995,11 @@ fn networkmanager<'elevate: 'action, 'action>(
     elevate: &'elevate Elevate,
 ) {
     plan.block("networkmanager", |plan| {
-        let networkmanager = &[Ref("networkmanager")];
+        let networkmanager = &[
+            Ref("networkmanager"),
+            Ref("networkmanager-dmenu"),
+            Ref("nm-connection-editor"),
+        ];
         plan.add(
             "install networkmanager",
             elevate,

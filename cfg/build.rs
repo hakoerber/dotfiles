@@ -199,12 +199,6 @@ const PKGBUILDS: &[BuildInfo] = &[
         update: false,
     },
     BuildInfo {
-        name: "nm-sidebar",
-        path: "../pkgbuilds/nm-sidebar",
-        preexec: None,
-        update: false,
-    },
-    BuildInfo {
         name: "nodejs-intelephense",
         path: "../pkgbuilds/nodejs-intelephense",
         preexec: None,
