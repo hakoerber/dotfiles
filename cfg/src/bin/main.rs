@@ -266,7 +266,6 @@ const APPLICATION_PACKAGES: &[(&str, &[&str])] = &[
     ("imagemagick", &["imagemagick"]),
     ("mpv", &["mpv"]),
     ("terraform", &["terraform", "terragrunt", "tflint"]),
-    ("discord", &["discord"]),
     ("kubectl", &["kubectl"]),
     ("chromium", &["chromium"]),
     ("go", &["go", "gopls", "delve", "golangci-lint"]),
@@ -3963,6 +3962,46 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
         );
     });
 
+    plan.block("discord", |plan| {
+        packages.insert(Ref("discord"), Ref(&[Ref("discord")]));
+
+        let service_path = directories.systemd_user_units.join("discord.service");
+        if machine.roles.has(MachineRole::Gaming) {
+            plan.add(
+                Ref("add discord service"),
+                user_elevate,
+                File {
+                    path: Owned(service_path),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Bail,
+                    permissions: FilePermissions {
+                        owner: Uid::from(user.name.clone()),
+                        group: Gid::from(user.name.clone()),
+                        mode: FileMode(0o644),
+                    },
+                    binary: false,
+                    secret: false,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                        env!("CARGO_MANIFEST_DIR"),
+                        "/../files/autostart/services/discord.service"
+                    )))),
+                },
+            );
+        } else {
+            plan.add(
+                Ref("user service discord"),
+                user_elevate,
+                Remove {
+                    path: Owned(service_path),
+                    on_directory: DirectoryHandling::Bail,
+                    on_file: FileHandling::Proceed,
+                    on_symlink: SymlinkHandling::Proceed,
+                },
+            );
+        }
+    });
+
     plan.block("steam", |plan| {
         packages.insert(
             Ref("steam"),
@@ -4704,6 +4743,10 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
                             out.push(Ref("Wants=nextcloud.service"));
                         }
 
+                        if machine.roles.has(MachineRole::Gaming) {
+                            out.push(Ref("Wants=discord.service"));
+                        }
+
                         if user.steam.enabled() {
                             out.push(Ref("Wants=steam.service"));
                         }
@@ -4770,6 +4813,20 @@ enum MachineType {
 use MachineType::{Laptop, Tv, Workstation};
 
 #[derive(Serialize)]
+struct MachineRoles(&'static [MachineRole]);
+
+impl MachineRoles {
+    fn has(&self, role: MachineRole) -> bool {
+        self.0.contains(&role)
+    }
+}
+
+#[derive(Eq, PartialEq, Serialize, Clone, Copy)]
+enum MachineRole {
+    Gaming,
+}
+
+#[derive(Serialize)]
 struct WorkspaceConfig {
     num1: Option<String>,
     num2: Option<String>,
@@ -4792,6 +4849,7 @@ struct MachineConfig {
     font_size: usize,
     workspace: WorkspaceConfig,
     machine_type: MachineType,
+    roles: MachineRoles,
 }
 
 #[derive(Serialize)]
@@ -5085,6 +5143,7 @@ async fn main() -> MainResult {
                             num0: Some("".to_owned()),
                         },
                         machine_type: Laptop,
+                        roles: MachineRoles(&[]),
                     },
                     Ares => MachineConfig {
                         encrypted_root: true,
@@ -5100,11 +5159,12 @@ async fn main() -> MainResult {
                             num5: None,
                             num6: None,
                             num7: None,
-                            num8: None,
+                            num8: Some("".to_owned()),
                             num9: Some("".to_owned()),
                             num0: Some("".to_owned()),
                         },
                         machine_type: Workstation,
+                        roles: MachineRoles(&[MachineRole::Gaming]),
                     },
                     Hera => MachineConfig {
                         encrypted_root: false,
@@ -5125,6 +5185,7 @@ async fn main() -> MainResult {
                             num0: Some("".to_owned()),
                         },
                         machine_type: Laptop,
+                        roles: MachineRoles(&[]),
                     },
                     Dionysus => MachineConfig {
                         encrypted_root: true,
@@ -5145,6 +5206,7 @@ async fn main() -> MainResult {
                             num0: None,
                         },
                         machine_type: Tv,
+                        roles: MachineRoles(&[]),
                     },
                 };
 
