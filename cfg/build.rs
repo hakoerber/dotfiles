@@ -236,6 +236,12 @@ const PKGBUILDS: &[BuildInfo] = &[
         preexec: None,
         update: false,
     },
+    BuildInfo {
+        name: "orca-ide-bin",
+        path: "../pkgbuilds/orca-ide-bin",
+        preexec: None,
+        update: false,
+    },
 ];
 
 fn main() {
