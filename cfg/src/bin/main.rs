@@ -3502,6 +3502,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                 Ref("zsh-completions"),
                 Ref("eza"),                // alias for ls
                 Ref("python-ruamel-yaml"), // json2yaml alias
+                Ref("fzf"),                // fzf integration
             ]
             .as_slice()),
         );
