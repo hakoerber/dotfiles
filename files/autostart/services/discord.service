@@ -3,6 +3,6 @@ BindsTo=autostart.target
 After=windowmanager.target
 
 [Service]
-ExecStart=/usr/bin/env discord
+ExecStart=/usr/bin/env discord --ozone-platform=wayland
 PassEnvironment=WAYLAND_DISPLAY
 Restart=always
