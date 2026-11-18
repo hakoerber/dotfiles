@@ -23,6 +23,7 @@ impl Target {
 pub enum ServiceStateRuntime {
     Active,
     Inactive,
+    Ignore,
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, derive_more::Display)]
@@ -30,6 +31,12 @@ pub enum ServiceStateRuntimeActual {
     Active,
     Inactive,
     ConditionNotMet,
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq, derive_more::Display)]
+pub enum ServiceStateRuntimeDesired {
+    Active,
+    Inactive,
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, derive_more::Display)]
@@ -54,19 +61,21 @@ pub struct ServiceStateActual {
 impl ServiceState {
     fn diff(&self, other: &ServiceStateActual) -> ServiceStateDiff {
         ServiceStateDiff {
+            #[expect(clippy::match_same_arms, reason = "Easier to reason about")]
             runtime: match (other.runtime, self.runtime) {
                 (ServiceStateRuntimeActual::Active, ServiceStateRuntime::Active)
                 | (ServiceStateRuntimeActual::Inactive, ServiceStateRuntime::Inactive) => None,
                 (ServiceStateRuntimeActual::Active, ServiceStateRuntime::Inactive) => {
-                    Some(ServiceStateRuntime::Inactive)
+                    Some(ServiceStateRuntimeDesired::Inactive)
                 }
                 (ServiceStateRuntimeActual::Inactive, ServiceStateRuntime::Active) => {
-                    Some(ServiceStateRuntime::Active)
+                    Some(ServiceStateRuntimeDesired::Active)
                 }
                 (ServiceStateRuntimeActual::ConditionNotMet, _) => {
                     // when condition not met, we never assume changes
                     None
                 }
+                (_, ServiceStateRuntime::Ignore) => None,
             },
 
             persistent: (self.persistent != other.persistent).then_some(self.persistent),
@@ -76,7 +85,7 @@ impl ServiceState {
 
 #[derive(Debug)]
 pub(crate) struct ServiceStateDiff {
-    runtime: Option<ServiceStateRuntime>,
+    runtime: Option<ServiceStateRuntimeDesired>,
     persistent: Option<ServiceStatePersistent>,
 }
 
@@ -310,7 +319,7 @@ impl Applyable for ServicePlan<'_> {
         // do the runtime state after the persistent state, otherwise the unit may be masked
         if let Some(runtime_state) = self.diff.runtime {
             match runtime_state {
-                ServiceStateRuntime::Active => {
+                ServiceStateRuntimeDesired::Active => {
                     cmd::Process::run(
                         "systemctl",
                         &["start", "--", self.args.name],
@@ -320,7 +329,7 @@ impl Applyable for ServicePlan<'_> {
                     .await?
                     .check()?;
                 }
-                ServiceStateRuntime::Inactive => {
+                ServiceStateRuntimeDesired::Inactive => {
                     cmd::Process::run(
                         "systemctl",
                         &["stop", "--", self.args.name],

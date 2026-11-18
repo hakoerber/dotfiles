@@ -869,74 +869,41 @@ fn libvirt<'elevate: 'action, 'action>(
             },
         );
 
-        for socket in [
-            "libvirtd.socket",
-            "libvirtd-tls.socket",
-            "libvirtd-tcp.socket",
-            "libvirtd-ro.socket",
-            "libvirtd-admin.socket",
-        ] {
+        for socket in ["libvirtd.socket", "virtlogd.socket"] {
             plan.add(
-                Owned(format!("mask {socket}")),
+                Owned(format!("enable {socket}")),
                 elevate,
                 Service {
                     name: socket,
                     state: ServiceState {
-                        runtime: ServiceStateRuntime::Inactive,
-                        persistent: ServiceStatePersistent::Masked,
+                        runtime: ServiceStateRuntime::Active,
+                        persistent: ServiceStatePersistent::Enabled,
                     },
                 },
             );
         }
 
-        // the libvirtd unit file contains the following setting:
-        //
-        // Environment=LIBVIRTD_ARGS="--timeout 120"
-        //
-        // This will make libvirtd stop after 120 seconds without connections or running
-        // domains. To convince the daemon to just keep being a daemon, this needs to be
-        // removed. Fortunately, the unit also contains the following:
-        //
-        // EnvironmentFile=-/etc/conf.d/libvirtd
-        //
-        // And `EnvironmentFile` trumps `Environment`. Otherwise we'd need to do some
-        // damn systemd override shenanigans.
+        // leftover libvirtd configuration
         plan.add(
             "configure libvirtd env variable override",
             elevate,
-            File {
+            Remove {
                 path: Ref(Path::new("/etc/conf.d/libvirtd")),
-                permissions: FilePermissions {
-                    owner: Uid::root(),
-                    group: Gid::root(),
-                    mode: FileMode(0o600),
-                },
                 on_directory: DirectoryHandling::Bail,
+                on_file: FileHandling::Proceed,
                 on_symlink: SymlinkHandling::Proceed,
-                binary: false,
-                secret: false,
-                ignore_checksum_changes: false,
-                content: Lines(Ref(&[Ref("LIBVIRTD_ARGS=")])),
             },
-        )
-        .on_change(|| {
-            Resource::new(
-                Ref("restart libvirt"),
-                elevate,
-                RestartService {
-                    name: "libvirtd.service",
-                },
-            )
-        });
+        );
 
+        // leftover, should not be enabled, but can run
         plan.add(
-            Ref("enable libvirt"),
+            Ref("disable libvirt service"),
             elevate,
             Service {
                 name: "libvirtd.service",
                 state: ServiceState {
-                    runtime: ServiceStateRuntime::Active,
-                    persistent: ServiceStatePersistent::Enabled,
+                    runtime: ServiceStateRuntime::Ignore,
+                    persistent: ServiceStatePersistent::Disabled,
                 },
             },
         );
