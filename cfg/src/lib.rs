@@ -24,8 +24,7 @@ mod user;
 
 use checksum::Checksum;
 use maybeowned::MaybeOwned;
-use owo_colors::OwoColorize;
-use owo_colors::colors;
+use owo_colors::{OwoColorize, colors};
 use tempfile::Tempfile;
 
 pub mod prelude {
