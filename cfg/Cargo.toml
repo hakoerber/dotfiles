@@ -95,6 +95,7 @@ redundant_else = "allow"
 redundant_closure_for_method_calls = "allow"
 needless_raw_string_hashes = "allow"
 bool_to_int_with_if = "allow"
+single_match_else = "allow"
 
 # nursery overrides
 missing_const_for_fn = "allow"

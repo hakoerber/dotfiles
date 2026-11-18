@@ -366,7 +366,7 @@ pub(crate) async fn remove_recursive(elevate: &Elevate, path: &Path) -> Result<(
     Ok(())
 }
 
-pub(crate) async fn try_read(elevate: &Elevate, path: &Path) -> Result<Option<Vec<u8>>> {
+pub async fn try_read(elevate: &Elevate, path: &Path) -> Result<Option<Vec<u8>>> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => match stat(elevate, path).await? {
             Some(_stat) => {
@@ -402,7 +402,7 @@ pub(crate) async fn read_to_string(elevate: &Elevate, path: &Path) -> Result<Str
     String::from_utf8(content).map_err(|_err| anyhow!("non utf-8 file content"))
 }
 
-pub(crate) async fn write(path: &Path, input: &[u8], elevate: &Elevate) -> Result<()> {
+pub async fn write(path: &Path, input: &[u8], elevate: &Elevate) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
             cmd::Process::run(
@@ -417,6 +417,29 @@ pub(crate) async fn write(path: &Path, input: &[u8], elevate: &Elevate) -> Resul
         Elevate::No => {
             std::fs::OpenOptions::new()
                 .write(true)
+                .open(path)?
+                .write_all(input)?;
+        }
+    }
+    Ok(())
+}
+
+pub async fn create(path: &Path, input: &[u8], elevate: &Elevate) -> Result<()> {
+    match *elevate {
+        Elevate::Sudo(ref _elevate_to) => {
+            cmd::Process::run(
+                "dd",
+                &[&format!("of={path}")],
+                elevate,
+                cmd::Stdin::Write(input),
+            )
+            .await?
+            .check()?;
+        }
+        Elevate::No => {
+            std::fs::OpenOptions::new()
+                .write(true)
+                .create_new(true)
                 .open(path)?
                 .write_all(input)?;
         }

@@ -28,6 +28,163 @@ static SCRIPTS: include_dir::Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../file
 static INCLUDED_PACKAGES: &[(&str, &str, &str, &[u8])] =
     include!(concat!(env!("OUT_DIR"), "/packages.rs"));
 
+#[expect(clippy::print_stdout, reason = "migrations are chatty")]
+mod migrations {
+    use std::fmt;
+
+    use anyhow::Result;
+    use serde::{Deserialize, Serialize};
+
+    use cfg::prelude::*;
+
+    const STATE_PATH: &str = "/var/lib/cfg.state";
+
+    #[derive(Serialize, Deserialize, Debug)]
+    pub(super) struct MachineState {
+        migration: Migration,
+    }
+
+    const LATEST_MIGRATION: usize = 2;
+
+    #[derive(Serialize, Deserialize, Clone, Debug)]
+    pub(super) struct Migration {
+        id: usize,
+    }
+
+    struct MigrationIter {
+        migration: Migration,
+    }
+
+    impl Iterator for MigrationIter {
+        type Item = Migration;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            if self.migration.id >= LATEST_MIGRATION {
+                None
+            } else {
+                self.migration.id = self
+                    .migration
+                    .id
+                    .checked_add(1)
+                    .expect("bounded by LATEST_MIGRATION");
+                Some(self.migration.clone())
+            }
+        }
+    }
+
+    impl Migration {
+        pub(super) fn apply(&self, elevate: &Elevate) -> Result<()> {
+            #[expect(
+                clippy::match_overlapping_arm,
+                reason = "make sure that bumping LATEST_MIGRATION forces adding it here"
+            )]
+            match self.id {
+                0 => unreachable!("initial migration will never be applied"),
+                1 => {
+                    Process::run_in_foreground(
+                        "bash",
+                        &[
+                            "-c",
+                            "
+                            yes | pacman --needed -S pipewire pipewire-pulse
+                        ",
+                        ],
+                        elevate,
+                        &Stdin::Closed,
+                    )?
+                    .check()?;
+                }
+                LATEST_MIGRATION => {
+                    Process::run_in_foreground(
+                        "bash",
+                        &[
+                            "-c",
+                            "
+                            set -o nounset
+                            set -o errexit
+                            set -o pipefail
+
+                            rm -f /etc/conf.d/libvirtd
+                            systemctl disable libvirtd.service
+                            systemctl stop libvirtd.service
+                        ",
+                        ],
+                        elevate,
+                        &Stdin::Closed,
+                    )?
+                    .check()?;
+                }
+                LATEST_MIGRATION.. => unreachable!(),
+            }
+
+            Ok(())
+        }
+
+        fn unapplied(&self) -> MigrationIter {
+            MigrationIter {
+                migration: self.clone(),
+            }
+        }
+
+        pub(crate) fn latest() -> Self {
+            Self {
+                id: LATEST_MIGRATION,
+            }
+        }
+    }
+
+    impl fmt::Display for Migration {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(f, "(id: {})", self.id)
+        }
+    }
+
+    impl MachineState {
+        pub(super) async fn load(elevate: &Elevate) -> Result<Option<Self>> {
+            Ok(try_read(elevate, Path::new(STATE_PATH))
+                .await?
+                .map(|file| serde_json::from_slice(&file))
+                .transpose()?)
+        }
+
+        pub(super) async fn save(&self, elevate: &Elevate) -> Result<()> {
+            let data = serde_json::to_string(self)?;
+            create(Path::new(STATE_PATH), data.as_bytes(), elevate).await?;
+            Ok(())
+        }
+
+        pub(super) async fn apply_migrations(
+            &mut self,
+            elevate: &Elevate,
+            dry_run: bool,
+        ) -> Result<bool> {
+            let mut any_applied = false;
+            for migration in self.migration.unapplied() {
+                if dry_run {
+                    println!("would apply {migration}");
+                } else {
+                    println!("applying {migration}");
+                    migration.apply(elevate)?;
+                    self.migration = migration;
+                    self.save(elevate).await?;
+                    any_applied = true;
+                }
+            }
+            Ok(any_applied)
+        }
+
+        pub(super) fn new(migration: Migration) -> Self {
+            Self { migration }
+        }
+    }
+
+    impl fmt::Display for MachineState {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(f, "State({})", self.migration)
+        }
+    }
+}
+
 const MY_SSH_PUBKEY: &str = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCxOtVxz3vRL7SUZVO899RUcg9BiDuZfPUfsd9v3AHOwNvSVsLObqq0QgwajmTML9nRZzX7kc7RmFtXZ5ypMkyEJ9p14rYXKYKhLqEM4Paz0lUagQhy0sdYijtayNsM5luU3yk6a4F/PkanprDGEEtJPMLCwpDODTwlE7THvFtJXLnYeFtF2DJKnUcP6E9MWGYM1zYdrmf43pxWg2YXFjoyLEkOy6TVjjqwz+tKa6+4YRqFWNyXcEWqI2ZLqHRzZTvu+46gsnR+8HcLpov3ij/Mr0jYSJ4vqMGz1yfKnrsKZUp0IhvlPYbGjdcL17xYame2UroPS8AzWWegyqeEFh54qmCrFVw/uwErcWcUJX3KEijrc48DYZUBK09vnFFcXIYR/cfFWpTGhnqlwp/EAaBeR3zr6hS6lL+XluMIjHHkwT/eD3YydEwABjbJwBJp5PdYR4M/bSHuOoCH6d/U36OpkwwekyYKWvEoxxPSJIWCy1ApILQZmWuctIFc8SQfSXfRifPEDBnL9hNzzX00beDYmS6cPIP0TIqa9fdL1AeO68Tk7o67f2cCE11QTH7FI9JjhuQ/M4dO8jUw7kmtGCKdReNIuYYU3xZB4wdFHs/5UxROCwEZnv+3uWAgHbgc14XLWunN9P9msOxYLHPVJK/XcdhHvWSmQdNq4ajry/H+kQ==";
 
 type PackageList<'pkgs> =
@@ -156,6 +313,13 @@ enum Action {
     Bootstrap {
         #[arg(long)]
         i_am_sure: bool,
+    },
+    Migrate {
+        #[arg(long)]
+        dry_run: bool,
+
+        #[arg(long)]
+        init: bool,
     },
 }
 
@@ -885,31 +1049,6 @@ fn libvirt<'elevate: 'action, 'action>(
                 },
             );
         }
-
-        // leftover libvirtd configuration
-        plan.add(
-            "configure libvirtd env variable override",
-            elevate,
-            Remove {
-                path: Ref(Path::new("/etc/conf.d/libvirtd")),
-                on_directory: DirectoryHandling::Bail,
-                on_file: FileHandling::Proceed,
-                on_symlink: SymlinkHandling::Proceed,
-            },
-        );
-
-        // leftover, should not be enabled, but can run
-        plan.add(
-            Ref("disable libvirt service"),
-            elevate,
-            Service {
-                name: "libvirtd.service",
-                state: ServiceState {
-                    runtime: ServiceStateRuntime::Ignore,
-                    persistent: ServiceStatePersistent::Disabled,
-                },
-            },
-        );
     });
 }
 
@@ -4472,31 +4611,6 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
         );
     });
 
-    plan.block("ensure removed dotfiles", |plan| {
-        for absent in [
-            ".gitconfig",
-            ".vimrc",
-            ".config/nvim/init.vim",
-            ".tmux.conf",
-            ".i3",
-            ".gtkrc-2.0",
-            ".opt",
-            ".optbin",
-            ".usr",
-            ".var",
-            ".screenrc",
-            ".zshrc.d",
-        ] {
-            plan.assert(
-                Owned(format!("assert that {absent} does not exist")),
-                user_elevate,
-                AssertAbsent {
-                    path: Owned(home.join(absent)),
-                },
-            );
-        }
-    });
-
     Ok(packages)
 }
 
@@ -5107,6 +5221,49 @@ async fn main() -> MainResult {
             .to_owned();
 
         match args.action {
+            #[expect(
+                clippy::print_stdout,
+                clippy::print_stderr,
+                reason = "migrate is more chatty"
+            )]
+            Action::Migrate { dry_run, init } => {
+                let root = match running_user.as_str() {
+                    "root" => Elevate::No,
+                    _ => Elevate::Sudo(ElevateTo::Root),
+                };
+
+                let state = migrations::MachineState::load(&root).await?;
+
+                match state {
+                    Some(mut state) => {
+                        if init {
+                            eprintln!("state already present, --init cannot be done");
+                            Ok(Err(()))
+                        } else {
+                            let any_applied = state.apply_migrations(&root, dry_run).await?;
+                            if any_applied {
+                                println!("All migrations applied");
+                            }
+
+                            Ok(Ok(()))
+                        }
+                    }
+                    None => {
+                        if init {
+                            let id = migrations::Migration::latest();
+                            let new_state = migrations::MachineState::new(id);
+                            if dry_run {
+                                println!("would save new state {new_state}");
+                            } else {
+                                new_state.save(&root).await?;
+                            }
+                            Ok(Ok(()))
+                        } else {
+                            Err(anyhow!("no state found, use --init to initialize it"))
+                        }
+                    }
+                }
+            }
             Action::Deploy {
                 dry_run,
                 only_changed,

@@ -126,6 +126,7 @@ cat << 'EOF' > /root/.bash_profile
         echo '[Install]' >> /etc/systemd/system/plasmalogin.service
         echo 'Alias=display-manager.service' >> /etc/systemd/system/plasmalogin.service
 
+        /usr/local/bin/cfg --hostname hera migrate --init
         if /usr/local/bin/cfg --hostname hera deploy --only-changed --secrets-stdin < /usr/local/share/secrets.json 2>&1 | tee /var/log/install.log ; then
             rm -f /usr/local/bin/cfg
             rm -f /root/.bash_profile
