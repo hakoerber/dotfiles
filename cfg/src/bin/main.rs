@@ -2227,6 +2227,45 @@ fn networkmanager<'elevate: 'action, 'action>(
         );
         plan.register_packages(networkmanager);
 
+        // https://wiki.archlinux.org/title/NetworkManager#Checking_connectivity
+        plan.add(
+            "disable connectivity checks",
+            elevate,
+            File {
+                path: Ref(Path::new("/etc/NetworkManager/conf.d/20-connectivity.conf")),
+                on_directory: DirectoryHandling::Bail,
+                on_symlink: SymlinkHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                #[expect(
+                    clippy::string_lit_as_bytes,
+                    reason = "false positive due to the dedent!() macro"
+                )]
+                content: FileContent::Bytes(Ref(dedent!(
+                    "
+                    [connectivity]
+                    enabled=false
+                    "
+                )
+                .as_bytes())),
+            },
+        )
+        .on_change(|| {
+            Resource::new(
+                Ref("restart networkmanager"),
+                elevate,
+                RestartService {
+                    name: "NetworkManager.service",
+                },
+            )
+        });
+
         plan.add(
             "enable networkmanager",
             elevate,
