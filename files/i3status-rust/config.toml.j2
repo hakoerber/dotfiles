@@ -98,7 +98,7 @@ signal = 0
 [[block]]
 block = "toggle"
 format = "   $icon "
-command_on = "workstation-client spotify start"
+command_on = "workstation-client spotify start ; sleep 3 ; pkill -SIGRTMIN+0 i3status-rs"
 command_off = "workstation-client spotify stop"
 command_state = "[[ $(workstation-client spotify status) == active ]] && echo 1"
 signal = 0

@@ -910,6 +910,37 @@ fn libvirt<'elevate: 'action, 'action>(
     });
 }
 
+fn docker<'elevate: 'action, 'action>(
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    elevate: &'elevate Elevate,
+) {
+    plan.block("docker", |plan| {
+        let docker = &[Ref("docker"), Ref("docker-compose")];
+        plan.register_packages(docker);
+
+        plan.add(
+            "install docker",
+            elevate,
+            Packages {
+                install: Ref(docker),
+                reason: InstallReason::Explicit,
+            },
+        );
+
+        plan.add(
+            Ref("enable docker socket"),
+            elevate,
+            Service {
+                name: "docker.socket",
+                state: ServiceState {
+                    runtime: ServiceStateRuntime::Active,
+                    persistent: ServiceStatePersistent::Enabled,
+                },
+            },
+        );
+    });
+}
+
 fn wireshark<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
@@ -2431,6 +2462,7 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     reflector(plan, elevate);
     initrd(plan, elevate, config);
     libvirt(plan, elevate);
+    docker(plan, elevate);
     pipewire(plan, elevate);
     fonts(plan, elevate);
     smartcard(plan, elevate);
@@ -2495,6 +2527,7 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine, 'p
                 "kvm",
                 "video",
                 "ssh",
+                "docker",
             ],
             shell: "/usr/bin/zsh",
             system: false,
