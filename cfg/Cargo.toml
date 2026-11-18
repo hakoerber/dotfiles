@@ -59,6 +59,7 @@ async-scoped = { version = "0.9", default-features = false, features = [
 ] }
 tokio-stream = { version = "0.1", default-features = false, features = ["fs"] }
 futures = { version = "0.3", default-features = false }
+strum = { version = "0.28", default-features = false, features = ["derive"] }
 
 [features]
 testing = []

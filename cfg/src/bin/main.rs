@@ -18,6 +18,7 @@ use clap::{Parser, Subcommand, ValueEnum};
 use dedent::dedent;
 use include_dir::{DirEntry, include_dir};
 use serde::{Deserialize, Serialize};
+use strum::VariantArray;
 
 use cfg::prelude::*;
 
@@ -1971,6 +1972,9 @@ fn pacman<'plan, 'elevate: 'action, 'action>(
                         # Managed by reflector
                         NoExtract = etc/pacman.d/mirrorlist
 
+                        # Managed manually
+                        NoExtract = etc/locale.gen
+
                         CheckSpace
                         ParallelDownloads = 5
                         DownloadUser = alpm
@@ -2297,6 +2301,76 @@ fn filesystem<'elevate: 'action, 'action>(
         },
     );
     plan.register_packages(lvm);
+}
+
+fn locale<'elevate: 'action, 'action, 'machine>(
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    elevate: &'elevate Elevate,
+    config: &Config,
+) {
+    plan.add(
+        "configure locale.gen",
+        elevate,
+        File {
+            path: Ref(Path::new("/etc/locale.gen")),
+            permissions: FilePermissions {
+                owner: Uid::root(),
+                group: Gid::root(),
+                mode: FileMode(0o644),
+            },
+            on_symlink: SymlinkHandling::Proceed,
+            on_directory: DirectoryHandling::Proceed,
+            binary: false,
+            secret: false,
+            ignore_checksum_changes: false,
+            content: FileContent::Lines(Owned(
+                Language::VARIANTS
+                    .iter()
+                    .map(|lang| Owned(format!("{} UTF-8", lang.as_locale())))
+                    .collect(),
+            )),
+        },
+    )
+    .on_change(|| {
+        Resource::new(
+            Ref("generate locale"),
+            elevate,
+            Command {
+                cmd: Ref("locale-gen"),
+                args: &[],
+                check_command: None,
+            },
+        )
+    });
+
+    plan.add(
+        "configure locale.conf",
+        elevate,
+        File {
+            path: Ref(Path::new("/etc/locale.conf")),
+            permissions: FilePermissions {
+                owner: Uid::root(),
+                group: Gid::root(),
+                mode: FileMode(0o644),
+            },
+            on_symlink: SymlinkHandling::Proceed,
+            on_directory: DirectoryHandling::Proceed,
+            binary: false,
+            secret: false,
+            ignore_checksum_changes: false,
+            content: FileContent::Bytes(Owned(
+                format!(
+                    dedent!(
+                        r#"
+                    LANG={lang}
+                "#
+                    ),
+                    lang = config.machine.language.as_locale()
+                )
+                .into_bytes(),
+            )),
+        },
+    );
 }
 
 fn posix<'elevate: 'action, 'action>(
@@ -2692,6 +2766,7 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
 ) -> Result<()> {
     kernel(plan, elevate);
     filesystem(plan, elevate);
+    locale(plan, elevate, config);
     pacman(plan, elevate);
     posix(plan, elevate);
     networkmanager(plan, elevate);
@@ -5079,6 +5154,21 @@ struct WorkspaceConfig {
     num0: Option<String>,
 }
 
+#[derive(Serialize, VariantArray)]
+enum Language {
+    En,
+    De,
+}
+
+impl Language {
+    fn as_locale(&self) -> &str {
+        match *self {
+            Self::En => "en_US.UTF-8",
+            Self::De => "de_DE.UTF-8",
+        }
+    }
+}
+
 #[derive(Serialize)]
 struct MachineConfig {
     encrypted_root: bool,
@@ -5089,6 +5179,7 @@ struct MachineConfig {
     workspace: WorkspaceConfig,
     machine_type: MachineType,
     roles: MachineRoles,
+    language: Language,
 }
 
 #[derive(Serialize)]
@@ -5426,6 +5517,7 @@ async fn main() -> MainResult {
                         },
                         machine_type: Laptop,
                         roles: MachineRoles(&[]),
+                        language: Language::En,
                     },
                     Ares => MachineConfig {
                         encrypted_root: true,
@@ -5447,6 +5539,7 @@ async fn main() -> MainResult {
                         },
                         machine_type: Workstation,
                         roles: MachineRoles(&[MachineRole::Gaming]),
+                        language: Language::En,
                     },
                     Hera => MachineConfig {
                         encrypted_root: false,
@@ -5468,6 +5561,7 @@ async fn main() -> MainResult {
                         },
                         machine_type: Laptop,
                         roles: MachineRoles(&[]),
+                        language: Language::De,
                     },
                     Dionysus => MachineConfig {
                         encrypted_root: true,
@@ -5489,6 +5583,7 @@ async fn main() -> MainResult {
                         },
                         machine_type: Tv,
                         roles: MachineRoles(&[]),
+                        language: Language::En,
                     },
                 };
 
