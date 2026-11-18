@@ -1968,6 +1968,9 @@ fn pacman<'plan, 'elevate: 'action, 'action>(
                         # See https://bbs.archlinux.org/viewtopic.php?id=259764
                         NoExtract = usr/share/dbus-1/services/com.nextcloudgmbh.Nextcloud.service
 
+                        # Managed by reflector
+                        NoExtract = etc/pacman.d/mirrorlist
+
                         CheckSpace
                         ParallelDownloads = 5
                         DownloadUser = alpm
