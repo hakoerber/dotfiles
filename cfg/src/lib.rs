@@ -31,7 +31,7 @@ pub mod prelude {
     pub use super::cmd::{Process, Stdin};
     pub use super::fs::{
         FileContent::{self, Lines},
-        FileMode, FilePermissions, create, files_in_dir, try_read,
+        FileMode, FilePermissions, SymlinkPermissions, create, files_in_dir, try_read,
     };
     pub use super::gpg::{GpgFingerprint, GpgTrust};
     pub use super::maybeowned::MaybeOwned::{self, Owned, Ref};

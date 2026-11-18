@@ -92,7 +92,7 @@ pub(crate) struct FilePermissionDiff {
 }
 
 impl FilePermissionDiff {
-    fn is_empty(&self) -> bool {
+    pub(crate) fn is_empty(&self) -> bool {
         self.mode.is_none() && self.owner.is_none() && self.group.is_none()
     }
 
@@ -102,12 +102,13 @@ impl FilePermissionDiff {
 }
 
 impl FilePermissions {
-    fn diff(&self, other: &Self) -> FilePermissionDiff {
-        FilePermissionDiff {
+    pub(crate) fn diff(&self, other: &Self) -> Option<FilePermissionDiff> {
+        let diff = FilePermissionDiff {
             mode: (self.mode != other.mode).then_some(other.mode),
             owner: (self.owner != other.owner).then_some(other.owner.clone()),
             group: (self.group != other.group).then_some(other.group.clone()),
-        }
+        };
+        if diff.is_empty() { None } else { Some(diff) }
     }
 }
 
@@ -127,6 +128,62 @@ impl Reporter for FilePermissionChange {
                 mode.as_oct_string()
             ));
         }
+        if let Some(ref owner) = self.diff.owner {
+            out.push(format!("owner: {} -> {}", self.existing.owner, owner));
+        }
+        if let Some(ref group) = self.diff.group {
+            out.push(format!("group: {} -> {}", self.existing.group, group));
+        }
+        Ok(out)
+    }
+}
+
+// From `symlink(7)`:
+//
+// > On Linux, the permissions of an ordinary symbolic link are not used in any
+// > operations; the permissions are always 0777 (read, write, and execute for all
+// > user categories), and can't be changed.
+#[derive(PartialEq, Eq, Debug)]
+pub struct SymlinkPermissions {
+    pub owner: Uid,
+    pub group: Gid,
+}
+
+#[derive(Debug)]
+pub(crate) struct SymlinkPermissionDiff {
+    pub(crate) owner: Option<Uid>,
+    pub(crate) group: Option<Gid>,
+}
+
+impl SymlinkPermissionDiff {
+    fn is_empty(&self) -> bool {
+        self.owner.is_none() && self.group.is_none()
+    }
+
+    fn has_changes(&self) -> bool {
+        !self.is_empty()
+    }
+}
+
+impl SymlinkPermissions {
+    pub(crate) fn diff(&self, other: &Self) -> Option<SymlinkPermissionDiff> {
+        let diff = SymlinkPermissionDiff {
+            owner: (self.owner != other.owner).then_some(other.owner.clone()),
+            group: (self.group != other.group).then_some(other.group.clone()),
+        };
+        if diff.is_empty() { None } else { Some(diff) }
+    }
+}
+
+#[derive(Debug)]
+pub(crate) struct SymlinkPermissionChange {
+    pub(crate) existing: SymlinkPermissions,
+    pub(crate) diff: SymlinkPermissionDiff,
+}
+
+impl Reporter for SymlinkPermissionChange {
+    fn report(&self) -> Result<Vec<String>> {
+        let mut out = vec![];
         if let Some(ref owner) = self.diff.owner {
             out.push(format!("owner: {} -> {}", self.existing.owner, owner));
         }
@@ -183,15 +240,11 @@ pub(crate) async fn create_directory(path: &Path, elevate: &Elevate) -> Result<(
     Ok(())
 }
 
-pub(crate) enum EntryType {
-    File,
-    Directory,
-    Symlink,
-}
-
-pub(crate) struct Stat {
-    pub(crate) entry_type: EntryType,
-    pub(crate) permissions: FilePermissions,
+#[derive(Debug)]
+pub(crate) enum Stat {
+    File(FilePermissions),
+    Directory(FilePermissions),
+    Symlink(SymlinkPermissions),
 }
 
 // elevate is irrelevant here, always using getent. std does not support getting file names
@@ -206,67 +259,45 @@ pub(crate) async fn stat(elevate: &Elevate, path: &Path) -> Result<Option<Stat>>
     .unchecked();
 
     if output.status.success() {
-        let (owner, group, mode, entry_type) = {
-            let mut segments = output.stdout.trim().split(' ');
-            let uid = Uid(segments
+        let mut segments = output.stdout.trim().split(' ');
+        let owner = Uid(segments
+            .next()
+            .ok_or_else(|| anyhow!("stat output could not be parsed"))?
+            .to_owned());
+        let group = Gid(segments
+            .next()
+            .ok_or_else(|| anyhow!("stat output could not be parsed"))?
+            .to_owned());
+        let mode = FileMode(
+            segments
                 .next()
-                .ok_or_else(|| anyhow!("stat output could not be parsed"))?
-                .to_owned());
-            let gid = Gid(segments
-                .next()
-                .ok_or_else(|| anyhow!("stat output could not be parsed"))?
-                .to_owned());
-            let mode = FileMode(
-                segments
-                    .next()
-                    .ok_or_else(|| anyhow!("stat output could not be parsed"))
-                    .map(|s| u32::from_str_radix(s, 8))??,
-            );
-            let entry_type = segments
-                .next()
-                .ok_or_else(|| anyhow!("stat output could not be parsed"))?;
+                .ok_or_else(|| anyhow!("stat output could not be parsed"))
+                .map(|s| u32::from_str_radix(s, 8))??,
+        );
+        let entry_type = segments
+            .next()
+            .ok_or_else(|| anyhow!("stat output could not be parsed"))?;
 
-            let entry_type = u16::from_str_radix(entry_type, 16)?;
+        let entry_type = u16::from_str_radix(entry_type, 16)?;
 
-            // top 4 bits indicate file type
-            let entry_type = match (entry_type & 0xF000) >> 12_u16 {
-                0b1100 => bail!("sockets unsupported"),
-                0b1010 => EntryType::Symlink,
-                0b1000 => EntryType::File,
-                0b0110 => bail!("block devices unsupported"),
-                0b0100 => EntryType::Directory,
-                0b0010 => bail!("character devices unsupported"),
-                0b0001 => bail!("fifos unsupported"),
-                other => bail!("unknown file type {other}"),
-            };
-
-            (uid, gid, mode, entry_type)
-        };
-
-        Ok(Some(Stat {
-            entry_type,
-            permissions: FilePermissions { owner, group, mode },
-        }))
+        // top 4 bits indicate file type
+        match (entry_type & 0xF000) >> 12_u16 {
+            0b1100 => Err(anyhow!("sockets unsupported")),
+            0b1010 => Ok(Some(Stat::Symlink(SymlinkPermissions { owner, group }))),
+            0b1000 => Ok(Some(Stat::File(FilePermissions { owner, group, mode }))),
+            0b0110 => Err(anyhow!("block devices unsupported")),
+            0b0100 => Ok(Some(Stat::Directory(FilePermissions {
+                owner,
+                group,
+                mode,
+            }))),
+            0b0010 => Err(anyhow!("character devices unsupported")),
+            0b0001 => Err(anyhow!("fifos unsupported")),
+            other => Err(anyhow!("unknown file type {other}")),
+        }
     } else {
         Ok(None)
     }
-}
-
-pub(crate) async fn check_file_permissions(
-    elevate: &Elevate,
-    path: &Path,
-    perms: &FilePermissions,
-) -> Result<Option<FilePermissionChange>> {
-    let existing = stat(elevate, path)
-        .await?
-        .ok_or_else(|| anyhow!("file not found"))?
-        .permissions;
-
-    let diff = existing.diff(perms);
-
-    Ok(diff
-        .has_changes()
-        .then_some(FilePermissionChange { existing, diff }))
 }
 
 // always using chown, fs::chown does not support names
