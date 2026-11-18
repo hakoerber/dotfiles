@@ -1616,6 +1616,56 @@ fn wireguard<'elevate: 'action, 'action>(
             },
         );
 
+        plan.add(
+            Ref("create sshd override directory"),
+            elevate,
+            Directory {
+                path: Ref(Path::new("/etc/systemd/system/sshd.service.d/")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_file: FileHandling::Proceed,
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o755),
+                },
+            },
+        );
+
+        plan.add(
+            "add systemd override for sshd wireguard dependency",
+            elevate,
+            File {
+                path: Ref(Path::new(
+                    "/etc/systemd/system/sshd.service.d/override.conf",
+                )),
+                permissions: FilePermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                    mode: FileMode(0o644),
+                },
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Proceed,
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(dedent!(
+                    r#"
+                        [Unit]
+                        After=wg-quick@wg0.service
+                        Requires=sys-devices-virtual-net-wg0.device
+                    "#
+                )
+                .as_bytes())),
+            },
+        )
+        .on_change(|| {
+            Resource::new(
+                Ref("restart service manager due to sshd override"),
+                elevate,
+                DaemonReload {},
+            )
+        });
+
         Ok(())
     })?;
 
@@ -2611,7 +2661,6 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     fonts(plan, elevate);
     smartcard(plan, elevate);
     wireshark(plan, elevate);
-    sshd(plan, elevate)?;
     boot_target(plan, elevate, config);
     timesyncd(plan, elevate);
     sudo(plan, elevate);
@@ -2619,6 +2668,7 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     logind(plan, elevate);
     journald(plan, elevate);
     wireguard(plan, elevate)?;
+    sshd(plan, elevate)?;
     iptables(plan, elevate);
     backlight(plan, elevate);
     firefox(plan, elevate);
