@@ -199,12 +199,6 @@ const PKGBUILDS: &[BuildInfo] = &[
         update: false,
     },
     BuildInfo {
-        name: "nodejs-intelephense",
-        path: "../pkgbuilds/nodejs-intelephense",
-        preexec: None,
-        update: false,
-    },
-    BuildInfo {
         name: "portfolio-performance-bin",
         path: "../pkgbuilds/portfolio-performance-bin",
         preexec: Some(
