@@ -1471,6 +1471,7 @@ fn wireguard<'elevate: 'action, 'action>(
                         PresharedKey = {{psk}}
                         AllowedIPs = {{server_ip}}/24
                         Endpoint = {{server_endpoint_domain}}:{{server_endpoint_port}}
+                        PersistentKeepalive = 25
                     "#
                     ),
                     &context,
