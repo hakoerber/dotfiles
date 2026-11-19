@@ -498,7 +498,7 @@ impl<'name, 'elevate: 'name> PlannedResource<'name, 'elevate, '_> {
                     .copied()
                     .chain(iter::once(self.name.as_ref()))
                     .collect::<Vec<_>>()
-                    .join(" ⟶ ");
+                    .join(" | ");
 
                 write!(stdout, "Applying {name_with_path} ... ").unwrap();
                 stdout.flush().unwrap();
