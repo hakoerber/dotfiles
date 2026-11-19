@@ -5393,18 +5393,18 @@ enum WorkspaceApp {
 }
 
 impl WorkspaceApp {
-    fn icon(self) -> char {
+    fn icon(self) -> &'static str {
         match self {
-            Self::Firefox => '',
-            Self::Terminal => '',
-            Self::Steam => '',
-            Self::Discord => '',
-            Self::Spotify => '',
-            Self::Game => '',
-            Self::Pim => '',
-            Self::Keepass => '',
-            Self::Meet => '',
-            Self::Tv => '',
+            Self::Firefox => "",
+            Self::Terminal => "",
+            Self::Steam => "",
+            Self::Discord => " ",
+            Self::Spotify => "",
+            Self::Game => "",
+            Self::Pim => "",
+            Self::Keepass => "",
+            Self::Meet => "",
+            Self::Tv => "",
         }
     }
 }
