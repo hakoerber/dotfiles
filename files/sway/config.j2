@@ -23,21 +23,6 @@ set {
     $terminal "alacritty --config-file ~/.config/alacritty/config.toml"
     $calc "alacritty --config-file ~/.config/alacritty/config.toml -e $SHELL -i -c calc"
 
-    # Keys for the exit mode
-    $key_lock      l
-    $key_logout    e
-    $key_suspend   s
-    $key_hibernate h
-    $key_reboot    r
-    $key_shutdown  Shift+S
-
-    $signal_lock      lock
-    $signal_logout    logout
-    $signal_suspend   suspend
-    $signal_hibernate hibernate
-    $signal_reboot    reboot
-    $signal_shutdown  shutdown
-
     $left  h
     $down  j
     $up    k
@@ -65,11 +50,8 @@ set {
     $workspace_back_and_forth asciicircum
 
     $reload  Shift+C
-    $restart Shift+R
 
     $kill Shift+Q
-
-    $screenshot o
 }
 
 ################################################################################
@@ -131,7 +113,6 @@ bindsym {
     $mod+Shift+$next_on_output move container to workspace next_on_output
 
     $mod+$reload  reload
-    $mod+$restart restart
 
     ### START APPLICATIONS #####################################################
 
