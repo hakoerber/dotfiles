@@ -2325,6 +2325,48 @@ fn timezone<'elevate: 'action, 'action, 'machine>(
     });
 }
 
+fn vconsole<'elevate: 'action, 'action, 'machine>(
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    elevate: &'elevate Elevate,
+) {
+    plan.add(
+        "configure vconsole",
+        elevate,
+        File {
+            path: Ref(Path::new("/etc/vconsole.conf")),
+            permissions: FilePermissions {
+                owner: Uid::root(),
+                group: Gid::root(),
+                mode: FileMode(0o644),
+            },
+            on_symlink: SymlinkHandling::Proceed,
+            on_directory: DirectoryHandling::Proceed,
+            binary: false,
+            secret: false,
+            ignore_checksum_changes: false,
+            content: FileContent::Bytes(Ref(concat!(
+                dedent!(
+                    r#"
+                        KEYMAP=de-latin1
+                        FONT=lat2-16
+                    "#
+                ),
+                "\n"
+            )
+            .as_bytes())),
+        },
+    )
+    .on_change(|| {
+        Resource::new(
+            Ref("restart vconsole config"),
+            elevate,
+            RestartService {
+                name: "systemd-vconsole-setup.service",
+            },
+        )
+    });
+}
+
 fn locale<'elevate: 'action, 'action, 'machine>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
@@ -2789,6 +2831,7 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     kernel(plan, elevate);
     filesystem(plan, elevate);
     locale(plan, elevate, config);
+    vconsole(plan, elevate);
     timezone(plan, elevate);
     pacman(plan, elevate);
     posix(plan, elevate);
