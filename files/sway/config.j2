@@ -38,28 +38,6 @@ set {
     $signal_reboot    reboot
     $signal_shutdown  shutdown
 
-    $workspace1  "1{{ "" if not machine.workspace.num1 else ': ' ~ machine.workspace.num1 }}"
-    $workspace2  "2{{ "" if not machine.workspace.num2 else ': ' ~ machine.workspace.num2 }}"
-    $workspace3  "3{{ "" if not machine.workspace.num3 else ': ' ~ machine.workspace.num3 }}"
-    $workspace4  "4{{ "" if not machine.workspace.num4 else ': ' ~ machine.workspace.num4 }}"
-    $workspace5  "5{{ "" if not machine.workspace.num5 else ': ' ~ machine.workspace.num5 }}"
-    $workspace6  "6{{ "" if not machine.workspace.num6 else ': ' ~ machine.workspace.num6 }}"
-    $workspace7  "7{{ "" if not machine.workspace.num7 else ': ' ~ machine.workspace.num7 }}"
-    $workspace8  "8{{ "" if not machine.workspace.num8 else ': ' ~ machine.workspace.num8 }}"
-    $workspace9  "9{{ "" if not machine.workspace.num9 else ': ' ~ machine.workspace.num9 }}"
-    $workspace0 "10{{ "" if not machine.workspace.num0 else ': ' ~ machine.workspace.num0 }}"
-
-    $key_workspace1 1
-    $key_workspace2 2
-    $key_workspace3 3
-    $key_workspace4 4
-    $key_workspace5 5
-    $key_workspace6 6
-    $key_workspace7 7
-    $key_workspace8 8
-    $key_workspace9 9
-    $key_workspace0 0
-
     $left  h
     $down  j
     $up    k
@@ -95,15 +73,10 @@ set {
 }
 
 ################################################################################
-### WORKSPACE ASSIGNMENTS ######################################################
+### WORKSPACES #################################################################
 ################################################################################
 
-assign [class="^[Ss]team$"] $workspace0
-assign [app_id="^discord$"] $workspace8
-assign [app_id="^org.keepassxc.KeePassXC$"] $workspace8
-assign [app_id="^spotify$"] $workspace9
-
-for_window [shell="xwayland"] title_format "[XWayland] %title"
+{{ workspace_sway_config }}
 
 ################################################################################
 ### KEYBINDINGS ################################################################
@@ -148,28 +121,6 @@ bindsym {
 
     $mod+$focus_parent focus parent
     $mod+$focus_child  focus child
-
-    $mod+$key_workspace1 workspace $workspace1
-    $mod+$key_workspace2 workspace $workspace2
-    $mod+$key_workspace3 workspace $workspace3
-    $mod+$key_workspace4 workspace $workspace4
-    $mod+$key_workspace5 workspace $workspace5
-    $mod+$key_workspace6 workspace $workspace6
-    $mod+$key_workspace7 workspace $workspace7
-    $mod+$key_workspace8 workspace $workspace8
-    $mod+$key_workspace9 workspace $workspace9
-    $mod+$key_workspace0 workspace $workspace0
-
-    $mod+Shift+$key_workspace1 move container to workspace $workspace1
-    $mod+Shift+$key_workspace2 move container to workspace $workspace2
-    $mod+Shift+$key_workspace3 move container to workspace $workspace3
-    $mod+Shift+$key_workspace4 move container to workspace $workspace4
-    $mod+Shift+$key_workspace5 move container to workspace $workspace5
-    $mod+Shift+$key_workspace6 move container to workspace $workspace6
-    $mod+Shift+$key_workspace7 move container to workspace $workspace7
-    $mod+Shift+$key_workspace8 move container to workspace $workspace8
-    $mod+Shift+$key_workspace9 move container to workspace $workspace9
-    $mod+Shift+$key_workspace0 move container to workspace $workspace0
 
     $mod+$prev_on_output workspace prev_on_output
     $mod+$next_on_output workspace next_on_output
@@ -227,6 +178,8 @@ bindsym $mod+r mode "resize"
 ################################################################################
 ### GENERAL SETUP ##############################################################
 ################################################################################
+
+for_window [shell="xwayland"] title_format "[XWayland] %title"
 
 default_border pixel 1
 

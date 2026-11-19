@@ -253,7 +253,7 @@ enum Gpu {
     Intel,
 }
 
-#[derive(Clone, Copy, ValueEnum)]
+#[derive(Clone, Copy, ValueEnum, Serialize)]
 enum Host {
     Neptune,
     Ares,
@@ -2495,7 +2495,7 @@ fn hostname<'elevate: 'action, 'action, 'machine>(
             binary: false,
             secret: false,
             ignore_checksum_changes: false,
-            content: FileContent::Bytes(Ref(config.machine.hostname.as_bytes())),
+            content: FileContent::Bytes(Ref(config.machine.host.as_str().as_bytes())),
         },
     );
 
@@ -2526,7 +2526,7 @@ fn hostname<'elevate: 'action, 'action, 'machine>(
                         ),
                         "\n"
                     ),
-                    hostname = config.machine.hostname
+                    hostname = config.machine.host.as_str()
                 )
                 .into_bytes(),
             )),
@@ -3430,6 +3430,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
     struct TemplateContext<'a> {
         user: &'a UserConfig,
         machine: &'a MachineConfig,
+        workspace_sway_config: String,
         is_laptop: bool,
         is_workstation: bool,
         is_tv: bool,
@@ -3440,6 +3441,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
     let template_context = TemplateContext {
         user,
         machine,
+        workspace_sway_config: user.workspace.to_sway_config(),
         is_laptop: machine.machine_type == Laptop,
         is_workstation: machine.machine_type == Workstation,
         is_tv: machine.machine_type == Tv,
@@ -5376,18 +5378,121 @@ enum MachineRole {
     Gaming,
 }
 
+#[derive(Serialize, Copy, Clone)]
+enum WorkspaceApp {
+    Firefox,
+    Terminal,
+    Steam,
+    Discord,
+    Spotify,
+    Game,
+    Pim,
+    Keepass,
+    Meet,
+    Tv,
+}
+
+impl WorkspaceApp {
+    fn icon(self) -> char {
+        match self {
+            Self::Firefox => '',
+            Self::Terminal => '',
+            Self::Steam => '',
+            Self::Discord => '',
+            Self::Spotify => '',
+            Self::Game => '',
+            Self::Pim => '',
+            Self::Keepass => '',
+            Self::Meet => '',
+            Self::Tv => '',
+        }
+    }
+}
+
 #[derive(Serialize)]
 struct WorkspaceConfig {
-    num1: Option<String>,
-    num2: Option<String>,
-    num3: Option<String>,
-    num4: Option<String>,
-    num5: Option<String>,
-    num6: Option<String>,
-    num7: Option<String>,
-    num8: Option<String>,
-    num9: Option<String>,
-    num0: Option<String>,
+    num1: Option<WorkspaceApp>,
+    num2: Option<WorkspaceApp>,
+    num3: Option<WorkspaceApp>,
+    num4: Option<WorkspaceApp>,
+    num5: Option<WorkspaceApp>,
+    num6: Option<WorkspaceApp>,
+    num7: Option<WorkspaceApp>,
+    num8: Option<WorkspaceApp>,
+    num9: Option<WorkspaceApp>,
+    num0: Option<WorkspaceApp>,
+}
+
+macro_rules! workspace_config_sway_workspace_name {
+    ($self:ident, $v:ident, $i:literal, $s:literal) => {
+        paste::paste! {
+            let name = $self.[<num$i>]
+                .map(|app| format!(concat!($s, ": {}"), app.icon()))
+                .unwrap_or_else(|| $i.to_owned());
+
+            let mut out = vec![];
+
+            out.push(
+                format!("bindsym $mod+{i} workspace \"{name}\"", i = $i)
+            );
+
+            out.push(
+                format!("bindsym $mod+Shift+{i} move container to workspace \"{name}\"", i = $i)
+            );
+
+            if let Some(app) = $self.[<num$i>] {
+                match app {
+                    WorkspaceApp::Steam => {
+                        out.push(
+                             format!("assign [class=\"^[Ss]team$\"] \"{name}\"")
+                        )
+                    },
+                    WorkspaceApp::Discord => {
+                        out.push(
+                             format!("assign [app_id=\"^discord$\"] \"{name}\"")
+                        )
+                    },
+                    WorkspaceApp::Spotify => {
+                        out.push(
+                             format!("assign [app_id=\"^spotify$\"] \"{name}\"")
+                        )
+                    },
+                    WorkspaceApp::Keepass => {
+                        out.push(
+                             format!("assign [app_id=\"^org.keepassxc.KeePassXC$\"] \"{name}\"")
+                        )
+                    },
+                    WorkspaceApp::Firefox => (),
+                    WorkspaceApp::Terminal => (),
+                    WorkspaceApp::Game => (),
+                    WorkspaceApp::Pim => (),
+                    WorkspaceApp::Meet => (),
+                    WorkspaceApp::Tv => (),
+                }
+            }
+
+            $v.push(out.join("\n"));
+        }
+    };
+}
+
+impl WorkspaceConfig {
+    fn to_sway_config(&self) -> String {
+        let mut out = vec![];
+
+        workspace_config_sway_workspace_name!(self, out, "1", "1");
+        workspace_config_sway_workspace_name!(self, out, "2", "2");
+        workspace_config_sway_workspace_name!(self, out, "3", "3");
+        workspace_config_sway_workspace_name!(self, out, "4", "4");
+        workspace_config_sway_workspace_name!(self, out, "5", "5");
+        workspace_config_sway_workspace_name!(self, out, "6", "6");
+        workspace_config_sway_workspace_name!(self, out, "7", "7");
+        workspace_config_sway_workspace_name!(self, out, "8", "8");
+        workspace_config_sway_workspace_name!(self, out, "9", "9");
+        workspace_config_sway_workspace_name!(self, out, "0", "10");
+
+        out.join("\n\n")
+    }
 }
 
 #[derive(Serialize, VariantArray)]
@@ -5407,13 +5512,12 @@ impl Language {
 
 #[derive(Serialize)]
 struct MachineConfig {
-    hostname: &'static str,
+    host: Host,
     encrypted_root: bool,
     boot_target: Target,
     cpu: Cpu,
     gpu: Gpu,
     font_size: usize,
-    workspace: WorkspaceConfig,
     machine_type: MachineType,
     roles: MachineRoles,
     language: Language,
@@ -5472,6 +5576,7 @@ struct UserConfig {
     keepassxc: FeatureState,
     autologin: bool,
     firefox: FirefoxUserConfig,
+    workspace: WorkspaceConfig,
 }
 
 struct UserContext {
@@ -5543,6 +5648,56 @@ fn private_user(
                     "floccus".to_owned(),
                 ],
             }],
+        },
+        workspace: match machine.host {
+            Neptune => WorkspaceConfig {
+                num1: Some(WorkspaceApp::Firefox),
+                num2: Some(WorkspaceApp::Terminal),
+                num3: Some(WorkspaceApp::Terminal),
+                num4: Some(WorkspaceApp::Terminal),
+                num5: None,
+                num6: None,
+                num7: Some(WorkspaceApp::Meet),
+                num8: Some(WorkspaceApp::Keepass),
+                num9: Some(WorkspaceApp::Spotify),
+                num0: Some(WorkspaceApp::Pim),
+            },
+            Ares => WorkspaceConfig {
+                num1: Some(WorkspaceApp::Firefox),
+                num2: Some(WorkspaceApp::Terminal),
+                num3: Some(WorkspaceApp::Terminal),
+                num4: Some(WorkspaceApp::Terminal),
+                num5: None,
+                num6: None,
+                num7: Some(WorkspaceApp::Spotify),
+                num8: Some(WorkspaceApp::Discord),
+                num9: Some(WorkspaceApp::Game),
+                num0: Some(WorkspaceApp::Steam),
+            },
+            Hera => WorkspaceConfig {
+                num1: Some(WorkspaceApp::Firefox),
+                num2: Some(WorkspaceApp::Terminal),
+                num3: Some(WorkspaceApp::Terminal),
+                num4: Some(WorkspaceApp::Terminal),
+                num5: None,
+                num6: None,
+                num7: None,
+                num8: None,
+                num9: None,
+                num0: Some(WorkspaceApp::Spotify),
+            },
+            Dionysus => WorkspaceConfig {
+                num1: Some(WorkspaceApp::Tv),
+                num2: Some(WorkspaceApp::Firefox),
+                num3: Some(WorkspaceApp::Spotify),
+                num4: None,
+                num5: None,
+                num6: None,
+                num7: None,
+                num8: None,
+                num9: None,
+                num0: None,
+            },
         },
     }
 }
@@ -5731,97 +5886,61 @@ async fn main() -> MainResult {
                             },
                         ],
                     },
+                    workspace: WorkspaceConfig {
+                        num1: Some(WorkspaceApp::Firefox),
+                        num2: Some(WorkspaceApp::Terminal),
+                        num3: Some(WorkspaceApp::Terminal),
+                        num4: Some(WorkspaceApp::Terminal),
+                        num5: None,
+                        num6: None,
+                        num7: Some(WorkspaceApp::Meet),
+                        num8: Some(WorkspaceApp::Keepass),
+                        num9: Some(WorkspaceApp::Spotify),
+                        num0: Some(WorkspaceApp::Pim),
+                    },
                 };
 
                 let machine = match args.hostname {
                     Neptune => MachineConfig {
-                        hostname: args.hostname.as_str(),
+                        host: args.hostname,
                         encrypted_root: true,
                         boot_target: Target::MultiUser,
                         cpu: Cpu::Intel,
                         gpu: Gpu::Nvidia,
                         font_size: 11,
-                        workspace: WorkspaceConfig {
-                            num1: Some("".to_owned()),
-                            num2: Some("".to_owned()),
-                            num3: Some("".to_owned()),
-                            num4: Some("".to_owned()),
-                            num5: None,
-                            num6: None,
-                            num7: Some("".to_owned()),
-                            num8: Some("".to_owned()),
-                            num9: Some("".to_owned()),
-                            num0: Some("".to_owned()),
-                        },
                         machine_type: Laptop,
                         roles: MachineRoles(&[]),
                         language: Language::En,
                     },
                     Ares => MachineConfig {
-                        hostname: args.hostname.as_str(),
+                        host: args.hostname,
                         encrypted_root: true,
                         boot_target: Target::MultiUser,
                         cpu: Cpu::Amd,
                         gpu: Gpu::Amd,
                         font_size: 10,
-                        workspace: WorkspaceConfig {
-                            num1: Some("".to_owned()),
-                            num2: Some("".to_owned()),
-                            num3: Some("".to_owned()),
-                            num4: Some("".to_owned()),
-                            num5: None,
-                            num6: None,
-                            num7: None,
-                            num8: Some(" ".to_owned()),
-                            num9: Some("".to_owned()),
-                            num0: Some("".to_owned()),
-                        },
                         machine_type: Workstation,
                         roles: MachineRoles(&[MachineRole::Gaming]),
                         language: Language::En,
                     },
                     Hera => MachineConfig {
-                        hostname: args.hostname.as_str(),
+                        host: args.hostname,
                         encrypted_root: false,
                         boot_target: Target::Graphical,
                         cpu: Cpu::Intel,
                         gpu: Gpu::Intel,
                         font_size: 11,
-                        workspace: WorkspaceConfig {
-                            num1: Some("".to_owned()),
-                            num2: Some("".to_owned()),
-                            num3: Some("".to_owned()),
-                            num4: Some("".to_owned()),
-                            num5: None,
-                            num6: None,
-                            num7: None,
-                            num8: None,
-                            num9: Some("".to_owned()),
-                            num0: Some("".to_owned()),
-                        },
                         machine_type: Laptop,
                         roles: MachineRoles(&[]),
                         language: Language::De,
                     },
                     Dionysus => MachineConfig {
-                        hostname: args.hostname.as_str(),
+                        host: args.hostname,
                         encrypted_root: true,
                         boot_target: Target::MultiUser,
                         cpu: Cpu::Intel,
                         gpu: Gpu::Intel,
                         font_size: 16,
-                        workspace: WorkspaceConfig {
-                            num1: Some("".to_owned()),
-                            num2: Some("".to_owned()),
-                            num3: Some("".to_owned()),
-                            num4: None,
-                            num5: None,
-                            num6: None,
-                            num7: None,
-                            num8: None,
-                            num9: None,
-                            num0: None,
-                        },
                         machine_type: Tv,
                         roles: MachineRoles(&[]),
                         language: Language::En,
