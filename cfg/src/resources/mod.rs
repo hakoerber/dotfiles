@@ -11,7 +11,7 @@ pub mod prelude {
     pub use super::command::{CheckScript, Command};
     pub use super::file::{
         AssertAbsent, AssertFile, Directory, DirectoryHandling, File, FileHandling, Remove,
-        SymlinkHandling,
+        Symlink, SymlinkHandling,
     };
     pub use super::gpg::GpgKey;
     pub use super::package::{

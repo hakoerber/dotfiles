@@ -3,7 +3,7 @@ use async_trait::async_trait;
 
 use super::super::{
     Applyable, Assertable, AssertionFailureReport, AssertionResult, ChangeStatus, ChecksumChange,
-    Elevate, MaybeOwned, Path, Plannable, Reporter, Tempfile, checksum,
+    Elevate, MaybeOwned, Path, PathBuf, Plannable, Reporter, Tempfile, checksum,
     fs::{
         self, FileContent, FilePermissionChange, FilePermissions, RawFileContent,
         SymlinkPermissionChange, SymlinkPermissions,
@@ -633,6 +633,229 @@ impl Assertable<'_> for AssertAbsent<'_> {
             }))
         } else {
             Ok(AssertionResult::Success)
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct Symlink<'args> {
+    pub path: MaybeOwned<'args, Path>,
+    pub target: MaybeOwned<'args, Path>,
+    pub permissions: SymlinkPermissions,
+    pub on_file: FileHandling,
+    pub on_directory: DirectoryHandling,
+}
+
+#[async_trait]
+impl<'args> Plannable<'args> for Symlink<'args> {
+    async fn plan<'elevate>(
+        self: Box<Self>,
+        elevate: &'elevate Elevate,
+    ) -> Result<ChangeStatus<'args>>
+    where
+        'elevate: 'args,
+    {
+        let stat = fs::stat(elevate, self.path.as_ref()).await?;
+
+        if let Some(stat) = stat {
+            match stat {
+                fs::Stat::File(permissions) => match self.on_file {
+                    FileHandling::Bail => bail!("refusing to overwrite file"),
+                    FileHandling::Proceed => {
+                        Ok(ChangeStatus::NeedsChange(Box::new(SymlinkChangePlan {
+                            args: *self,
+                            change: SymlinkChange::ReplaceDirectory,
+                        })))
+                    }
+                },
+                fs::Stat::Directory(permissions) => match self.on_directory {
+                    DirectoryHandling::Bail => bail!("refusing to overwrite directory"),
+                    DirectoryHandling::Proceed => {
+                        Ok(ChangeStatus::NeedsChange(Box::new(SymlinkChangePlan {
+                            args: *self,
+                            change: SymlinkChange::ReplaceDirectory,
+                        })))
+                    }
+                },
+                fs::Stat::Symlink(existing) => {
+                    let permission_change = existing
+                        .diff(&self.permissions)
+                        .map(|diff| SymlinkPermissionChange { existing, diff });
+                    let target = fs::get_symlink_target(elevate, self.path.as_ref()).await?;
+                    let target_differs = target != self.target.as_ref();
+
+                    if target_differs || permission_change.is_some() {
+                        Ok(ChangeStatus::NeedsChange(Box::new(SymlinkChangePlan {
+                            args: *self,
+                            change: SymlinkChange::Changed {
+                                permission_change,
+                                current_target: target_differs.then_some(target),
+                            },
+                        })))
+                    } else {
+                        Ok(ChangeStatus::Clean)
+                    }
+                }
+            }
+        } else {
+            // not found
+            Ok(ChangeStatus::NeedsChange(Box::new(SymlinkChangePlan {
+                args: *self,
+                change: SymlinkChange::Create,
+            })))
+        }
+    }
+}
+#[derive(Debug)]
+pub(crate) struct SymlinkChangePlan<'args> {
+    pub(crate) args: Symlink<'args>,
+    pub(crate) change: SymlinkChange,
+}
+
+#[derive(Debug)]
+pub(crate) enum SymlinkChange {
+    Create,
+    MetadataChange {
+        permission_change: SymlinkPermissionChange,
+    },
+    Changed {
+        permission_change: Option<SymlinkPermissionChange>,
+        current_target: Option<PathBuf>,
+    },
+    ReplaceFile,
+    ReplaceDirectory,
+}
+
+#[async_trait]
+impl Applyable for SymlinkChangePlan<'_> {
+    async fn apply(&self, elevate: &Elevate) -> Result<()> {
+        match self.change {
+            SymlinkChange::Create => {
+                fs::create_symlink(elevate, self.args.path.as_ref(), self.args.target.as_ref())
+                    .await?;
+                fs::set_symlink_owner(
+                    elevate,
+                    self.args.path.as_ref(),
+                    &self.args.permissions.owner,
+                )
+                .await?;
+                fs::set_symlink_group(
+                    elevate,
+                    self.args.path.as_ref(),
+                    &self.args.permissions.group,
+                )
+                .await?;
+            }
+            SymlinkChange::ReplaceFile => {
+                fs::remove_file(elevate, self.args.path.as_ref()).await?;
+                fs::create_symlink(elevate, self.args.path.as_ref(), self.args.target.as_ref())
+                    .await?;
+                fs::set_symlink_owner(
+                    elevate,
+                    self.args.path.as_ref(),
+                    &self.args.permissions.owner,
+                )
+                .await?;
+                fs::set_symlink_group(
+                    elevate,
+                    self.args.path.as_ref(),
+                    &self.args.permissions.group,
+                )
+                .await?;
+            }
+            SymlinkChange::ReplaceDirectory => {
+                fs::remove_recursive(elevate, self.args.path.as_ref()).await?;
+                fs::create_symlink(elevate, self.args.path.as_ref(), self.args.target.as_ref())
+                    .await?;
+                fs::set_symlink_owner(
+                    elevate,
+                    self.args.path.as_ref(),
+                    &self.args.permissions.owner,
+                )
+                .await?;
+                fs::set_symlink_group(
+                    elevate,
+                    self.args.path.as_ref(),
+                    &self.args.permissions.group,
+                )
+                .await?;
+            }
+            SymlinkChange::MetadataChange {
+                ref permission_change,
+            } => {
+                if let Some(ref uid) = permission_change.diff.owner {
+                    fs::set_symlink_owner(elevate, self.args.path.as_ref(), uid).await?;
+                }
+                if let Some(ref gid) = permission_change.diff.group {
+                    fs::set_symlink_group(elevate, self.args.path.as_ref(), gid).await?;
+                }
+            }
+            SymlinkChange::Changed {
+                ref permission_change,
+                ref current_target,
+            } => match *current_target {
+                Some(ref _change) => {
+                    fs::remove_symlink(elevate, self.args.path.as_ref()).await?;
+                    fs::create_symlink(elevate, self.args.path.as_ref(), self.args.target.as_ref())
+                        .await?;
+                    fs::set_symlink_owner(
+                        elevate,
+                        self.args.path.as_ref(),
+                        &self.args.permissions.owner,
+                    )
+                    .await?;
+                    fs::set_symlink_group(
+                        elevate,
+                        self.args.path.as_ref(),
+                        &self.args.permissions.group,
+                    )
+                    .await?;
+                }
+                None => {
+                    if let Some(ref permission_change) = *permission_change {
+                        if let Some(ref uid) = permission_change.diff.owner {
+                            fs::set_symlink_owner(elevate, self.args.path.as_ref(), uid).await?;
+                        }
+                        if let Some(ref gid) = permission_change.diff.group {
+                            fs::set_symlink_group(elevate, self.args.path.as_ref(), gid).await?;
+                        }
+                    }
+                }
+            },
+        }
+        Ok(())
+    }
+}
+
+impl Reporter for SymlinkChangePlan<'_> {
+    fn report(&self) -> Result<Vec<String>> {
+        match self.change {
+            SymlinkChange::Create => Ok(vec!["create symlink".to_owned()]),
+            SymlinkChange::ReplaceFile => Ok(vec!["replacing file".to_owned()]),
+            SymlinkChange::ReplaceDirectory => Ok(vec!["replacing directory".to_owned()]),
+            SymlinkChange::MetadataChange {
+                ref permission_change,
+            } => Ok(permission_change.report()?),
+            SymlinkChange::Changed {
+                ref permission_change,
+                ref current_target,
+            } => {
+                let mut out = vec![];
+
+                if let Some(ref permission_change) = *permission_change {
+                    out.extend(permission_change.report()?);
+                }
+
+                if let Some(ref current_target) = *current_target {
+                    out.push(format!(
+                        "target change: {} -> {}",
+                        current_target,
+                        self.args.target.as_ref()
+                    ));
+                }
+
+                Ok(out)
+            }
         }
     }
 }

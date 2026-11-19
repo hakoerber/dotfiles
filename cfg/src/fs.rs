@@ -378,6 +378,33 @@ pub(crate) async fn remove_symlink(elevate: &Elevate, path: &Path) -> Result<()>
     remove_file(elevate, path).await
 }
 
+pub(crate) async fn get_symlink_target(elevate: &Elevate, path: &Path) -> Result<PathBuf> {
+    use std::os::unix::ffi::OsStringExt as _;
+
+    match *elevate {
+        Elevate::Sudo(ref _elevate_to) => {
+            let mut readlink = cmd::Process::run_bin(
+                "readlink",
+                &["--zero", "--", path.as_str()],
+                elevate,
+                cmd::Stdin::Closed,
+            )
+            .await?
+            .check()?
+            .stdout;
+
+            let Some(0x00) = readlink.pop() else {
+                bail!("readlink did not terminate with a zero byte");
+            };
+
+            PathBuf::try_from(OsString::from_vec(readlink)).map_err(|_err| anyhow!("non utf8 path"))
+        }
+        Elevate::No => Ok(fs::read_link(path)
+            .await
+            .map(|path| PathBuf::try_from(path).map_err(|_err| anyhow!("non utf8 path")))??),
+    }
+}
+
 pub(crate) async fn remove_recursive(elevate: &Elevate, path: &Path) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
@@ -475,6 +502,59 @@ pub async fn create(path: &Path, input: &[u8], elevate: &Elevate) -> Result<()> 
                 .write_all(input)?;
         }
     }
+    Ok(())
+}
+
+pub async fn create_symlink(elevate: &Elevate, path: &Path, target: &Path) -> Result<()> {
+    match *elevate {
+        Elevate::Sudo(ref _elevate_to) => {
+            cmd::Process::run(
+                "ln",
+                &[
+                    "--symbolic",
+                    "--no-dereference",
+                    "--no-target-directory",
+                    "--",
+                    target.as_str(),
+                    path.as_str(),
+                ],
+                elevate,
+                cmd::Stdin::Closed,
+            )
+            .await?
+            .check()?;
+        }
+        Elevate::No => {
+            fs::symlink(target, path).await?;
+        }
+    }
+    Ok(())
+}
+
+// always using chown, fs::chown does not support names
+pub(crate) async fn set_symlink_owner(elevate: &Elevate, path: &Path, uid: &Uid) -> Result<()> {
+    cmd::Process::run(
+        "chown",
+        &["--no-dereference", &uid.to_string(), "--", path.as_str()],
+        elevate,
+        cmd::Stdin::Closed,
+    )
+    .await?
+    .check()?;
+
+    Ok(())
+}
+
+// always using chown, fs::chown does not support names
+pub(crate) async fn set_symlink_group(elevate: &Elevate, path: &Path, gid: &Gid) -> Result<()> {
+    cmd::Process::run(
+        "chgrp",
+        &["--no-dereference", &gid.to_string(), "--", path.as_str()],
+        elevate,
+        cmd::Stdin::Closed,
+    )
+    .await?
+    .check()?;
     Ok(())
 }
 
