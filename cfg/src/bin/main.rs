@@ -212,6 +212,17 @@ enum Host {
     Hera,
 }
 
+impl Host {
+    fn as_str(self) -> &'static str {
+        match self {
+            Neptune => "neptune",
+            Ares => "ares",
+            Dionysus => "dionysus",
+            Hera => "hera",
+        }
+    }
+}
+
 use Host::{Ares, Dionysus, Hera, Neptune};
 
 #[derive(Deserialize, Clone)]
@@ -2383,6 +2394,31 @@ fn vconsole<'elevate: 'action, 'action, 'machine>(
     });
 }
 
+fn hostname<'elevate: 'action, 'action, 'machine>(
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    elevate: &'elevate Elevate,
+    config: &Config,
+) {
+    plan.add(
+        "configure /etc/hostname",
+        elevate,
+        File {
+            path: Ref(Path::new("/etc/hostname")),
+            permissions: FilePermissions {
+                owner: Uid::root(),
+                group: Gid::root(),
+                mode: FileMode(0o644),
+            },
+            on_symlink: SymlinkHandling::Proceed,
+            on_directory: DirectoryHandling::Proceed,
+            binary: false,
+            secret: false,
+            ignore_checksum_changes: false,
+            content: FileContent::Bytes(Ref(config.machine.hostname.as_bytes())),
+        },
+    );
+}
+
 fn locale<'elevate: 'action, 'action, 'machine>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
@@ -2846,6 +2882,7 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
 ) -> Result<()> {
     kernel(plan, elevate);
     filesystem(plan, elevate);
+    hostname(plan, elevate, config);
     locale(plan, elevate, config);
     vconsole(plan, elevate);
     timezone(plan, elevate);
@@ -5254,6 +5291,7 @@ impl Language {
 
 #[derive(Serialize)]
 struct MachineConfig {
+    hostname: &'static str,
     encrypted_root: bool,
     boot_target: Target,
     cpu: Cpu,
@@ -5581,6 +5619,7 @@ async fn main() -> MainResult {
 
                 let machine = match args.hostname {
                     Neptune => MachineConfig {
+                        hostname: args.hostname.as_str(),
                         encrypted_root: true,
                         boot_target: Target::MultiUser,
                         cpu: Cpu::Intel,
@@ -5603,6 +5642,7 @@ async fn main() -> MainResult {
                         language: Language::En,
                     },
                     Ares => MachineConfig {
+                        hostname: args.hostname.as_str(),
                         encrypted_root: true,
                         boot_target: Target::MultiUser,
                         cpu: Cpu::Amd,
@@ -5625,6 +5665,7 @@ async fn main() -> MainResult {
                         language: Language::En,
                     },
                     Hera => MachineConfig {
+                        hostname: args.hostname.as_str(),
                         encrypted_root: false,
                         boot_target: Target::Graphical,
                         cpu: Cpu::Intel,
@@ -5647,6 +5688,7 @@ async fn main() -> MainResult {
                         language: Language::De,
                     },
                     Dionysus => MachineConfig {
+                        hostname: args.hostname.as_str(),
                         encrypted_root: true,
                         boot_target: Target::MultiUser,
                         cpu: Cpu::Intel,
