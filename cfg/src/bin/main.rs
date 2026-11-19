@@ -5809,7 +5809,7 @@ async fn main() -> MainResult {
                         boot_target: Target::MultiUser,
                         cpu: Cpu::Intel,
                         gpu: Gpu::Intel,
-                        font_size: 11,
+                        font_size: 16,
                         workspace: WorkspaceConfig {
                             num1: Some("".to_owned()),
                             num2: Some("".to_owned()),
