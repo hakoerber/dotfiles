@@ -32,7 +32,7 @@ sleep 1
 
 while :; do
     cryptsetup --batch-mode luksFormat --iter-time 1000 ${DEVICE}p3
-    cryptsetup --batch-mode open --tries 1 ${DEVICE}p3 cryptpart && break
+    cryptsetup --batch-mode open --allow-discards --persistent --tries 1 ${DEVICE}p3 cryptpart && break
 done
 
 pvcreate /dev/mapper/cryptpart
@@ -43,8 +43,10 @@ lvcreate -l 100%FREE vgbase -n root
 
 yes | mkfs.fat -F32 ${DEVICE}p1
 yes | mkfs.ext4 ${DEVICE}p2
-yes | mkfs.ext4 /dev/vgbase/swap
 yes | mkfs.ext4 /dev/vgbase/root
+
+tune2fs -o discard ${DEVICE}p2
+tune2fs -o discard /dev/vgbase/root
 
 mount /dev/vgbase/root /mnt
 

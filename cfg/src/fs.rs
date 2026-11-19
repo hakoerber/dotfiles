@@ -482,7 +482,7 @@ pub async fn write(path: &Path, input: &[u8], elevate: &Elevate) -> Result<()> {
     Ok(())
 }
 
-pub async fn create(path: &Path, input: &[u8], elevate: &Elevate) -> Result<()> {
+pub async fn create_or_write(path: &Path, input: &[u8], elevate: &Elevate) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
             cmd::Process::run(
@@ -497,7 +497,8 @@ pub async fn create(path: &Path, input: &[u8], elevate: &Elevate) -> Result<()> 
         Elevate::No => {
             std::fs::OpenOptions::new()
                 .write(true)
-                .create_new(true)
+                .create(true)
+                .truncate(true)
                 .open(path)?
                 .write_all(input)?;
         }

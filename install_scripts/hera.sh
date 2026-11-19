@@ -37,6 +37,10 @@ yes | mkfs.ext4 /dev/disk/by-partlabel/boot
 yes | mkfs.ext4 /dev/disk/by-partlabel/root
 yes | mkfs.ext4 /dev/disk/by-partlabel/home
 
+tune2fs -o discard /dev/disk/by-partlabel/boot
+tune2fs -o discard /dev/disk/by-partlabel/root
+tune2fs -o discard /dev/disk/by-partlabel/home
+
 mkswap /dev/disk/by-partlabel/swap
 swapon /dev/disk/by-partlabel/swap
 

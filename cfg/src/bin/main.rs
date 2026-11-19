@@ -45,7 +45,7 @@ mod migrations {
         migration: Migration,
     }
 
-    const LATEST_MIGRATION: usize = 2;
+    const LATEST_MIGRATION: usize = 4;
 
     #[derive(Serialize, Deserialize, Clone, Debug)]
     pub(super) struct Migration {
@@ -95,7 +95,7 @@ mod migrations {
                     )?
                     .check()?;
                 }
-                LATEST_MIGRATION => {
+                2 => {
                     Process::run_in_foreground(
                         "bash",
                         &[
@@ -109,6 +109,55 @@ mod migrations {
                             systemctl disable libvirtd.service
                             systemctl stop libvirtd.service
                         ",
+                        ],
+                        elevate,
+                        &Stdin::Closed,
+                    )?
+                    .check()?;
+                }
+                3 => {
+                    Process::run_in_foreground(
+                        "bash",
+                        &[
+                            "-c",
+                            r#"
+                            set -o nounset
+                            set -o errexit
+                            set -o pipefail
+
+                            cryptdev="$(lsblk --filter 'FSTYPE == "crypto_LUKS"' --output NAME --noheadings)"
+
+                            if [[ -n "${cryptdev}" ]] ; then
+                                if ! cryptsetup luksDump "/dev/${cryptdev}" | grep ^Flags | grep -q allow-discards ; then
+                                    cryptmapper="$(cat /proc/cmdline | grep -o 'cryptdevice=[^ ]*' | cut -d ':' -f 2)"
+                                    printf 'you need to enable discards in luks via the following command:\n' 2>&1
+                                    printf 'cryptsetup --allow-discards --persistent refresh %s\n' "${cryptmapper}" 2>&1
+                                    exit 1
+                                fi
+                            fi
+                        "#,
+                        ],
+                        elevate,
+                        &Stdin::Closed,
+                    )?
+                    .check()?;
+                }
+                LATEST_MIGRATION => {
+                    Process::run_in_foreground(
+                        "bash",
+                        &[
+                            "-c",
+                            r#"
+                            set -o nounset
+                            set -o errexit
+                            set -o pipefail
+
+                            lsblk --filter 'FSTYPE == "ext4"' --output PATH --noheadings | while read device ; do
+                                if ! tune2fs -l "${device}" | grep '^Default mount options:' | grep -q discard ; then
+                                    tune2fs -o discard "${device}" >/dev/null
+                                fi
+                            done
+                        "#,
                         ],
                         elevate,
                         &Stdin::Closed,
@@ -150,7 +199,7 @@ mod migrations {
 
         pub(super) async fn save(&self, elevate: &Elevate) -> Result<()> {
             let data = serde_json::to_string(self)?;
-            create(Path::new(STATE_PATH), data.as_bytes(), elevate).await?;
+            create_or_write(Path::new(STATE_PATH), data.as_bytes(), elevate).await?;
             Ok(())
         }
 
@@ -681,6 +730,38 @@ fn autoupdate<'name: 'static, 'elevate: 'action, 'pkgs, 'action, 'secrets>(
             elevate,
             Service {
                 name: "pacman-autoupdate.timer",
+                state: ServiceState {
+                    runtime: ServiceStateRuntime::Active,
+                    persistent: ServiceStatePersistent::Enabled,
+                },
+            },
+        );
+    });
+}
+
+fn fstrim<'elevate: 'action, 'action, 'machine>(
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    elevate: &'elevate Elevate,
+) {
+    let util_linux = &[Ref("util-linux")];
+
+    plan.block("ssd trim", |plan| {
+        plan.add(
+            "install linux-utils",
+            elevate,
+            Packages {
+                install: Ref(util_linux),
+                reason: InstallReason::Explicit,
+            },
+        );
+
+        plan.register_packages(util_linux);
+
+        plan.add(
+            Ref("enable fstrim timer"),
+            elevate,
+            Service {
+                name: "fstrim.timer",
                 state: ServiceState {
                     runtime: ServiceStateRuntime::Active,
                     persistent: ServiceStatePersistent::Enabled,
@@ -2919,6 +3000,7 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     hostname(plan, elevate, config);
     locale(plan, elevate, config);
     vconsole(plan, elevate);
+    fstrim(plan, elevate);
     timezone(plan, elevate);
     pacman(plan, elevate);
     posix(plan, elevate);
