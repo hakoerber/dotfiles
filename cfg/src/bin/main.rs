@@ -2521,7 +2521,7 @@ fn hostname<'elevate: 'action, 'action, 'machine>(
                             r#"
                             127.0.0.1 localhost
                             ::1       localhost
-                            127.0.0.1 {hostname}
+                            127.0.1.1 {hostname}
                         "#
                         ),
                         "\n"
