@@ -2417,6 +2417,40 @@ fn hostname<'elevate: 'action, 'action, 'machine>(
             content: FileContent::Bytes(Ref(config.machine.hostname.as_bytes())),
         },
     );
+
+    plan.add(
+        "configure /etc/hosts",
+        elevate,
+        File {
+            path: Ref(Path::new("/etc/hosts")),
+            permissions: FilePermissions {
+                owner: Uid::root(),
+                group: Gid::root(),
+                mode: FileMode(0o644),
+            },
+            on_symlink: SymlinkHandling::Proceed,
+            on_directory: DirectoryHandling::Proceed,
+            binary: false,
+            secret: false,
+            ignore_checksum_changes: false,
+            content: FileContent::Bytes(Owned(
+                format!(
+                    concat!(
+                        dedent!(
+                            r#"
+                            127.0.0.1 localhost
+                            ::1       localhost
+                            127.0.0.1 {hostname}
+                        "#
+                        ),
+                        "\n"
+                    ),
+                    hostname = config.machine.hostname
+                )
+                .into_bytes(),
+            )),
+        },
+    );
 }
 
 fn locale<'elevate: 'action, 'action, 'machine>(
