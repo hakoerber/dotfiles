@@ -1845,6 +1845,22 @@ fn sshd<'elevate: 'action, 'action>(
     Ok(())
 }
 
+fn pkgstats<'elevate: 'action, 'action>(
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    elevate: &'elevate Elevate,
+) {
+    plan.add(
+        Ref("install pkgstats"),
+        elevate,
+        SinglePackage {
+            package: Ref("pkgstats"),
+            reason: InstallReason::Explicit,
+            force: false,
+        },
+    );
+    plan.register_packages(&[Ref("pkgstats")]);
+}
+
 fn iptables<'elevate: 'action, 'action>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
@@ -2852,6 +2868,7 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     journald(plan, elevate);
     wireguard(plan, elevate)?;
     sshd(plan, elevate)?;
+    pkgstats(plan, elevate);
     iptables(plan, elevate);
     backlight(plan, elevate);
     firefox(plan, elevate);
