@@ -274,18 +274,22 @@ impl Host {
 
 use Host::{Ares, Dionysus, Hera, Neptune};
 
-#[derive(Deserialize, Clone)]
-struct Secret<T: Clone>(T);
+mod secret {
+    use serde::Deserialize;
 
-impl<T: Clone> std::fmt::Debug for Secret<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("[redacted]").finish()
+    #[derive(Deserialize, Clone)]
+    pub(super) struct Secret<T: Clone>(T);
+
+    impl<T: Clone> std::fmt::Debug for Secret<T> {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            f.debug_tuple("[redacted]").finish()
+        }
     }
-}
 
-impl<T: Clone> Secret<T> {
-    fn access(&self) -> &T {
-        &self.0
+    impl<T: Clone> Secret<T> {
+        pub(super) fn access(&self) -> &T {
+            &self.0
+        }
     }
 }
 
@@ -336,13 +340,13 @@ impl Port {
 
 #[derive(Debug, Deserialize, Clone)]
 struct WireguardSecrets {
-    address: Secret<Ipv4Addr>,
-    privkey: Secret<WireguardPrivkey>,
-    psk: Secret<WireguardPsk>,
-    server_pubkey: Secret<WireguardPubkey>,
-    server_ip: Secret<Ipv4Addr>,
-    server_endpoint_domain: Secret<Domain>,
-    server_endpoint_port: Secret<Port>,
+    address: secret::Secret<Ipv4Addr>,
+    privkey: secret::Secret<WireguardPrivkey>,
+    psk: secret::Secret<WireguardPsk>,
+    server_pubkey: secret::Secret<WireguardPubkey>,
+    server_ip: secret::Secret<Ipv4Addr>,
+    server_endpoint_domain: secret::Secret<Domain>,
+    server_endpoint_port: secret::Secret<Port>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
