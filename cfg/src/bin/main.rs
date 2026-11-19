@@ -598,6 +598,7 @@ const APPLICATION_PACKAGES: &[(&str, &[&str])] = if cfg!(feature = "testing") {
         ("graphviz", &["graphviz", "xdot"]),
         ("markdown", &["marksman", "mdformat"]),
         ("magic-wormhole", &["magic-wormhole"]),
+        ("words", &["words"]),
     ]
 };
 
