@@ -2303,6 +2303,28 @@ fn filesystem<'elevate: 'action, 'action>(
     plan.register_packages(lvm);
 }
 
+fn timezone<'elevate: 'action, 'action, 'machine>(
+    plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
+    elevate: &'elevate Elevate,
+) {
+    plan.block("timezone", |plan| {
+        plan.add(
+            "link timezone",
+            elevate,
+            Symlink {
+                path: Ref(Path::new("/etc/localtime")),
+                target: Ref(Path::new("/usr/share/zoneinfo/Europe/Berlin")),
+                permissions: SymlinkPermissions {
+                    owner: Uid::root(),
+                    group: Gid::root(),
+                },
+                on_file: FileHandling::Proceed,
+                on_directory: DirectoryHandling::Proceed,
+            },
+        );
+    });
+}
+
 fn locale<'elevate: 'action, 'action, 'machine>(
     plan: &mut Plan<'_, 'elevate, '_, 'action, '_, Secrets>,
     elevate: &'elevate Elevate,
@@ -2767,6 +2789,7 @@ fn root_setup<'elevate: 'action, 'action, 'pkgs>(
     kernel(plan, elevate);
     filesystem(plan, elevate);
     locale(plan, elevate, config);
+    timezone(plan, elevate);
     pacman(plan, elevate);
     posix(plan, elevate);
     networkmanager(plan, elevate);
