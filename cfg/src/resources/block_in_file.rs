@@ -2,9 +2,11 @@ use anyhow::{Result, anyhow, bail};
 use camino::Utf8Path as Path;
 use regex::Regex;
 
+use maybeowned::prelude::*;
+
 use super::super::{
     Applyable, ChangeStatus, Checksum, Elevate, Plannable, Reporter, Tempfile, checksum, fs,
-    fs::RawFileContent, maybeowned::MaybeOwned,
+    fs::RawFileContent,
 };
 
 #[derive(Debug)]

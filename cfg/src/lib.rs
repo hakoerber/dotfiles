@@ -9,22 +9,21 @@ use std::{
 };
 
 use anyhow::Result;
-
 pub use camino::{Utf8Path as Path, Utf8PathBuf as PathBuf};
+use owo_colors::{OwoColorize, colors};
+
+use maybeowned::prelude::*;
 
 mod checksum;
 mod cmd;
 mod fs;
 mod gpg;
-mod maybeowned;
 mod pkg;
 mod resources;
 mod tempfile;
 mod user;
 
 use checksum::Checksum;
-use maybeowned::MaybeOwned;
-use owo_colors::{OwoColorize, colors};
 use tempfile::Tempfile;
 
 pub mod prelude {
@@ -34,7 +33,6 @@ pub mod prelude {
         FileMode, FilePermissions, SymlinkPermissions, create_or_write, files_in_dir, try_read,
     };
     pub use super::gpg::{GpgFingerprint, GpgTrust};
-    pub use super::maybeowned::MaybeOwned::{self, Owned, Ref};
     pub use super::pkg::{
         InstallReason, check_installed, get_package_version, list_explicitly_installed_packages,
         list_orphaned_packages, resolve_installed_package,

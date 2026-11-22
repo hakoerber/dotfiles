@@ -21,6 +21,7 @@ use serde::{Deserialize, Serialize};
 use strum::VariantArray;
 
 use cfg::prelude::*;
+use maybeowned::prelude::*;
 
 static BINS: include_dir::Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../files/bin");
 

@@ -122,6 +122,7 @@ dependencies = [
  "diffy",
  "futures",
  "include_dir",
+ "maybeowned",
  "owo-colors",
  "paste",
  "regex",
@@ -461,6 +462,36 @@ name = "linux-raw-sys"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53"
+
+[[package]]
+name = "maybeowned"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-once-cell",
+ "async-scoped",
+ "async-trait",
+ "camino",
+ "clap",
+ "dedent",
+ "derive_more",
+ "diffy",
+ "futures",
+ "include_dir",
+ "owo-colors",
+ "paste",
+ "regex",
+ "serde",
+ "serde_json",
+ "sha3",
+ "strum",
+ "tap",
+ "tera",
+ "tokio",
+ "tokio-stream",
+ "tracing",
+ "tracing-subscriber",
+]
 
 [[package]]
 name = "memchr"

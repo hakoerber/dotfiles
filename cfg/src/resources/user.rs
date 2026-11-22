@@ -1,9 +1,9 @@
 use anyhow::Result;
 use async_trait::async_trait;
 
-use crate::{maybeowned::MaybeOwned, user};
+use maybeowned::prelude::*;
 
-use super::super::{Applyable, ChangeStatus, Elevate, Path, Plannable, Reporter, cmd};
+use super::super::{Applyable, ChangeStatus, Elevate, Path, Plannable, Reporter, cmd, user};
 
 #[derive(Debug)]
 pub(crate) enum UserGroupDiff<'change> {

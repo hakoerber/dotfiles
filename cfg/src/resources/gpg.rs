@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::maybeowned::MaybeOwned;
+use maybeowned::MaybeOwned;
 
 use super::super::{Applyable, ChangeStatus, Elevate, Path, Plannable, Reporter, gpg};
 

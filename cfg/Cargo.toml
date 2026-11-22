@@ -1,5 +1,7 @@
 [workspace]
-members = []
+members = [
+  "maybeowned"
+]
 
 [workspace.package]
 version = "0.1.0"
@@ -77,6 +79,7 @@ codegen-units = 1
 panic = "unwind"
 
 [dependencies]
+maybeowned = { path = "./maybeowned/"}
 clap = { workspace = true }
 derive_more = { workspace = true }
 diffy = { workspace = true }

@@ -4,9 +4,10 @@ use anyhow::Result;
 use async_once_cell::OnceCell;
 use tap::Tap as _;
 
+use maybeowned::prelude::*;
+
 use super::super::{
     Applyable, ChangeStatus, Elevate, Path, Plannable, Reporter, cmd,
-    maybeowned::MaybeOwned,
     pkg::{self, InstallReason},
 };
 

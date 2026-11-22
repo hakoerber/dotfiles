@@ -1,5 +1,10 @@
 use std::fmt;
 
+pub mod prelude {
+    pub use super::MaybeOwned;
+    pub use super::MaybeOwned::{Owned, Ref};
+}
+
 pub enum MaybeOwned<'a, R>
 where
     R: ToOwned + ?Sized,
