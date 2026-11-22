@@ -3,22 +3,21 @@ use std::{
     process::Stdio,
 };
 
-use tokio::{io::AsyncWriteExt as _, process};
-
 use anyhow::{Result, bail};
 use tap::Tap as _;
+use tokio::{io::AsyncWriteExt as _, process};
 
-use super::{Elevate, ElevateTo};
+use crate::{Elevate, ElevateTo};
 
 #[derive(Debug)]
 pub struct ExitStatus(usize);
 
 impl ExitStatus {
-    pub(crate) fn code(&self) -> usize {
+    pub fn code(&self) -> usize {
         self.0
     }
 
-    pub(crate) fn success(&self) -> bool {
+    pub fn success(&self) -> bool {
         self.0 == 0
     }
 
@@ -49,32 +48,32 @@ impl ProcessForegroundStatusUnknown {
 
 #[derive(Debug)]
 pub struct ProcessForeground {
-    pub(crate) status: ExitStatus,
+    pub status: ExitStatus,
 }
 
 #[derive(Debug)]
-pub(crate) struct ProcessRawStatusUnknown {
+pub struct ProcessRawStatusUnknown {
     stdout: Vec<u8>,
     stderr: Vec<u8>,
     status: ExitStatus,
 }
 
 #[derive(Debug)]
-pub(crate) struct ProcessRaw {
-    pub(crate) stdout: Vec<u8>,
-    pub(crate) stderr: Vec<u8>,
-    pub(crate) status: ExitStatus,
+pub struct ProcessRaw {
+    pub stdout: Vec<u8>,
+    pub stderr: Vec<u8>,
+    pub status: ExitStatus,
 }
 
 impl ProcessRawStatusUnknown {
-    pub(crate) fn check(self) -> Result<ProcessRaw> {
+    pub fn check(self) -> Result<ProcessRaw> {
         if self.status.failed() {
             bail!("process failed {self:?}")
         }
         Ok(self.unchecked())
     }
 
-    pub(crate) fn unchecked(self) -> ProcessRaw {
+    pub fn unchecked(self) -> ProcessRaw {
         ProcessRaw {
             stdout: self.stdout,
             stderr: self.stderr,
@@ -105,7 +104,7 @@ pub enum Stdin<'a> {
 }
 
 impl Process {
-    pub(crate) async fn run_bin(
+    pub async fn run_bin(
         cmd: &str,
         args: &[&str],
         elevate: &Elevate,
@@ -160,7 +159,7 @@ impl Process {
         })
     }
 
-    pub(crate) fn run_bin_sync(
+    pub fn run_bin_sync(
         cmd: &str,
         args: &[&str],
         elevate: &Elevate,

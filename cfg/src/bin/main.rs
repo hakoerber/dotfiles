@@ -20,6 +20,10 @@ use include_dir::{DirEntry, include_dir};
 use serde::{Deserialize, Serialize};
 use strum::VariantArray;
 
+use blocks::{
+    Elevate, ElevateTo,
+    user::{Gid, Uid},
+};
 use cfg::prelude::*;
 use maybeowned::prelude::*;
 
@@ -37,6 +41,7 @@ mod migrations {
     use anyhow::Result;
     use serde::{Deserialize, Serialize};
 
+    use blocks::Elevate;
     use cfg::prelude::*;
 
     const STATE_PATH: &str = "/var/lib/cfg.state";

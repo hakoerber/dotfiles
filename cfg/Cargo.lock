@@ -93,6 +93,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3ded4057c258ba199e2d26386d3af3780957ecaee6c4ef4041c6b4b8b97c0b06"
 
 [[package]]
+name = "blocks"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "camino",
+ "derive_more",
+ "maybeowned",
+ "sha3",
+ "tap",
+ "tokio",
+ "tokio-stream",
+ "tracing",
+]
+
+[[package]]
 name = "bytes"
 version = "1.12.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -103,9 +118,6 @@ name = "camino"
 version = "1.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbbad30e4b4c14a39e3cc8aed085a12a327257c316619c93581e017bc52be591"
-dependencies = [
- "serde_core",
-]
 
 [[package]]
 name = "cfg"
@@ -115,12 +127,11 @@ dependencies = [
  "async-once-cell",
  "async-scoped",
  "async-trait",
- "camino",
+ "blocks",
  "clap",
  "dedent",
  "derive_more",
  "diffy",
- "futures",
  "include_dir",
  "maybeowned",
  "owo-colors",
@@ -128,13 +139,11 @@ dependencies = [
  "regex",
  "serde",
  "serde_json",
- "sha3",
  "strum",
  "tap",
  "tempfile",
  "tera",
  "tokio",
- "tokio-stream",
  "tracing",
  "tracing-subscriber",
 ]
@@ -147,9 +156,9 @@ checksum = "4e7648175b45a9a48536d676f68d918270699102aa8dab5496df06904c914600"
 
 [[package]]
 name = "clap"
-version = "4.6.8"
+version = "4.6.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac230478587d0269d8d6998b82ae69ea51509d55df66d9e92edd1f986904cd4a"
+checksum = "844c5c0b65be192cb68d570cca1b21a6444431d24e39c084dc0336177015337c"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -168,9 +177,9 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "4.6.8"
+version = "4.6.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "895c9d8d2ac2dd8b8a29f3724a14e72aaaa6debcf8c38c82f97305c6a172767a"
+checksum = "b4c174f11f949b9ca8c60580925e282b9cbd5454750e506f08648b2038080cd7"
 dependencies = [
  "heck",
  "proc-macro2",
@@ -382,9 +391,9 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.17.1"
+version = "0.17.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a"
+checksum = "735eaa21a6a5ffb2e84362faaeb90c05ba8e19797ca30428478cb6ea3a4921bc"
 dependencies = [
  "foldhash",
 ]
@@ -467,30 +476,7 @@ checksum = "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53"
 name = "maybeowned"
 version = "0.1.0"
 dependencies = [
- "anyhow",
- "async-once-cell",
- "async-scoped",
- "async-trait",
- "camino",
- "clap",
- "dedent",
- "derive_more",
- "diffy",
- "futures",
- "include_dir",
- "owo-colors",
- "paste",
- "regex",
  "serde",
- "serde_json",
- "sha3",
- "strum",
- "tap",
- "tera",
- "tokio",
- "tokio-stream",
- "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]

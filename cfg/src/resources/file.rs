@@ -1,14 +1,44 @@
 use anyhow::{Result, anyhow, bail};
 use async_trait::async_trait;
 
-use super::super::{
-    Applyable, Assertable, AssertionFailureReport, AssertionResult, ChangeStatus, ChecksumChange,
-    Elevate, MaybeOwned, Path, PathBuf, Plannable, Reporter, Tempfile, checksum,
+use blocks::{
+    checksum,
     fs::{
-        self, FileContent, FilePermissionChange, FilePermissions, RawFileContent,
-        SymlinkPermissionChange, SymlinkPermissions,
+        self, FileContent, FilePermissionDiff, FilePermissions, RawFileContent,
+        SymlinkPermissionDiff, SymlinkPermissions,
     },
 };
+
+use crate::{
+    Applyable, Assertable, AssertionFailureReport, AssertionResult, ChangeStatus, ChecksumChange,
+    Elevate, MaybeOwned, Path, PathBuf, Plannable, Reporter, Tempfile,
+};
+
+#[derive(Debug)]
+pub(crate) struct FilePermissionChange {
+    pub(crate) existing: FilePermissions,
+    pub(crate) diff: FilePermissionDiff,
+}
+
+impl Reporter for FilePermissionChange {
+    fn report(&self) -> Result<Vec<String>> {
+        let mut out = vec![];
+        if let Some(mode) = self.diff.mode {
+            out.push(format!(
+                "mode: {} -> {}",
+                self.existing.mode.as_oct_string(),
+                mode.as_oct_string()
+            ));
+        }
+        if let Some(ref owner) = self.diff.owner {
+            out.push(format!("owner: {} -> {}", self.existing.owner, owner));
+        }
+        if let Some(ref group) = self.diff.group {
+            out.push(format!("group: {} -> {}", self.existing.group, group));
+        }
+        Ok(out)
+    }
+}
 
 #[derive(Debug)]
 pub(crate) enum FileChange {
@@ -710,6 +740,25 @@ impl<'args> Plannable<'args> for Symlink<'args> {
 pub(crate) struct SymlinkChangePlan<'args> {
     pub(crate) args: Symlink<'args>,
     pub(crate) change: SymlinkChange,
+}
+
+#[derive(Debug)]
+pub(crate) struct SymlinkPermissionChange {
+    pub(crate) existing: SymlinkPermissions,
+    pub(crate) diff: SymlinkPermissionDiff,
+}
+
+impl Reporter for SymlinkPermissionChange {
+    fn report(&self) -> Result<Vec<String>> {
+        let mut out = vec![];
+        if let Some(ref owner) = self.diff.owner {
+            out.push(format!("owner: {} -> {}", self.existing.owner, owner));
+        }
+        if let Some(ref group) = self.diff.group {
+            out.push(format!("group: {} -> {}", self.existing.group, group));
+        }
+        Ok(out)
+    }
 }
 
 #[derive(Debug)]

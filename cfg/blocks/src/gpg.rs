@@ -1,14 +1,14 @@
 use anyhow::bail;
 
-use super::{Elevate, Path, Tempfile, cmd, fs};
-
 use anyhow::{Result, anyhow};
+
+use crate::{Elevate, Path, cmd, fs, tempfile::Tempfile};
 
 #[derive(Debug, derive_more::Display)]
 pub struct GpgFingerprint(pub String);
 
 impl GpgFingerprint {
-    pub(crate) fn as_str(&self) -> &str {
+    pub fn as_str(&self) -> &str {
         &self.0
     }
 }
@@ -23,7 +23,7 @@ pub enum GpgTrust {
 }
 
 impl GpgTrust {
-    pub(crate) fn as_str(&self) -> &str {
+    pub fn as_str(&self) -> &str {
         match *self {
             Self::Unknown => "2",
             Self::Untrusted => "3",
@@ -34,7 +34,7 @@ impl GpgTrust {
     }
 }
 
-pub(crate) async fn get_gpg_key_trust(
+pub async fn get_gpg_key_trust(
     fingerprint: &GpgFingerprint,
     gnupg_directory: &Path,
     elevate_check: &Elevate,
@@ -155,7 +155,7 @@ pub(crate) async fn get_gpg_key_trust(
     }
 }
 
-pub(crate) async fn trust_key(
+pub async fn trust_key(
     fingerprint: &GpgFingerprint,
     trust: GpgTrust,
     gnupg_directory: &Path,
@@ -188,11 +188,7 @@ pub(crate) async fn trust_key(
     Ok(())
 }
 
-pub(crate) async fn import_key(
-    content: &[u8],
-    gnupg_directory: &Path,
-    elevate: &Elevate,
-) -> Result<()> {
+pub async fn import_key(content: &[u8], gnupg_directory: &Path, elevate: &Elevate) -> Result<()> {
     cmd::Process::run(
         "env",
         &[

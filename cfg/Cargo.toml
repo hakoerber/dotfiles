@@ -1,6 +1,7 @@
 [workspace]
 members = [
-  "maybeowned"
+  "maybeowned",
+  "blocks",
 ]
 
 [workspace.package]
@@ -16,9 +17,6 @@ clap = { version = "4", default-features = false, features = [
   "usage",
   "error-context",
 ] }
-derive_more = { version = "2", default-features = false, features = [
-  "display",
-] }
 diffy = { version = "0.5", default-features = false, features = [
   "std",
   "color",
@@ -28,11 +26,9 @@ anyhow = { version = "1", default-features = false, features = [
   "std",
   "backtrace",
 ] }
-camino = { version = "1", default-features = false, features = ["serde1"] }
 owo-colors = { version = "4", default-features = false }
 regex = { version = "1", default-features = false }
 serde_json = { version = "1", default-features = false, features = ["std"] }
-sha3 = { version = "0.12", default-features = false }
 tap = { version = "1", default-features = false }
 tera = { version = "2", default-features = false }
 dedent = { version = "0.1", default-features = false }
@@ -54,10 +50,11 @@ async-once-cell = { version = "0.5", default-features = false }
 async-scoped = { version = "0.9", default-features = false, features = [
   "use-tokio",
 ] }
-tokio-stream = { version = "0.1", default-features = false, features = ["fs"] }
-futures = { version = "0.3", default-features = false }
 strum = { version = "0.28", default-features = false, features = ["derive"] }
 paste = { version = "1", default-features = false }
+derive_more = { version = "2", default-features = false, features = [
+  "display",
+] }
 
 [package]
 name = "cfg"
@@ -80,28 +77,25 @@ panic = "unwind"
 
 [dependencies]
 maybeowned = { path = "./maybeowned/"}
+blocks = { path = "./blocks/"}
 clap = { workspace = true }
 derive_more = { workspace = true }
 diffy = { workspace = true }
 serde = { workspace = true }
 anyhow = { workspace = true }
-camino = { workspace = true }
 owo-colors = { workspace = true }
 regex = { workspace = true }
 serde_json = { workspace = true }
-sha3 = { workspace = true }
 tap = { workspace = true }
 tera = { workspace = true }
 dedent = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 include_dir = { workspace = true }
-tokio = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread"] }
 async-trait = { workspace = true }
 async-once-cell = { workspace = true }
 async-scoped = { workspace = true }
-tokio-stream = { workspace = true }
-futures = { workspace = true }
 strum = { workspace = true }
 paste = { workspace = true }
 

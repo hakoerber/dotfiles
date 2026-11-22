@@ -9,52 +9,35 @@ use std::{
 };
 
 use anyhow::Result;
-pub use camino::{Utf8Path as Path, Utf8PathBuf as PathBuf};
 use owo_colors::{OwoColorize, colors};
 
+use blocks::{
+    Elevate, ElevateTo, Path, PathBuf,
+    checksum::Checksum,
+    tempfile::Tempfile,
+    user::{Gid, Uid},
+};
 use maybeowned::prelude::*;
 
-mod checksum;
-mod cmd;
-mod fs;
-mod gpg;
-mod pkg;
 mod resources;
-mod tempfile;
-mod user;
-
-use checksum::Checksum;
-use tempfile::Tempfile;
 
 pub mod prelude {
-    pub use super::cmd::{Process, Stdin};
-    pub use super::fs::{
-        FileContent::{self, Lines},
-        FileMode, FilePermissions, SymlinkPermissions, create_or_write, files_in_dir, try_read,
-    };
-    pub use super::gpg::{GpgFingerprint, GpgTrust};
-    pub use super::pkg::{
-        InstallReason, check_installed, get_package_version, list_explicitly_installed_packages,
-        list_orphaned_packages, resolve_installed_package,
-    };
     pub use super::resources::prelude::*;
-    pub use super::tempfile::Tempfile;
-    pub use super::{
-        Block, Elevate, ElevateTo, FinishResult, Gid, Path, PathBuf, Plan, ReportConfig, Resource,
-        SecretsWorkflow, Uid,
+    pub use super::{Block, FinishResult, Plan, ReportConfig, Resource, SecretsWorkflow};
+    pub use blocks::{
+        Path, PathBuf,
+        cmd::{Process, Stdin},
+        fs::{
+            FileContent::{self, Lines},
+            FileMode, FilePermissions, SymlinkPermissions, create_or_write, files_in_dir, try_read,
+        },
+        gpg::{GpgFingerprint, GpgTrust},
+        pkg::{
+            InstallReason, check_installed, get_package_version,
+            list_explicitly_installed_packages, list_orphaned_packages, resolve_installed_package,
+        },
+        tempfile::Tempfile,
     };
-}
-
-#[derive(Eq, PartialEq, Debug)]
-pub enum ElevateTo {
-    Root,
-    User { user: String },
-}
-
-#[derive(Eq, PartialEq, Debug)]
-pub enum Elevate {
-    Sudo(ElevateTo),
-    No,
 }
 
 pub trait Reporter {
@@ -559,32 +542,6 @@ pub trait Assertable<'assert>: fmt::Debug {
 struct ChecksumChange {
     from: Checksum,
     to: Checksum,
-}
-
-#[derive(PartialEq, Eq, Clone, derive_more::Display, Debug)]
-pub struct Uid(String);
-
-impl Uid {
-    pub fn root() -> Self {
-        Self("root".into())
-    }
-
-    pub fn from(s: String) -> Self {
-        Self(s)
-    }
-}
-
-#[derive(PartialEq, Eq, Clone, derive_more::Display, Debug)]
-pub struct Gid(String);
-
-impl Gid {
-    pub fn root() -> Self {
-        Self("root".into())
-    }
-
-    pub fn from(s: String) -> Self {
-        Self(s)
-    }
 }
 
 pub struct NodePlanRef<'plan, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>

@@ -2,7 +2,9 @@ use anyhow::{Result, anyhow, bail};
 use async_trait::async_trait;
 use serde::Serialize;
 
-use super::super::{Applyable, ChangeStatus, Elevate, Plannable, Reporter, cmd};
+use blocks::cmd;
+
+use crate::{Applyable, ChangeStatus, Elevate, Plannable, Reporter};
 
 #[derive(Debug, PartialEq, Eq, Serialize, Clone, Copy)]
 pub enum Target {

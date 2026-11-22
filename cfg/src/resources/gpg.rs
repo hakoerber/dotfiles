@@ -1,8 +1,9 @@
 use anyhow::Result;
 
+use blocks::gpg;
 use maybeowned::MaybeOwned;
 
-use super::super::{Applyable, ChangeStatus, Elevate, Path, Plannable, Reporter, gpg};
+use crate::{Applyable, ChangeStatus, Elevate, Path, Plannable, Reporter};
 
 #[derive(Debug)]
 pub struct GpgKey<'a> {

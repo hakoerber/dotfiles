@@ -3,9 +3,8 @@
 //! inside each struct that implements `Drop`?
 
 use anyhow::Result;
-use camino::Utf8Path as Path;
 
-use super::{Elevate, PathBuf, cmd, fs};
+use crate::{Elevate, Path, PathBuf, cmd, fs};
 
 #[must_use]
 #[derive(Debug)]

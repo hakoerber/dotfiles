@@ -1,6 +1,8 @@
 use anyhow::{Result, bail};
 
-use super::super::{Applyable, ChangeStatus, Elevate, MaybeOwned, Plannable, Reporter, cmd};
+use blocks::cmd;
+
+use crate::{Applyable, ChangeStatus, Elevate, MaybeOwned, Plannable, Reporter};
 
 #[derive(Debug, Clone)]
 pub struct CheckScript<'a> {

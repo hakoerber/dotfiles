@@ -17,7 +17,7 @@ impl fmt::Display for Checksum {
     }
 }
 
-pub(crate) fn checksum_from(source: &[u8]) -> Checksum {
+pub fn checksum_from(source: &[u8]) -> Checksum {
     let digest = sha3::Sha3_256::digest(source);
     Checksum(digest)
 }

@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use anyhow::{Result, anyhow};
 
-use super::{Elevate, cmd};
+use crate::{Elevate, cmd};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InstallReason {

@@ -4,12 +4,10 @@ use anyhow::Result;
 use async_once_cell::OnceCell;
 use tap::Tap as _;
 
+use blocks::{cmd, pkg};
 use maybeowned::prelude::*;
 
-use super::super::{
-    Applyable, ChangeStatus, Elevate, Path, Plannable, Reporter, cmd,
-    pkg::{self, InstallReason},
-};
+use crate::{Applyable, ChangeStatus, Elevate, Path, Plannable, Reporter};
 
 static INSTALLED_PACKAGES: OnceCell<HashSet<String>> = OnceCell::new();
 
@@ -86,7 +84,7 @@ impl Reporter for PackageDatabaseRefreshPlan<'_> {
 #[derive(Debug)]
 pub struct Packages<'action> {
     pub install: MaybeOwned<'action, [MaybeOwned<'action, str>]>,
-    pub reason: InstallReason,
+    pub reason: pkg::InstallReason,
 }
 
 #[async_trait::async_trait]
@@ -110,7 +108,7 @@ impl<'change> Plannable<'change> for Packages<'change> {
                 install.push(package.clone());
             } else {
                 match self.reason {
-                    InstallReason::Explicit => {
+                    pkg::InstallReason::Explicit => {
                         if !explicitly_installed_packages(elevate)
                             .await?
                             .iter()
@@ -119,7 +117,7 @@ impl<'change> Plannable<'change> for Packages<'change> {
                             set_reason.push(package.clone());
                         }
                     }
-                    InstallReason::Dependency => {
+                    pkg::InstallReason::Dependency => {
                         for package in self.install.as_ref() {
                             if !packages_installed_as_dependencies(elevate)
                                 .await?
@@ -130,7 +128,7 @@ impl<'change> Plannable<'change> for Packages<'change> {
                             }
                         }
                     }
-                    InstallReason::DependencyIfInstalling => {
+                    pkg::InstallReason::DependencyIfInstalling => {
                         // in this case, we retain the current setting, except when we install new
                     }
                 }
@@ -178,10 +176,9 @@ impl Applyable for PackagesPlan<'_> {
                 &vec![
                     "--database",
                     match self.args.reason {
-                        InstallReason::Explicit => "--asexplicit",
-                        InstallReason::Dependency | InstallReason::DependencyIfInstalling => {
-                            "--asdeps"
-                        }
+                        pkg::InstallReason::Explicit => "--asexplicit",
+                        pkg::InstallReason::Dependency
+                        | pkg::InstallReason::DependencyIfInstalling => "--asdeps",
                     },
                     "--",
                 ]
@@ -208,8 +205,8 @@ impl Reporter for PackagesPlan<'_> {
                 "set {name} as {message}",
                 name = package.as_ref(),
                 message = match self.args.reason {
-                    InstallReason::Explicit => "explicitly installed",
-                    InstallReason::Dependency | InstallReason::DependencyIfInstalling =>
+                    pkg::InstallReason::Explicit => "explicitly installed",
+                    pkg::InstallReason::Dependency | pkg::InstallReason::DependencyIfInstalling =>
                         "installed as dependency",
                 }
             ));
@@ -296,7 +293,7 @@ pub struct LocalPackage<'action> {
     pub name: MaybeOwned<'action, str>,
     pub path: MaybeOwned<'action, Path>,
     pub version: MaybeOwned<'action, str>,
-    pub reason: InstallReason,
+    pub reason: pkg::InstallReason,
 }
 
 #[async_trait::async_trait]
@@ -313,15 +310,15 @@ impl<'change> Plannable<'change> for LocalPackage<'change> {
         match package_version {
             Some(installed_version) => {
                 let set_reason = match self.reason {
-                    InstallReason::Explicit => !explicitly_installed_packages(elevate)
+                    pkg::InstallReason::Explicit => !explicitly_installed_packages(elevate)
                         .await?
                         .iter()
                         .any(|s| s == self.name.as_ref()),
-                    InstallReason::Dependency => !packages_installed_as_dependencies(elevate)
+                    pkg::InstallReason::Dependency => !packages_installed_as_dependencies(elevate)
                         .await?
                         .iter()
                         .any(|s| s == self.name.as_ref()),
-                    InstallReason::DependencyIfInstalling => false,
+                    pkg::InstallReason::DependencyIfInstalling => false,
                 };
 
                 if installed_version != self.version.as_ref() {
@@ -408,9 +405,9 @@ impl Applyable for LocalPackagePlan<'_> {
                 &[
                     "--database",
                     match self.args.reason {
-                        InstallReason::Explicit => "--asexplicit",
-                        InstallReason::Dependency => "--asdeps",
-                        InstallReason::DependencyIfInstalling => unreachable!(),
+                        pkg::InstallReason::Explicit => "--asexplicit",
+                        pkg::InstallReason::Dependency => "--asdeps",
+                        pkg::InstallReason::DependencyIfInstalling => unreachable!(),
                     },
                     "--",
                     self.args.name.as_ref(),
@@ -449,9 +446,9 @@ impl Reporter for LocalPackagePlan<'_> {
                 "set {} as {}",
                 self.args.name.as_ref(),
                 match self.args.reason {
-                    InstallReason::Explicit => "explicitly installed",
-                    InstallReason::Dependency => "installed as dependency",
-                    InstallReason::DependencyIfInstalling => unreachable!(),
+                    pkg::InstallReason::Explicit => "explicitly installed",
+                    pkg::InstallReason::Dependency => "installed as dependency",
+                    pkg::InstallReason::DependencyIfInstalling => unreachable!(),
                 }
             ));
         }
@@ -463,7 +460,7 @@ impl Reporter for LocalPackagePlan<'_> {
 #[derive(Debug)]
 pub struct SinglePackage<'action> {
     pub package: MaybeOwned<'action, str>,
-    pub reason: InstallReason,
+    pub reason: pkg::InstallReason,
     pub force: bool,
 }
 
@@ -487,7 +484,7 @@ impl<'change> Plannable<'change> for SinglePackage<'change> {
             })))
         } else {
             match self.reason {
-                InstallReason::Explicit => {
+                pkg::InstallReason::Explicit => {
                     if !explicitly_installed_packages(elevate)
                         .await?
                         .iter()
@@ -501,7 +498,7 @@ impl<'change> Plannable<'change> for SinglePackage<'change> {
                         Ok(ChangeStatus::Clean)
                     }
                 }
-                InstallReason::Dependency => {
+                pkg::InstallReason::Dependency => {
                     if !packages_installed_as_dependencies(elevate)
                         .await?
                         .iter()
@@ -515,7 +512,7 @@ impl<'change> Plannable<'change> for SinglePackage<'change> {
                         Ok(ChangeStatus::Clean)
                     }
                 }
-                InstallReason::DependencyIfInstalling => {
+                pkg::InstallReason::DependencyIfInstalling => {
                     // in this case, we retain the current setting
                     Ok(ChangeStatus::Clean)
                 }
@@ -583,8 +580,8 @@ impl Applyable for SinglePackagePlan<'_> {
                     .await?
                     .expect("installed package has an install reason");
 
-                if reason == InstallReason::Dependency
-                    && self.args.reason == InstallReason::Explicit
+                if reason == pkg::InstallReason::Dependency
+                    && self.args.reason == pkg::InstallReason::Explicit
                 {
                     cmd::Process::run(
                         "pacman",
@@ -602,10 +599,9 @@ impl Applyable for SinglePackagePlan<'_> {
                     &[
                         "--database",
                         match self.args.reason {
-                            InstallReason::Explicit => "--asexplicit",
-                            InstallReason::Dependency | InstallReason::DependencyIfInstalling => {
-                                "--asdeps"
-                            }
+                            pkg::InstallReason::Explicit => "--asexplicit",
+                            pkg::InstallReason::Dependency
+                            | pkg::InstallReason::DependencyIfInstalling => "--asdeps",
                         },
                         "--",
                         name,
@@ -633,8 +629,8 @@ impl Reporter for SinglePackagePlan<'_> {
                 "set {name} as {message}",
                 name = self.args.package.as_ref(),
                 message = match self.args.reason {
-                    InstallReason::Explicit => "explicitly installed",
-                    InstallReason::Dependency | InstallReason::DependencyIfInstalling =>
+                    pkg::InstallReason::Explicit => "explicitly installed",
+                    pkg::InstallReason::Dependency | pkg::InstallReason::DependencyIfInstalling =>
                         "installed as dependency",
                 }
             )]),

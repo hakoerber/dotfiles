@@ -1,24 +1,48 @@
 use anyhow::{Result, anyhow, bail};
 
-use crate::Elevate;
+use crate::{Elevate, PathBuf, cmd};
 
-use super::{PathBuf, cmd};
+#[derive(PartialEq, Eq, Clone, derive_more::Display, Debug)]
+pub struct Uid(String);
+
+impl Uid {
+    pub fn root() -> Self {
+        Self("root".into())
+    }
+
+    pub fn from(s: String) -> Self {
+        Self(s)
+    }
+}
+
+#[derive(PartialEq, Eq, Clone, derive_more::Display, Debug)]
+pub struct Gid(String);
+
+impl Gid {
+    pub fn root() -> Self {
+        Self("root".into())
+    }
+
+    pub fn from(s: String) -> Self {
+        Self(s)
+    }
+}
 
 #[derive(Debug, Clone, derive_more::Display)]
-pub(crate) struct Group {
-    pub(crate) name: String,
+pub struct Group {
+    pub name: String,
 }
 
 #[derive(Debug)]
-pub(crate) struct User {
-    pub(crate) name: String,
-    pub(crate) primary_group: Group,
-    pub(crate) additional_groups: Vec<Group>,
-    pub(crate) home: PathBuf,
-    pub(crate) shell: String,
+pub struct User {
+    pub name: String,
+    pub primary_group: Group,
+    pub additional_groups: Vec<Group>,
+    pub home: PathBuf,
+    pub shell: String,
 }
 
-pub(crate) async fn find_group(name: &str, elevate: &Elevate) -> Result<Option<Group>> {
+pub async fn find_group(name: &str, elevate: &Elevate) -> Result<Option<Group>> {
     let getent = cmd::Process::run(
         "getent",
         &["group", "--", name],
@@ -46,9 +70,9 @@ pub(crate) async fn find_group(name: &str, elevate: &Elevate) -> Result<Option<G
     }
 }
 
-// pub(crate) fn find_username_by_id(name: &str, elevate: &Elevate) -> Result<Option<User>> {}
+// pub fn find_username_by_id(name: &str, elevate: &Elevate) -> Result<Option<User>> {}
 
-pub(crate) async fn find_user(name: &str, elevate: &Elevate) -> Result<Option<User>> {
+pub async fn find_user(name: &str, elevate: &Elevate) -> Result<Option<User>> {
     let getent = cmd::Process::run(
         "getent",
         &["passwd", "--", name],

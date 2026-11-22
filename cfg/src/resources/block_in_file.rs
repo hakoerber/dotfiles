@@ -1,13 +1,10 @@
 use anyhow::{Result, anyhow, bail};
-use camino::Utf8Path as Path;
 use regex::Regex;
 
+use blocks::{Path, checksum, fs, fs::RawFileContent};
 use maybeowned::prelude::*;
 
-use super::super::{
-    Applyable, ChangeStatus, Checksum, Elevate, Plannable, Reporter, Tempfile, checksum, fs,
-    fs::RawFileContent,
-};
+use crate::{Applyable, ChangeStatus, Checksum, Elevate, Plannable, Reporter, Tempfile};
 
 #[derive(Debug)]
 pub struct BlockInFile<'change> {

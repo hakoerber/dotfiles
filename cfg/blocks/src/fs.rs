@@ -5,35 +5,39 @@ use std::{
 };
 
 use anyhow::{Result, anyhow, bail};
+use maybeowned::MaybeOwned;
 use tokio::fs;
 
-use super::{Elevate, Gid, MaybeOwned, Path, PathBuf, Reporter, Uid, cmd};
+use crate::{
+    Elevate, Path, PathBuf, cmd,
+    user::{Gid, Uid},
+};
 
 #[derive(Debug)]
-pub(crate) struct RawFileContent(Vec<u8>);
+pub struct RawFileContent(Vec<u8>);
 
 impl RawFileContent {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Self(vec![])
     }
 
-    pub(crate) fn from(from: Vec<u8>) -> Self {
+    pub fn from(from: Vec<u8>) -> Self {
         Self(from)
     }
 
-    pub(crate) fn from_string(from: String) -> Self {
+    pub fn from_string(from: String) -> Self {
         Self(from.into_bytes())
     }
 
-    pub(crate) fn truncate(&mut self) {
+    pub fn truncate(&mut self) {
         self.0.clear();
     }
 
-    pub(crate) fn as_bytes(&self) -> &[u8] {
+    pub fn as_bytes(&self) -> &[u8] {
         &self.0
     }
 
-    pub(crate) fn write_all(&mut self, buf: &[u8]) {
+    pub fn write_all(&mut self, buf: &[u8]) {
         self.0.write_all(buf).expect("memory writes to not fail");
     }
 }
@@ -45,7 +49,7 @@ pub enum FileContent<'a> {
 }
 
 impl FileContent<'_> {
-    pub(crate) fn to_bytes(&self) -> MaybeOwned<'_, [u8]> {
+    pub fn to_bytes(&self) -> MaybeOwned<'_, [u8]> {
         match *self {
             FileContent::Lines(ref lines) => MaybeOwned::Owned({
                 let mut raw = Vec::new();
@@ -61,7 +65,7 @@ impl FileContent<'_> {
         }
     }
 
-    pub(crate) fn to_raw(&self) -> RawFileContent {
+    pub fn to_raw(&self) -> RawFileContent {
         let bytes = self.to_bytes();
         let owned = bytes.into_owned();
         RawFileContent(owned)
@@ -72,7 +76,7 @@ impl FileContent<'_> {
 pub struct FileMode(pub u32);
 
 impl FileMode {
-    fn as_oct_string(self) -> String {
+    pub fn as_oct_string(self) -> String {
         format!("{0:04o}", self.0)
     }
 }
@@ -85,56 +89,26 @@ pub struct FilePermissions {
 }
 
 #[derive(Debug)]
-pub(crate) struct FilePermissionDiff {
-    pub(crate) mode: Option<FileMode>,
-    pub(crate) owner: Option<Uid>,
-    pub(crate) group: Option<Gid>,
+pub struct FilePermissionDiff {
+    pub mode: Option<FileMode>,
+    pub owner: Option<Uid>,
+    pub group: Option<Gid>,
 }
 
 impl FilePermissionDiff {
-    pub(crate) fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.mode.is_none() && self.owner.is_none() && self.group.is_none()
-    }
-
-    fn has_changes(&self) -> bool {
-        !self.is_empty()
     }
 }
 
 impl FilePermissions {
-    pub(crate) fn diff(&self, other: &Self) -> Option<FilePermissionDiff> {
+    pub fn diff(&self, other: &Self) -> Option<FilePermissionDiff> {
         let diff = FilePermissionDiff {
             mode: (self.mode != other.mode).then_some(other.mode),
             owner: (self.owner != other.owner).then_some(other.owner.clone()),
             group: (self.group != other.group).then_some(other.group.clone()),
         };
         if diff.is_empty() { None } else { Some(diff) }
-    }
-}
-
-#[derive(Debug)]
-pub(crate) struct FilePermissionChange {
-    pub(crate) existing: FilePermissions,
-    pub(crate) diff: FilePermissionDiff,
-}
-
-impl Reporter for FilePermissionChange {
-    fn report(&self) -> Result<Vec<String>> {
-        let mut out = vec![];
-        if let Some(mode) = self.diff.mode {
-            out.push(format!(
-                "mode: {} -> {}",
-                self.existing.mode.as_oct_string(),
-                mode.as_oct_string()
-            ));
-        }
-        if let Some(ref owner) = self.diff.owner {
-            out.push(format!("owner: {} -> {}", self.existing.owner, owner));
-        }
-        if let Some(ref group) = self.diff.group {
-            out.push(format!("group: {} -> {}", self.existing.group, group));
-        }
-        Ok(out)
     }
 }
 
@@ -150,23 +124,19 @@ pub struct SymlinkPermissions {
 }
 
 #[derive(Debug)]
-pub(crate) struct SymlinkPermissionDiff {
-    pub(crate) owner: Option<Uid>,
-    pub(crate) group: Option<Gid>,
+pub struct SymlinkPermissionDiff {
+    pub owner: Option<Uid>,
+    pub group: Option<Gid>,
 }
 
 impl SymlinkPermissionDiff {
     fn is_empty(&self) -> bool {
         self.owner.is_none() && self.group.is_none()
     }
-
-    fn has_changes(&self) -> bool {
-        !self.is_empty()
-    }
 }
 
 impl SymlinkPermissions {
-    pub(crate) fn diff(&self, other: &Self) -> Option<SymlinkPermissionDiff> {
+    pub fn diff(&self, other: &Self) -> Option<SymlinkPermissionDiff> {
         let diff = SymlinkPermissionDiff {
             owner: (self.owner != other.owner).then_some(other.owner.clone()),
             group: (self.group != other.group).then_some(other.group.clone()),
@@ -175,26 +145,7 @@ impl SymlinkPermissions {
     }
 }
 
-#[derive(Debug)]
-pub(crate) struct SymlinkPermissionChange {
-    pub(crate) existing: SymlinkPermissions,
-    pub(crate) diff: SymlinkPermissionDiff,
-}
-
-impl Reporter for SymlinkPermissionChange {
-    fn report(&self) -> Result<Vec<String>> {
-        let mut out = vec![];
-        if let Some(ref owner) = self.diff.owner {
-            out.push(format!("owner: {} -> {}", self.existing.owner, owner));
-        }
-        if let Some(ref group) = self.diff.group {
-            out.push(format!("group: {} -> {}", self.existing.group, group));
-        }
-        Ok(out)
-    }
-}
-
-pub(crate) async fn mv(from: &Path, to: &Path, elevate: &Elevate) -> Result<()> {
+pub async fn mv(from: &Path, to: &Path, elevate: &Elevate) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
             cmd::Process::run(
@@ -227,7 +178,7 @@ pub(crate) async fn mv(from: &Path, to: &Path, elevate: &Elevate) -> Result<()> 
     }
 }
 
-pub(crate) async fn create_directory(path: &Path, elevate: &Elevate) -> Result<()> {
+pub async fn create_directory(path: &Path, elevate: &Elevate) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
             cmd::Process::run("mkdir", &["--", path.as_str()], elevate, cmd::Stdin::Closed)
@@ -241,14 +192,14 @@ pub(crate) async fn create_directory(path: &Path, elevate: &Elevate) -> Result<(
 }
 
 #[derive(Debug)]
-pub(crate) enum Stat {
+pub enum Stat {
     File(FilePermissions),
     Directory(FilePermissions),
     Symlink(SymlinkPermissions),
 }
 
 // elevate is irrelevant here, always using getent. std does not support getting file names
-pub(crate) async fn stat(elevate: &Elevate, path: &Path) -> Result<Option<Stat>> {
+pub async fn stat(elevate: &Elevate, path: &Path) -> Result<Option<Stat>> {
     let output = cmd::Process::run(
         "stat",
         &["--format", "%U %G %a %f", "--", path.as_str()],
@@ -260,14 +211,18 @@ pub(crate) async fn stat(elevate: &Elevate, path: &Path) -> Result<Option<Stat>>
 
     if output.status.success() {
         let mut segments = output.stdout.trim().split(' ');
-        let owner = Uid(segments
-            .next()
-            .ok_or_else(|| anyhow!("stat output could not be parsed"))?
-            .to_owned());
-        let group = Gid(segments
-            .next()
-            .ok_or_else(|| anyhow!("stat output could not be parsed"))?
-            .to_owned());
+        let owner = Uid::from(
+            segments
+                .next()
+                .ok_or_else(|| anyhow!("stat output could not be parsed"))?
+                .to_owned(),
+        );
+        let group = Gid::from(
+            segments
+                .next()
+                .ok_or_else(|| anyhow!("stat output could not be parsed"))?
+                .to_owned(),
+        );
         let mode = FileMode(
             segments
                 .next()
@@ -301,7 +256,7 @@ pub(crate) async fn stat(elevate: &Elevate, path: &Path) -> Result<Option<Stat>>
 }
 
 // always using chown, fs::chown does not support names
-pub(crate) async fn set_file_owner(elevate: &Elevate, path: &Path, uid: &Uid) -> Result<()> {
+pub async fn set_file_owner(elevate: &Elevate, path: &Path, uid: &Uid) -> Result<()> {
     cmd::Process::run(
         "chown",
         &[&uid.to_string(), "--", path.as_str()],
@@ -315,7 +270,7 @@ pub(crate) async fn set_file_owner(elevate: &Elevate, path: &Path, uid: &Uid) ->
 }
 
 // always using chown, fs::chown does not support names
-pub(crate) async fn set_file_group(elevate: &Elevate, path: &Path, gid: &Gid) -> Result<()> {
+pub async fn set_file_group(elevate: &Elevate, path: &Path, gid: &Gid) -> Result<()> {
     cmd::Process::run(
         "chgrp",
         &[&gid.to_string(), "--", path.as_str()],
@@ -327,7 +282,7 @@ pub(crate) async fn set_file_group(elevate: &Elevate, path: &Path, gid: &Gid) ->
     Ok(())
 }
 
-pub(crate) async fn set_file_mode(elevate: &Elevate, path: &Path, mode: FileMode) -> Result<()> {
+pub async fn set_file_mode(elevate: &Elevate, path: &Path, mode: FileMode) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
             cmd::Process::run(
@@ -346,7 +301,7 @@ pub(crate) async fn set_file_mode(elevate: &Elevate, path: &Path, mode: FileMode
     Ok(())
 }
 
-pub(crate) async fn remove_file(elevate: &Elevate, path: &Path) -> Result<()> {
+pub async fn remove_file(elevate: &Elevate, path: &Path) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
             cmd::Process::run("rm", &["--", path.as_str()], elevate, cmd::Stdin::Closed)
@@ -360,7 +315,7 @@ pub(crate) async fn remove_file(elevate: &Elevate, path: &Path) -> Result<()> {
     Ok(())
 }
 
-pub(crate) fn remove_file_sync(elevate: &Elevate, path: &Path) -> Result<()> {
+pub fn remove_file_sync(elevate: &Elevate, path: &Path) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
             cmd::Process::run_sync("rm", &["--", path.as_str()], elevate, &cmd::Stdin::Closed)?
@@ -374,11 +329,11 @@ pub(crate) fn remove_file_sync(elevate: &Elevate, path: &Path) -> Result<()> {
 }
 
 /// `remove_file` also works for symlinks and removes only the link itself
-pub(crate) async fn remove_symlink(elevate: &Elevate, path: &Path) -> Result<()> {
+pub async fn remove_symlink(elevate: &Elevate, path: &Path) -> Result<()> {
     remove_file(elevate, path).await
 }
 
-pub(crate) async fn get_symlink_target(elevate: &Elevate, path: &Path) -> Result<PathBuf> {
+pub async fn get_symlink_target(elevate: &Elevate, path: &Path) -> Result<PathBuf> {
     use std::os::unix::ffi::OsStringExt as _;
 
     match *elevate {
@@ -405,7 +360,7 @@ pub(crate) async fn get_symlink_target(elevate: &Elevate, path: &Path) -> Result
     }
 }
 
-pub(crate) async fn remove_recursive(elevate: &Elevate, path: &Path) -> Result<()> {
+pub async fn remove_recursive(elevate: &Elevate, path: &Path) -> Result<()> {
     match *elevate {
         Elevate::Sudo(ref _elevate_to) => {
             cmd::Process::run(
@@ -449,13 +404,13 @@ pub async fn try_read(elevate: &Elevate, path: &Path) -> Result<Option<Vec<u8>>>
     }
 }
 
-pub(crate) async fn read(elevate: &Elevate, path: &Path) -> Result<Vec<u8>> {
+pub async fn read(elevate: &Elevate, path: &Path) -> Result<Vec<u8>> {
     try_read(elevate, path)
         .await
         .and_then(|content| content.ok_or_else(|| anyhow!("not found")))
 }
 
-pub(crate) async fn read_to_string(elevate: &Elevate, path: &Path) -> Result<String> {
+pub async fn read_to_string(elevate: &Elevate, path: &Path) -> Result<String> {
     let content = read(elevate, path).await?;
     String::from_utf8(content).map_err(|_err| anyhow!("non utf-8 file content"))
 }
@@ -533,7 +488,7 @@ pub async fn create_symlink(elevate: &Elevate, path: &Path, target: &Path) -> Re
 }
 
 // always using chown, fs::chown does not support names
-pub(crate) async fn set_symlink_owner(elevate: &Elevate, path: &Path, uid: &Uid) -> Result<()> {
+pub async fn set_symlink_owner(elevate: &Elevate, path: &Path, uid: &Uid) -> Result<()> {
     cmd::Process::run(
         "chown",
         &["--no-dereference", &uid.to_string(), "--", path.as_str()],
@@ -547,7 +502,7 @@ pub(crate) async fn set_symlink_owner(elevate: &Elevate, path: &Path, uid: &Uid)
 }
 
 // always using chown, fs::chown does not support names
-pub(crate) async fn set_symlink_group(elevate: &Elevate, path: &Path, gid: &Gid) -> Result<()> {
+pub async fn set_symlink_group(elevate: &Elevate, path: &Path, gid: &Gid) -> Result<()> {
     cmd::Process::run(
         "chgrp",
         &["--no-dereference", &gid.to_string(), "--", path.as_str()],
