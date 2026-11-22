@@ -1,16 +1,11 @@
-[package]
-name = "cfg"
+[workspace]
+members = []
+
+[workspace.package]
 version = "0.1.0"
 edition = "2024"
 
-[[bin]]
-name = "cfg"
-path = "src/bin/main.rs"
-
-[build-dependencies]
-tempfile = { version = "3", default-features = false }
-
-[dependencies]
+[workspace.dependencies]
 clap = { version = "4", default-features = false, features = [
   "std",
   "derive",
@@ -62,6 +57,15 @@ futures = { version = "0.3", default-features = false }
 strum = { version = "0.28", default-features = false, features = ["derive"] }
 paste = { version = "1", default-features = false }
 
+[package]
+name = "cfg"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "cfg"
+path = "src/bin/main.rs"
+
 [features]
 testing = []
 
@@ -72,7 +76,39 @@ lto = true
 codegen-units = 1
 panic = "unwind"
 
-[lints.clippy]
+[dependencies]
+clap = { workspace = true }
+derive_more = { workspace = true }
+diffy = { workspace = true }
+serde = { workspace = true }
+anyhow = { workspace = true }
+camino = { workspace = true }
+owo-colors = { workspace = true }
+regex = { workspace = true }
+serde_json = { workspace = true }
+sha3 = { workspace = true }
+tap = { workspace = true }
+tera = { workspace = true }
+dedent = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+include_dir = { workspace = true }
+tokio = { workspace = true }
+async-trait = { workspace = true }
+async-once-cell = { workspace = true }
+async-scoped = { workspace = true }
+tokio-stream = { workspace = true }
+futures = { workspace = true }
+strum = { workspace = true }
+paste = { workspace = true }
+
+[build-dependencies]
+tempfile = { version = "3", default-features = false }
+
+[lints]
+workspace = true
+
+[workspace.lints.clippy]
 # enabled groups
 correctness = { level = "deny", priority = -1 }
 suspicious = { level = "warn", priority = -1 }
