@@ -3099,8 +3099,15 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine, 'p
 
     user_create_directories(plan, user_elevate, user, &user_directories);
 
-    let (required_packages, additional_services) =
-        user_dotfiles(plan, user_elevate, user, machine, &home, &user_directories)?;
+    let (required_packages, additional_services) = user_dotfiles(
+        plan,
+        user_elevate,
+        strict_elevate,
+        user,
+        machine,
+        &home,
+        &user_directories,
+    )?;
 
     services.extend(additional_services);
     packages.extend(required_packages);
@@ -3160,22 +3167,6 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine, 'p
             secret: false,
             ignore_checksum_changes: false,
             content: FileContent::Lines(Ref(&[Ref(MY_SSH_PUBKEY)])),
-        },
-    );
-
-    plan.add(
-        "import my gpg key",
-        user_elevate,
-        GpgKey {
-            content: include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../files/gpgkeys/hannes@hkoerber.de.gpg.asc"
-            )),
-            gnupg_directory: Owned(home.join(".local/state/gnupg/")),
-            // run as the actual user, not using root
-            elevate_apply: strict_elevate,
-            fingerprint: GpgFingerprint("973AE48D71B76735C4712B5BB5C002530C6A2053".to_owned()),
-            trust: GpgTrust::Ultimately,
         },
     );
 
@@ -3413,6 +3404,7 @@ fn user_autologin<'elevate: 'action, 'action, 'user, 'machine>(
 fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
     plan: &mut Block<'_, 'elevate, 'pkgs, 'action, '_, Secrets>,
     user_elevate: &'elevate Elevate,
+    strict_elevate: &'elevate Elevate,
     user: &'user UserConfig,
     machine: &MachineConfig,
     home: &Path,
@@ -4305,6 +4297,22 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
             );
         }
 
+        plan.add(
+            "import my gpg key",
+            user_elevate,
+            GpgKey {
+                content: include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/gpgkeys/hannes@hkoerber.de.gpg.asc"
+                )),
+                gnupg_directory: Owned(home.join(".local/state/gnupg/")),
+                // run as the actual user, not using root
+                elevate_apply: strict_elevate,
+                fingerprint: GpgFingerprint("973AE48D71B76735C4712B5BB5C002530C6A2053".to_owned()),
+                trust: GpgTrust::Ultimately,
+            },
+        );
+
         Ok(())
     })?;
 
@@ -4415,12 +4423,12 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
     });
 
     plan.block("keepassxc", |plan| {
-        packages.insert(Ref("keepassxc"), Ref([Ref("keepassxc")].as_slice()));
-
         let service_name = "keepassxc.service";
         let service_path = directories.systemd_user_units.join(service_name);
 
         if user.keepassxc.enabled() {
+            packages.insert(Ref("keepassxc"), Ref([Ref("keepassxc")].as_slice()));
+
             plan.add(
                 Ref("add keepassxc service"),
                 user_elevate,
@@ -4459,12 +4467,12 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
     });
 
     plan.block("nextcloud", |plan| {
-        packages.insert(Ref("nextloud"), Ref([Ref("nextcloud-client")].as_slice()));
-
         let service_name = "nextcloud.service";
         let service_path = directories.systemd_user_units.join(service_name);
 
         if user.nextcloud.enabled() {
+            packages.insert(Ref("nextloud"), Ref([Ref("nextcloud-client")].as_slice()));
+
             plan.add(
                 Ref("add nextcloud service"),
                 user_elevate,
@@ -4559,12 +4567,12 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
     });
 
     plan.block("discord", |plan| {
-        packages.insert(Ref("discord"), Ref(&[Ref("discord")]));
-
         let service_name = "discord.service";
         let service_path = directories.systemd_user_units.join(service_name);
 
         if machine.roles.has(MachineRole::Gaming) {
+            packages.insert(Ref("discord"), Ref(&[Ref("discord")]));
+
             plan.add(
                 Ref("add discord service"),
                 user_elevate,
@@ -4603,21 +4611,21 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
     });
 
     plan.block("steam", |plan| {
-        packages.insert(
-            Ref("steam"),
-            Ref([
-                Ref("steam"),
-                Ref("lib32-pango"),
-                Ref("pango"),
-                Ref("ttf-liberation"),
-            ]
-            .as_slice()),
-        );
-
         let service_name = "steam.service";
         let service_path = directories.systemd_user_units.join(service_name);
 
         if user.steam.enabled() {
+            packages.insert(
+                Ref("steam"),
+                Ref([
+                    Ref("steam"),
+                    Ref("lib32-pango"),
+                    Ref("pango"),
+                    Ref("ttf-liberation"),
+                ]
+                .as_slice()),
+            );
+
             plan.add(
                 Ref("add steam service"),
                 user_elevate,
@@ -4698,34 +4706,35 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
     });
 
     plan.block("gammastep", |plan| {
-        packages.insert(Ref("gammastep"), Ref([Ref("gammastep")].as_slice()));
-
-        plan.add(
-            Ref("add gammastep config"),
-            user_elevate,
-            File {
-                path: Owned(directories.config.join("gammastep.conf")),
-                on_symlink: SymlinkHandling::Proceed,
-                on_directory: DirectoryHandling::Bail,
-                permissions: FilePermissions {
-                    owner: Uid::from(user.name.clone()),
-                    group: Gid::from(user.name.clone()),
-                    mode: FileMode(0o644),
-                },
-                binary: false,
-                secret: false,
-                ignore_checksum_changes: false,
-                content: FileContent::Bytes(Ref(include_bytes!(concat!(
-                    env!("CARGO_MANIFEST_DIR"),
-                    "/../files/gammastep/gammastep.conf"
-                )))),
-            },
-        );
-
         let service_name = "gammastep.service";
         let service_path = directories.systemd_user_units.join(service_name);
+        let config_path = directories.config.join("gammastep.conf");
 
         if machine.machine_type != MachineType::Tv {
+            packages.insert(Ref("gammastep"), Ref([Ref("gammastep")].as_slice()));
+
+            plan.add(
+                Ref("add gammastep config"),
+                user_elevate,
+                File {
+                    path: Owned(config_path),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Bail,
+                    permissions: FilePermissions {
+                        owner: Uid::from(user.name.clone()),
+                        group: Gid::from(user.name.clone()),
+                        mode: FileMode(0o644),
+                    },
+                    binary: false,
+                    secret: false,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                        env!("CARGO_MANIFEST_DIR"),
+                        "/../files/gammastep/gammastep.conf"
+                    )))),
+                },
+            );
+
             plan.add(
                 Ref("add gammastep service"),
                 user_elevate,
@@ -4758,6 +4767,17 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                     on_directory: DirectoryHandling::Bail,
                     on_file: FileHandling::Proceed,
                     on_symlink: SymlinkHandling::Proceed,
+                },
+            );
+
+            plan.add(
+                Ref("remove config for gammastep"),
+                user_elevate,
+                Remove {
+                    path: Owned(config_path),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Bail,
+                    on_file: FileHandling::Proceed,
                 },
             );
         }
@@ -5491,6 +5511,12 @@ impl FeatureState {
     }
 }
 
+impl From<bool> for FeatureState {
+    fn from(value: bool) -> Self {
+        if value { Self::Enabled } else { Self::Disabled }
+    }
+}
+
 #[derive(Serialize)]
 struct UserConfig {
     name: String,
@@ -5530,13 +5556,7 @@ fn configure_tracing(level: tracing::Level) -> impl tracing::Subscriber {
         .finish()
 }
 
-fn private_user(
-    autologin: bool,
-    vt: usize,
-    name: String,
-    steam: FeatureState,
-    machine: &MachineConfig,
-) -> UserConfig {
+fn private_user(autologin: bool, vt: usize, name: String, machine: &MachineConfig) -> UserConfig {
     UserConfig {
         autologin,
         vt,
@@ -5563,7 +5583,7 @@ fn private_user(
             gpg_agent_for_ssh: true,
         }),
         nextcloud: FeatureState::Enabled,
-        steam,
+        steam: machine.roles.has(MachineRole::Gaming).into(),
         keepassxc: FeatureState::Disabled,
         firefox: FirefoxUserConfig {
             profiles: vec![FirefoxProfile {
@@ -5878,36 +5898,12 @@ async fn main() -> MainResult {
 
                 let users = match args.hostname {
                     Neptune => vec![
-                        private_user(
-                            true,
-                            2,
-                            "hannes-private".to_owned(),
-                            FeatureState::Disabled,
-                            &machine,
-                        ),
+                        private_user(true, 2, "hannes-private".to_owned(), &machine),
                         work_user,
                     ],
-                    Ares => vec![private_user(
-                        true,
-                        1,
-                        "hannes".to_owned(),
-                        FeatureState::Enabled,
-                        &machine,
-                    )],
-                    Dionysus => vec![private_user(
-                        true,
-                        1,
-                        "hannes".to_owned(),
-                        FeatureState::Disabled,
-                        &machine,
-                    )],
-                    Hera => vec![private_user(
-                        false,
-                        1,
-                        "hannes".to_owned(),
-                        FeatureState::Disabled,
-                        &machine,
-                    )],
+                    Ares => vec![private_user(true, 1, "hannes".to_owned(), &machine)],
+                    Dionysus => vec![private_user(false, 1, "hannes".to_owned(), &machine)],
+                    Hera => vec![private_user(false, 2, "hannes".to_owned(), &machine)],
                 }
                 .into_iter()
                 .map(|config| UserContext {
