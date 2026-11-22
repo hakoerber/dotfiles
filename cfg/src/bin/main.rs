@@ -3045,6 +3045,7 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine, 'p
     machine: &'machine MachineConfig,
 ) -> Result<UserResult<'pkgs>> {
     let mut packages = HashMap::new();
+    let mut services = vec![];
 
     let UserContext {
         simplest_elevate: ref user_elevate,
@@ -3113,9 +3114,10 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine, 'p
 
     user_create_directories(plan, user_elevate, user, &user_directories);
 
-    let mut required_packages =
+    let (required_packages, additional_services) =
         user_dotfiles(plan, user_elevate, user, machine, &home, &user_directories)?;
 
+    services.extend(additional_services);
     packages.extend(required_packages);
 
     let dependencies = Box::pin(user_executables(
@@ -3139,7 +3141,7 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine, 'p
     );
 
     user_wallpaper(plan, user_elevate, user, &user_directories);
-    user_services(plan, user_elevate, user, &user_directories, machine);
+    user_services(plan, user_elevate, user, &user_directories, &services);
 
     let ssh_directory = home.join(".ssh");
     plan.add(
@@ -3430,7 +3432,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
     machine: &MachineConfig,
     home: &Path,
     directories: &UserDirectories,
-) -> Result<PackageList<'pkgs>> {
+) -> Result<(PackageList<'pkgs>, Vec<MaybeOwned<'static, str>>)> {
     #[derive(Serialize)]
     struct TemplateContext<'a> {
         user: &'a UserConfig,
@@ -3442,6 +3444,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
     }
 
     let mut packages = HashMap::new();
+    let mut services = Vec::new();
 
     let template_context = TemplateContext {
         user,
@@ -4239,13 +4242,18 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
             },
         );
 
-        let service_path = directories.systemd_user_units.join("gpg-agent.service");
+        let gpg_agent_service_name = "gpg-agent.service";
+        let gpg_agent_service_path = directories.systemd_user_units.join(gpg_agent_service_name);
+
+        let yubikey_service_name = "yubikey-touch-detector.service";
+        let yubikey_service_path = directories.systemd_user_units.join(yubikey_service_name);
+
         if user.gpg.as_ref().is_some_and(|gpg| gpg.agent_enabled) {
             plan.add(
                 Ref("add gpg-agent service"),
                 user_elevate,
                 File {
-                    path: Owned(service_path),
+                    path: Owned(gpg_agent_service_path),
                     on_symlink: SymlinkHandling::Proceed,
                     on_directory: DirectoryHandling::Bail,
                     permissions: FilePermissions {
@@ -4262,12 +4270,49 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                     )))),
                 },
             );
+
+            services.push(Ref(gpg_agent_service_name));
+
+            plan.add(
+                Ref("add yubikey-touch-detector service"),
+                user_elevate,
+                File {
+                    path: Owned(yubikey_service_path),
+                    on_symlink: SymlinkHandling::Proceed,
+                    on_directory: DirectoryHandling::Bail,
+                    permissions: FilePermissions {
+                        owner: Uid::from(user.name.clone()),
+                        group: Gid::from(user.name.clone()),
+                        mode: FileMode(0o644),
+                    },
+                    binary: false,
+                    secret: false,
+                    ignore_checksum_changes: false,
+                    content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                        env!("CARGO_MANIFEST_DIR"),
+                        "/../files/autostart/services/yubikey-touch-detector.service"
+                    )))),
+                },
+            );
+
+            services.push(Ref(yubikey_service_name));
         } else {
             plan.add(
                 Ref("user service gpg-agent"),
                 user_elevate,
                 Remove {
-                    path: Owned(service_path),
+                    path: Owned(gpg_agent_service_path),
+                    on_directory: DirectoryHandling::Bail,
+                    on_file: FileHandling::Proceed,
+                    on_symlink: SymlinkHandling::Proceed,
+                },
+            );
+
+            plan.add(
+                Ref("user service yubikey-touch-detector"),
+                user_elevate,
+                Remove {
+                    path: Owned(yubikey_service_path),
                     on_directory: DirectoryHandling::Bail,
                     on_file: FileHandling::Proceed,
                     on_symlink: SymlinkHandling::Proceed,
@@ -4346,11 +4391,14 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
             Ref("gnome-keyring"),
             Ref([Ref("gnome-keyring"), Ref("seahorse")].as_slice()),
         );
+
+        let service_name = "gnome-keyring.service";
+
         plan.add(
             Ref("add gnome-keyring service"),
             user_elevate,
             File {
-                path: Owned(directories.systemd_user_units.join("gnome-keyring.service")),
+                path: Owned(directories.systemd_user_units.join(service_name)),
                 on_symlink: SymlinkHandling::Proceed,
                 on_directory: DirectoryHandling::Bail,
                 permissions: FilePermissions {
@@ -4367,15 +4415,20 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                 )))),
             },
         );
+
+        services.push(Ref(service_name));
     });
 
     plan.block("kdeconnect", |plan| {
         packages.insert(Ref("kdeconnect"), Ref([Ref("kdeconnect")].as_slice()));
+
+        let service_name = "kdeconnect.service";
+
         plan.add(
             Ref("add kdeconnect service"),
             user_elevate,
             File {
-                path: Owned(directories.systemd_user_units.join("kdeconnect.service")),
+                path: Owned(directories.systemd_user_units.join(service_name)),
                 on_symlink: SymlinkHandling::Proceed,
                 on_directory: DirectoryHandling::Bail,
                 permissions: FilePermissions {
@@ -4392,12 +4445,16 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                 )))),
             },
         );
+
+        services.push(Ref(service_name));
     });
 
     plan.block("keepassxc", |plan| {
         packages.insert(Ref("keepassxc"), Ref([Ref("keepassxc")].as_slice()));
 
-        let service_path = directories.systemd_user_units.join("keepassxc.service");
+        let service_name = "keepassxc.service";
+        let service_path = directories.systemd_user_units.join(service_name);
+
         if user.keepassxc.enabled() {
             plan.add(
                 Ref("add keepassxc service"),
@@ -4420,6 +4477,8 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                     )))),
                 },
             );
+
+            services.push(Ref(service_name));
         } else {
             plan.add(
                 Ref("user service keepassxc"),
@@ -4437,7 +4496,9 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
     plan.block("nextcloud", |plan| {
         packages.insert(Ref("nextloud"), Ref([Ref("nextcloud-client")].as_slice()));
 
-        let service_path = directories.systemd_user_units.join("nextcloud.service");
+        let service_name = "nextcloud.service";
+        let service_path = directories.systemd_user_units.join(service_name);
+
         if user.nextcloud.enabled() {
             plan.add(
                 Ref("add nextcloud service"),
@@ -4460,6 +4521,8 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                     )))),
                 },
             );
+
+            services.push(Ref(service_name));
         } else {
             plan.add(
                 Ref("user service nextcloud"),
@@ -4475,11 +4538,13 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
     });
 
     plan.block("screencfg", |plan| {
+        let service_name = "screencfg.service";
+
         plan.add(
             Ref("add screencfg service"),
             user_elevate,
             File {
-                path: Owned(directories.systemd_user_units.join("screencfg.service")),
+                path: Owned(directories.systemd_user_units.join(service_name)),
                 on_symlink: SymlinkHandling::Proceed,
                 on_directory: DirectoryHandling::Bail,
                 permissions: FilePermissions {
@@ -4496,14 +4561,18 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                 )))),
             },
         );
+
+        services.push(Ref(service_name));
     });
 
     plan.block("spotify", |plan| {
+        let service_name = "spotify.service";
+
         plan.add(
             Ref("add spotify service"),
             user_elevate,
             File {
-                path: Owned(directories.systemd_user_units.join("spotify.service")),
+                path: Owned(directories.systemd_user_units.join(service_name)),
                 on_symlink: SymlinkHandling::Proceed,
                 on_directory: DirectoryHandling::Bail,
                 permissions: FilePermissions {
@@ -4520,12 +4589,16 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                 )))),
             },
         );
+
+        services.push(Ref(service_name));
     });
 
     plan.block("discord", |plan| {
         packages.insert(Ref("discord"), Ref(&[Ref("discord")]));
 
-        let service_path = directories.systemd_user_units.join("discord.service");
+        let service_name = "discord.service";
+        let service_path = directories.systemd_user_units.join(service_name);
+
         if machine.roles.has(MachineRole::Gaming) {
             plan.add(
                 Ref("add discord service"),
@@ -4548,6 +4621,8 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                     )))),
                 },
             );
+
+            services.push(Ref(service_name));
         } else {
             plan.add(
                 Ref("user service discord"),
@@ -4574,7 +4649,9 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
             .as_slice()),
         );
 
-        let service_path = directories.systemd_user_units.join("steam.service");
+        let service_name = "steam.service";
+        let service_path = directories.systemd_user_units.join(service_name);
+
         if user.steam.enabled() {
             plan.add(
                 Ref("add steam service"),
@@ -4597,6 +4674,8 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                     )))),
                 },
             );
+
+            services.push(Ref(service_name));
         } else {
             plan.add(
                 Ref("user service steam"),
@@ -4611,48 +4690,10 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
         }
     });
 
-    plan.block("yubikey-touch-detector", |plan| {
-        let service_path = directories
-            .systemd_user_units
-            .join("yubikey-touch-detector.service");
-        if user.gpg.as_ref().is_some_and(|gpg| gpg.agent_enabled) {
-            plan.add(
-                Ref("add yubikey-touch-detector service"),
-                user_elevate,
-                File {
-                    path: Owned(service_path),
-                    on_symlink: SymlinkHandling::Proceed,
-                    on_directory: DirectoryHandling::Bail,
-                    permissions: FilePermissions {
-                        owner: Uid::from(user.name.clone()),
-                        group: Gid::from(user.name.clone()),
-                        mode: FileMode(0o644),
-                    },
-                    binary: false,
-                    secret: false,
-                    ignore_checksum_changes: false,
-                    content: FileContent::Bytes(Ref(include_bytes!(concat!(
-                        env!("CARGO_MANIFEST_DIR"),
-                        "/../files/autostart/services/yubikey-touch-detector.service"
-                    )))),
-                },
-            );
-        } else {
-            plan.add(
-                Ref("user service yubikey-touch-detector"),
-                user_elevate,
-                Remove {
-                    path: Owned(service_path),
-                    on_directory: DirectoryHandling::Bail,
-                    on_file: FileHandling::Proceed,
-                    on_symlink: SymlinkHandling::Proceed,
-                },
-            );
-        }
-    });
-
     plan.block("laptop-lid", |plan| {
-        let service_path = directories.systemd_user_units.join("laptop-lid.service");
+        let service_name = "laptop-lid.service";
+        let service_path = directories.systemd_user_units.join(service_name);
+
         if machine.machine_type == MachineType::Laptop {
             plan.add(
                 Ref("add laptop-lid service"),
@@ -4675,6 +4716,8 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                     )))),
                 },
             );
+
+            services.push(Ref(service_name));
         } else {
             plan.add(
                 Ref("user service laptop-lid"),
@@ -4714,7 +4757,9 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
             },
         );
 
-        let service_path = directories.systemd_user_units.join("gammastep.service");
+        let service_name = "gammastep.service";
+        let service_path = directories.systemd_user_units.join(service_name);
+
         if machine.machine_type != MachineType::Tv {
             plan.add(
                 Ref("add gammastep service"),
@@ -4737,6 +4782,8 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                     )))),
                 },
             );
+
+            services.push(Ref(service_name));
         } else {
             plan.add(
                 Ref("user service gammastep"),
@@ -4752,15 +4799,13 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
     });
 
     plan.block("workstation-mgr", |plan| {
+        let service_name = "workstation-mgr.service";
+
         plan.add(
             Ref("add workstation-mgr service"),
             user_elevate,
             File {
-                path: Owned(
-                    directories
-                        .systemd_user_units
-                        .join("workstation-mgr.service"),
-                ),
+                path: Owned(directories.systemd_user_units.join(service_name)),
                 on_symlink: SymlinkHandling::Proceed,
                 on_directory: DirectoryHandling::Bail,
                 permissions: FilePermissions {
@@ -4777,6 +4822,8 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                 )))),
             },
         );
+
+        services.push(Ref(service_name));
     });
 
     plan.try_block("dunst", |plan| {
@@ -4811,11 +4858,13 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
             },
         );
 
+        let service_name = "dunst.service";
+
         plan.add(
             Ref("add dunst service"),
             user_elevate,
             File {
-                path: Owned(directories.systemd_user_units.join("dunst.service")),
+                path: Owned(directories.systemd_user_units.join(service_name)),
                 on_symlink: SymlinkHandling::Proceed,
                 on_directory: DirectoryHandling::Bail,
                 permissions: FilePermissions {
@@ -4832,6 +4881,8 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                 )))),
             },
         );
+
+        services.push(Ref(service_name));
 
         Ok(())
     })?;
@@ -4894,9 +4945,33 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
             },
         );
 
+        plan.add(
+            Ref("add firefox service"),
+            user_elevate,
+            File {
+                path: Owned(directories.systemd_user_units.join("firefox@.service")),
+                on_symlink: SymlinkHandling::Proceed,
+                on_directory: DirectoryHandling::Bail,
+                permissions: FilePermissions {
+                    owner: Uid::from(user.name.clone()),
+                    group: Gid::from(user.name.clone()),
+                    mode: FileMode(0o644),
+                },
+                binary: false,
+                secret: false,
+                ignore_checksum_changes: false,
+                content: FileContent::Bytes(Ref(include_bytes!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../files/autostart/services/firefox@.service"
+                )))),
+            },
+        );
+
         for profile in &user.firefox.profiles {
             let profile_dir = firefox_dir.join(format!("profile-{}", profile.name));
             let chrome_dir = profile_dir.join("chrome");
+
+            services.push(Owned(format!("firefox@{name}.service", name = profile.name)));
 
             plan.add(
                 Owned(format!(
@@ -4978,31 +5053,9 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                 );
             }
         }
-
-        plan.add(
-            Ref("add firefox service"),
-            user_elevate,
-            File {
-                path: Owned(directories.systemd_user_units.join("firefox@.service")),
-                on_symlink: SymlinkHandling::Proceed,
-                on_directory: DirectoryHandling::Bail,
-                permissions: FilePermissions {
-                    owner: Uid::from(user.name.clone()),
-                    group: Gid::from(user.name.clone()),
-                    mode: FileMode(0o644),
-                },
-                binary: false,
-                secret: false,
-                ignore_checksum_changes: false,
-                content: FileContent::Bytes(Ref(include_bytes!(concat!(
-                    env!("CARGO_MANIFEST_DIR"),
-                    "/../files/autostart/services/firefox@.service"
-                )))),
-            },
-        );
     });
 
-    Ok(packages)
+    Ok((packages, services))
 }
 
 async fn user_executables<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
@@ -5197,7 +5250,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
     user_elevate: &'elevate Elevate,
     user: &'user UserConfig,
     user_directories: &UserDirectories,
-    machine: &MachineConfig,
+    services: &[MaybeOwned<'static, str>],
 ) {
     plan.block("services", |plan| {
         plan.block("targets", |plan| {
@@ -5243,57 +5296,16 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
                     secret: false,
                     ignore_checksum_changes: false,
                     content: FileContent::Lines(Owned({
-                        let mut out = vec![
+                        [
                             Ref("[Unit]"),
                             Ref("BindsTo=windowmanager.target"),
                             Ref("After=windowmanager.target"),
-                            Ref(""),
-                            Ref("Wants=gnome-keyring.service"),
-                            Ref("Wants=dunst.service"),
-                            Ref("Wants=nm-sidebar.service"),
-                            Ref("Wants=gammastep.service"),
-                            Ref("Wants=spotify.service"),
-                            Ref("Wants=kdeconnect.service"),
-                            Ref("Wants=color-theme-dark.service"),
-                            Ref("Wants=workstation-mgr.service"),
-                            Ref("Wants=screencfg.service"),
-                        ];
-
-                        if user.gpg.as_ref().is_some_and(|gpg| gpg.agent_enabled) {
-                            out.extend([
-                                Ref("Wants=gpg-agent.service"),
-                                Ref("Wants=yubikey-touch-detector.service"),
-                            ]);
-                        }
-
-                        if user.keepassxc.enabled() {
-                            out.push(Ref("Wants=keepassxc.service"));
-                        }
-
-                        if machine.machine_type == Laptop {
-                            out.push(Ref("Wants=laptop-lid.service"));
-                        }
-
-                        if user.nextcloud.enabled() {
-                            out.push(Ref("Wants=nextcloud.service"));
-                        }
-
-                        if machine.roles.has(MachineRole::Gaming) {
-                            out.push(Ref("Wants=discord.service"));
-                        }
-
-                        if user.steam.enabled() {
-                            out.push(Ref("Wants=steam.service"));
-                        }
-
-                        for profile in &user.firefox.profiles {
-                            out.push(Owned(format!(
-                                "Wants=firefox@{name}.service",
-                                name = profile.name
-                            )));
-                        }
-
-                        out
+                        ]
+                        .into_iter()
+                        .chain(services.iter().map(|service| {
+                            Owned(format!("Wants={service}", service = service.as_ref()))
+                        }))
+                        .collect()
                     })),
                 },
             );
