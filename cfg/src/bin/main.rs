@@ -2795,7 +2795,7 @@ fn firefox<'elevate: 'action, 'action>(
             "policies": {
                 "AutofillAddressEnabled": false,
                 "AutofillCreditCardEnabled": false,
-                "DefaultDownloadDirectory": "${home}/download",
+                "DownloadDirectory": "${home}/download",
                 "DisableFeedbackCommands": true,
                 "DisableFirefoxAccounts": true,
                 "DisableFirefoxStudies": true,
