@@ -14,7 +14,6 @@ pub mod present;
 pub(crate) mod sleep;
 pub(crate) mod spotify;
 pub(crate) mod systemd;
-pub(crate) mod theme;
 pub(crate) mod weather;
 pub mod wire;
 
@@ -26,8 +25,6 @@ pub enum ExecError {
     Presentation(#[from] present::Error),
     #[error(transparent)]
     Pipewire(#[from] pipewire::Error),
-    #[error(transparent)]
-    Theme(#[from] theme::Error),
     #[error(transparent)]
     Spotify(#[from] spotify::Error),
     #[error(transparent)]
@@ -47,7 +44,6 @@ pub enum Action {
     Power(power::Action),
     Present(present::Action),
     Pipewire(pipewire::Action),
-    Theme(theme::Action),
     Spotify(spotify::Action),
     Gammastep(gammastep::Action),
     Weather(weather::Action),
@@ -61,7 +57,7 @@ impl wire::WireCommand for Action {
             0x01 => Ok(Self::Power(power::Action::parse_wire(input)?)),
             0x02 => Ok(Self::Present(present::Action::parse_wire(input)?)),
             0x03 => Ok(Self::Pipewire(pipewire::Action::parse_wire(input)?)),
-            0x04 => Ok(Self::Theme(theme::Action::parse_wire(input)?)),
+            // 0x04 was used by the theme switcher
             0x05 => Ok(Self::Spotify(spotify::Action::parse_wire(input)?)),
             0x06 => Ok(Self::Gammastep(gammastep::Action::parse_wire(input)?)),
             0x07 => Ok(Self::Weather(weather::Action::parse_wire(input)?)),
@@ -88,11 +84,7 @@ impl wire::WireCommand for Action {
                 v.extend_from_slice(&action.to_wire());
                 v
             }
-            Self::Theme(action) => {
-                let mut v = vec![0x04];
-                v.extend_from_slice(&action.to_wire());
-                v
-            }
+            // 0x04 was used by the theme switcher
             Self::Spotify(action) => {
                 let mut v = vec![0x05];
                 v.extend_from_slice(&action.to_wire());
@@ -145,10 +137,6 @@ impl cli::CliCommand for Action {
                 let choice = rest.next().ok_or(cli::ParseError::MissingAction)?;
                 Ok(Self::Pipewire(pipewire::Action::parse_str(&choice, rest)?))
             }
-            "theme" => {
-                let choice = rest.next().ok_or(cli::ParseError::MissingAction)?;
-                Ok(Self::Theme(theme::Action::parse_str(&choice, rest)?))
-            }
             "spotify" => {
                 let choice = rest.next().ok_or(cli::ParseError::MissingAction)?;
                 Ok(Self::Spotify(spotify::Action::parse_str(&choice, rest)?))
@@ -194,7 +182,6 @@ impl Exec for Action {
             Self::Power(action) => Ok(action.execute()?),
             Self::Present(action) => Ok(action.execute()?),
             Self::Pipewire(action) => Ok(action.execute()?),
-            Self::Theme(action) => Ok(action.execute()?),
             Self::Spotify(action) => Ok(action.execute()?),
             Self::Gammastep(action) => Ok(action.execute()?),
             Self::Weather(action) => Ok(action.execute()?),

@@ -4104,28 +4104,6 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
             },
         );
 
-        plan.add(
-            Ref("add github_light theme for alacritty"),
-            user_elevate,
-            File {
-                path: Owned(themes_dir.join("github_light.toml")),
-                on_symlink: SymlinkHandling::Proceed,
-                on_directory: DirectoryHandling::Bail,
-                permissions: FilePermissions {
-                    owner: Uid::from(user.name.clone()),
-                    group: Gid::from(user.name.clone()),
-                    mode: FileMode(0o644),
-                },
-                binary: false,
-                secret: false,
-                ignore_checksum_changes: false,
-                content: FileContent::Bytes(Ref(include_bytes!(concat!(
-                    env!("CARGO_MANIFEST_DIR"),
-                    "/../files/alacritty/themes/github_light.toml"
-                )))),
-            },
-        );
-
         Ok(())
     })?;
 
@@ -5320,44 +5298,6 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
                 },
             );
         });
-
-        for (unit, content) in [
-            (
-                "color-theme-dark.service",
-                include_bytes!(concat!(
-                    env!("CARGO_MANIFEST_DIR"),
-                    "/../files/services/color-theme-dark.service"
-                ))
-                .as_slice(),
-            ),
-            (
-                "color-theme-light.service",
-                include_bytes!(concat!(
-                    env!("CARGO_MANIFEST_DIR"),
-                    "/../files/services/color-theme-light.service"
-                ))
-                .as_slice(),
-            ),
-        ] {
-            plan.add(
-                Owned(format!("user service {unit}")),
-                user_elevate,
-                File {
-                    path: Owned(user_directories.systemd_user_units.join(unit)),
-                    on_symlink: SymlinkHandling::Proceed,
-                    on_directory: DirectoryHandling::Bail,
-                    permissions: FilePermissions {
-                        owner: Uid::from(user.name.clone()),
-                        group: Gid::from(user.name.clone()),
-                        mode: FileMode(0o644),
-                    },
-                    binary: false,
-                    secret: false,
-                    ignore_checksum_changes: false,
-                    content: FileContent::Bytes(Ref(content)),
-                },
-            );
-        }
     });
 }
 

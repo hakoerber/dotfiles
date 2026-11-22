@@ -1,9 +1,0 @@
-[Unit]
-After=windowmanager.target
-Conflicts=color-theme-dark.service
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/env switch-color-mode light
-RemainAfterExit=true
-PassEnvironment=WAYLAND_DISPLAY
