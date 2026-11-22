@@ -3898,7 +3898,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                 ignore_checksum_changes: false,
                 content: FileContent::Bytes(Ref(include_bytes!(concat!(
                     env!("CARGO_MANIFEST_DIR"),
-                    "/../files/autostart/services/sway.service"
+                    "/../files/services/sway.service"
                 )))),
             },
         );
@@ -4266,7 +4266,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                     ignore_checksum_changes: false,
                     content: FileContent::Bytes(Ref(include_bytes!(concat!(
                         env!("CARGO_MANIFEST_DIR"),
-                        "/../files/autostart/services/gpg-agent.service"
+                        "/../files/services/gpg-agent.service"
                     )))),
                 },
             );
@@ -4290,7 +4290,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                     ignore_checksum_changes: false,
                     content: FileContent::Bytes(Ref(include_bytes!(concat!(
                         env!("CARGO_MANIFEST_DIR"),
-                        "/../files/autostart/services/yubikey-touch-detector.service"
+                        "/../files/services/yubikey-touch-detector.service"
                     )))),
                 },
             );
@@ -4411,7 +4411,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                 ignore_checksum_changes: false,
                 content: FileContent::Bytes(Ref(include_bytes!(concat!(
                     env!("CARGO_MANIFEST_DIR"),
-                    "/../files/autostart/services/gnome-keyring.service"
+                    "/../files/services/gnome-keyring.service"
                 )))),
             },
         );
@@ -4441,7 +4441,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                 ignore_checksum_changes: false,
                 content: FileContent::Bytes(Ref(include_bytes!(concat!(
                     env!("CARGO_MANIFEST_DIR"),
-                    "/../files/autostart/services/kdeconnect.service"
+                    "/../files/services/kdeconnect.service"
                 )))),
             },
         );
@@ -4473,7 +4473,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                     ignore_checksum_changes: false,
                     content: FileContent::Bytes(Ref(include_bytes!(concat!(
                         env!("CARGO_MANIFEST_DIR"),
-                        "/../files/autostart/services/keepassxc.service"
+                        "/../files/services/keepassxc.service"
                     )))),
                 },
             );
@@ -4517,7 +4517,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                     ignore_checksum_changes: false,
                     content: FileContent::Bytes(Ref(include_bytes!(concat!(
                         env!("CARGO_MANIFEST_DIR"),
-                        "/../files/autostart/services/nextcloud.service"
+                        "/../files/services/nextcloud.service"
                     )))),
                 },
             );
@@ -4557,7 +4557,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                 ignore_checksum_changes: false,
                 content: FileContent::Bytes(Ref(include_bytes!(concat!(
                     env!("CARGO_MANIFEST_DIR"),
-                    "/../files/autostart/services/screencfg.service"
+                    "/../files/services/screencfg.service"
                 )))),
             },
         );
@@ -4585,7 +4585,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                 ignore_checksum_changes: false,
                 content: FileContent::Bytes(Ref(include_bytes!(concat!(
                     env!("CARGO_MANIFEST_DIR"),
-                    "/../files/autostart/services/spotify.service"
+                    "/../files/services/spotify.service"
                 )))),
             },
         );
@@ -4617,7 +4617,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                     ignore_checksum_changes: false,
                     content: FileContent::Bytes(Ref(include_bytes!(concat!(
                         env!("CARGO_MANIFEST_DIR"),
-                        "/../files/autostart/services/discord.service"
+                        "/../files/services/discord.service"
                     )))),
                 },
             );
@@ -4670,7 +4670,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                     ignore_checksum_changes: false,
                     content: FileContent::Bytes(Ref(include_bytes!(concat!(
                         env!("CARGO_MANIFEST_DIR"),
-                        "/../files/autostart/services/steam.service"
+                        "/../files/services/steam.service"
                     )))),
                 },
             );
@@ -4712,7 +4712,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                     ignore_checksum_changes: false,
                     content: FileContent::Bytes(Ref(include_bytes!(concat!(
                         env!("CARGO_MANIFEST_DIR"),
-                        "/../files/autostart/services/laptop-lid.service"
+                        "/../files/services/laptop-lid.service"
                     )))),
                 },
             );
@@ -4778,7 +4778,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                     ignore_checksum_changes: false,
                     content: FileContent::Bytes(Ref(include_bytes!(concat!(
                         env!("CARGO_MANIFEST_DIR"),
-                        "/../files/autostart/services/gammastep.service"
+                        "/../files/services/gammastep.service"
                     )))),
                 },
             );
@@ -4818,7 +4818,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                 ignore_checksum_changes: false,
                 content: FileContent::Bytes(Ref(include_bytes!(concat!(
                     env!("CARGO_MANIFEST_DIR"),
-                    "/../files/autostart/services/workstation-mgr.service"
+                    "/../files/services/workstation-mgr.service"
                 )))),
             },
         );
@@ -4877,7 +4877,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                 ignore_checksum_changes: false,
                 content: FileContent::Bytes(Ref(include_bytes!(concat!(
                     env!("CARGO_MANIFEST_DIR"),
-                    "/../files/autostart/services/dunst.service"
+                    "/../files/services/dunst.service"
                 )))),
             },
         );
@@ -4962,7 +4962,7 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
                 ignore_checksum_changes: false,
                 content: FileContent::Bytes(Ref(include_bytes!(concat!(
                     env!("CARGO_MANIFEST_DIR"),
-                    "/../files/autostart/services/firefox@.service"
+                    "/../files/services/firefox@.service"
                 )))),
             },
         );
@@ -5273,10 +5273,17 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
                     binary: false,
                     secret: false,
                     ignore_checksum_changes: false,
-                    content: FileContent::Bytes(Ref(include_bytes!(concat!(
-                        env!("CARGO_MANIFEST_DIR"),
-                        "/../files/autostart/services/windowmanager.target"
-                    )))),
+                    content: FileContent::Bytes(Ref(concat!(
+                        dedent!(
+                            r#"
+                            [Unit]
+                            Requires=sway.service
+                            After=sway.service
+                        "#
+                        ),
+                        "\n"
+                    )
+                    .as_bytes())),
                 },
             );
 
