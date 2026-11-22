@@ -3116,6 +3116,8 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine, 'p
     let mut required_packages =
         user_dotfiles(plan, user_elevate, user, machine, &home, &user_directories)?;
 
+    packages.extend(required_packages);
+
     let dependencies = Box::pin(user_executables(
         plan,
         user_elevate,
@@ -3124,9 +3126,7 @@ async fn configure_user<'elevate: 'action, 'action, 'user: 'action, 'machine, 'p
     ))
     .await?;
 
-    required_packages.extend(dependencies);
-
-    packages.extend(required_packages);
+    packages.extend(dependencies);
 
     packages.insert(
         Ref("pass"),
