@@ -27,6 +27,10 @@ name = "cfg"
 version.workspace = true
 edition.workspace = true
 
+[lib]
+name = "cfg"
+path = "src/lib.rs"
+
 [[bin]]
 name = "cfg"
 path = "src/main.rs"
