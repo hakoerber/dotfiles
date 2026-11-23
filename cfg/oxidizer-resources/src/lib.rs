@@ -19,7 +19,7 @@ pub mod prelude {
     };
     pub use super::systemd::{
         BootTarget, DaemonReload, RestartService, Service, ServiceState, ServiceStatePersistent,
-        ServiceStateRuntime, Target,
+        ServiceStateRuntime,
     };
     pub use super::user::{Group, PrimaryGroupConfig, User};
 }

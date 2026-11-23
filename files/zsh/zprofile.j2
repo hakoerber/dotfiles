@@ -131,7 +131,7 @@ for env in "${systemd_envs[@]}" ; do
 done
 
 if [[ -n "${XDG_VTNR}" ]] ; then
-    if (( $XDG_VTNR == {{ user.vt }} )) ; then
+    if (( $XDG_VTNR == {{ vt }} )) ; then
         systemctl --user start windowmanager.target
     else
         tmux new-session -A -s "tmux-tty-${XDG_VTNR}"

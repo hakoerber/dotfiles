@@ -2,16 +2,17 @@ use anyhow::{Result, anyhow, bail};
 use async_trait::async_trait;
 
 use blocks::{
-    checksum,
+    Elevate, Path, PathBuf, checksum,
     fs::{
         self, FileContent, FilePermissionDiff, FilePermissions, RawFileContent,
         SymlinkPermissionDiff, SymlinkPermissions,
     },
+    tempfile::Tempfile,
 };
-
-use crate::{
+use maybeowned::MaybeOwned;
+use oxidizer_core::{
     Applyable, Assertable, AssertionFailureReport, AssertionResult, ChangeStatus, ChecksumChange,
-    Elevate, MaybeOwned, Path, PathBuf, Plannable, Reporter, Tempfile,
+    Plannable, Reporter,
 };
 
 #[derive(Debug)]
@@ -297,7 +298,7 @@ impl<'args> Plannable<'args> for File<'args> {
                         }
                     }
                 }
-                fs::Stat::Directory(permissions) => match self.on_directory {
+                fs::Stat::Directory(_permissions) => match self.on_directory {
                     DirectoryHandling::Bail => bail!("refusing to overwrite directory"),
                     DirectoryHandling::Proceed => {
                         Ok(ChangeStatus::NeedsChange(Box::new(FileChangePlan {
@@ -306,7 +307,7 @@ impl<'args> Plannable<'args> for File<'args> {
                         })))
                     }
                 },
-                fs::Stat::Symlink(permissions) => match self.on_symlink {
+                fs::Stat::Symlink(_permissions) => match self.on_symlink {
                     SymlinkHandling::Proceed => {
                         Ok(ChangeStatus::NeedsChange(Box::new(FileChangePlan {
                             args: *self,
@@ -464,7 +465,7 @@ impl<'args> Plannable<'args> for Directory<'args> {
 
         if let Some(stat) = stat {
             match stat {
-                fs::Stat::File(permissions) => match self.on_file {
+                fs::Stat::File(_permissions) => match self.on_file {
                     FileHandling::Proceed => {
                         Ok(ChangeStatus::NeedsChange(Box::new(DirectoryChangePlan {
                             args: *self,
@@ -473,7 +474,7 @@ impl<'args> Plannable<'args> for Directory<'args> {
                     }
                     FileHandling::Bail => bail!("refusing to overwrite file"),
                 },
-                fs::Stat::Symlink(permissions) => match self.on_symlink {
+                fs::Stat::Symlink(_permissions) => match self.on_symlink {
                     SymlinkHandling::Proceed => {
                         Ok(ChangeStatus::NeedsChange(Box::new(DirectoryChangePlan {
                             args: *self,
@@ -561,20 +562,20 @@ impl<'args> Plannable<'args> for Remove<'args> {
         match fs::stat(elevate, self.path.as_ref()).await? {
             Some(stat) => Ok(ChangeStatus::NeedsChange(Box::new(RemovePlan {
                 change: match stat {
-                    fs::Stat::File(permissions) => match self.on_file {
+                    fs::Stat::File(_permissions) => match self.on_file {
                         FileHandling::Bail => {
                             bail!("refusing to remove file {}", self.path.as_ref())
                         }
                         FileHandling::Proceed => RemoveChange::File,
                     },
 
-                    fs::Stat::Directory(permissions) => match self.on_directory {
+                    fs::Stat::Directory(_permissions) => match self.on_directory {
                         DirectoryHandling::Bail => {
                             bail!("refusing to remove directory {}", self.path.as_ref())
                         }
                         DirectoryHandling::Proceed => RemoveChange::Directory,
                     },
-                    fs::Stat::Symlink(permissions) => match self.on_symlink {
+                    fs::Stat::Symlink(_permissions) => match self.on_symlink {
                         SymlinkHandling::Bail => {
                             bail!("refusing to remove symlink {}", self.path.as_ref())
                         }
@@ -621,7 +622,7 @@ impl Assertable<'_> for AssertFile<'_> {
                         Ok(AssertionResult::Success)
                     }
                 }
-                fs::Stat::Directory(permissions) => {
+                fs::Stat::Directory(_permissions) => {
                     Ok(AssertionResult::Failed(AssertionFailureReport {
                         reason: vec![format!(
                             "{} is a directory (expected file)",
@@ -629,7 +630,7 @@ impl Assertable<'_> for AssertFile<'_> {
                         )],
                     }))
                 }
-                fs::Stat::Symlink(permissions) => {
+                fs::Stat::Symlink(_permissions) => {
                     Ok(AssertionResult::Failed(AssertionFailureReport {
                         reason: vec![format!(
                             "{} is a symlink (expected file)",
@@ -689,16 +690,16 @@ impl<'args> Plannable<'args> for Symlink<'args> {
 
         if let Some(stat) = stat {
             match stat {
-                fs::Stat::File(permissions) => match self.on_file {
+                fs::Stat::File(_permissions) => match self.on_file {
                     FileHandling::Bail => bail!("refusing to overwrite file"),
                     FileHandling::Proceed => {
                         Ok(ChangeStatus::NeedsChange(Box::new(SymlinkChangePlan {
                             args: *self,
-                            change: SymlinkChange::ReplaceDirectory,
+                            change: SymlinkChange::ReplaceFile,
                         })))
                     }
                 },
-                fs::Stat::Directory(permissions) => match self.on_directory {
+                fs::Stat::Directory(_permissions) => match self.on_directory {
                     DirectoryHandling::Bail => bail!("refusing to overwrite directory"),
                     DirectoryHandling::Proceed => {
                         Ok(ChangeStatus::NeedsChange(Box::new(SymlinkChangePlan {
@@ -764,9 +765,6 @@ impl Reporter for SymlinkPermissionChange {
 #[derive(Debug)]
 pub(crate) enum SymlinkChange {
     Create,
-    MetadataChange {
-        permission_change: SymlinkPermissionChange,
-    },
     Changed {
         permission_change: Option<SymlinkPermissionChange>,
         current_target: Option<PathBuf>,
@@ -829,16 +827,6 @@ impl Applyable for SymlinkChangePlan<'_> {
                 )
                 .await?;
             }
-            SymlinkChange::MetadataChange {
-                ref permission_change,
-            } => {
-                if let Some(ref uid) = permission_change.diff.owner {
-                    fs::set_symlink_owner(elevate, self.args.path.as_ref(), uid).await?;
-                }
-                if let Some(ref gid) = permission_change.diff.group {
-                    fs::set_symlink_group(elevate, self.args.path.as_ref(), gid).await?;
-                }
-            }
             SymlinkChange::Changed {
                 ref permission_change,
                 ref current_target,
@@ -882,9 +870,6 @@ impl Reporter for SymlinkChangePlan<'_> {
             SymlinkChange::Create => Ok(vec!["create symlink".to_owned()]),
             SymlinkChange::ReplaceFile => Ok(vec!["replacing file".to_owned()]),
             SymlinkChange::ReplaceDirectory => Ok(vec!["replacing directory".to_owned()]),
-            SymlinkChange::MetadataChange {
-                ref permission_change,
-            } => Ok(permission_change.report()?),
             SymlinkChange::Changed {
                 ref permission_change,
                 ref current_target,

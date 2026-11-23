@@ -4,10 +4,9 @@ use anyhow::Result;
 use async_once_cell::OnceCell;
 use tap::Tap as _;
 
-use blocks::{cmd, pkg};
+use blocks::{Elevate, Path, cmd, pkg};
 use maybeowned::prelude::*;
-
-use crate::{Applyable, ChangeStatus, Elevate, Path, Plannable, Reporter};
+use oxidizer_core::{Applyable, ChangeStatus, Plannable, Reporter};
 
 static INSTALLED_PACKAGES: OnceCell<HashSet<String>> = OnceCell::new();
 
@@ -56,7 +55,7 @@ impl<'change> Plannable<'change> for PackageDatabaseRefresh {
 
 #[derive(Debug)]
 pub(crate) struct PackageDatabaseRefreshPlan<'a> {
-    // #[expect(unused, reason = "kept to have the same shape as other plans")]
+    #[expect(unused, reason = "kept to have the same shape as other plans")]
     pub(crate) args: &'a (),
 }
 
@@ -254,7 +253,7 @@ impl<'change> Plannable<'change> for PackageRemove<'change> {
 
 #[derive(Debug)]
 pub(crate) struct PackageRemovePlan<'a> {
-    // #[expect(unused, reason = "kept to have the same shape as other plans")]
+    #[expect(unused, reason = "kept to have the same shape as other plans")]
     pub(crate) args: PackageRemove<'a>,
     pub(crate) remove: Vec<MaybeOwned<'a, str>>,
 }

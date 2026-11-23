@@ -1,10 +1,9 @@
 use anyhow::Result;
 use async_trait::async_trait;
 
-use blocks::{cmd, user};
+use blocks::{Elevate, Path, cmd, user};
 use maybeowned::prelude::*;
-
-use super::super::{Applyable, ChangeStatus, Elevate, Path, Plannable, Reporter};
+use oxidizer_core::{Applyable, ChangeStatus, Plannable, Reporter};
 
 #[derive(Debug)]
 pub(crate) enum UserGroupDiff<'change> {
@@ -305,7 +304,6 @@ impl<'change> Plannable<'change> for Group<'change> {
             Ok(ChangeStatus::Clean)
         } else {
             Ok(ChangeStatus::NeedsChange(Box::new(GroupPlan {
-                elevate,
                 args: *self,
                 change: GroupChange::Create,
             })))
@@ -314,15 +312,13 @@ impl<'change> Plannable<'change> for Group<'change> {
 }
 
 #[derive(Debug)]
-pub(crate) struct GroupPlan<'elevate, 'args> {
-    pub(crate) elevate: &'elevate Elevate,
-    // #[expect(unused, reason = "kept to have the same shape as other plans")]
+pub(crate) struct GroupPlan<'args> {
     pub(crate) args: Group<'args>,
     pub(crate) change: GroupChange,
 }
 
 #[async_trait]
-impl Applyable for GroupPlan<'_, '_> {
+impl Applyable for GroupPlan<'_> {
     async fn apply(&self, elevate: &Elevate) -> Result<()> {
         match self.change {
             GroupChange::Create => {
@@ -343,7 +339,7 @@ impl Applyable for GroupPlan<'_, '_> {
     }
 }
 
-impl Reporter for GroupPlan<'_, '_> {
+impl Reporter for GroupPlan<'_> {
     fn report(&self) -> Result<Vec<String>> {
         match self.change {
             GroupChange::Create => Ok(vec!["create group".to_owned()]),

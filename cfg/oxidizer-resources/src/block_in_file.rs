@@ -1,10 +1,14 @@
 use anyhow::{Result, anyhow, bail};
 use regex::Regex;
 
-use blocks::{Path, checksum, fs, fs::RawFileContent};
+use blocks::{
+    Elevate, Path,
+    checksum::{self, Checksum},
+    fs::{self, RawFileContent},
+    tempfile::Tempfile,
+};
 use maybeowned::prelude::*;
-
-use crate::{Applyable, ChangeStatus, Checksum, Elevate, Plannable, Reporter, Tempfile};
+use oxidizer_core::{Applyable, ChangeStatus, Plannable, Reporter};
 
 #[derive(Debug)]
 pub struct BlockInFile<'change> {

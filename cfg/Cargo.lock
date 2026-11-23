@@ -124,23 +124,15 @@ name = "cfg"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "async-once-cell",
- "async-scoped",
- "async-trait",
- "blocks",
  "clap",
  "dedent",
- "derive_more",
- "diffy",
  "include_dir",
  "maybeowned",
- "owo-colors",
+ "oxidizer",
  "paste",
- "regex",
  "serde",
  "serde_json",
  "strum",
- "tap",
  "tempfile",
  "tera",
  "tokio",
@@ -522,6 +514,43 @@ name = "owo-colors"
 version = "4.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13c45bb4a6ae1280ec0803b1ef9d3455eb50f01efbbe1447ab020f1d54fba9d8"
+
+[[package]]
+name = "oxidizer"
+version = "0.1.0"
+dependencies = [
+ "blocks",
+ "oxidizer-core",
+ "oxidizer-resources",
+]
+
+[[package]]
+name = "oxidizer-core"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-scoped",
+ "async-trait",
+ "blocks",
+ "maybeowned",
+ "owo-colors",
+]
+
+[[package]]
+name = "oxidizer-resources"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-once-cell",
+ "async-trait",
+ "blocks",
+ "derive_more",
+ "diffy",
+ "maybeowned",
+ "oxidizer-core",
+ "regex",
+ "tap",
+]
 
 [[package]]
 name = "paste"

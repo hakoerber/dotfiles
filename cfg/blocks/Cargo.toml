@@ -7,24 +7,17 @@ edition = "2024"
 path = "src/lib.rs"
 
 [dependencies]
+maybeowned = { path = "../maybeowned/" }
 sha3 = { version = "0.12", default-features = false }
 derive_more = { version = "2", default-features = false, features = [
   "display",
 ] }
-tracing = { version = "0.1", default-features = false }
-anyhow = { version = "1", default-features = false, features = [
-  "std",
-  "backtrace",
-] }
 camino = { version = "1", default-features = false, features = [] }
-tokio = { version = "1", default-features = false, features = [
-  "fs",
-  "io-util",
-  "process",
-] }
 tokio-stream = { version = "0.1", default-features = false, features = ["fs"] }
-tap = { version = "1", default-features = false }
-maybeowned = { path = "../maybeowned/" }
+tracing = { workspace = true }
+anyhow = { workspace = true }
+tokio = { workspace = true, features = ["fs", "io-util", "process"] }
+tap = { workspace = true }
 
 [lints]
 workspace = true

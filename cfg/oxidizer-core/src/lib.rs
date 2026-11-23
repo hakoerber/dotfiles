@@ -19,27 +19,6 @@ use blocks::{
 };
 use maybeowned::prelude::*;
 
-mod resources;
-
-pub mod prelude {
-    pub use super::resources::prelude::*;
-    pub use super::{Block, FinishResult, Plan, ReportConfig, Resource, SecretsWorkflow};
-    pub use blocks::{
-        Path, PathBuf,
-        cmd::{Process, Stdin},
-        fs::{
-            FileContent::{self, Lines},
-            FileMode, FilePermissions, SymlinkPermissions, create_or_write, files_in_dir, try_read,
-        },
-        gpg::{GpgFingerprint, GpgTrust},
-        pkg::{
-            InstallReason, check_installed, get_package_version,
-            list_explicitly_installed_packages, list_orphaned_packages, resolve_installed_package,
-        },
-        tempfile::Tempfile,
-    };
-}
-
 pub trait Reporter {
     fn report(&self) -> Result<Vec<String>>;
 }
@@ -539,9 +518,9 @@ pub trait Assertable<'assert>: fmt::Debug {
 }
 
 #[derive(Debug)]
-struct ChecksumChange {
-    from: Checksum,
-    to: Checksum,
+pub struct ChecksumChange {
+    pub from: Checksum,
+    pub to: Checksum,
 }
 
 pub struct NodePlanRef<'plan, 'name, 'elevate, 'pkgs, 'action, 'secrets, S>
@@ -1031,7 +1010,7 @@ struct Report<'name> {
 
 #[derive(Debug)]
 pub struct AssertionFailureReport {
-    reason: Vec<String>,
+    pub reason: Vec<String>,
 }
 
 #[must_use]

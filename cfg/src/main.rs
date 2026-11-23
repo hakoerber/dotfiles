@@ -20,12 +20,8 @@ use include_dir::{DirEntry, include_dir};
 use serde::{Deserialize, Serialize};
 use strum::VariantArray;
 
-use blocks::{
-    Elevate, ElevateTo,
-    user::{Gid, Uid},
-};
-use cfg::prelude::*;
 use maybeowned::prelude::*;
+use oxidizer::prelude::*;
 
 static BINS: include_dir::Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../files/bin");
 
@@ -41,8 +37,7 @@ mod migrations {
     use anyhow::Result;
     use serde::{Deserialize, Serialize};
 
-    use blocks::Elevate;
-    use cfg::prelude::*;
+    use oxidizer::prelude::*;
 
     const STATE_PATH: &str = "/var/lib/cfg.state";
 
@@ -246,20 +241,18 @@ const MY_SSH_PUBKEY: &str = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCxOtVxz3vRL7S
 type PackageList<'pkgs> =
     HashMap<MaybeOwned<'pkgs, str>, MaybeOwned<'pkgs, [MaybeOwned<'pkgs, str>]>>;
 
-#[derive(Serialize)]
 enum Cpu {
     Intel,
     Amd,
 }
 
-#[derive(Serialize)]
 enum Gpu {
     Amd,
     Nvidia,
     Intel,
 }
 
-#[derive(Clone, Copy, ValueEnum, Serialize)]
+#[derive(Clone, Copy, ValueEnum)]
 enum Host {
     Neptune,
     Ares,
@@ -594,6 +587,25 @@ const APPLICATION_PACKAGES: &[(&str, &[&str])] = if cfg!(feature = "testing") {
         ("lsp/markdown", &["marksman", "mdformat"]),
         ("magic-wormhole", &["magic-wormhole"]),
         ("words", &["words"]),
+        (
+            "rust",
+            &[
+                "rustup",
+                "rust-analyzer",
+                "cargo-edit",
+                "cargo-expand",
+                "cargo-msrv",
+                "cargo-watch",
+                "cargo-release",
+                "cargo-sort",
+                "cargo-hack",
+                "cargo-dist",
+                "cargo-binstall",
+                "cargo-machete",
+                "rust-script",
+                "bacon",
+            ],
+        ),
     ]
 };
 
@@ -1293,9 +1305,7 @@ fn boot_target<'elevate: 'action, 'action>(
     plan.add(
         Ref("setting boot target"),
         elevate,
-        BootTarget {
-            target: config.machine.boot_target,
-        },
+        config.machine.boot_target,
     );
 }
 
@@ -1341,7 +1351,7 @@ fn sudo<'elevate: 'action, 'action>(
                 binary: false,
                 secret: false,
                 ignore_checksum_changes: false,
-                content: Lines(Owned(vec![Ref("%sudonopw ALL=(ALL) NOPASSWD: ALL")])),
+                content: FileContent::Lines(Owned(vec![Ref("%sudonopw ALL=(ALL) NOPASSWD: ALL")])),
             },
         );
 
@@ -1371,7 +1381,7 @@ fn sudo<'elevate: 'action, 'action>(
                 binary: false,
                 secret: false,
                 ignore_checksum_changes: false,
-                content: Lines(Owned(vec![Ref("permit nopass nolog setenv {PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin} :sudonopw")])),
+                content: FileContent::Lines(Owned(vec![Ref("permit nopass nolog setenv {PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin} :sudonopw")])),
             },
         );
     });
@@ -1411,7 +1421,7 @@ fn timesyncd<'elevate: 'action, 'action>(
                 binary: false,
                 secret: false,
                 ignore_checksum_changes: false,
-                content: Lines(Owned(vec![
+                content: FileContent::Lines(Owned(vec![
                     Ref("[Time]"),
                     Owned(format!("NTP={}", arch_ntp_servers.join(" "))),
                     Owned(format!("FallbackNTP={}", fallback_ntp_servers.join(" "))),
@@ -1464,7 +1474,7 @@ fn reflector<'elevate: 'action, 'action>(
                 binary: false,
                 secret: false,
                 ignore_checksum_changes: false,
-                content: Lines(Ref(&[
+                content: FileContent::Lines(Ref(&[
                     Ref("--save /etc/pacman.d/mirrorlist"),
                     Ref("--protocol https"),
                     Ref("--country Germany"),
@@ -2137,7 +2147,7 @@ fn pacman<'plan, 'elevate: 'action, 'action>(
                     binary: false,
                     secret: false,
                     ignore_checksum_changes: false,
-                    content: Lines(Ref(&[
+                    content: FileContent::Lines(Ref(&[
                         Ref("[Service]"),
                         Ref("Type=oneshot"),
                         Ref("ExecStart=/bin/sh -c '/usr/bin/paccache -rk1 && /usr/bin/paccache -ruk0'"),
@@ -2162,7 +2172,7 @@ fn pacman<'plan, 'elevate: 'action, 'action>(
                     binary: false,
                     secret: false,
                     ignore_checksum_changes: false,
-                    content: Lines(Ref(&[
+                    content: FileContent::Lines(Ref(&[
                         Ref("[Timer]"),
                         Ref("OnCalendar=daily"),
                         Ref(""),
@@ -2313,7 +2323,7 @@ fn backlight<'elevate: 'action, 'action>(
             binary: false,
             secret: false,
             ignore_checksum_changes: false,
-            content: Lines(Ref(&[Ref(r#"ACTION=="add", SUBSYSTEM=="backlight", RUN+="/bin/chgrp video $sys$devpath/brightness", RUN+="/bin/chmod g+w $sys$devpath/brightness""#)])),
+            content: FileContent::Lines(Ref(&[Ref(r#"ACTION=="add", SUBSYSTEM=="backlight", RUN+="/bin/chgrp video $sys$devpath/brightness", RUN+="/bin/chmod g+w $sys$devpath/brightness""#)])),
         },
     );
 }
@@ -2664,7 +2674,7 @@ fn kernel<'elevate: 'action, 'action>(
                 binary: false,
                 secret: false,
                 ignore_checksum_changes: false,
-                content: Lines(Ref(&[
+                content: FileContent::Lines(Ref(&[
                     // dirty flag
                     Ref("install esp4 /bin/false"),
                     Ref("install esp6 /bin/false"),
@@ -2747,7 +2757,7 @@ fn logind<'elevate: 'action, 'action>(
             binary: false,
             secret: false,
             ignore_checksum_changes: false,
-            content: Lines(Ref(&[
+            content: FileContent::Lines(Ref(&[
                 Ref("[Login]"),
                 Ref("HandlePowerKey=suspend"),
                 Ref("HandleLidSwitch=ignore"),
@@ -3394,7 +3404,7 @@ fn user_autologin<'elevate: 'action, 'action, 'user, 'machine>(
                 binary: false,
                 secret: false,
                 ignore_checksum_changes: false,
-                content: Lines(Owned(vec![
+                content: FileContent::Lines(Owned(vec![
                     Ref("[Service]"),
                     Ref("ExecStart="),
                     Owned(format!(
@@ -3416,10 +3426,21 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
     home: &Path,
     directories: &UserDirectories,
 ) -> Result<(PackageList<'pkgs>, Vec<MaybeOwned<'static, str>>)> {
+    #[expect(
+        clippy::struct_excessive_bools,
+        reason = "i don't want logic in the templates"
+    )]
     #[derive(Serialize)]
     struct TemplateContext<'a> {
-        user: &'a UserConfig,
-        machine: &'a MachineConfig,
+        gpg_agent_enabled: bool,
+        ssh_agent_enabled: bool,
+        gpg_agent_for_ssh: bool,
+        vt: usize,
+        fullname: &'a str,
+        mail: &'a str,
+        keyboard_repeat_delay: usize,
+        keyboard_repeat_rate: usize,
+        font_size: usize,
         workspace_sway_config: String,
         is_laptop: bool,
         is_workstation: bool,
@@ -3430,12 +3451,22 @@ fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
     let mut services = Vec::new();
 
     let template_context = TemplateContext {
-        user,
-        machine,
+        font_size: machine.font_size,
         workspace_sway_config: user.workspace.to_sway_config(),
         is_laptop: machine.machine_type == Laptop,
         is_workstation: machine.machine_type == Workstation,
         is_tv: machine.machine_type == Tv,
+        gpg_agent_enabled: user.gpg.as_ref().is_some_and(|config| config.agent_enabled),
+        gpg_agent_for_ssh: user
+            .gpg
+            .as_ref()
+            .is_some_and(|config| config.gpg_agent_for_ssh),
+        ssh_agent_enabled: user.ssh_agent_enabled,
+        vt: user.vt,
+        fullname: user.fullname.as_str(),
+        mail: user.mail.as_str(),
+        keyboard_repeat_delay: user.keyboard.repeat_delay,
+        keyboard_repeat_rate: user.keyboard.repeat_rate,
     };
 
     let template_context = tera::Context::from_serialize(&template_context)?;
@@ -5311,7 +5342,7 @@ fn user_services<'elevate: 'action, 'action, 'user, 'machine>(
     });
 }
 
-#[derive(Eq, PartialEq, Serialize)]
+#[derive(Eq, PartialEq)]
 enum MachineType {
     Tv,
     Workstation,
@@ -5319,7 +5350,6 @@ enum MachineType {
 }
 use MachineType::{Laptop, Tv, Workstation};
 
-#[derive(Serialize)]
 struct MachineRoles(&'static [MachineRole]);
 
 impl MachineRoles {
@@ -5328,12 +5358,12 @@ impl MachineRoles {
     }
 }
 
-#[derive(Eq, PartialEq, Serialize, Clone, Copy)]
+#[derive(Eq, PartialEq, Clone, Copy)]
 enum MachineRole {
     Gaming,
 }
 
-#[derive(Serialize, Copy, Clone)]
+#[derive(Copy, Clone)]
 enum WorkspaceApp {
     Firefox,
     Terminal,
@@ -5364,7 +5394,6 @@ impl WorkspaceApp {
     }
 }
 
-#[derive(Serialize)]
 struct WorkspaceConfig {
     num1: Option<WorkspaceApp>,
     num2: Option<WorkspaceApp>,
@@ -5450,7 +5479,7 @@ impl WorkspaceConfig {
     }
 }
 
-#[derive(Serialize, VariantArray)]
+#[derive(VariantArray)]
 enum Language {
     En,
     De,
@@ -5465,11 +5494,10 @@ impl Language {
     }
 }
 
-#[derive(Serialize)]
 struct MachineConfig {
     host: Host,
     encrypted_root: bool,
-    boot_target: Target,
+    boot_target: BootTarget,
     cpu: Cpu,
     gpu: Gpu,
     font_size: usize,
@@ -5478,34 +5506,26 @@ struct MachineConfig {
     language: Language,
 }
 
-#[derive(Serialize)]
 struct UserKeyboardConfig {
     repeat_delay: usize,
     repeat_rate: usize,
 }
 
-#[derive(Serialize)]
 struct UserGpgConfig {
-    email: String,
-    id: String,
-    fingerprint: String,
     gpg_agent_for_ssh: bool,
     agent_enabled: bool,
 }
 
-#[derive(Serialize)]
 struct FirefoxProfile {
     name: String,
     manage_css: bool,
-    extensions: Vec<String>,
 }
 
-#[derive(Serialize)]
 struct FirefoxUserConfig {
     profiles: Vec<FirefoxProfile>,
 }
 
-#[derive(PartialEq, Eq, Serialize)]
+#[derive(PartialEq, Eq)]
 enum FeatureState {
     Enabled,
     Disabled,
@@ -5523,7 +5543,6 @@ impl From<bool> for FeatureState {
     }
 }
 
-#[derive(Serialize)]
 struct UserConfig {
     name: String,
     fullname: String,
@@ -5583,9 +5602,6 @@ fn private_user(autologin: bool, vt: usize, name: String, machine: &MachineConfi
         ssh_agent_enabled: false,
         gpg: Some(UserGpgConfig {
             agent_enabled: true,
-            email: "hannes@hkoerber.de".to_owned(),
-            id: "0xB5C002530C6A2053".to_owned(),
-            fingerprint: "973AE48D71B76735C4712B5BB5C002530C6A2053".to_owned(),
             gpg_agent_for_ssh: true,
         }),
         nextcloud: FeatureState::Enabled,
@@ -5595,13 +5611,6 @@ fn private_user(autologin: bool, vt: usize, name: String, machine: &MachineConfi
             profiles: vec![FirefoxProfile {
                 name: "default".to_owned(),
                 manage_css: true,
-                extensions: vec![
-                    "ublock-origin".to_owned(),
-                    "passff".to_owned(),
-                    "tree-style-tab".to_owned(),
-                    "i-dont-care-about-cookies".to_owned(),
-                    "floccus".to_owned(),
-                ],
             }],
         },
         workspace: match machine.host {
@@ -5828,16 +5837,10 @@ async fn main() -> MainResult {
                             FirefoxProfile {
                                 name: "default".to_owned(),
                                 manage_css: true,
-                                extensions: vec![
-                                    "ublock-origin".to_owned(),
-                                    "tree-style-tab".to_owned(),
-                                    "i-dont-care-about-cookies".to_owned(),
-                                ],
                             },
                             FirefoxProfile {
                                 name: "meet".to_owned(),
                                 manage_css: false,
-                                extensions: vec!["ublock-origin".to_owned()],
                             },
                         ],
                     },
@@ -5859,7 +5862,7 @@ async fn main() -> MainResult {
                     Neptune => MachineConfig {
                         host: args.hostname,
                         encrypted_root: true,
-                        boot_target: Target::MultiUser,
+                        boot_target: BootTarget::MultiUser,
                         cpu: Cpu::Intel,
                         gpu: Gpu::Nvidia,
                         font_size: 11,
@@ -5870,7 +5873,7 @@ async fn main() -> MainResult {
                     Ares => MachineConfig {
                         host: args.hostname,
                         encrypted_root: true,
-                        boot_target: Target::MultiUser,
+                        boot_target: BootTarget::MultiUser,
                         cpu: Cpu::Amd,
                         gpu: Gpu::Amd,
                         font_size: 10,
@@ -5881,7 +5884,7 @@ async fn main() -> MainResult {
                     Hera => MachineConfig {
                         host: args.hostname,
                         encrypted_root: false,
-                        boot_target: Target::Graphical,
+                        boot_target: BootTarget::Graphical,
                         cpu: Cpu::Intel,
                         gpu: Gpu::Intel,
                         font_size: 11,
@@ -5892,7 +5895,7 @@ async fn main() -> MainResult {
                     Dionysus => MachineConfig {
                         host: args.hostname,
                         encrypted_root: true,
-                        boot_target: Target::MultiUser,
+                        boot_target: BootTarget::MultiUser,
                         cpu: Cpu::Intel,
                         gpu: Gpu::Intel,
                         font_size: 16,

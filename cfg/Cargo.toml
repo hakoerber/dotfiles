@@ -1,60 +1,26 @@
 [workspace]
 members = [
-  "maybeowned",
   "blocks",
+  "maybeowned",
+  "oxidizer",
+  "oxidizer-core",
+  "oxidizer-resources",
 ]
 
-[workspace.package]
-version = "0.1.0"
-edition = "2024"
-
 [workspace.dependencies]
-clap = { version = "4", default-features = false, features = [
-  "std",
-  "derive",
-  "color",
-  "help",
-  "usage",
-  "error-context",
-] }
-diffy = { version = "0.5", default-features = false, features = [
-  "std",
-  "color",
-] }
 serde = { version = "1", default-features = false, features = ["derive"] }
 anyhow = { version = "1", default-features = false, features = [
   "std",
   "backtrace",
 ] }
-owo-colors = { version = "4", default-features = false }
-regex = { version = "1", default-features = false }
-serde_json = { version = "1", default-features = false, features = ["std"] }
-tap = { version = "1", default-features = false }
-tera = { version = "2", default-features = false }
-dedent = { version = "0.1", default-features = false }
 tracing = { version = "0.1", default-features = false }
-tracing-subscriber = { version = "0.3", default-features = false, features = [
-  "fmt",
-  "ansi",
-] }
 include_dir = { version = "0.7", default-features = false }
-tokio = { version = "1", default-features = false, features = [
-  "fs",
-  "io-util",
-  "macros",
-  "process",
-  "rt-multi-thread",
-] }
-async-trait = { version = "0.1", default-features = false }
-async-once-cell = { version = "0.5", default-features = false }
-async-scoped = { version = "0.9", default-features = false, features = [
-  "use-tokio",
-] }
-strum = { version = "0.28", default-features = false, features = ["derive"] }
-paste = { version = "1", default-features = false }
-derive_more = { version = "2", default-features = false, features = [
-  "display",
-] }
+tokio = { version = "1", default-features = false, features = [] }
+tap = { version = "1", default-features = false }
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
 
 [package]
 name = "cfg"
@@ -63,7 +29,7 @@ edition.workspace = true
 
 [[bin]]
 name = "cfg"
-path = "src/bin/main.rs"
+path = "src/main.rs"
 
 [features]
 testing = []
@@ -76,28 +42,30 @@ codegen-units = 1
 panic = "unwind"
 
 [dependencies]
-maybeowned = { path = "./maybeowned/"}
-blocks = { path = "./blocks/"}
-clap = { workspace = true }
-derive_more = { workspace = true }
-diffy = { workspace = true }
+maybeowned = { path = "./maybeowned/" }
+oxidizer = { path = "./oxidizer/" }
+clap = { version = "4", default-features = false, features = [
+  "std",
+  "derive",
+  "color",
+  "help",
+  "usage",
+  "error-context",
+] }
+serde_json = { version = "1", default-features = false, features = ["std"] }
+tera = { version = "2", default-features = false }
+dedent = { version = "0.1", default-features = false }
+tracing-subscriber = { version = "0.3", default-features = false, features = [
+  "fmt",
+  "ansi",
+] }
+paste = { version = "1", default-features = false }
+strum = { version = "0.28", default-features = false, features = ["derive"] }
 serde = { workspace = true }
 anyhow = { workspace = true }
-owo-colors = { workspace = true }
-regex = { workspace = true }
-serde_json = { workspace = true }
-tap = { workspace = true }
-tera = { workspace = true }
-dedent = { workspace = true }
 tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
 include_dir = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
-async-trait = { workspace = true }
-async-once-cell = { workspace = true }
-async-scoped = { workspace = true }
-strum = { workspace = true }
-paste = { workspace = true }
 
 [build-dependencies]
 tempfile = { version = "3", default-features = false }

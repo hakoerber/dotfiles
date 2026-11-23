@@ -3,7 +3,8 @@ use anyhow::Result;
 use blocks::gpg;
 use maybeowned::MaybeOwned;
 
-use crate::{Applyable, ChangeStatus, Elevate, Path, Plannable, Reporter};
+use blocks::{Elevate, Path};
+use oxidizer_core::{Applyable, ChangeStatus, Plannable, Reporter};
 
 #[derive(Debug)]
 pub struct GpgKey<'a> {
@@ -65,7 +66,7 @@ pub(crate) struct GpgPlan<'a> {
 
 #[async_trait::async_trait]
 impl Applyable for GpgPlan<'_> {
-    async fn apply(&self, elevate: &Elevate) -> Result<()> {
+    async fn apply(&self, _elevate: &Elevate) -> Result<()> {
         match self.action {
             GpgAction::Import => {
                 gpg::import_key(

@@ -1,0 +1,30 @@
+[package]
+name = "oxidizer-resources"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+derive_more = { version = "2", default-features = false, features = [
+  "display",
+] }
+anyhow = { version = "1", default-features = false, features = [
+  "std",
+  "backtrace",
+] }
+tap = { version = "1", default-features = false }
+regex = { version = "1", default-features = false }
+maybeowned = { path = "../maybeowned/" }
+oxidizer-core = { path = "../oxidizer-core/" }
+blocks = { path = "../blocks/" }
+async-trait = { version = "0.1", default-features = false }
+async-once-cell = { version = "0.5", default-features = false }
+diffy = { version = "0.5", default-features = false, features = [
+  "std",
+  "color",
+] }
+
+[lints]
+workspace = true

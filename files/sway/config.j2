@@ -2,8 +2,8 @@ input type:keyboard {
     xkb_layout "de"
     xkb_variant "nodeadkeys"
 
-    repeat_delay "{{ user.keyboard.repeat_delay }}"
-    repeat_rate "{{ user.keyboard.repeat_rate }}"
+    repeat_delay "{{ keyboard_repeat_delay }}"
+    repeat_rate "{{ keyboard_repeat_rate }}"
 }
 
 input type:touchpad {
@@ -199,7 +199,7 @@ floating_modifier $mod
 floating_minimum_size 0 x 0
 floating_maximum_size 0 x 0
 
-font pango:JetBrainsMono {{ machine.font_size }}
+font pango:JetBrainsMono {{ font_size }}
 
 ################################################################################
 ### COLOR SETTINGS #############################################################
@@ -230,7 +230,7 @@ bar {
 
     id bar-0
 
-    font pango:JetBrainsMono, FontAwesome {{ machine.font_size }}
+    font pango:JetBrainsMono, FontAwesome {{ font_size }}
 
     colors {
         background #272822

@@ -1,18 +1,16 @@
 use anyhow::{Result, anyhow, bail};
 use async_trait::async_trait;
-use serde::Serialize;
 
-use blocks::cmd;
+use blocks::{Elevate, cmd};
+use oxidizer_core::{Applyable, ChangeStatus, Plannable, Reporter};
 
-use crate::{Applyable, ChangeStatus, Elevate, Plannable, Reporter};
-
-#[derive(Debug, PartialEq, Eq, Serialize, Clone, Copy)]
-pub enum Target {
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum BootTarget {
     MultiUser,
     Graphical,
 }
 
-impl Target {
+impl BootTarget {
     fn as_str(self) -> &'static str {
         match self {
             Self::MultiUser => "multi-user.target",
@@ -437,6 +435,7 @@ impl<'change> Plannable<'change> for DaemonReload {
 
 #[derive(Debug)]
 pub(crate) struct DaemonReloadPlan {
+    #[expect(unused, reason = "kept to have the same shape as other plans")]
     pub(crate) args: DaemonReload,
 }
 
@@ -457,11 +456,6 @@ impl Reporter for DaemonReloadPlan {
     }
 }
 
-#[derive(Debug)]
-pub struct BootTarget {
-    pub target: Target,
-}
-
 #[async_trait]
 impl<'change> Plannable<'change> for BootTarget {
     async fn plan<'elevate>(
@@ -477,8 +471,8 @@ impl<'change> Plannable<'change> for BootTarget {
                     .await?
                     .check()?;
             match systemctl.stdout.trim() {
-                "multi-user.target" => Target::MultiUser,
-                "graphical.target" => Target::Graphical,
+                "multi-user.target" => Self::MultiUser,
+                "graphical.target" => Self::Graphical,
                 _ => bail!(
                     "invalid systemctl get-default output \"{}\"",
                     systemctl.stdout.trim()
@@ -486,7 +480,7 @@ impl<'change> Plannable<'change> for BootTarget {
             }
         };
 
-        if current_target != self.target {
+        if current_target != *self {
             Ok(ChangeStatus::NeedsChange(Box::new(BootTargetPlan {
                 args: *self,
                 current_target,
@@ -500,7 +494,7 @@ impl<'change> Plannable<'change> for BootTarget {
 #[derive(Debug)]
 pub(crate) struct BootTargetPlan {
     pub(crate) args: BootTarget,
-    pub(crate) current_target: Target,
+    pub(crate) current_target: BootTarget,
 }
 
 #[async_trait]
@@ -508,7 +502,7 @@ impl Applyable for BootTargetPlan {
     async fn apply(&self, elevate: &Elevate) -> Result<()> {
         cmd::Process::run(
             "systemctl",
-            &["set-default", "--", self.args.target.as_str()],
+            &["set-default", "--", self.args.as_str()],
             elevate,
             cmd::Stdin::Closed,
         )
@@ -524,7 +518,7 @@ impl Reporter for BootTargetPlan {
         Ok(vec![format!(
             "default boot target: {} -> {}",
             self.current_target.as_str(),
-            self.args.target.as_str()
+            self.args.as_str()
         )])
     }
 }

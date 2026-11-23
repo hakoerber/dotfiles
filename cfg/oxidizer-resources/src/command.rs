@@ -1,8 +1,8 @@
 use anyhow::{Result, bail};
 
-use blocks::cmd;
-
-use crate::{Applyable, ChangeStatus, Elevate, MaybeOwned, Plannable, Reporter};
+use blocks::{Elevate, cmd};
+use maybeowned::MaybeOwned;
+use oxidizer_core::{Applyable, ChangeStatus, Plannable, Reporter};
 
 #[derive(Debug, Clone)]
 pub struct CheckScript<'a> {
