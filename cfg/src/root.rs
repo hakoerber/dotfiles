@@ -1569,26 +1569,26 @@ pub fn hardware<'elevate: 'action, 'action>(
                 plan.register_packages(amdgpu_packages);
             }
             Gpu::Nvidia => {
-                let nouveau_packages = &[
+                let nvidia = &[
+                    Ref("nvidia-open"),
+                    Ref("nvidia-utils"),
                     Ref("mesa"),
                     Ref("mesa-utils"),
                     Ref("lib32-mesa"),
-                    Ref("vulkan-nouveau"),
-                    Ref("lib32-vulkan-nouveau"),
                     Ref("vulkan-headers"),
                     Ref("vulkan-tools"),
                 ];
 
                 plan.add(
-                    "install nouveau packages",
+                    "install nvidia packages",
                     elevate,
                     Packages {
-                        install: Ref(nouveau_packages),
+                        install: Ref(nvidia),
                         reason: InstallReason::Explicit,
                     },
                 );
 
-                plan.register_packages(nouveau_packages);
+                plan.register_packages(nvidia);
             }
             Gpu::Intel => {
                 let intel_packages = &[
