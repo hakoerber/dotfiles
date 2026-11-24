@@ -26,7 +26,8 @@ static SCRIPTS: include_dir::Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../file
 type PackageList<'pkgs> =
     HashMap<MaybeOwned<'pkgs, str>, MaybeOwned<'pkgs, [MaybeOwned<'pkgs, str>]>>;
 
-const MY_SSH_PUBKEY: &str = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCxOtVxz3vRL7SUZVO899RUcg9BiDuZfPUfsd9v3AHOwNvSVsLObqq0QgwajmTML9nRZzX7kc7RmFtXZ5ypMkyEJ9p14rYXKYKhLqEM4Paz0lUagQhy0sdYijtayNsM5luU3yk6a4F/PkanprDGEEtJPMLCwpDODTwlE7THvFtJXLnYeFtF2DJKnUcP6E9MWGYM1zYdrmf43pxWg2YXFjoyLEkOy6TVjjqwz+tKa6+4YRqFWNyXcEWqI2ZLqHRzZTvu+46gsnR+8HcLpov3ij/Mr0jYSJ4vqMGz1yfKnrsKZUp0IhvlPYbGjdcL17xYame2UroPS8AzWWegyqeEFh54qmCrFVw/uwErcWcUJX3KEijrc48DYZUBK09vnFFcXIYR/cfFWpTGhnqlwp/EAaBeR3zr6hS6lL+XluMIjHHkwT/eD3YydEwABjbJwBJp5PdYR4M/bSHuOoCH6d/U36OpkwwekyYKWvEoxxPSJIWCy1ApILQZmWuctIFc8SQfSXfRifPEDBnL9hNzzX00beDYmS6cPIP0TIqa9fdL1AeO68Tk7o67f2cCE11QTH7FI9JjhuQ/M4dO8jUw7kmtGCKdReNIuYYU3xZB4wdFHs/5UxROCwEZnv+3uWAgHbgc14XLWunN9P9msOxYLHPVJK/XcdhHvWSmQdNq4ajry/H+kQ==";
+const AUTHORIZED_KEYS: &[u8] =
+    include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../assets/ssh_pubkey"));
 
 pub(crate) struct UserDirectories {
     pub(crate) config: PathBuf,
@@ -183,7 +184,7 @@ pub async fn configure<'elevate: 'action, 'action, 'user: 'action, 'machine, 'pk
             binary: false,
             secret: false,
             ignore_checksum_changes: false,
-            content: FileContent::Lines(Ref(&[Ref(MY_SSH_PUBKEY)])),
+            content: FileContent::Bytes(Ref(AUTHORIZED_KEYS)),
         },
     );
 
