@@ -1980,6 +1980,7 @@ pub fn kernel<'elevate: 'action, 'action>(
             Ref("linux-firmware"),
             Ref("man-pages"),
         ];
+
         plan.add(
             "install kernel",
             elevate,
@@ -1987,7 +1988,19 @@ pub fn kernel<'elevate: 'action, 'action>(
                 install: Ref(kernel),
                 reason: InstallReason::Explicit,
             },
-        );
+        )
+        .on_change(|| {
+            Resource::new(
+                Ref("rebuild grub config"),
+                elevate,
+                Command {
+                    cmd: Ref("grub-mkconfig"),
+                    args: &["-o", "/boot/grub/grub.cfg"],
+                    check_command: None,
+                },
+            )
+        });
+
         plan.register_packages(kernel);
 
         let bootloader = &[Ref("grub"), Ref("efibootmgr")];
