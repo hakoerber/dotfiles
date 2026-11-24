@@ -1974,9 +1974,9 @@ pub fn kernel<'elevate: 'action, 'action>(
 ) {
     plan.block("kernel", |plan| {
         let kernel = &[
-            Ref("linux-zen"),
-            Ref("linux-zen-headers"),
-            Ref("linux-zen-docs"),
+            Ref("linux"),
+            Ref("linux-headers"),
+            Ref("linux-docs"),
             Ref("linux-firmware"),
             Ref("man-pages"),
         ];
