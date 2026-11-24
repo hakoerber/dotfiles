@@ -96,7 +96,7 @@ pub async fn configure<'elevate: 'action, 'action, 'user: 'action, 'machine, 'pk
     );
 
     if user.autologin {
-        user_autologin(plan, root, user);
+        autologin(plan, root, user);
     }
 
     let user_directories = {
@@ -120,9 +120,9 @@ pub async fn configure<'elevate: 'action, 'action, 'user: 'action, 'machine, 'pk
         }
     };
 
-    user_create_directories(plan, user_elevate, user, &user_directories);
+    directories(plan, user_elevate, user, &user_directories);
 
-    let (required_packages, additional_services) = user_dotfiles(
+    let (required_packages, additional_services) = dotfiles(
         plan,
         user_elevate,
         strict_elevate,
@@ -135,13 +135,7 @@ pub async fn configure<'elevate: 'action, 'action, 'user: 'action, 'machine, 'pk
     services.extend(additional_services);
     packages.extend(required_packages);
 
-    let dependencies = Box::pin(user_executables(
-        plan,
-        user_elevate,
-        user,
-        &user_directories,
-    ))
-    .await?;
+    let dependencies = Box::pin(executables(plan, user_elevate, user, &user_directories)).await?;
 
     packages.extend(dependencies);
 
@@ -155,7 +149,7 @@ pub async fn configure<'elevate: 'action, 'action, 'user: 'action, 'machine, 'pk
         Ref([Ref("breeze"), Ref("breeze-grub"), Ref("breeze-gtk")].as_slice()),
     );
 
-    user_wallpaper(plan, user_elevate, user, &user_directories);
+    wallpaper(plan, user_elevate, user, &user_directories);
     user_services(plan, user_elevate, user, &user_directories, &services);
 
     let ssh_directory = home.join(".ssh");
@@ -196,7 +190,7 @@ pub async fn configure<'elevate: 'action, 'action, 'user: 'action, 'machine, 'pk
     Ok(UserResult { packages })
 }
 
-pub(crate) fn user_create_directories<'elevate: 'action, 'action, 'user, 'machine>(
+pub(crate) fn directories<'elevate: 'action, 'action, 'user, 'machine>(
     plan: &mut Block<'_, 'elevate, '_, 'action, '_, Secrets>,
     user_elevate: &'elevate Elevate,
     user: &'elevate UserConfig,
@@ -370,7 +364,7 @@ pub(crate) fn user_create_directories<'elevate: 'action, 'action, 'user, 'machin
     });
 }
 
-pub(crate) fn user_autologin<'elevate: 'action, 'action, 'user, 'machine>(
+pub(crate) fn autologin<'elevate: 'action, 'action, 'user, 'machine>(
     plan: &mut Block<'_, 'elevate, '_, 'action, '_, Secrets>,
     root: &'elevate Elevate,
     user: &'user UserConfig,
@@ -424,7 +418,7 @@ pub(crate) fn user_autologin<'elevate: 'action, 'action, 'user, 'machine>(
     });
 }
 
-pub(crate) fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
+pub(crate) fn dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
     plan: &mut Block<'_, 'elevate, 'pkgs, 'action, '_, Secrets>,
     user_elevate: &'elevate Elevate,
     strict_elevate: &'elevate Elevate,
@@ -2087,7 +2081,7 @@ pub(crate) fn user_dotfiles<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
     Ok((packages, services))
 }
 
-pub(crate) async fn user_executables<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
+pub(crate) async fn executables<'elevate: 'action, 'action, 'user, 'machine, 'pkgs>(
     plan: &mut Block<'_, 'elevate, 'pkgs, 'action, '_, Secrets>,
     user_elevate: &'elevate Elevate,
     user: &'user UserConfig,
@@ -2246,7 +2240,7 @@ pub(crate) async fn user_executables<'elevate: 'action, 'action, 'user, 'machine
     .value_ok()
 }
 
-pub(crate) fn user_wallpaper<'elevate: 'action, 'action, 'user, 'machine>(
+pub(crate) fn wallpaper<'elevate: 'action, 'action, 'user, 'machine>(
     plan: &mut Block<'_, 'elevate, '_, 'action, '_, Secrets>,
     user_elevate: &'elevate Elevate,
     user: &'user UserConfig,
